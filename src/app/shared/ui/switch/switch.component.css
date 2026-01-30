@@ -1,0 +1,53 @@
+/* Switch thumb animation */
+:host .switch-thumb {
+  pointer-events-none: none;
+  display: block;
+  border-radius: 9999px;
+  ring-width: 0;
+  transition: transform 0.2s;
+}
+
+:host([data-size="default"]) .switch-thumb {
+  width: 1rem;
+  height: 1rem;
+  background-color: var(--background);
+}
+
+:host([data-size="default"][data-state="checked"]) .switch-thumb {
+  transform: translateX(calc(100% - 2px));
+}
+
+:host([data-size="default"][data-state="unchecked"]) .switch-thumb {
+  transform: translateX(0);
+}
+
+:host([data-size="sm"]) .switch-thumb {
+  width: 0.75rem;
+  height: 0.75rem;
+  background-color: var(--background);
+}
+
+:host([data-size="sm"][data-state="checked"]) .switch-thumb {
+  transform: translateX(calc(100% - 2px));
+}
+
+:host([data-size="sm"][data-state="unchecked"]) .switch-thumb {
+  transform: translateX(0);
+}
+
+/* Dark mode styles */
+:host([data-size="default"][data-state="unchecked"]) .switch-thumb {
+  background-color: var(--foreground);
+}
+
+:host([data-size="default"][data-state="checked"]) .switch-thumb {
+  background-color: var(--primary-foreground);
+}
+
+:host([data-size="sm"][data-state="unchecked"]) .switch-thumb {
+  background-color: var(--foreground);
+}
+
+:host([data-size="sm"][data-state="checked"]) .switch-thumb {
+  background-color: var(--primary-foreground);
+}

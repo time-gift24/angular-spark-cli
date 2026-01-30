@@ -1,0 +1,100 @@
+<div class="container max-w-2xl mx-auto py-8 px-4">
+  <div class="mb-8">
+    <h1 class="text-xl font-semibold mb-2">Badge</h1>
+    <p class="text-sm text-muted-foreground">
+      A compact badge component with multiple variants for status indicators and labels.
+    </p>
+  </div>
+
+  <div class="space-y-8">
+    <!-- Basic Variants -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Basic Variants</h2>
+      <div class="flex flex-wrap gap-2">
+        <span spark-badge>Default</span>
+        <span spark-badge variant="secondary">Secondary</span>
+        <span spark-badge variant="destructive">Destructive</span>
+        <span spark-badge variant="outline">Outline</span>
+        <span spark-badge variant="ghost">Ghost</span>
+        <span spark-badge variant="link">Link</span>
+      </div>
+    </div>
+
+    <!-- With Icons -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">With Icons</h2>
+      <div class="flex flex-wrap gap-2">
+        <span spark-badge variant="secondary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+          </svg>
+          Verified
+        </span>
+
+        <span spark-badge variant="destructive">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="m15 9-6 6"/>
+            <path d="m9 9 6 6"/>
+          </svg>
+          Error
+        </span>
+
+        <span spark-badge variant="outline">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4"/>
+            <path d="M12 8h.01"/>
+          </svg>
+          Info
+        </span>
+
+        <span spark-badge>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          Success
+        </span>
+      </div>
+    </div>
+
+    <!-- Notification Badges -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Notification Badges</h2>
+      <div class="flex flex-wrap gap-4">
+        <div class="flex items-center gap-2">
+          <span class="text-sm">Messages</span>
+          <span spark-badge class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">8</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-sm">Alerts</span>
+          <span spark-badge variant="destructive" class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">99</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-sm">Updates</span>
+          <span spark-badge variant="outline" class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">20+</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-sm">Tasks</span>
+          <span spark-badge variant="secondary" class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">3</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Colors -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Custom Colors</h2>
+      <div class="flex flex-wrap gap-2">
+        <span spark-badge class="bg-blue-500 text-white dark:bg-blue-600">Blue</span>
+        <span spark-badge class="bg-green-500 text-white dark:bg-green-600">Green</span>
+        <span spark-badge class="bg-orange-500 text-white dark:bg-orange-600">Orange</span>
+        <span spark-badge class="bg-purple-500 text-white dark:bg-purple-600">Purple</span>
+        <span spark-badge class="bg-pink-500 text-white dark:bg-pink-600">Pink</span>
+      </div>
+    </div>
+  </div>
+</div>

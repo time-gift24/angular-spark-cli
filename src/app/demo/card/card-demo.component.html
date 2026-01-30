@@ -1,0 +1,61 @@
+<div class="container max-w-2xl mx-auto py-8 px-4">
+  <div class="mb-8">
+    <h1 class="text-xl font-semibold mb-2">Card</h1>
+    <p class="text-sm text-muted-foreground">
+      A versatile card component with header, content, and footer sections.
+    </p>
+  </div>
+
+  <div spark-card class="w-full max-w-sm">
+    <div spark-card-header>
+      <h3 spark-card-title>Login to your account</h3>
+      <p spark-card-description>
+        Enter your email below to login to your account
+      </p>
+    </div>
+
+    <div spark-card-content>
+      <form>
+        <div class="flex flex-col gap-6">
+          <div class="grid gap-2">
+            <label spark-label for="email">Email</label>
+            <input
+              spark-input
+              id="email"
+              type="email"
+              placeholder="m@example.com"
+              required
+            />
+          </div>
+
+          <div class="grid gap-2">
+            <div class="flex items-center">
+              <label spark-label for="password">Password</label>
+              <a
+                href="#"
+                class="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+              >
+                Forgot your password?
+              </a>
+            </div>
+            <input
+              spark-input
+              id="password"
+              type="password"
+              required
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div spark-card-footer class="flex-col gap-2">
+      <button spark-button type="submit" class="w-full">
+        Login
+      </button>
+      <button spark-button variant="outline" class="w-full">
+        Login with Google
+      </button>
+    </div>
+  </div>
+</div>

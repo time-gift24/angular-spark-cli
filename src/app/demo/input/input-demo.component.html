@@ -1,0 +1,31 @@
+<div class="container max-w-2xl mx-auto py-8 px-4">
+  <div class="mb-8">
+    <h1 class="text-xl font-semibold mb-2">Input</h1>
+    <p class="text-sm text-muted-foreground">
+      A form input component with ultra compact styling and smooth transitions.
+    </p>
+  </div>
+
+  <div class="space-y-8">
+    @for (example of examples; track example.label) {
+      <div class="space-y-3">
+        <label class="text-sm font-medium">
+          {{ example.label }}
+        </label>
+
+        <input
+          spark-input
+          [type]="example.type ?? 'text'"
+          [placeholder]="example.placeholder"
+          [disabled]="example.disabled ?? false"
+        />
+
+        @if (example.description) {
+          <p class="text-xs text-muted-foreground">
+            {{ example.description }}
+          </p>
+        }
+      </div>
+    }
+  </div>
+</div>

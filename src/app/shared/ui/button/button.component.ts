@@ -1,4 +1,4 @@
-import { Component, input, computed, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, computed, output, ChangeDetectionStrategy, ElementRef, inject } from '@angular/core';
 import { cn } from '../../utils';
 
 export type ButtonVariant = 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
@@ -20,6 +20,8 @@ export type ButtonSize = 'default' | 'sm' | 'lg' | 'icon';
   `,
 })
 export class ButtonComponent {
+  private readonly elementRef = inject(ElementRef);
+
   readonly variant = input<ButtonVariant>('default');
   readonly size = input<ButtonSize>('default');
   readonly class = input<string>('');
@@ -122,6 +124,13 @@ export class ButtonComponent {
       event.stopPropagation();
       return;
     }
+
+    // Don't emit click events on anchor tags - let the router handle navigation
+    const nativeElement = this.elementRef.nativeElement as HTMLElement;
+    if (nativeElement.tagName === 'A') {
+      return;
+    }
+
     this.click.emit(event);
   }
 }

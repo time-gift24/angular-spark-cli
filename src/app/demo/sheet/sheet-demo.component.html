@@ -1,0 +1,100 @@
+<div class="container max-w-4xl mx-auto py-8 px-4">
+  <div class="mb-8">
+    <h1 class="text-xl font-semibold mb-2">Sheet</h1>
+    <p class="text-sm text-muted-foreground">
+      A versatile sheet (drawer) component that slides in from any side of the screen.
+    </p>
+  </div>
+
+  <div class="space-y-8">
+    <!-- Basic Sheet -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Basic Sheet</h2>
+      <p class="text-sm text-muted-foreground">
+        Click the buttons to see sheets slide in from different sides.
+      </p>
+      <div class="flex flex-wrap gap-2">
+        <button spark-button (click)="openSheet('top')">Open Top Sheet</button>
+        <button spark-button (click)="openSheet('right')">Open Right Sheet</button>
+        <button spark-button (click)="openSheet('bottom')">Open Bottom Sheet</button>
+        <button spark-button (click)="openSheet('left')">Open Left Sheet</button>
+      </div>
+    </div>
+
+    <!-- Sheet Component -->
+    @if (open()) {
+      <ng-container spark-sheet-trigger>
+        <div spark-sheet-overlay [open]="open()" (close)="closeSheet()"></div>
+        <div spark-sheet-content [open]="open()" [side]="side()">
+          <div spark-sheet-header>
+            <h3 spark-sheet-title>Sheet Title</h3>
+            <p spark-sheet-description>
+              This is a sheet component that slides in from the {{ side() }} side.
+            </p>
+          </div>
+          <div class="space-y-4">
+            <p class="text-sm">
+              Sheets are dialog-like elements that slide in from the edge of the screen.
+              They are useful for mobile navigation, forms, and other content that
+              doesn't require a full modal.
+            </p>
+            <p class="text-sm text-muted-foreground">
+              Click the overlay or the close button to dismiss this sheet.
+            </p>
+          </div>
+          <div spark-sheet-footer>
+            <button spark-sheet-close spark-button variant="outline">Cancel</button>
+            <button spark-sheet-close spark-button (click)="closeSheet()">Confirm</button>
+          </div>
+        </div>
+      </ng-container>
+    }
+
+    <!-- Features -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Features</h2>
+      <ul class="text-sm text-muted-foreground space-y-2">
+        <li>• <strong>Four positions:</strong> Top, right, bottom, and left</li>
+        <li>• <strong>Overlay:</strong> Semi-transparent backdrop that closes the sheet when clicked</li>
+        <li>• <strong>Responsive:</strong> Adapts to different screen sizes</li>
+        <li>• <strong>Composable:</strong> Build sheets with header, content, and footer sections</li>
+        <li>• <strong>Accessible:</strong> Proper ARIA attributes and keyboard navigation</li>
+      </ul>
+    </div>
+
+    <!-- API -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Component API</h2>
+      <div class="bg-muted rounded-lg p-4 space-y-4 text-sm">
+        <div>
+          <p class="font-mono text-xs mb-2 text-foreground font-semibold">SheetContentComponent</p>
+          <ul class="text-xs text-muted-foreground space-y-1">
+            <li>• <code class="text-foreground">open: boolean</code> - Controls visibility</li>
+            <li>• <code class="text-foreground">side: 'top' | 'right' | 'bottom' | 'left'</code> - Slide-in direction</li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-mono text-xs mb-2 text-foreground font-semibold">SheetOverlayComponent</p>
+          <ul class="text-xs text-muted-foreground space-y-1">
+            <li>• <code class="text-foreground">open: boolean</code> - Controls visibility</li>
+            <li>• <code class="text-foreground">close: Event</code> - Emitted when overlay is clicked</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Usage</h2>
+      <p class="text-sm text-muted-foreground">
+        The Sheet component is used throughout this application to show component details.
+        Click any "查看详情" (View Details) link on the home page to see it in action.
+      </p>
+      <div class="bg-muted rounded-lg p-4">
+        <p class="text-xs font-mono text-muted-foreground">
+          Navigate to <span class="text-foreground">/demo/button</span>, <span class="text-foreground">/demo/input</span>, etc. to see dedicated demo pages for each component.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

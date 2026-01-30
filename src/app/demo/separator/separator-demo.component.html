@@ -1,0 +1,105 @@
+<div class="container max-w-2xl mx-auto py-8 px-4">
+  <div class="mb-8">
+    <h1 class="text-xl font-semibold mb-2">Separator</h1>
+    <p class="text-sm text-muted-foreground">
+      A visual separator component for dividing content with horizontal or vertical lines.
+    </p>
+  </div>
+
+  <div class="space-y-8">
+    <!-- Horizontal Separator -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Horizontal Separator</h2>
+
+      <div class="space-y-1">
+        <h4 class="text-sm leading-none font-medium">Radix Primitives</h4>
+        <p class="text-muted-foreground text-sm">
+          An open-source UI component library.
+        </p>
+      </div>
+
+      <div spark-separator class="my-4"></div>
+
+      <div class="space-y-1">
+        <h4 class="text-sm leading-none font-medium">Angular Spark CLI</h4>
+        <p class="text-muted-foreground text-sm">
+          Modern Angular components with Tailwind CSS v4.
+        </p>
+      </div>
+    </div>
+
+    <!-- Vertical Separator -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Vertical Separator</h2>
+
+      <div class="flex h-5 items-center space-x-4 text-sm">
+        <div>Blog</div>
+        <div spark-separator orientation="vertical"></div>
+        <div>Docs</div>
+        <div spark-separator orientation="vertical"></div>
+        <div>Source</div>
+        <div spark-separator orientation="vertical"></div>
+        <div>About</div>
+      </div>
+    </div>
+
+    <!-- With Labels -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">With Labels</h2>
+
+      <div class="relative">
+        <div class="absolute inset-0 flex items-center">
+          <div spark-separator class="w-full"></div>
+        </div>
+        <div class="relative flex justify-center text-xs uppercase">
+          <span class="bg-background px-2 text-muted-foreground">Or continue with</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Styling -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Custom Styling</h2>
+
+      <div class="space-y-4">
+        <div spark-separator class="bg-primary"></div>
+        <div spark-separator class="bg-destructive"></div>
+        <div spark-separator class="h-0.5"></div>
+        <div spark-separator class="h-1"></div>
+      </div>
+    </div>
+
+    <!-- In Card -->
+    <div spark-card class="w-full max-w-sm">
+      <div spark-card-header>
+        <h3 spark-card-title>Account Settings</h3>
+        <p spark-card-description>
+          Manage your account preferences
+        </p>
+      </div>
+
+      <div spark-card-content class="space-y-4">
+        <div class="space-y-2">
+          <label class="text-sm font-medium">Email</label>
+          <input spark-input type="email" value="user@example.com" readonly />
+        </div>
+
+        <div spark-separator></div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium">Password</label>
+          <input spark-input type="password" value="********" readonly />
+        </div>
+
+        <div spark-separator></div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium">Notification</label>
+          <p class="text-sm text-muted-foreground">
+            Manage your email notification preferences
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,134 @@
+<div class="container max-w-2xl mx-auto py-8 px-4">
+  <div class="mb-8">
+    <h1 class="text-xl font-semibold mb-2">Switch</h1>
+    <p class="text-sm text-muted-foreground">
+      A control that allows users to toggle between two states.
+    </p>
+  </div>
+
+  <div class="space-y-8">
+    <!-- Basic Usage -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Basic Usage</h2>
+
+      <div class="flex items-center space-x-2">
+        <button
+          spark-switch
+          id="airplane-mode"
+          [checked]="airplaneMode()"
+          (checkedChange)="airplaneMode.set($event)"
+        ></button>
+        <label spark-label for="airplane-mode">Airplane Mode</label>
+      </div>
+    </div>
+
+    <!-- Sizes -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Sizes</h2>
+
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center gap-2">
+          <button spark-switch size="default" [checked]="true"></button>
+          <span class="text-sm">Default size</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button spark-switch size="sm" [checked]="false"></button>
+          <span class="text-sm">Small size</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- With Labels -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">With Labels</h2>
+
+      <div class="flex items-center space-x-2">
+        <button
+          spark-switch
+          id="notifications"
+          [checked]="notifications()"
+          (checkedChange)="notifications.set($event)"
+        ></button>
+        <label spark-label for="notifications">Enable notifications</label>
+      </div>
+    </div>
+
+    <!-- In Card Example -->
+    <div spark-card class="w-full max-w-sm">
+      <div spark-card-header>
+        <h3 spark-card-title>Settings</h3>
+        <p spark-card-description>
+          Manage your application preferences
+        </p>
+      </div>
+
+      <div spark-card-content class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="space-y-0.5">
+            <label spark-label for="auto-updates">Auto Updates</label>
+            <p class="text-xs text-muted-foreground">
+              Automatically download and install updates
+            </p>
+          </div>
+          <button
+            spark-switch
+            id="auto-updates"
+            [checked]="autoUpdates()"
+            (checkedChange)="autoUpdates.set($event)"
+          ></button>
+        </div>
+
+        <div spark-separator></div>
+
+        <div class="flex items-center justify-between">
+          <div class="space-y-0.5">
+            <label spark-label for="2fa">Two-Factor Authentication</label>
+            <p class="text-xs text-muted-foreground">
+              Add an extra layer of security
+            </p>
+          </div>
+          <button
+            spark-switch
+            id="2fa"
+            [checked]="twoFactor()"
+            (checkedChange)="twoFactor.set($event)"
+          ></button>
+        </div>
+
+        <div spark-separator></div>
+
+        <div class="flex items-center justify-between">
+          <div class="space-y-0.5">
+            <label spark-label for="marketing">Marketing Emails</label>
+            <p class="text-xs text-muted-foreground">
+              Receive emails about new features
+            </p>
+          </div>
+          <button
+            spark-switch
+            id="marketing"
+            [checked]="true"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disabled States -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Disabled States</h2>
+
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center gap-2">
+          <button spark-switch disabled [checked]="true"></button>
+          <span class="text-sm text-muted-foreground">Disabled (checked)</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button spark-switch disabled [checked]="false"></button>
+          <span class="text-sm text-muted-foreground">Disabled (unchecked)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

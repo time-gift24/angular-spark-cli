@@ -38,7 +38,7 @@
 
       <div class="hero-stats">
         <div class="stat-item">
-          <div class="stat-value">1</div>
+          <div class="stat-value">8</div>
           <div class="stat-label">组件</div>
         </div>
         <div class="stat-divider"></div>
@@ -56,6 +56,7 @@
   </div>
 
   <!-- Components Preview Section -->
+  <main>
   <div class="components-section">
     <div class="section-container">
       <div class="section-header">
@@ -87,18 +88,48 @@
             <button spark-button variant="ghost" size="sm">幽灵</button>
           </div>
           <div class="card-footer">
-            <a spark-button variant="link" routerLink="/demo/button" class="card-link">
+            <button spark-button variant="link" (click)="openSheet('button')" class="card-link">
               查看详情
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M5 12h14"/>
                 <path d="m12 5 7 7-7 7"/>
               </svg>
-            </a>
+            </button>
           </div>
         </div>
 
-        <!-- Coming Soon Cards -->
-        <div class="component-card coming-soon">
+        <!-- Input Component Card -->
+        <div class="component-card">
+          <div class="card-header">
+            <div class="card-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+              </svg>
+            </div>
+            <div class="card-title-group">
+              <h3>Input</h3>
+              <span class="card-badge">可用</span>
+            </div>
+          </div>
+          <p class="card-description">
+            功能丰富的输入框组件，支持验证和多种状态。
+          </p>
+          <div class="input-preview">
+            <input spark-input placeholder="请输入..." size="sm" style="width: 100%">
+          </div>
+          <div class="card-footer">
+            <button spark-button variant="link" (click)="openSheet('input')" class="card-link">
+              查看详情
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card Component Card -->
+        <div class="component-card">
           <div class="card-header">
             <div class="card-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -109,47 +140,283 @@
             </div>
             <div class="card-title-group">
               <h3>Card</h3>
-              <span class="card-badge badge-coming">即将推出</span>
+              <span class="card-badge">可用</span>
             </div>
           </div>
           <p class="card-description">
             灵活的卡片容器，支持不同的布局和样式。
           </p>
-          <div class="coming-soon-overlay">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 6v6l4 2"/>
-            </svg>
-            <p>开发中</p>
+          <div class="card-preview">
+            <div style="background: var(--muted); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; color: var(--muted-foreground);">
+              卡片预览
+            </div>
+          </div>
+          <div class="card-footer">
+            <button spark-button variant="link" (click)="openSheet('card')" class="card-link">
+              查看详情
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+              </svg>
+            </button>
           </div>
         </div>
 
-        <div class="component-card coming-soon">
+        <!-- Badge Component Card -->
+        <div class="component-card">
           <div class="card-header">
             <div class="card-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-              </svg>
+                <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.78 4.78 4 4 0 0 1-6.74 0 4 4 0 0 1-4.78-4.77Z"/>
+              <path d="m12 16-3 3"/>
+            </svg>
             </div>
             <div class="card-title-group">
-              <h3>Input</h3>
-              <span class="card-badge badge-coming">即将推出</span>
+              <h3>Badge</h3>
+              <span class="card-badge">可用</span>
             </div>
           </div>
           <p class="card-description">
-            功能丰富的输入框组件，支持验证和多种状态。
+            紧凑的徽章组件，用于状态标识和标签。
           </p>
-          <div class="coming-soon-overlay">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 6v6l4 2"/>
-            </svg>
-            <p>开发中</p>
+          <div class="badge-preview">
+            <span spark-badge>默认</span>
+            <span spark-badge variant="secondary">次要</span>
+            <span spark-badge variant="outline">轮廓</span>
+          </div>
+          <div class="card-footer">
+            <button spark-button variant="link" (click)="openSheet('badge')" class="card-link">
+              查看详情
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Separator Component Card -->
+        <div class="component-card">
+          <div class="card-header">
+            <div class="card-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/>
+              </svg>
+            </div>
+            <div class="card-title-group">
+              <h3>Separator</h3>
+              <span class="card-badge">可用</span>
+            </div>
+          </div>
+          <p class="card-description">
+            视觉分隔组件，支持水平和垂直方向。
+          </p>
+          <div class="separator-preview">
+            <div spark-separator style="width: 100%"></div>
+          </div>
+          <div class="card-footer">
+            <button spark-button variant="link" (click)="openSheet('separator')" class="card-link">
+              查看详情
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Switch Component Card -->
+        <div class="component-card">
+          <div class="card-header">
+            <div class="card-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="44" height="24" x="2" y="6" rx="12"/>
+                <circle cx="16" cy="18" r="4"/>
+              </svg>
+            </div>
+            <div class="card-title-group">
+              <h3>Switch</h3>
+              <span class="card-badge">可用</span>
+            </div>
+          </div>
+          <p class="card-description">
+            切换开关组件，支持多种尺寸和状态。
+          </p>
+          <div class="switch-preview">
+            <button spark-switch [checked]="true"></button>
+            <button spark-switch size="sm"></button>
+          </div>
+          <div class="card-footer">
+            <button spark-button variant="link" (click)="openSheet('switch')" class="card-link">
+              查看详情
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+              </svg>
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+    <!-- Sheet Components -->
+    @if (buttonSheetOpen()) {
+      <div spark-sheet-overlay [open]="true" (close)="buttonSheetOpen.set(false)"></div>
+      <div spark-sheet-content [open]="true" side="right">
+        <div spark-sheet-header>
+          <h3 spark-sheet-title>Button 按钮</h3>
+          <p spark-sheet-description>
+            多功能的按钮组件，支持多种变体和尺寸。
+          </p>
+        </div>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="text-sm font-medium mb-2 block">变体</label>
+            <div class="flex gap-2 flex-wrap">
+              <button spark-button variant="default">默认</button>
+              <button spark-button variant="destructive">破坏</button>
+              <button spark-button variant="outline">轮廓</button>
+              <button spark-button variant="secondary">次要</button>
+              <button spark-button variant="ghost">幽灵</button>
+              <button spark-button variant="link">链接</button>
+            </div>
+          </div>
+          <div>
+            <label class="text-sm font-medium mb-2 block">尺寸</label>
+            <div class="flex gap-2 items-center">
+              <button spark-button size="sm">小</button>
+              <button spark-button>默认</button>
+              <button spark-button size="lg">大</button>
+            </div>
+          </div>
+        </div>
+        <div spark-sheet-footer>
+          <button spark-button variant="outline" (click)="buttonSheetOpen.set(false)">关闭</button>
+        </div>
+      </div>
+    }
+
+    @if (inputSheetOpen()) {
+      <div spark-sheet-overlay [open]="true" (close)="inputSheetOpen.set(false)"></div>
+      <div spark-sheet-content [open]="true" side="right">
+        <div spark-sheet-header>
+          <h3 spark-sheet-title>Input 输入框</h3>
+          <p spark-sheet-description>
+            功能丰富的输入框组件，支持验证和多种状态。
+          </p>
+        </div>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="text-sm font-medium mb-2 block">基本用法</label>
+            <input spark-input placeholder="请输入内容..." style="width: 100%">
+          </div>
+          <div>
+            <label class="text-sm font-medium mb-2 block">禁用状态</label>
+            <input spark-input placeholder="禁用的输入框" disabled style="width: 100%">
+          </div>
+        </div>
+        <div spark-sheet-footer>
+          <button spark-button variant="outline" (click)="inputSheetOpen.set(false)">关闭</button>
+        </div>
+      </div>
+    }
+
+    @if (cardSheetOpen()) {
+      <div spark-sheet-overlay [open]="true" (close)="cardSheetOpen.set(false)"></div>
+      <div spark-sheet-content [open]="true" side="right">
+        <div spark-sheet-header>
+          <h3 spark-sheet-title>Card 卡片</h3>
+          <p spark-sheet-description>
+            多功能的卡片组件，用于组织和展示内容。
+          </p>
+        </div>
+        <div spark-card class="w-full">
+          <div spark-card-header>
+            <h3 spark-card-title>卡片标题</h3>
+            <p spark-card-description>卡片的描述信息</p>
+          </div>
+          <div spark-card-content>
+            <p class="text-sm">这是卡片的内容区域，可以放置任何内容。</p>
+          </div>
+        </div>
+        <div spark-sheet-footer>
+          <button spark-button variant="outline" (click)="cardSheetOpen.set(false)">关闭</button>
+        </div>
+      </div>
+    }
+
+    @if (badgeSheetOpen()) {
+      <div spark-sheet-overlay [open]="true" (close)="badgeSheetOpen.set(false)"></div>
+      <div spark-sheet-content [open]="true" side="right">
+        <div spark-sheet-header>
+          <h3 spark-sheet-title>Badge 徽章</h3>
+          <p spark-sheet-description>
+            小型标签和状态指示器组件。
+          </p>
+        </div>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="text-sm font-medium mb-2 block">变体</label>
+            <div class="flex gap-2 flex-wrap">
+              <span spark-badge>默认</span>
+              <span spark-badge variant="secondary">次要</span>
+              <span spark-badge variant="destructive">破坏</span>
+              <span spark-badge variant="outline">轮廓</span>
+            </div>
+          </div>
+        </div>
+        <div spark-sheet-footer>
+          <button spark-button variant="outline" (click)="badgeSheetOpen.set(false)">关闭</button>
+        </div>
+      </div>
+    }
+
+    @if (separatorSheetOpen()) {
+      <div spark-sheet-overlay [open]="true" (close)="separatorSheetOpen.set(false)"></div>
+      <div spark-sheet-content [open]="true" side="right">
+        <div spark-sheet-header>
+          <h3 spark-sheet-title>Separator 分隔线</h3>
+          <p spark-sheet-description>
+            视觉分隔线组件，用于内容分组。
+          </p>
+        </div>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="text-sm font-medium mb-2 block">水平分隔线</label>
+            <div spark-separator style="width: 100%"></div>
+          </div>
+        </div>
+        <div spark-sheet-footer>
+          <button spark-button variant="outline" (click)="separatorSheetOpen.set(false)">关闭</button>
+        </div>
+      </div>
+    }
+
+    @if (switchSheetOpen()) {
+      <div spark-sheet-overlay [open]="true" (close)="switchSheetOpen.set(false)"></div>
+      <div spark-sheet-content [open]="true" side="right">
+        <div spark-sheet-header>
+          <h3 spark-sheet-title>Switch 开关</h3>
+          <p spark-sheet-description>
+            切换开关组件，用于二选一的场景。
+          </p>
+        </div>
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="text-sm font-medium mb-2 block">基本用法</label>
+            <div class="flex gap-4 items-center">
+              <button spark-switch [checked]="true"></button>
+              <span class="text-sm">开启</span>
+            </div>
+          </div>
+        </div>
+        <div spark-sheet-footer>
+          <button spark-button variant="outline" (click)="switchSheetOpen.set(false)">关闭</button>
+        </div>
+      </div>
+    }
+  </main>
 
   <!-- Features Section -->
   <div class="features-section">
@@ -453,6 +720,32 @@
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .input-preview {
+    margin-bottom: 1rem;
+  }
+
+  .card-preview {
+    margin-bottom: 1rem;
+  }
+
+  .badge-preview {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .separator-preview {
+    margin-bottom: 1rem;
+  }
+
+  .switch-preview {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
     margin-bottom: 1rem;
   }
 
