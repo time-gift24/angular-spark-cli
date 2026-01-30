@@ -10,6 +10,7 @@ export type ButtonSize = 'default' | 'sm' | 'lg' | 'icon';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
+    '[style]': 'buttonStyle()',
     '[attr.disabled]': 'disabled() ? "" : null',
     '[attr.aria-disabled]': 'disabled()',
     '(click)': 'handleClick($event)',
@@ -35,10 +36,10 @@ export class ButtonComponent {
   readonly click = output<MouseEvent>();
 
   /**
-   * Base button styles - Mira compact style
+   * Base button styles - Ultra compact style with lighter weight
    */
   private getBaseClasses(): string {
-    return 'inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-3.5 [&_svg]:shrink-0';
+    return 'inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md text-xs font-normal transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-3 [&_svg]:shrink-0';
   }
 
   /**
@@ -60,20 +61,46 @@ export class ButtonComponent {
   }
 
   /**
-   * Size styles - Mira compact sizing
+   * Size styles - Ultra compact sizing using CSS variables
    */
   private getSizeClasses(): string {
     const size = this.size();
 
     const sizeMap: Record<ButtonSize, string> = {
-      default: 'h-8 px-3 py-1.5',
-      sm: 'h-7 rounded-md px-2.5',
-      lg: 'h-9 rounded-md px-4',
-      icon: 'h-8 w-8',
+      default: 'px-2.5 py-1.5',
+      sm: 'px-2 py-1',
+      lg: 'px-3 py-2',
+      icon: 'w-7',
     };
 
     return sizeMap[size] || sizeMap.default;
   }
+
+  /**
+   * Dynamic sizing styles using CSS variables from styles.css
+   */
+  protected buttonStyle = computed(() => {
+    const size = this.size();
+    const style: Record<string, string> = {};
+
+    // Use CSS variables for consistent sizing
+    switch (size) {
+      case 'sm':
+        style['height'] = 'var(--button-height-sm)';
+        break;
+      case 'lg':
+        style['height'] = 'var(--button-height-lg)';
+        break;
+      case 'icon':
+        style['height'] = 'var(--button-height-md)';
+        style['width'] = 'var(--button-height-md)';
+        break;
+      default:
+        style['height'] = 'var(--button-height-md)';
+    }
+
+    return style;
+  });
 
   /**
    * Computed class for the button element

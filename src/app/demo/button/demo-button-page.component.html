@@ -1,0 +1,138 @@
+<div class="min-h-screen bg-background p-6">
+  <div class="mx-auto max-w-4xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+      <h1>Button Component</h1>
+      <p class="text-muted-foreground">
+        A flexible and accessible button component built with Angular 20+ and Tailwind CSS v4
+      </p>
+    </div>
+
+    <!-- Variants Section -->
+    <div class="demo-section">
+      <h2>Variants</h2>
+      <p class="text-sm text-muted-foreground">Different button styles for various use cases</p>
+      <div class="button-group">
+        @for (variant of buttonVariants; track variant.label) {
+          <button
+            spark-button
+            [variant]="variant.variant ?? 'default'"
+            [disabled]="variant.disabled ?? false"
+          >
+            {{ variant.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Sizes Section -->
+    <div class="demo-section">
+      <h2>Sizes</h2>
+      <p class="text-sm text-muted-foreground">Available button sizes</p>
+      <div class="button-group">
+        @for (size of buttonSizes; track size.label) {
+          <button spark-button [size]="size.size ?? 'default'">
+            {{ size.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Icon Button -->
+    <div class="button-group">
+      <button spark-button size="icon" class="icon-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"/>
+          <path d="m12 5 7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Disabled State Section -->
+    <div class="demo-section">
+      <h2>Disabled State</h2>
+      <p class="text-sm text-muted-foreground">Buttons with disabled state</p>
+      <div class="button-group">
+        @for (state of buttonStates; track state.label) {
+          <button
+            spark-button
+            [variant]="state.variant ?? 'default'"
+            [disabled]="state.disabled ?? false"
+          >
+            {{ state.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- With Icons Section -->
+    <div class="demo-section">
+      <h2>With Icons</h2>
+      <p class="text-sm text-muted-foreground">Buttons with icon integration</p>
+      <div class="button-group">
+        @for (example of buttonWithIcons; track example.label) {
+          <button spark-button [variant]="example.variant ?? 'default'">
+            @if (example.icon && iconPaths[example.icon]) {
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                [attr.viewBox]="iconPaths[example.icon].viewBox"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path [attr.d]="iconPaths[example.icon].path"/>
+              </svg>
+            }
+            {{ example.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Interactive Demo Section -->
+    <div class="demo-section">
+      <h2>Interactive Demo</h2>
+      <p class="text-muted-foreground">Click the button to see the event handler in action:</p>
+      <div class="button-group">
+        <button spark-button (click)="handleClick()">
+          Click Me ({{ clickCount() }} clicks)
+        </button>
+        <button spark-button variant="outline" (click)="resetCount()">
+          Reset Counter
+        </button>
+      </div>
+      @if (lastClickTime()) {
+        <p class="text-xs text-muted-foreground">
+          Last clicked: {{ lastClickTime() | date:'medium' }}
+        </p>
+      }
+    </div>
+
+    <!-- Dark Mode Preview Section -->
+    <div class="demo-section">
+      <h2>Dark Mode Preview</h2>
+      <p class="text-muted-foreground">Preview buttons in dark mode:</p>
+      <div class="dark-preview">
+        <div class="button-group">
+          <button spark-button>Default</button>
+          <button spark-button variant="secondary">Secondary</button>
+          <button spark-button variant="outline">Outline</button>
+          <button spark-button variant="ghost">Ghost</button>
+          <button spark-button variant="link">Link</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Example Section -->
+    <div class="demo-section">
+      <h2>Usage Example</h2>
+      <div>
+        <p class="text-xs font-semibold">See the README.md file for usage examples</p>
+      </div>
+    </div>
+  </div>
+</div>
