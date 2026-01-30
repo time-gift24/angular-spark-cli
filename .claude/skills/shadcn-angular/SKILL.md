@@ -1,5 +1,5 @@
 ---
-name: angular-shadcn-components
+name: shadcn-angular
 description: Use when implementing shadcn/ui-inspired components in Angular 20+ with Tailwind CSS v4, specifically when needing to convert React component patterns to Angular standalone components with Signals, or when setting up a token-driven design system using @theme directive
 ---
 

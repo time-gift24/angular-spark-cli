@@ -338,5 +338,131 @@
 <!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 
+<!-- Button Component Showcase -->
+<div class="button-showcase">
+  <div class="showcase-container">
+    <h2>Button Component Demo</h2>
+    <p>Check out our new shadcn/ui-inspired Button component!</p>
+
+    <div class="button-grid">
+      <div class="button-group">
+        <h3>Variants</h3>
+        <div class="buttons">
+          <button spark-button>Default</button>
+          <button spark-button variant="secondary">Secondary</button>
+          <button spark-button variant="destructive">Destructive</button>
+          <button spark-button variant="outline">Outline</button>
+          <button spark-button variant="ghost">Ghost</button>
+          <button spark-button variant="link">Link</button>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <h3>Sizes</h3>
+        <div class="buttons">
+          <button spark-button size="sm">Small</button>
+          <button spark-button size="default">Default</button>
+          <button spark-button size="lg">Large</button>
+          <button spark-button size="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"/>
+              <path d="m12 5 7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <h3>With Icons</h3>
+        <div class="buttons">
+          <button spark-button>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Sign Up
+          </button>
+          <button spark-button variant="outline">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            Toggle Theme
+          </button>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <h3>Interactive</h3>
+        <div class="buttons">
+          <a spark-button routerLink="/button-demo" variant="outline">
+            View Full Demo
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"/>
+              <path d="m12 5 7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .button-showcase {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 3rem 1rem;
+    margin-top: 2rem;
+  }
+
+  .showcase-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+
+  .showcase-container h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .showcase-container p {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin: 0 0 2rem 0;
+  }
+
+  .button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .button-group h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #9ca3af;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  @media (max-width: 640px) {
+    .button-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
 
 <router-outlet />
