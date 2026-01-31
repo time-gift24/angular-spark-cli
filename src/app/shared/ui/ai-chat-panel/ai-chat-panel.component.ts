@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatMessagesCardComponent } from '../chat-messages-card';
 import { SessionTabsBarComponent } from '../session-tabs-bar';
@@ -56,6 +56,9 @@ import { SessionStateService, SessionStorageService } from '../../services';
  * ```
  *
  * @Phase 8 - Task 8.1: Component Definition
+ * @Phase 8 - Task 8.2: Initialization Logic (localStorage loading, default session creation)
+ * @Phase 8 - Task 8.3: Position & Size Persistence (via SessionStateService effect)
+ * @Phase 8 - Task 8.4: Styling (mineral & time theme)
  */
 @Component({
   selector: 'spark-ai-chat-panel',
@@ -151,9 +154,7 @@ export class AiChatPanelComponent implements OnInit {
   readonly sessionState = inject(SessionStateService);
 
   /**
-   * Session storage service (injected but not directly used in this phase).
-   *
-   * Will be used in P8-T8.3 for position/size persistence.
+   * Session storage service for loading and persisting sessions.
    *
    * @readonly
    */
@@ -222,11 +223,67 @@ export class AiChatPanelComponent implements OnInit {
   /**
    * Component initialization hook.
    *
-   * Phase 8 Task 8.1: Basic initialization (placeholder)
-   * Phase 8 Task 8.2: Will add initialization logic for loading sessions from storage
+   * Phase 8 Task 8.2: Initialization logic for loading sessions from storage
+   *
+   * This method:
+   * 1. Loads sessions from localStorage via SessionStorageService
+   * 2. If no sessions exist, creates a default session
+   * 3. Loads active session ID and messages visibility from storage
+   * 4. Sets up storage sync effect for persistence (handled by SessionStateService)
    */
   ngOnInit(): void {
-    // Initialization logic will be added in P8-T8.2
+    this.initializeSessions();
+    this.initializeActiveSession();
+    this.initializeMessagesVisibility();
+  }
+
+  /**
+   * Loads sessions from localStorage or creates a default session.
+   *
+   * @private
+   */
+  private initializeSessions(): void {
+    const storedSessions = this.storage.loadSessions();
+
+    if (storedSessions && storedSessions.size > 0) {
+      // Load existing sessions from storage
+      (this.sessionState.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(storedSessions);
+    } else {
+      // Create a default session if none exist
+      const defaultSessionId = this.sessionState.createSession('New Chat');
+      // Set the new session as active
+      (this.sessionState.activeSessionId as unknown as ReturnType<typeof signal<string>>).set(defaultSessionId);
+    }
+  }
+
+  /**
+   * Loads the active session ID from localStorage.
+   *
+   * @private
+   */
+  private initializeActiveSession(): void {
+    const storedActiveId = this.storage.loadActiveSessionId();
+
+    if (storedActiveId) {
+      // Verify the session still exists
+      const sessions = this.sessionState.sessions();
+      if (sessions.has(storedActiveId)) {
+        (this.sessionState.activeSessionId as unknown as ReturnType<typeof signal<string>>).set(storedActiveId);
+      }
+    }
+  }
+
+  /**
+   * Loads the messages visibility state from localStorage.
+   *
+   * @private
+   */
+  private initializeMessagesVisibility(): void {
+    const storedVisibility = this.storage.loadMessagesVisibility();
+
+    if (storedVisibility !== null) {
+      (this.sessionState.isMessagesVisible as unknown as ReturnType<typeof signal<boolean>>).set(storedVisibility);
+    }
   }
 
   /**
@@ -337,6 +394,10 @@ export class AiChatPanelComponent implements OnInit {
    * Updates the position of the active session's panel.
    *
    * Called when ChatMessagesCard emits a positionChange event during drag operations.
+   * This method updates the session state, which triggers the storage sync effect
+   * in SessionStateService to persist changes to localStorage (debounced 500ms).
+   *
+   * Phase 8 Task 8.3: Position persistence (handled by SessionStateService effect)
    *
    * @param position - The new position to set
    *
@@ -370,6 +431,10 @@ export class AiChatPanelComponent implements OnInit {
    * Updates the size of the active session's panel.
    *
    * Called when ChatMessagesCard emits a sizeChange event during resize operations.
+   * This method updates the session state, which triggers the storage sync effect
+   * in SessionStateService to persist changes to localStorage (debounced 500ms).
+   *
+   * Phase 8 Task 8.3: Size persistence (handled by SessionStateService effect)
    *
    * @param size - The new size to set
    *

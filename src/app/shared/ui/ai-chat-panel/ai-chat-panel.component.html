@@ -1,4 +1,7 @@
-<div class="ai-chat-panel">
+<div
+  class="ai-chat-panel"
+  [attr.data-compact]="!isMessagesVisible()"
+>
   <!-- Chat Messages Card -->
   <app-chat-messages-card
     [messages]="sessionState.activeMessages"

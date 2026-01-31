@@ -163,6 +163,45 @@ describe('AiChatPanelComponent', () => {
       fixture.detectChanges();
       expect(ngOnInitSpy).toHaveBeenCalled();
     });
+
+    it('should initialize sessions from localStorage if available', () => {
+      const loadSessionsSpy = vi.spyOn(component['storage'], 'loadSessions');
+      const storedSessions = new Map([['sess-1', mockSession]]);
+      loadSessionsSpy.mockReturnValue(storedSessions);
+
+      component.ngOnInit();
+
+      expect(loadSessionsSpy).toHaveBeenCalled();
+    });
+
+    it('should create default session if no sessions exist in localStorage', () => {
+      const loadSessionsSpy = vi.spyOn(component['storage'], 'loadSessions');
+      loadSessionsSpy.mockReturnValue(null);
+
+      const createSessionSpy = vi.spyOn(mockSessionStateService, 'createSession');
+
+      component.ngOnInit();
+
+      expect(createSessionSpy).toHaveBeenCalledWith('New Chat');
+    });
+
+    it('should load active session ID from localStorage', () => {
+      const loadActiveIdSpy = vi.spyOn(component['storage'], 'loadActiveSessionId');
+      loadActiveIdSpy.mockReturnValue('sess-1');
+
+      component.ngOnInit();
+
+      expect(loadActiveIdSpy).toHaveBeenCalled();
+    });
+
+    it('should load messages visibility from localStorage', () => {
+      const loadVisibilitySpy = vi.spyOn(component['storage'], 'loadMessagesVisibility');
+      loadVisibilitySpy.mockReturnValue(true);
+
+      component.ngOnInit();
+
+      expect(loadVisibilitySpy).toHaveBeenCalled();
+    });
   });
 
   describe('sendMessage()', () => {
@@ -199,33 +238,68 @@ describe('AiChatPanelComponent', () => {
     });
 
     it('should not send message if input is empty', () => {
-      mockSessionStateService.activeInputValue = computed(() => '');
+      // Create a new mock service with empty input
+      const emptyInputMockService = {
+        ...mockSessionStateService,
+        activeInputValue: computed(() => ''),
+        canSendMessage: computed(() => false),
+      } as unknown as SessionStateService;
+
+      // Replace the service in the component
+      Object.defineProperty(component, 'sessionState', {
+        value: emptyInputMockService,
+        writable: false,
+      });
+
       const emitSpy = vi.spyOn(component.messageSend, 'emit');
 
       component.sendMessage();
 
-      expect(mockSessionStateService.addMessage).not.toHaveBeenCalled();
+      expect(emptyInputMockService.addMessage).not.toHaveBeenCalled();
       expect(emitSpy).not.toHaveBeenCalled();
     });
 
     it('should not send message if input is whitespace only', () => {
-      mockSessionStateService.activeInputValue = computed(() => '   ');
+      // Create a new mock service with whitespace input
+      const whitespaceInputMockService = {
+        ...mockSessionStateService,
+        activeInputValue: computed(() => '   '),
+        canSendMessage: computed(() => false),
+      } as unknown as SessionStateService;
+
+      // Replace the service in the component
+      Object.defineProperty(component, 'sessionState', {
+        value: whitespaceInputMockService,
+        writable: false,
+      });
+
       const emitSpy = vi.spyOn(component.messageSend, 'emit');
 
       component.sendMessage();
 
-      expect(mockSessionStateService.addMessage).not.toHaveBeenCalled();
+      expect(whitespaceInputMockService.addMessage).not.toHaveBeenCalled();
       expect(emitSpy).not.toHaveBeenCalled();
     });
 
     it('should not send message if no active session', () => {
-      mockSessionStateService.activeSessionId = signal('');
-      mockSessionStateService.activeSession = computed(() => undefined);
+      // Create a new mock service with no active session
+      const noActiveSessionMockService = {
+        ...mockSessionStateService,
+        activeSessionId: signal(''),
+        activeSession: computed(() => undefined),
+      } as unknown as SessionStateService;
+
+      // Replace the service in the component
+      Object.defineProperty(component, 'sessionState', {
+        value: noActiveSessionMockService,
+        writable: false,
+      });
+
       const emitSpy = vi.spyOn(component.messageSend, 'emit');
 
       component.sendMessage();
 
-      expect(mockSessionStateService.addMessage).not.toHaveBeenCalled();
+      expect(noActiveSessionMockService.addMessage).not.toHaveBeenCalled();
       expect(emitSpy).not.toHaveBeenCalled();
     });
   });
@@ -265,7 +339,16 @@ describe('AiChatPanelComponent', () => {
     });
 
     it('should emit panelToggle event with new visibility state', () => {
-      mockSessionStateService.isMessagesVisible = signal(true);
+      const visibleMockService = {
+        ...mockSessionStateService,
+        isMessagesVisible: signal(true),
+      } as unknown as SessionStateService;
+
+      Object.defineProperty(component, 'sessionState', {
+        value: visibleMockService,
+        writable: false,
+      });
+
       const emitSpy = vi.spyOn(component.panelToggle, 'emit');
 
       component.toggleMessagesVisibility();
@@ -274,7 +357,16 @@ describe('AiChatPanelComponent', () => {
     });
 
     it('should emit true when toggling from hidden to visible', () => {
-      mockSessionStateService.isMessagesVisible = signal(false);
+      const hiddenMockService = {
+        ...mockSessionStateService,
+        isMessagesVisible: signal(false),
+      } as unknown as SessionStateService;
+
+      Object.defineProperty(component, 'sessionState', {
+        value: hiddenMockService,
+        writable: false,
+      });
+
       const emitSpy = vi.spyOn(component.panelToggle, 'emit');
 
       component.toggleMessagesVisibility();
@@ -325,8 +417,16 @@ describe('AiChatPanelComponent', () => {
     });
 
     it('should not update if no active session', () => {
-      mockSessionStateService.activeSessionId = signal('');
-      mockSessionStateService.activeSession = computed(() => undefined);
+      const noActiveSessionMockService = {
+        ...mockSessionStateService,
+        activeSessionId: signal(''),
+        activeSession: computed(() => undefined),
+      } as unknown as SessionStateService;
+
+      Object.defineProperty(component, 'sessionState', {
+        value: noActiveSessionMockService,
+        writable: false,
+      });
 
       const originalSessions = component.sessions();
 
@@ -379,8 +479,16 @@ describe('AiChatPanelComponent', () => {
     });
 
     it('should not update if no active session', () => {
-      mockSessionStateService.activeSessionId = signal('');
-      mockSessionStateService.activeSession = computed(() => undefined);
+      const noActiveSessionMockService = {
+        ...mockSessionStateService,
+        activeSessionId: signal(''),
+        activeSession: computed(() => undefined),
+      } as unknown as SessionStateService;
+
+      Object.defineProperty(component, 'sessionState', {
+        value: noActiveSessionMockService,
+        writable: false,
+      });
 
       const originalSessions = component.sessions();
 
@@ -493,7 +601,15 @@ describe('AiChatPanelComponent', () => {
         messages: [],
       };
 
-      mockSessionStateService.activeSession = computed(() => emptySession);
+      const emptyMessagesMockService = {
+        ...mockSessionStateService,
+        activeSession: computed(() => emptySession),
+      } as unknown as SessionStateService;
+
+      Object.defineProperty(component, 'sessionState', {
+        value: emptyMessagesMockService,
+        writable: false,
+      });
 
       expect(component.activeSession()?.messages).toEqual([]);
       expect(component.activeSession()?.messages.length).toBe(0);
@@ -505,11 +621,20 @@ describe('AiChatPanelComponent', () => {
         inputValue: '',
       };
 
-      mockSessionStateService.activeInputValue = computed(() => '');
-      mockSessionStateService.canSendMessage = computed(() => false);
+      const emptyInputMockService = {
+        ...mockSessionStateService,
+        activeSession: computed(() => emptyInputSession),
+        activeInputValue: computed(() => ''),
+        canSendMessage: computed(() => false),
+      } as unknown as SessionStateService;
+
+      Object.defineProperty(component, 'sessionState', {
+        value: emptyInputMockService,
+        writable: false,
+      });
 
       expect(component.activeSession()?.inputValue).toBe('');
-      expect(mockSessionStateService.canSendMessage()).toBe(false);
+      expect(emptyInputMockService.canSendMessage()).toBe(false);
     });
   });
 });
