@@ -64,18 +64,18 @@ import { Component, input, output, computed } from '@angular/core';
     `
       .session-toggle {
         position: fixed;
-        bottom: 24px;
+        top: 24px;
         right: 24px;
-        width: 48px;
-        height: 48px;
-        border-radius: 24px;
-        background: oklch(0.48 0.07 195 / 95%);
+        width: 56px;
+        height: 56px;
+        border-radius: 28px;
+        background: oklch(0.48 0.07 195 / 98%);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border: none;
         box-shadow:
-          0 4px 12px oklch(0.28 0.03 185 / 15%),
-          0 0 0 2px oklch(0.48 0.07 195 / 20%);
+          0 6px 20px oklch(0.28 0.03 185 / 25%),
+          0 0 0 3px oklch(0.48 0.07 195 / 30%);
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -88,10 +88,10 @@ import { Component, input, output, computed } from '@angular/core';
 
       .session-toggle:hover {
         background: oklch(0.48 0.07 195);
-        transform: scale(1.05);
+        transform: scale(1.08);
         box-shadow:
-          0 6px 16px oklch(0.28 0.03 185 / 20%),
-          0 0 0 2px oklch(0.48 0.07 195 / 30%);
+          0 8px 24px oklch(0.28 0.03 185 / 30%),
+          0 0 0 4px oklch(0.48 0.07 195 / 40%);
       }
 
       .session-toggle:active {
@@ -106,14 +106,14 @@ import { Component, input, output, computed } from '@angular/core';
       /* Notification badge */
       .notification-badge {
         position: absolute;
-        top: 4px;
-        right: 4px;
-        width: 12px;
-        height: 12px;
-        border-radius: 6px;
+        top: 2px;
+        right: 2px;
+        width: 14px;
+        height: 14px;
+        border-radius: 7px;
         background: oklch(0.50 0.20 25);
-        border: 2px solid oklch(0.91 0.015 85);
-        box-shadow: 0 2px 4px oklch(0.28 0.03 185 / 30%);
+        border: 2px solid oklch(0.48 0.07 195 / 98%);
+        box-shadow: 0 2px 6px oklch(0.28 0.03 185 / 40%);
         animation: badgePop 0.3s ease-out;
       }
 
@@ -140,21 +140,21 @@ import { Component, input, output, computed } from '@angular/core';
         0%,
         100% {
           box-shadow:
-            0 4px 12px oklch(0.28 0.03 185 / 15%),
-            0 0 0 2px oklch(0.48 0.07 195 / 20%);
+            0 6px 20px oklch(0.28 0.03 185 / 25%),
+            0 0 0 3px oklch(0.48 0.07 195 / 30%);
         }
         50% {
           box-shadow:
-            0 4px 12px oklch(0.28 0.03 185 / 15%),
-            0 0 0 4px oklch(0.48 0.07 195 / 30%);
+            0 6px 20px oklch(0.28 0.03 185 / 25%),
+            0 0 0 5px oklch(0.48 0.07 195 / 50%);
         }
       }
 
       /* SVG icon styling */
       .session-toggle svg {
-        width: 24px;
-        height: 24px;
-        stroke-width: 2;
+        width: 28px;
+        height: 28px;
+        stroke-width: 2.5;
         transition: transform var(--duration-fast) ease;
       }
 
@@ -165,15 +165,15 @@ import { Component, input, output, computed } from '@angular/core';
       /* Responsive */
       @media (max-width: 768px) {
         .session-toggle {
-          bottom: 16px;
+          top: 16px;
           right: 16px;
-          width: 44px;
-          height: 44px;
+          width: 52px;
+          height: 52px;
         }
 
         .session-toggle svg {
-          width: 22px;
-          height: 22px;
+          width: 26px;
+          height: 26px;
         }
       }
     `,

@@ -19,7 +19,6 @@ import { BadgeType } from '../types/chat.types';
       @if (badge(); as badgeValue) {
         <div
           [class]="'badge badge-' + badgeValue.type"
-          (click)="onBadgeClick()"
           [attr.aria-label]="badgeValue.type + ' ' + (badgeValue.text || '')"
         >
           @switch (badgeValue.type) {
@@ -71,13 +70,7 @@ import { BadgeType } from '../types/chat.types';
         white-space: nowrap;
         transition: all var(--duration-fast) ease;
         animation: badgeFadeIn 0.3s ease-out;
-        cursor: pointer;
         user-select: none;
-      }
-
-      .badge:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px oklch(0.28 0.03 185 / 15%);
       }
 
       .badge-thinking {
@@ -219,21 +212,9 @@ export class StatusBadgesComponent {
   readonly badge = input<StatusBadge | null>(null);
 
   /**
-   * Emit when badge is clicked
-   */
-  readonly badgeClick = output<void>();
-
-  /**
    * Get badge type for styling
    */
   readonly badgeType = computed(() => this.badge()?.type);
-
-  /**
-   * Handle badge click
-   */
-  onBadgeClick(): void {
-    this.badgeClick.emit();
-  }
 }
 
 /**

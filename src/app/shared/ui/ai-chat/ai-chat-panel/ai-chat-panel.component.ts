@@ -21,17 +21,13 @@ import { SessionToggleComponent } from '../session-toggle-button/session-toggle-
 import { AiChatStorageService } from '../services/ai-chat-storage.service';
 import {
   ChatMessage,
-  PanelPosition,
-  PanelSize,
   StatusBadge,
-  DEFAULT_PANEL_POSITION,
-  DEFAULT_PANEL_SIZE,
   BadgeType,
 } from '../types/chat.types';
 
 /**
  * AI Chat Panel Component
- * Complete floating chat interface with drag/resize/storage
+ * Complete chat interface with fixed position on right side
  */
 @Component({
   selector: 'ai-chat-panel',
@@ -53,37 +49,28 @@ import {
     <!-- Chat Panel Container -->
     @if (isPanelOpen()) {
       <div class="ai-chat-panel-container">
-        <div class="ai-chat-wrapper">
-          <!-- Chat Messages Card -->
-          <ai-chat-messages-card
-            [messages]="messages()"
-            [position]="position()"
-            [size]="size()"
-            [isCollapsed]="isCollapsed()"
-            [minSize]="minSize()"
-            (positionChange)="onPositionChange($event)"
-            (sizeChange)="onSizeChange($event)"
-            (dragStart)="onDragStart()"
-            (resizeStart)="onResizeStart()"
-          />
+        <!-- Chat Messages Card -->
+        <ai-chat-messages-card
+          [messages]="messages()"
+          [isCollapsed]="isCollapsed()"
+          (collapseToggle)="toggleCollapse()"
+        />
 
-          <!-- Status Badges -->
-          <ai-status-badges
-            [badge]="currentBadge()"
-            (badgeClick)="toggleCollapse()"
-          />
+        <!-- Status Badges -->
+        <ai-status-badges
+          [badge]="currentBadge()"
+        />
 
-          <!-- Chat Input -->
-          <div class="input-wrapper">
-            <ai-chat-input
-              [value]="inputValue"
-              [disabled]="isProcessing()"
-              (send)="onSend($event)"
-              (fileClick)="onFileClick()"
-              (imageClick)="onImageClick()"
-              (voiceClick)="onVoiceClick()"
-            />
-          </div>
+        <!-- Chat Input -->
+        <div class="input-wrapper">
+          <ai-chat-input
+            [value]="inputValue"
+            [disabled]="isProcessing()"
+            (send)="onSend($event)"
+            (fileClick)="onFileClick()"
+            (imageClick)="onImageClick()"
+            (voiceClick)="onVoiceClick()"
+          />
         </div>
       </div>
     }
@@ -99,31 +86,14 @@ import {
         pointer-events: none;
       }
 
-      .ai-chat-wrapper {
-        position: absolute;
-        bottom: 24px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        pointer-events: auto;
-        transition: all var(--duration-normal) ease;
-      }
-
-      .input-wrapper {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-      }
-
       /* Responsive */
       @media (max-width: 768px) {
-        .ai-chat-wrapper {
+        .input-wrapper {
           bottom: 16px;
-          left: 8px;
-          right: 8px;
+          left: 0;
+          right: 0;
           transform: none;
+          padding: 0 16px;
         }
       }
     `,
@@ -131,7 +101,6 @@ import {
 })
 export class AiChatPanelComponent {
   private readonly storageService = inject(AiChatStorageService);
-  private readonly destroyRef = inject(DestroyRef);
 
   /**
    * Emit when user sends message
@@ -164,16 +133,6 @@ export class AiChatPanelComponent {
   readonly isCollapsed = signal(false);
 
   /**
-   * Panel position
-   */
-  readonly position = signal<PanelPosition>(DEFAULT_PANEL_POSITION);
-
-  /**
-   * Panel size
-   */
-  readonly size = signal<PanelSize>(DEFAULT_PANEL_SIZE);
-
-  /**
    * Chat messages
    */
   readonly messages = signal<ChatMessage[]>([]);
@@ -201,14 +160,6 @@ export class AiChatPanelComponent {
    */
   readonly hasNotification = computed(() => this.currentBadge()?.type === 'done');
 
-  /**
-   * Minimum panel size
-   */
-  readonly minSize = computed(() => ({
-    width: 300,
-    height: 200,
-  }));
-
   constructor() {
     afterNextRender(() => {
       this.loadPreferences();
@@ -221,8 +172,6 @@ export class AiChatPanelComponent {
   private loadPreferences(): void {
     const preferences = this.storageService.load();
     if (preferences) {
-      this.position.set(preferences.position);
-      this.size.set(preferences.size);
       this.isCollapsed.set(preferences.isCollapsed);
     }
   }
@@ -247,36 +196,6 @@ export class AiChatPanelComponent {
     const newState = !this.isCollapsed();
     this.isCollapsed.set(newState);
     this.storageService.toggleCollapsed();
-  }
-
-  /**
-   * Handle position change (drag)
-   */
-  onPositionChange(position: PanelPosition): void {
-    this.position.set(position);
-    // Don't save on every move - wait for drag end
-  }
-
-  /**
-   * Handle size change (resize)
-   */
-  onSizeChange(size: PanelSize): void {
-    this.size.set(size);
-    // Don't save on every resize - wait for resize end
-  }
-
-  /**
-   * Handle drag start
-   */
-  onDragStart(): void {
-    // Drag has started, will save on end
-  }
-
-  /**
-   * Handle resize start
-   */
-  onResizeStart(): void {
-    // Resize has started, will save on end
   }
 
   /**

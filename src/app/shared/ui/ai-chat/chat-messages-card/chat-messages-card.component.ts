@@ -1,6 +1,6 @@
 /**
  * Chat Messages Card Component
- * Draggable and resizable message container
+ * Fixed position message container on the right side
  * Mineral & Time Theme - Angular 20+
  */
 
@@ -8,25 +8,21 @@ import {
   Component,
   input,
   output,
-  signal,
-  computed,
   ViewChild,
   ElementRef,
   afterNextRender,
 } from '@angular/core';
-import { DragHandleDirective } from '../directives/drag-handle.directive';
-import { ResizeHandleDirective } from '../directives/resize-handle.directive';
 import { LiquidGlassDirective } from '../../liquid-glass';
-import { ChatMessage, PanelPosition, PanelSize } from '../types/chat.types';
+import { ChatMessage } from '../types/chat.types';
 
 /**
  * Chat messages card component
- * Displays chat history with drag/resize capabilities
+ * Displays chat history in fixed position on right side
  */
 @Component({
   selector: 'ai-chat-messages-card',
   standalone: true,
-  imports: [DragHandleDirective, ResizeHandleDirective, LiquidGlassDirective],
+  imports: [LiquidGlassDirective],
   template: `
     <div
       #card
@@ -40,42 +36,47 @@ import { ChatMessage, PanelPosition, PanelSize } from '../types/chat.types';
       lgAriaLabel="Chat messages card"
       class="chat-messages-card"
       [class.collapsed]="isCollapsed()"
-      [style.position]="'fixed'"
-      [style.left.px]="position().x"
-      [style.top.px]="position().y"
-      [style.width.px]="size().width"
-      [style.height.px]="size().height"
     >
-      <!-- Drag Handle (Top) -->
-      <div
-        class="drag-handle"
-        dragHandle
-        [dragTarget]="cardRef"
-        (dragStart)="onDragStart($event)"
-        (dragMove)="onDragMove($event)"
-        (dragEnd)="onDragEnd($event)"
-        [attr.aria-label]="'Drag to move'"
+      <!-- Collapse/Expand Button -->
+      <button
+        type="button"
+        class="collapse-toggle"
+        [attr.aria-label]="isCollapsed() ? 'Expand chat' : 'Collapse chat'"
+        [attr.aria-expanded]="!isCollapsed()"
+        (click)="toggleCollapse()"
       >
-        <div class="drag-lines">
-          <div class="drag-line"></div>
-          <div class="drag-line"></div>
-          <div class="drag-line"></div>
-        </div>
-      </div>
-
-      <!-- Resize Handle (Bottom-right) -->
-      <div
-        class="resize-handle"
-        resizeHandle
-        [resizeTarget]="cardRef"
-        [minSize]="minSize()"
-        (resizeStart)="onResizeStart($event)"
-        (resizeMove)="onResizeMove($event)"
-        (resizeEnd)="onResizeEnd($event)"
-        [attr.aria-label]="'Drag to resize'"
-      >
-        <div class="resize-indicator"></div>
-      </div>
+        @if (isCollapsed()) {
+          <!-- Expand icon (down arrow) -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        } @else {
+          <!-- Collapse icon (up arrow) -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="18 15 12 9 6 15" />
+          </svg>
+        }
+      </button>
 
       <!-- Messages Container -->
       <div class="chat-messages" #messagesContainer>
@@ -115,10 +116,66 @@ import { ChatMessage, PanelPosition, PanelSize } from '../types/chat.types';
   styles: [
     `
       .chat-messages-card {
-        position: relative;
+        position: fixed;
+        right: 24px;
+        top: 90px;
+        width: 380px;
+        max-height: 60vh;
         overflow: visible;
         transition: all var(--duration-slow) cubic-bezier(0.4, 0, 0.2, 1);
-        animation: slideUp 0.4s ease-out;
+        animation: slideInRight 0.4s ease-out;
+        z-index: 999;
+      }
+
+      /* Collapse/Expand Toggle Button */
+      .collapse-toggle {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: oklch(0.48 0.07 195 / 90%);
+        border: 2px solid oklch(0.48 0.07 195 / 40%);
+        box-shadow:
+          0 2px 8px oklch(0.28 0.03 185 / 20%),
+          0 0 0 1px oklch(1 0 0 / 10%);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--duration-fast) ease;
+        z-index: 10;
+        padding: 0;
+        color: oklch(1 0 0);
+      }
+
+      .collapse-toggle:hover {
+        background: oklch(0.48 0.07 195);
+        transform: scale(1.1);
+        box-shadow:
+          0 4px 12px oklch(0.28 0.03 185 / 25%),
+          0 0 0 2px oklch(0.48 0.07 195 / 50%);
+      }
+
+      .collapse-toggle:active {
+        transform: scale(0.95);
+      }
+
+      .collapse-toggle:focus-visible {
+        outline: 2px solid oklch(0.48 0.07 195);
+        outline-offset: 2px;
+      }
+
+      .collapse-toggle svg {
+        width: 20px;
+        height: 20px;
+        stroke-width: 2.5;
+        transition: transform var(--duration-fast) ease;
+      }
+
+      .collapse-toggle:hover svg {
+        transform: scale(1.1);
       }
 
       .chat-messages-card.collapsed {
@@ -128,101 +185,7 @@ import { ChatMessage, PanelPosition, PanelSize } from '../types/chat.types';
         margin: 0;
         overflow: hidden;
         pointer-events: none;
-      }
-
-      /* Drag Handle */
-      .drag-handle {
-        position: absolute;
-        top: -20px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 8px 16px;
-        cursor: grab;
-        transition: all var(--duration-fast) ease;
-        z-index: 1000;
-        pointer-events: auto;
-        user-select: none;
-        opacity: 0.4;
-      }
-
-      .drag-handle:active {
-        cursor: grabbing;
-      }
-
-      .drag-handle:hover {
-        opacity: 0.7;
-      }
-
-      .drag-lines {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-        pointer-events: none;
-      }
-
-      .drag-line {
-        width: 20px;
-        height: 2px;
-        background: oklch(0.48 0.07 195);
-        border-radius: 1px;
-      }
-
-      /* Resize Handle */
-      .resize-handle {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        width: 16px;
-        height: 16px;
-        cursor: nwse-resize;
-        opacity: 0;
-        transition: opacity var(--duration-fast) ease;
-        z-index: 10;
-      }
-
-      .chat-messages-card:hover .resize-handle {
-        opacity: 0.4;
-      }
-
-      .resize-handle:hover {
-        opacity: 0.6 !important;
-      }
-
-      .resize-indicator {
-        position: absolute;
-        bottom: 3px;
-        right: 3px;
-        width: 10px;
-        height: 10px;
-        pointer-events: none;
-      }
-
-      .resize-indicator::before,
-      .resize-indicator::after {
-        content: '';
-        position: absolute;
-        background: oklch(0.48 0.07 195);
-        border-radius: 1px;
-      }
-
-      .resize-indicator::before {
-        width: 10px;
-        height: 2px;
-        bottom: 2px;
-        transform: rotate(45deg);
-        transform-origin: left center;
-      }
-
-      .resize-indicator::after {
-        width: 6px;
-        height: 2px;
-        bottom: 0;
-        right: 0;
-        transform: rotate(45deg);
-        transform-origin: left center;
+        transform: translateX(20px);
       }
 
       /* Messages Container */
@@ -349,30 +312,30 @@ import { ChatMessage, PanelPosition, PanelSize } from '../types/chat.types';
       }
 
       /* Animations */
-      @keyframes slideUp {
+      @keyframes slideInRight {
         from {
           opacity: 0;
-          transform: translateY(20px);
+          transform: translateX(30px);
         }
         to {
           opacity: 1;
-          transform: translateY(0);
+          transform: translateX(0);
         }
       }
 
       /* Responsive */
       @media (max-width: 768px) {
-        .drag-handle {
-          top: -20px;
+        .chat-messages-card {
+          right: 16px;
+          top: 75px;
+          width: calc(100vw - 32px);
+          max-height: 50vh;
         }
       }
     `,
   ],
 })
 export class ChatMessagesCardComponent {
-  @ViewChild('card')
-  cardRef!: ElementRef<HTMLDivElement>;
-
   @ViewChild('messagesContainer')
   messagesContainerRef!: ElementRef<HTMLDivElement>;
 
@@ -382,110 +345,19 @@ export class ChatMessagesCardComponent {
   readonly messages = input<ChatMessage[]>([]);
 
   /**
-   * Position signal
-   */
-  readonly position = input.required<PanelPosition>();
-
-  /**
-   * Size signal
-   */
-  readonly size = input.required<PanelSize>();
-
-  /**
    * Collapsed state
    */
   readonly isCollapsed = input(false);
 
   /**
-   * Minimum size
-   */
-  readonly minSize = input<PanelSize>({ width: 300, height: 200 });
-
-  /**
-   * Emit position changes
-   */
-  readonly positionChange = output<PanelPosition>();
-
-  /**
-   * Emit size changes
-   */
-  readonly sizeChange = output<PanelSize>();
-
-  /**
-   * Emit when drag starts
-   */
-  readonly dragStart = output<PanelPosition>();
-
-  /**
-   * Emit when resize starts
-   */
-  readonly resizeStart = output<PanelSize>();
-
-  /**
-   * Emit when collapse is toggled
+   * Emit when collapse toggle is clicked
    */
   readonly collapseToggle = output<void>();
-
-  /**
-   * Is currently dragging
-   */
-  readonly isDragging = signal(false);
-
-  /**
-   * Is currently resizing
-   */
-  readonly isResizing = signal(false);
 
   constructor() {
     afterNextRender(() => {
       this.scrollToBottom();
     });
-  }
-
-  /**
-   * Handle drag start
-   */
-  onDragStart(position: PanelPosition): void {
-    this.isDragging.set(true);
-    this.dragStart.emit(position);
-  }
-
-  /**
-   * Handle drag move
-   */
-  onDragMove(position: PanelPosition): void {
-    this.positionChange.emit(position);
-  }
-
-  /**
-   * Handle drag end
-   */
-  onDragEnd(position: PanelPosition): void {
-    this.isDragging.set(false);
-    this.positionChange.emit(position);
-  }
-
-  /**
-   * Handle resize start
-   */
-  onResizeStart(size: PanelSize): void {
-    this.isResizing.set(true);
-    this.resizeStart.emit(size);
-  }
-
-  /**
-   * Handle resize move
-   */
-  onResizeMove(size: PanelSize): void {
-    this.sizeChange.emit(size);
-  }
-
-  /**
-   * Handle resize end
-   */
-  onResizeEnd(size: PanelSize): void {
-    this.isResizing.set(false);
-    this.sizeChange.emit(size);
   }
 
   /**
@@ -496,5 +368,12 @@ export class ChatMessagesCardComponent {
       const container = this.messagesContainerRef.nativeElement;
       container.scrollTop = container.scrollHeight;
     }
+  }
+
+  /**
+   * Toggle collapse state
+   */
+  toggleCollapse(): void {
+    this.collapseToggle.emit();
   }
 }
