@@ -1,12 +1,12 @@
 <div
   liquidGlass
   lgTheme="mineral-light"
-  lgCornerRadius="12px"
+  lgCornerRadius="16px"
   [lgBlurAmount]="0.5"
   [lgDisplacementScale]="0"
   lgTint="oklch(0 0 0 / 2%)"
   lgHotspot="oklch(1 0 0 / 3%)"
-  lgAriaLabel="Chat messages card"
+  lgAriaLabel="AI chat messages card"
   [class.visible]="safeIsVisible"
   [style.left.px]="safePosition.x"
   [style.top.px]="safePosition.y"
@@ -14,17 +14,25 @@
   [style.height.px]="safeSize.height"
   class="messages-card"
 >
-  <!-- Drag handle for panel positioning -->
-  <!-- Note: Directive expects Signal<PanelPosition> input via [appDragHandle] alias -->
+  <!-- 拖拽手柄 -->
   <div
     class="drag-handle"
     [appDragHandle]="position"
+    [dragHandleSize]="size"
     (positionChange)="positionChange.emit($event)"
+    title="拖拽移动面板"
   >
-    <span class="drag-icon">≡ ≡ ≡</span>
+    <svg class="drag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="5" r="1"/>
+      <circle cx="9" cy="12" r="1"/>
+      <circle cx="9" cy="19" r="1"/>
+      <circle cx="15" cy="5" r="1"/>
+      <circle cx="15" cy="12" r="1"/>
+      <circle cx="15" cy="19" r="1"/>
+    </svg>
   </div>
 
-  <!-- Scrollable message list -->
+  <!-- 消息列表 -->
   <div #messageList class="message-list">
     @for (message of safeMessages; track message.id) {
       <div [class.role-user]="message.role === 'user'"
@@ -35,16 +43,24 @@
         <div class="message-timestamp">{{ message.timestamp | date: 'short' }}</div>
       </div>
     } @empty {
-      <!-- Enhancement: Empty state for better UX (not in original spec) -->
-      <div class="empty-state">No messages yet</div>
+      <div class="empty-state">
+        <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span>开始与 AI 对话...</span>
+      </div>
     }
   </div>
 
-  <!-- Resize handle for panel sizing -->
-  <!-- Note: Directive expects Signal<PanelSize> input via [appResizeHandle] alias -->
+  <!-- 缩放手柄 -->
   <div
     class="resize-handle"
     [appResizeHandle]="size"
     (sizeChange)="sizeChange.emit($event)"
-  ></div>
+    title="拖拽调整大小"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m21 21-6-6m6 6v-4.8m0 4.8h-4.8"/>
+    </svg>
+  </div>
 </div>

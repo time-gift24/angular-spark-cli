@@ -1,5 +1,5 @@
 import { Directive, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, Signal } from '@angular/core';
-import { PanelPosition } from '../models';
+import { PanelPosition, PanelSize } from '../models';
 
 /**
  * Drag handle directive for making elements draggable.
@@ -14,7 +14,9 @@ import { PanelPosition } from '../models';
  * - Drag lifecycle events (dragStart, dragEnd, positionChange)
  * - CSS transition management for smooth UX
  * - Automatic cleanup on destroy
- * - Viewport boundary constraints to prevent off-screen dragging
+ * - Free-form dragging: panel can be moved anywhere on screen
+ *   - Only constraint: at least 50px of the panel must remain visible
+ *   - Allows partial off-screen positioning for maximum flexibility
  * - requestAnimationFrame throttling for optimal performance
  *
  * Known limitations:
@@ -24,12 +26,17 @@ import { PanelPosition } from '../models';
  * Usage:
  * ```html
  * <div [appDragHandle]="position"
+ *      [dragHandleSize]="size"
  *      (positionChange)="onPositionChange($event)"
  *      (dragStart)="onDragStart()"
  *      (dragEnd)="onDragEnd()">
  *   Drag me!
  * </div>
  * ```
+ *
+ * Note: The [dragHandleSize] input is optional but recommended for accurate
+ * boundary constraints. When provided, the directive ensures at least 50px
+ * of the panel remains visible on screen.
  */
 @Directive({
   selector: '[appDragHandle]',
@@ -41,6 +48,13 @@ export class DragHandleDirective implements OnInit, OnDestroy {
    * Required input that provides the initial and current position.
    */
   @Input({ required: true, alias: 'appDragHandle' }) position!: Signal<PanelPosition>;
+
+  /**
+   * Optional size signal from parent component.
+   * When provided, enables more accurate boundary constraints by considering
+   * panel height when limiting vertical movement.
+   */
+  @Input() dragHandleSize?: Signal<PanelSize>;
 
   /**
    * Emits when position changes during drag.
@@ -142,6 +156,7 @@ export class DragHandleDirective implements OnInit, OnDestroy {
    * Features:
    * - requestAnimationFrame throttling to prevent excessive re-renders
    * - Viewport boundary constraints to prevent off-screen dragging
+   * - Dynamic bottom boundary calculation based on DOM elements
    */
   private onMouseMove(event: MouseEvent): void {
     if (!this.isDragging) {
@@ -161,11 +176,20 @@ export class DragHandleDirective implements OnInit, OnDestroy {
       let newX = this.startPosition.x + deltaX;
       let newY = this.startPosition.y + deltaY;
 
-      // Constrain to viewport boundaries
-      // Keep at least 100px of the panel visible on screen
-      const minVisibleSize = 100;
-      newX = Math.max(0, Math.min(newX, window.innerWidth - minVisibleSize));
-      newY = Math.max(0, Math.min(newY, window.innerHeight - minVisibleSize));
+      // Boundary constraint constants
+      const minVisibleSize = 50; // Minimum visible portion of panel
+
+      // Get panel dimensions from size input if available
+      const panelWidth = this.dragHandleSize?.().width ?? minVisibleSize;
+      const panelHeight = this.dragHandleSize?.().height ?? minVisibleSize;
+
+      // X axis constraint: keep at least minVisibleSize visible on screen
+      // 允许面板部分移出屏幕，但保持至少 minVisibleSize 可见
+      newX = Math.max(minVisibleSize - panelWidth, Math.min(newX, window.innerWidth - minVisibleSize));
+
+      // Y axis constraint: 允许自由拖拽到屏幕任何位置
+      // 只要求至少 minVisibleSize 可见
+      newY = Math.max(minVisibleSize - panelHeight, Math.min(newY, window.innerHeight - minVisibleSize));
 
       const newPosition: PanelPosition = {
         x: newX,
@@ -212,4 +236,5 @@ export class DragHandleDirective implements OnInit, OnDestroy {
       window.removeEventListener('mouseup', this.boundMouseUp);
     }
   }
+
 }

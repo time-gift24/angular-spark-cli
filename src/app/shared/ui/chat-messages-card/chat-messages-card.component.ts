@@ -4,40 +4,19 @@ import { DragHandleDirective } from '../../directives/drag-handle.directive';
 import { ResizeHandleDirective } from '../../directives/resize-handle.directive';
 import { LiquidGlassDirective } from '../liquid-glass';
 import { ChatMessage, PanelPosition, PanelSize } from '../../models';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 /**
- * Chat messages card component.
+ * AI Chat Messages Card Component - 矿物与时光主题
  *
- * Displays chat messages in a draggable, resizable panel. This component
- * provides the main conversation view in the AI chat panel, showing messages
- * from the user, assistant, and system.
+ * 可自由拖拽、缩放的 AI 消息面板，使用 liquid-glass 效果。
  *
- * Key features:
- * - Displays messages with role-based styling
- * - Draggable via DragHandleDirective
- * - Resizable via ResizeHandleDirective
- * - Scrollable message list
- * - Auto-scroll to bottom on new message (smart detection)
- * - Smooth scroll animation
- * - Scroll position preservation during updates
- * - Visibility toggle support
- *
- * Phase 6 Task 6.1: Component Definition
- * - Basic component structure
- * - Drag/resize directive integration
- * - Message rendering with @for loop
- * - Basic scrollToBottom implementation
- *
- * Phase 6 Task 6.2: Enhanced Scroll Behavior
- * - Auto-scroll on new message with smart detection
- * - Smooth scroll animation support
- * - Scroll position preservation
- * - isUserNearBottom computed signal
- * - effect() to watch messages Signal
- *
- * Future enhancements (P6-T6.3):
- * - Full mineral & time theme styling
+ * 特性：
+ * - Liquid glass 视觉效果（与输入框风格一致）
+ * - 自由拖拽定位
+ * - 自由缩放大小
+ * - 消息气泡样式
+ * - 自动滚动到底部
+ * - 平滑动画过渡
  *
  * @example
  * ```html
@@ -59,258 +38,95 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   styleUrls: ['./chat-messages-card.component.css'],
 })
 export class ChatMessagesCardComponent {
-  /**
-   * Signal containing the array of chat messages to display.
-   * Messages are rendered in chronological order using @for loop.
-   */
-  @Input()
-  messages: Signal<ChatMessage[]>;
+  @Input() messages: Signal<ChatMessage[]>;
+  @Input() isVisible: Signal<boolean>;
+  @Input() position: Signal<PanelPosition>;
+  @Input() size: Signal<PanelSize>;
 
-  /**
-   * Signal controlling the visibility of the messages card.
-   * When false, the card is hidden (collapsed state).
-   * When true, the card is visible and interactive.
-   */
-  @Input()
-  isVisible: Signal<boolean>;
-
-  /**
-   * Signal containing the current position of the panel.
-   * Used by DragHandleDirective to track and update position.
-   */
-  @Input()
-  position: Signal<PanelPosition>;
-
-  /**
-   * Signal containing the current size of the panel.
-   * Used by ResizeHandleDirective to track and update size.
-   */
-  @Input()
-  size: Signal<PanelSize>;
-
-  /**
-   * Emits when the panel position changes during drag operations.
-   * Parent components should update their position state when this fires.
-   */
   @Output() positionChange = new EventEmitter<PanelPosition>();
-
-  /**
-   * Emits when the panel size changes during resize operations.
-   * Parent components should update their size state when this fires.
-   */
   @Output() sizeChange = new EventEmitter<PanelSize>();
 
-  /**
-   * Safe getter for position that handles undefined during component initialization.
-   * Returns default position if position signal is not yet available.
-   *
-   * When position is { x: 0, y: 0 }, calculates a centered position
-   * that avoids overlap with session tabs and input at the bottom.
-   */
+  // 视图子元素引用
+  readonly messageListRef = viewChild.required<ElementRef<HTMLDivElement>>('messageList');
+
+  // 私有状态
+  private readonly NEAR_BOTTOM_THRESHOLD = 50;
+  private readonly destroyRef = inject(DestroyRef);
+  private previousMessageCount = signal(0);
+
+  // 计算属性 - 安全获取器
+  readonly isUserNearBottom = computed(() => {
+    const element = this.messageListRef()?.nativeElement;
+    if (!element) return true;
+    const distanceFromBottom =
+      element.scrollHeight - element.scrollTop - element.clientHeight;
+    return distanceFromBottom < this.NEAR_BOTTOM_THRESHOLD;
+  });
+
+  // 安全获取器
   get safePosition(): PanelPosition {
     const pos = this.position?.();
-    if (!pos) {
-      // Calculate centered position for initial render
+    if (!pos || (pos.x === 0 && pos.y === 0)) {
       return this.calculateCenteredPosition();
     }
-
-    // If position is still default { x: 0, y: 0 }, calculate centered position
-    if (pos.x === 0 && pos.y === 0) {
-      return this.calculateCenteredPosition();
-    }
-
     return pos;
   }
 
-  /**
-   * Calculates a centered position for the messages card.
-   *
-   * Positioning strategy:
-   * - Horizontal center: 50% of viewport width minus half panel width
-   * - Vertical position: 200px from bottom (above tabs and input)
-   *
-   * This ensures the card appears centered horizontally and positioned
-   * above the always-visible session tabs and input area.
-   *
-   * @private
-   */
-  private calculateCenteredPosition(): PanelPosition {
-    const panelWidth = this.safeSize.width;
-    const panelHeight = this.safeSize.height;
-
-    // Horizontal center: (viewportWidth - panelWidth) / 2
-    const centerX = (window.innerWidth - panelWidth) / 2;
-
-    // Vertical position: 200px from bottom
-    // This leaves space for session tabs (~48px) + input (~40px) + gaps (~112px)
-    const centerY = window.innerHeight - panelHeight - 200;
-
-    return {
-      x: Math.max(0, centerX), // Ensure non-negative
-      y: Math.max(0, centerY)
-    };
-  }
-
-  /**
-   * Safe getter for size that handles undefined during component initialization.
-   * Returns default size if size signal is not yet available.
-   */
   get safeSize(): PanelSize {
-    return this.size?.() ?? { width: 900, height: 500 };
+    return this.size?.() ?? { width: 500, height: 400 };
   }
 
-  /**
-   * Safe getter for visibility that handles undefined during component initialization.
-   * Returns false if isVisible signal is not yet available.
-   */
   get safeIsVisible(): boolean {
     return this.isVisible?.() ?? false;
   }
 
-  /**
-   * Safe getter for messages that handles undefined during component initialization.
-   * Returns empty array if messages signal is not yet available.
-   */
   get safeMessages(): ChatMessage[] {
     return this.messages?.() ?? [];
   }
 
-  /**
-   * Reference to the message list container element.
-   * Used for scroll-to-bottom functionality and scroll position tracking.
-   *
-   * This viewChild reference enables:
-   * - scrollToBottom() method (P6-T6.1)
-   * - Auto-scroll on new message (P6-T6.2)
-   * - Scroll position preservation (P6-T6.2)
-   * - isUserNearBottom detection (P6-T6.2)
-   */
-  readonly messageListRef = viewChild.required<ElementRef<HTMLDivElement>>('messageList');
-
-  /**
-   * Threshold in pixels for considering user "near bottom" of message list.
-   * If user is within this distance from bottom, auto-scroll will trigger.
-   *
-   * @default 50 (pixels)
-   */
-  private readonly NEAR_BOTTOM_THRESHOLD = 50;
-
-  /**
-   * Computed signal that detects if user is currently near bottom of message list.
-   *
-   * This is used to determine whether to auto-scroll when new messages arrive.
-   * If user is near bottom, we auto-scroll (they're following conversation).
-   * If user is reading above, we don't scroll (don't interrupt their reading).
-   *
-   * Returns true if:
-   * - Element doesn't exist yet (default to true for initial render)
-   * - Distance from bottom is less than NEAR_BOTTOM_THRESHOLD
-   *
-   * @returns boolean - true if user is near bottom or element not ready
-   */
-  readonly isUserNearBottom = computed(() => {
-    const element = this.messageListRef()?.nativeElement;
-    if (!element) return true; // Default to true during initialization
-
-    const distanceFromBottom =
-      element.scrollHeight - element.scrollTop - element.clientHeight;
-
-    return distanceFromBottom < this.NEAR_BOTTOM_THRESHOLD;
-  });
-
-  /**
-   * Private signal to track previous message count for detecting new messages.
-   * Used in effect() to determine when messages are added vs updated.
-   */
-  private previousMessageCount = signal(0);
-
-  /**
-   * DestroyRef for cleanup in effect.
-   */
-  private destroyRef = inject(DestroyRef);
-
-  /**
-   * Effect that automatically scrolls to bottom when new messages arrive,
-   * but only if user is already near bottom (following the conversation).
-   *
-   * This prevents jarring scroll jumps when user is reading older messages
-   * while new messages arrive.
-   *
-   * Logic:
-   * 1. Watch messages() signal
-   * 2. Detect if new messages were added (count increased)
-   * 3. Check if user is near bottom
-   * 4. If both true, scroll to bottom smoothly
-   * 5. Use setTimeout to ensure DOM has updated
-   */
+  // 自动滚动效果
   private readonly autoScrollEffect = effect(() => {
     const messages = this.messages();
     const currentCount = messages.length;
     const previousCount = this.previousMessageCount();
 
-    // Only scroll if new messages were added
     if (currentCount > previousCount && currentCount > 0) {
       const isNearBottom = this.isUserNearBottom();
-
       if (isNearBottom) {
-        // Wait for DOM to update, then scroll smoothly
         setTimeout(() => {
           this.scrollToBottom('smooth');
         }, 0);
       }
     }
 
-    // Update previous count for next effect run
     this.previousMessageCount.set(currentCount);
   });
 
   /**
-   * Scrolls the message list to the bottom with optional smooth behavior.
-   *
-   * This method scrolls the message list to show the most recent messages.
-   * Supports both smooth animation and instant scrolling.
-   *
-   * Phase 6 Task 6.1: Basic implementation with instant scroll
-   * Phase 6 Task 6.2: Enhanced with smooth scroll and scroll preservation
-   *
-   * @param behavior - Scroll behavior: 'smooth' for animation, 'auto' for instant
-   *
-   * @example
-   * ```typescript
-   * // Smooth scroll to bottom (default)
-   * messagesCard.scrollToBottom();
-   *
-   * // Instant scroll to bottom
-   * messagesCard.scrollToBottom('auto');
-   *
-   * // Scroll when new message arrives
-   * messages.set([...messages(), newMessage]);
-   * messagesCard.scrollToBottom('smooth');
-   * ```
+   * 计算居中位置（初始位置）
    */
-  scrollToBottom(behavior: ScrollBehavior = 'smooth'): void {
-    const messageListEl = this.messageListRef()?.nativeElement;
-    if (!messageListEl) {
-      console.warn('[ChatMessagesCard] Cannot scroll: message list not initialized');
-      return;
-    }
-    this.performScroll(messageListEl, behavior);
+  private calculateCenteredPosition(): PanelPosition {
+    const panelWidth = this.safeSize.width;
+    const panelHeight = this.safeSize.height;
+
+    // 屏幕中央位置
+    const centerX = (window.innerWidth - panelWidth) / 2;
+    const centerY = (window.innerHeight - panelHeight) / 2;
+
+    return {
+      x: Math.max(0, centerX),
+      y: Math.max(0, centerY)
+    };
   }
 
   /**
-   * Performs the actual scroll operation to the bottom of the message list.
-   *
-   * This private method contains the scrolling logic, separated from
-   * scrollToBottom() for better testability and future enhancement.
-   *
-   * Supports smooth and instant scrolling via the ScrollBehavior API.
-   *
-   * @param element - The message list container element to scroll
-   * @param behavior - Scroll behavior: 'smooth' or 'auto'
+   * 滚动到底部
    */
-  private performScroll(element: HTMLDivElement, behavior: ScrollBehavior): void {
-    element.scrollTo({
-      top: element.scrollHeight,
+  scrollToBottom(behavior: ScrollBehavior = 'smooth'): void {
+    const messageListEl = this.messageListRef()?.nativeElement;
+    if (!messageListEl) return;
+    messageListEl.scrollTo({
+      top: messageListEl.scrollHeight,
       behavior: behavior,
     });
   }

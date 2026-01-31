@@ -1,85 +1,53 @@
 /**
- * Chat Messages Card Component - Full 矿物与时光 (Mineral & Time) 岩彩主题 Styling
+ * AI Chat Messages Card - 矿物与时光主题
  *
- * Phase 6 Task 6.3: Complete mineral & time theme styling
- * - Glass morphism effect with backdrop-filter
- * - Role-based message bubbles with subtle backgrounds
- * - Smooth show/hide transitions
- * - Drag/resize handle visual indicators
- * - Proper spacing and typography using design tokens
- * - WCAG AA contrast ratios
+ * 与输入框保持一致的 liquid-glass 风格
  */
 
 /* ========================================
-   MESSAGES CARD CONTAINER
+   消息卡片容器
    ======================================== */
 
 .messages-card {
-  /* Positioning - controlled by [style] bindings */
   position: fixed;
   z-index: 100;
-
-  /* Display */
   display: none;
   flex-direction: column;
-
-  /* Smooth show/hide transitions */
-  transition:
-    opacity var(--duration-slow) ease,
-    transform var(--duration-slow) ease;
-
-  /* Overflow handling */
   overflow: hidden;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* Visible state */
 .messages-card.visible {
   display: flex;
   opacity: 1;
-  transform: translateX(0) translateY(0);
 }
 
-/* Hidden state - fade out and slide down */
 .messages-card:not(.visible) {
   opacity: 0;
   pointer-events: none;
-  /* Note: transform is applied via inline styles for positioning,
-     so we only override opacity and pointer-events here */
 }
 
 /* ========================================
-   DRAG HANDLE
+   拖拽手柄
    ======================================== */
 
 .drag-handle {
-  /* Layout */
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-
-  /* Compact sizing */
-  height: calc(var(--spacing-lg) * 2); /* 24px */
-  padding: var(--spacing-sm) 0;
-
-  /* Interaction */
+  height: 28px;
   cursor: move;
   user-select: none;
+  border-bottom: 1px solid oklch(0.85 0.015 85 / 30%);
 }
 
-/* Drag icon - visual indicator */
-.drag-icon {
-  /* Typography */
-  font-size: 10px;
-  letter-spacing: 2px;
-  line-height: 1;
-
-  /* Color - 深灰但低饱和度 */
-  color: oklch(0.50 0.025 195);
-
-  /* Subtle opacity variation */
-  opacity: 0.6;
-  transition: opacity var(--duration-fast) ease;
+.drag-handle .drag-icon {
+  width: 16px;
+  height: 16px;
+  color: oklch(0.55 0.02 185);
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
 }
 
 .drag-handle:hover .drag-icon {
@@ -87,445 +55,249 @@
 }
 
 /* ========================================
-   MESSAGE LIST
+   消息列表
    ======================================== */
 
 .message-list {
-  /* Layout - fill available space */
   flex: 1;
   min-height: 0;
-
-  /* Overflow - scrollable */
   overflow-y: auto;
   overflow-x: hidden;
-
-  /* Spacing */
-  padding: var(--spacing-md);
-
-  /* Custom scrollbar styling for webkit browsers */
-  scrollbar-width: thin;
-  scrollbar-color: oklch(0.80 0.02 85) oklch(0.95 0.01 85);
+  padding: 12px;
 }
 
-/* Webkit scrollbar styling */
 .message-list::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .message-list::-webkit-scrollbar-track {
-  background: oklch(0.95 0.01 85);
-  border-radius: var(--radius-sm);
+  background: transparent;
 }
 
 .message-list::-webkit-scrollbar-thumb {
-  background: oklch(0.80 0.02 85);
-  border-radius: var(--radius-sm);
-  transition: background-color var(--duration-fast) ease;
+  background: oklch(0.75 0.015 85 / 40%);
+  border-radius: 2px;
 }
 
 .message-list::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.70 0.025 195);
+  background: oklch(0.65 0.02 195 / 60%);
 }
 
 /* ========================================
-   MESSAGE ITEM
+   消息气泡
    ======================================== */
 
 .message {
-  /* Layout */
   display: flex;
   flex-direction: column;
   max-width: 85%;
-
-  /* Spacing */
-  margin-bottom: var(--spacing-md);
-
-  /* Background & Border - 默认绢黄 */
+  margin-bottom: 10px;
+  padding: 8px 12px;
   background: oklch(0.96 0.01 85);
   border: 1px solid oklch(0.88 0.015 85);
-  border-radius: var(--radius-md);
-
-  /* Padding - 紧凑设计 */
-  padding: var(--spacing-sm) var(--spacing-md);
-
-  /* Typography */
+  border-radius: 10px;
   font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;
   font-size: 13px;
   line-height: 1.5;
   color: oklch(0.28 0.03 185);
-
-  /* Transition for hover effects */
-  transition:
-    background-color var(--duration-fast) ease,
-    border-color var(--duration-fast) ease,
-    box-shadow var(--duration-fast) ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* Hover effect - subtle lift */
 .message:hover {
   background: oklch(0.97 0.01 85);
-  border-color: oklch(0.83 0.018 85);
-  box-shadow:
-    0 1px 3px 0 oklch(0.28 0.03 185 / 8%),
-    0 1px 2px -1px oklch(0.28 0.03 185 / 8%);
 }
 
-/* ========================================
-   ROLE-BASED MESSAGE STYLING
-   ======================================== */
-
-/* User messages - 右对齐，石绿背景 */
+/* 用户消息 - 右对齐 */
 .message.role-user {
   align-self: flex-end;
-
-  /* 石绿背景 (低透明度) */
   background: oklch(0.48 0.07 195 / 12%);
   border-color: oklch(0.48 0.07 195 / 25%);
 }
 
 .message.role-user:hover {
   background: oklch(0.48 0.07 195 / 15%);
-  border-color: oklch(0.48 0.07 195 / 30%);
 }
 
-/* Assistant messages - 左对齐，默认背景 */
+/* AI 消息 - 左对齐 */
 .message.role-assistant {
   align-self: flex-start;
-
-  /* 默认绢黄背景 */
   background: oklch(0.96 0.01 85);
   border-color: oklch(0.88 0.015 85);
 }
 
 .message.role-assistant:hover {
   background: oklch(0.97 0.01 85);
-  border-color: oklch(0.83 0.018 85);
 }
 
-/* System messages - 居中，斜体，低饱和度 */
+/* 系统消息 - 居中 */
 .message.role-system {
   align-self: center;
   max-width: 90%;
-
-  /* 深绢黄背景 */
   background: oklch(0.92 0.02 85);
   border-color: oklch(0.85 0.015 85);
-
-  /* Italic for system messages */
-  font-style: italic;
   font-size: 12px;
-
-  /* 低饱和度文本 */
+  font-style: italic;
   color: oklch(0.50 0.025 195);
 }
 
-.message.role-system:hover {
-  background: oklch(0.93 0.02 85);
-  border-color: oklch(0.82 0.018 85);
-}
-
 /* ========================================
-   MESSAGE CONTENT
+   消息内容
    ======================================== */
 
 .message-content {
-  /* Typography */
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 1.5;
-  color: oklch(0.28 0.03 185);
-
-  /* Word wrapping */
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: pre-wrap;
-
-  /* Spacing */
-  margin-bottom: var(--spacing-xs);
-}
-
-/* User message content - 深灰 */
-.message.role-user .message-content {
-  color: oklch(0.28 0.03 185);
-}
-
-/* Assistant message content - 深灰 */
-.message.role-assistant .message-content {
-  color: oklch(0.28 0.03 185);
-}
-
-/* System message content - 低饱和度 */
-.message.role-system .message-content {
-  color: oklch(0.50 0.025 195);
+  margin-bottom: 4px;
 }
 
 /* ========================================
-   MESSAGE TIMESTAMP
+   时间戳
    ======================================== */
 
 .message-timestamp {
-  /* Typography - 小而低饱和度 */
   font-size: 11px;
-  font-weight: 400;
-  line-height: 1.2;
-  font-style: normal;
-
-  /* Color - 低饱和度 */
   color: oklch(0.60 0.03 185);
-
-  /* Spacing */
-  margin-top: var(--spacing-xs);
-
-  /* Display */
-  display: block;
   text-align: right;
+  margin-top: 2px;
 }
 
-/* System message timestamp - 略深 */
 .message.role-system .message-timestamp {
-  color: oklch(0.65 0.035 195);
   text-align: center;
 }
 
 /* ========================================
-   EMPTY STATE
+   空状态
    ======================================== */
 
 .empty-state {
-  /* Layout - 居中 */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-md);
-
-  /* Sizing - fill parent */
+  gap: 8px;
   height: 100%;
   min-height: 120px;
-
-  /* Typography */
+  padding: 16px;
   font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif;
   font-size: 13px;
-  font-weight: 400;
-  line-height: 1.5;
-
-  /* Color - 低饱和度 */
   color: oklch(0.60 0.035 195);
-
-  /* Subtle opacity */
   opacity: 0.8;
-
-  /* Padding */
-  padding: var(--spacing-xl);
 }
 
-/* Optional: Add icon to empty state */
-.empty-state::before {
-  content: '💬';
-  font-size: 24px;
-  opacity: 0.5;
-  margin-bottom: var(--spacing-sm);
+.empty-state .empty-icon {
+  width: 32px;
+  height: 32px;
+  opacity: 0.4;
 }
 
 /* ========================================
-   RESIZE HANDLE
+   缩放手柄
    ======================================== */
 
 .resize-handle {
-  /* Positioning - bottom right corner */
   position: absolute;
   bottom: 0;
   right: 0;
-
-  /* Sizing */
-  width: 16px;
-  height: 16px;
-
-  /* Visual indicator - corner grip pattern */
-  background:
-    linear-gradient(135deg, transparent 50%, oklch(0.60 0.035 195 / 50%) 50%);
-
-  /* Interaction */
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: nwse-resize;
-
-  /* Subtle opacity */
   opacity: 0.4;
-
-  /* Transition */
-  transition: opacity var(--duration-fast) ease;
+  transition: opacity 0.2s ease;
 }
 
-/* Hover effect - more visible */
+.resize-handle svg {
+  width: 14px;
+  height: 14px;
+  color: oklch(0.55 0.02 185);
+}
+
 .resize-handle:hover {
   opacity: 0.8;
-  background:
-    linear-gradient(135deg, transparent 50%, oklch(0.50 0.04 195 / 70%) 50%);
 }
 
-/* Active effect - full opacity */
 .resize-handle:active {
   opacity: 1;
-  background:
-    linear-gradient(135deg, transparent 50%, oklch(0.45 0.045 195 / 80%) 50%);
-}
-
-/* Alternative: Using CSS pseudo-elements for grip dots */
-.resize-handle::after {
-  content: '';
-  position: absolute;
-  bottom: 3px;
-  right: 3px;
-  width: 6px;
-  height: 6px;
-  background-image:
-    radial-gradient(circle, oklch(0.60 0.035 195 / 60%) 1px, transparent 1px);
-  background-size: 3px 3px;
-  background-position: 0 0, 3px 3px;
-  background-repeat: no-repeat;
 }
 
 /* ========================================
-   DARK MODE SUPPORT (Optional)
+   深色模式
    ======================================== */
 
-@media (prefers-color-scheme: dark) {
-  .drag-icon {
-    color: oklch(0.65 0.035 195);
-  }
+.dark .drag-handle {
+  border-bottom-color: oklch(0.40 0.04 230 / 30%);
+}
 
-  .message-list {
-    scrollbar-color: oklch(0.40 0.045 230) oklch(0.28 0.04 230);
-  }
+.dark .drag-handle .drag-icon {
+  color: oklch(0.65 0.035 195);
+}
 
-  .message-list::-webkit-scrollbar-track {
-    background: oklch(0.28 0.04 230);
-  }
+.dark .message-list::-webkit-scrollbar-thumb {
+  background: oklch(0.45 0.045 230 / 50%);
+}
 
-  .message-list::-webkit-scrollbar-thumb {
-    background: oklch(0.40 0.045 230);
-  }
+.dark .message-list::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.55 0.05 195 / 70%);
+}
 
-  .message-list::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.50 0.05 195);
-  }
+.dark .message {
+  background: oklch(0.28 0.04 230);
+  border-color: oklch(0.40 0.04 230 / 50%);
+  color: oklch(0.94 0.015 85);
+}
 
-  .message {
-    background: oklch(0.30 0.045 230);
-    border-color: oklch(0.40 0.04 230 / 50%);
-    color: oklch(0.94 0.015 85);
-  }
+.dark .message:hover {
+  background: oklch(0.31 0.045 230);
+}
 
-  .message:hover {
-    background: oklch(0.33 0.045 230);
-    border-color: oklch(0.45 0.045 230 / 60%);
-  }
+.dark .message.role-user {
+  background: oklch(0.62 0.08 195 / 15%);
+  border-color: oklch(0.62 0.08 195 / 30%);
+}
 
-  .message.role-user {
-    background: oklch(0.62 0.08 195 / 15%);
-    border-color: oklch(0.62 0.08 195 / 30%);
-  }
+.dark .message.role-user:hover {
+  background: oklch(0.62 0.08 195 / 20%);
+}
 
-  .message.role-user:hover {
-    background: oklch(0.62 0.08 195 / 20%);
-    border-color: oklch(0.62 0.08 195 / 40%);
-  }
+.dark .message.role-assistant {
+  background: oklch(0.28 0.04 230);
+  border-color: oklch(0.40 0.04 230 / 50%);
+}
 
-  .message.role-assistant {
-    background: oklch(0.30 0.045 230);
-    border-color: oklch(0.40 0.04 230 / 50%);
-  }
+.dark .message.role-assistant:hover {
+  background: oklch(0.31 0.045 230);
+}
 
-  .message.role-assistant:hover {
-    background: oklch(0.33 0.045 230);
-    border-color: oklch(0.45 0.045 230 / 60%);
-  }
+.dark .message.role-system {
+  background: oklch(0.25 0.04 230);
+  border-color: oklch(0.38 0.04 230 / 50%);
+  color: oklch(0.65 0.035 195);
+}
 
-  .message.role-system {
-    background: oklch(0.26 0.04 230);
-    border-color: oklch(0.38 0.04 230 / 50%);
-    color: oklch(0.65 0.035 195);
-  }
+.dark .message-timestamp {
+  color: oklch(0.70 0.04 195);
+}
 
-  .message.role-system:hover {
-    background: oklch(0.29 0.04 230);
-    border-color: oklch(0.42 0.045 230 / 60%);
-  }
+.dark .empty-state {
+  color: oklch(0.70 0.04 195);
+}
 
-  .message-content {
-    color: oklch(0.94 0.015 85);
-  }
-
-  .message.role-system .message-content {
-    color: oklch(0.65 0.035 195);
-  }
-
-  .message-timestamp {
-    color: oklch(0.70 0.04 195);
-  }
-
-  .message.role-system .message-timestamp {
-    color: oklch(0.70 0.04 195);
-  }
-
-  .empty-state {
-    color: oklch(0.70 0.04 195);
-  }
-
-  .resize-handle {
-    background:
-      linear-gradient(135deg, transparent 50%, oklch(0.65 0.04 195 / 50%) 50%);
-  }
-
-  .resize-handle:hover {
-    background:
-      linear-gradient(135deg, transparent 50%, oklch(0.75 0.045 195 / 70%) 50%);
-  }
-
-  .resize-handle:active {
-    background:
-      linear-gradient(135deg, transparent 50%, oklch(0.80 0.05 195 / 80%) 50%);
-  }
-
-  .resize-handle::after {
-    background-image:
-      radial-gradient(circle, oklch(0.65 0.04 195 / 60%) 1px, transparent 1px);
-  }
+.dark .resize-handle svg {
+  color: oklch(0.65 0.035 195);
 }
 
 /* ========================================
-   ACCESSIBILITY & REDUCED MOTION
+   辅助功能
    ======================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .messages-card {
-    transition: none;
-  }
-
-  .drag-handle,
-  .drag-icon,
+  .messages-card,
   .message,
+  .drag-handle .drag-icon,
   .resize-handle {
     transition: none;
-  }
-}
-
-/* Focus visible for keyboard navigation */
-.messages-card:focus-visible {
-  outline: 2px solid oklch(0.48 0.07 195);
-  outline-offset: 2px;
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .messages-card {
-    border-width: 2px;
-  }
-
-  .message {
-    border-width: 2px;
-  }
-
-  .resize-handle {
-    opacity: 1;
   }
 }
