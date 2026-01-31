@@ -16,6 +16,7 @@ import {
 } from '@angular/core';
 import { DragHandleDirective } from '../directives/drag-handle.directive';
 import { ResizeHandleDirective } from '../directives/resize-handle.directive';
+import { LiquidGlassDirective } from '../../liquid-glass';
 import { ChatMessage, PanelPosition, PanelSize } from '../types/chat.types';
 
 /**
@@ -25,10 +26,18 @@ import { ChatMessage, PanelPosition, PanelSize } from '../types/chat.types';
 @Component({
   selector: 'ai-chat-messages-card',
   standalone: true,
-  imports: [DragHandleDirective, ResizeHandleDirective],
+  imports: [DragHandleDirective, ResizeHandleDirective, LiquidGlassDirective],
   template: `
     <div
       #card
+      liquidGlass
+      lgTheme="mineral-light"
+      lgCornerRadius="12px"
+      [lgBlurAmount]="0.5"
+      [lgDisplacementScale]="0"
+      lgTint="oklch(0 0 0 / 2%)"
+      lgHotspot="oklch(1 0 0 / 3%)"
+      lgAriaLabel="Chat messages card"
       class="chat-messages-card"
       [class.collapsed]="isCollapsed()"
       [style.position]="'fixed'"
@@ -107,14 +116,6 @@ import { ChatMessage, PanelPosition, PanelSize } from '../types/chat.types';
     `
       .chat-messages-card {
         position: relative;
-        background: oklch(0.91 0.015 85 / 95%);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-radius: 12px;
-        border: 1px solid oklch(0.48 0.07 195 / 30%);
-        box-shadow:
-          0 -4px 24px oklch(0.28 0.03 185 / 15%),
-          0 0 0 1px oklch(0.48 0.07 195 / 10%);
         overflow: visible;
         transition: all var(--duration-slow) cubic-bezier(0.4, 0, 0.2, 1);
         animation: slideUp 0.4s ease-out;
@@ -361,10 +362,6 @@ import { ChatMessage, PanelPosition, PanelSize } from '../types/chat.types';
 
       /* Responsive */
       @media (max-width: 768px) {
-        .chat-messages-card {
-          border-radius: 12px;
-        }
-
         .drag-handle {
           top: -20px;
         }
