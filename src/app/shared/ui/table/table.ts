@@ -6,10 +6,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
-  host: {
-    'class': 'w-full caption-bottom text-sm',
-  },
-  templateUrl: './table.html',
+  template: `<table class="w-full caption-bottom text-sm"><ng-content /></table>`,
   styleUrl: './table.css'
 })
 export class TableComponent {}
@@ -19,10 +16,7 @@ export class TableComponent {}
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
-  host: {
-    'class': '[&_tr]:border-b',
-  },
-  templateUrl: './table.html',
+  template: `<thead class="[&_tr]:border-b"><ng-content /></thead>`,
   styleUrl: './table.css'
 })
 export class TableHeaderComponent {}
@@ -32,10 +26,7 @@ export class TableHeaderComponent {}
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
-  host: {
-    'class': '[&_tr:last-child]:border-0',
-  },
-  templateUrl: './table.html',
+  template: `<tbody class="[&_tr:last-child]:border-0"><ng-content /></tbody>`,
   styleUrl: './table.css'
 })
 export class TableBodyComponent {}
@@ -45,10 +36,7 @@ export class TableBodyComponent {}
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
-  host: {
-    'class': 'border-t bg-muted/50 font-medium [&>tr]:last:border-b-0',
-  },
-  templateUrl: './table.html',
+  template: `<tfoot class="border-t bg-muted/50 font-medium [&>tr]:last:border-b-0"><ng-content /></tfoot>`,
   styleUrl: './table.css'
 })
 export class TableFooterComponent {}
@@ -58,10 +46,7 @@ export class TableFooterComponent {}
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
-  host: {
-    'class': 'border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted',
-  },
-  templateUrl: './table.html',
+  template: `<tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"><ng-content /></tr>`,
   styleUrl: './table.css'
 })
 export class TableRowComponent {}
@@ -71,10 +56,7 @@ export class TableRowComponent {}
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
-  host: {
-    'class': 'h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0',
-  },
-  templateUrl: './table.html',
+  template: `<th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0"><ng-content /></th>`,
   styleUrl: './table.css'
 })
 export class TableHeadComponent {}
@@ -84,10 +66,7 @@ export class TableHeadComponent {}
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
-  host: {
-    'class': 'p-4 align-middle [&:has([role=checkbox])]:pr-0',
-  },
-  templateUrl: './table.html',
+  template: `<td class="p-4 align-middle [&:has([role=checkbox])]:pr-0"><ng-content /></td>`,
   styleUrl: './table.css'
 })
 export class TableCellComponent {}
@@ -97,10 +76,7 @@ export class TableCellComponent {}
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
-  host: {
-    'class': 'mt-4 text-sm text-muted-foreground',
-  },
-  templateUrl: './table.html',
+  template: `<caption class="mt-4 text-sm text-muted-foreground"><ng-content /></caption>`,
   styleUrl: './table.css'
 })
 export class TableCaptionComponent {}

@@ -18,24 +18,18 @@ import { FooterComponent } from './footer.component';
   standalone: true,
   imports: [RouterOutlet, NavComponent, FooterComponent],
   template: `
-    <div class="min-h-screen bg-background flex flex-col">
+    <div class="min-h-screen bg-background flex flex-col md:flex-row">
       @if (showHeader()) {
-        <header class="border-b">
-          <!-- Navigation -->
+        <aside class="w-full md:w-64 md:h-screen md:sticky md:top-0 border-b md:border-b-0 md:border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <!-- Sidebar Navigation -->
           <app-nav />
-        </header>
+        </aside>
       }
 
-      <main class="flex-1">
+      <main class="flex-1 overflow-auto p-6">
         <router-outlet />
       </main>
 
-      @if (showFooter()) {
-        <footer class="border-t">
-          <!-- Footer content -->
-          <app-footer />
-        </footer>
-      }
     </div>
   `
 })

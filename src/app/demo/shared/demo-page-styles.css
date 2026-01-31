@@ -7,7 +7,8 @@
 .demo-container {
   min-height: 100vh;
   background: var(--background);
-  padding: 1.5rem;
+  padding: 0;
+  max-width: 100%;
 }
 
 /* Page Header */
@@ -96,19 +97,19 @@
 }
 
 /* Width Utilities (for responsive demos) */
-.w-\[60\%] {
+.w-60-percent {
   width: 60%;
 }
 
-.w-\[100px\] {
+.w-100px {
   width: 100px;
 }
 
-.w-\[200px\] {
+.w-200px {
   width: 200px;
 }
 
-.w-\[250px\] {
+.w-250px {
   width: 250px;
 }
 
@@ -141,10 +142,6 @@
 
 /* Responsive */
 @media (max-width: 640px) {
-  .demo-container {
-    padding: 1rem;
-  }
-
   .demo-section {
     padding: 0.75rem;
   }

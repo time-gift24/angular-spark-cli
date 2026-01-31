@@ -1,3 +1,4 @@
+/* Table styles - using native HTML table elements */
 :host {
-  display: block;
+  display: contents;
 }
