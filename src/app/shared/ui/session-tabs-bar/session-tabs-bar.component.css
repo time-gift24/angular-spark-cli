@@ -1,26 +1,193 @@
 /**
  * Session Tabs Bar Component Styles
  *
- * Full styling will be implemented in Phase 4 - Task 4.2
- * This file provides basic structure only.
+ * Phase 4 - Task 4.2: Full styling implementation
+ *
+ * Design System: "矿物与时光" (Mineral & Time) 岩彩主题
+ * - Low saturation mineral colors
+ * - Ultra compact sizing
+ * - CSS variables for all values
  */
 
+/**
+ * Container for all session tabs
+ *
+ * Fixed positioning at bottom center of screen
+ * Provides always-visible session switching UI
+ */
 .session-tabs-container {
-  /* Container for all session tabs */
-  /* Will be styled in P4-T4.2 */
+  position: fixed;
+  bottom: calc(var(--spacing-xl) * 3);  /* ~48px - above input area */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--spacing-sm);  /* 4px - tight spacing for compact design */
+  z-index: 1000;
+
+  /* Maximum width with wrapping for many sessions */
+  max-width: calc(100vw - var(--spacing-xl) * 2);
+  flex-wrap: wrap;
+  justify-content: center;
+
+  /* Smooth fade-in animation */
+  animation: fadeIn var(--duration-normal) ease-in;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/**
+ * Individual session tab button
+ *
+ * Default state: subtle background with primary color
+ * Compact sizing with rounded corners
+ */
 .session-tab {
-  /* Individual session tab button */
-  /* Will be styled in P4-T4.2 */
+  background: oklch(from var(--primary) l c h / 0.15);  /* 15% opacity */
+  color: var(--primary);
+  padding: var(--spacing-sm) var(--spacing-md);  /* 4px 8px */
+  border-radius: var(--radius-lg);  /* 5px - slightly larger for tabs */
+  border: 1px solid transparent;
+
+  /* Typography - compact and light */
+  font-family: var(--font-sans);
+  font-size: 0.75rem;  /* 12px - text-xs */
+  font-weight: 400;  /* font-normal - lighter weight */
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+
+  /* Reset button defaults */
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+
+  /* Smooth transitions */
+  transition: all var(--duration-normal) ease;
+
+  /* Subtle shadow for depth */
+  box-shadow: 0 1px 2px oklch(0 0 0 / 5%);
 }
 
+/**
+ * Active session tab
+ *
+ * Full primary background with white foreground
+ * Clear visual indicator of current session
+ */
 .session-tab.active {
-  /* Active session tab styling */
-  /* Will be styled in P4-T4.2 */
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+
+  /* More prominent shadow for active state */
+  box-shadow: 0 2px 4px oklch(from var(--primary) l c h / 0.25);
+
+  /* Scale up slightly for emphasis */
+  transform: translateY(-1px);
 }
 
+/**
+ * Hover state for session tabs
+ *
+ * Darker background for visual feedback
+ */
+.session-tab:hover {
+  background: oklch(from var(--primary) l c h / 0.25);  /* 25% opacity */
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px oklch(from var(--primary) l c h / 0.2);
+}
+
+/**
+ * Active tab hover state
+ *
+ * Slightly brighter primary background
+ */
+.session-tab.active:hover {
+  background: oklch(from var(--primary) calc(l + 0.03) c h);
+  box-shadow: 0 3px 6px oklch(from var(--primary) l c h / 0.3);
+}
+
+/**
+ * Focus state for accessibility
+ *
+ * Visible focus ring for keyboard navigation
+ */
+.session-tab:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/**
+ * Active focus state
+ *
+ * Darker ring for better visibility on primary background
+ */
+.session-tab.active:focus-visible {
+  outline-color: var(--primary-foreground);
+}
+
+/**
+ * Session name text
+ *
+ * Inherits typography from parent button
+ * Prevents text wrapping for consistent tab sizing
+ */
 .session-name {
-  /* Session name text */
-  /* Will be styled in P4-T4.2 */
+  display: inline-block;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/**
+ * Dark mode adjustments
+ *
+ * Enhanced contrast and subtle color shifts for dark backgrounds
+ */
+.dark .session-tab {
+  background: oklch(from var(--primary) l c h / 0.2);  /* 20% opacity - more visible on dark */
+  box-shadow: 0 1px 2px oklch(0 0 0 / 20%);
+}
+
+.dark .session-tab:hover {
+  background: oklch(from var(--primary) l c h / 0.3);  /* 30% opacity */
+}
+
+.dark .session-tab.active {
+  box-shadow: 0 2px 4px oklch(0 0 0 / 30%);
+}
+
+.dark .session-tab.active:hover {
+  background: oklch(from var(--primary) calc(l + 0.02) c h);
+  box-shadow: 0 3px 6px oklch(0 0 0 / 40%);
+}
+
+/**
+ * Responsive adjustments
+ *
+ * Reduce padding on smaller screens
+ */
+@media (max-width: 640px) {
+  .session-tabs-container {
+    bottom: calc(var(--spacing-xl) * 2);  /* 32px - less space on mobile */
+    gap: var(--spacing-xs);  /* 2px - tighter spacing */
+  }
+
+  .session-tab {
+    padding: var(--spacing-xs) var(--spacing-sm);  /* 2px 4px */
+    font-size: 0.6875rem;  /* 11px - slightly smaller */
+  }
+
+  .session-name {
+    max-width: 80px;  /* Shorter max width on mobile */
+  }
 }
