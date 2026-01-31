@@ -35,5 +35,20 @@ export const routes: Routes = [
     path: 'demo/sheet',
     loadComponent: () => import('./demo/sheet/sheet-demo.component')
       .then(m => m.SheetDemoComponent)
+  },
+  {
+    path: 'demo/checkbox',
+    loadComponent: () => import('./demo/checkbox/checkbox-demo.component')
+      .then(m => m.CheckboxDemoComponent)
+  },
+  {
+    path: 'demo/alert',
+    loadComponent: () => import('./demo/alert/alert-demo.component')
+      .then(m => m.AlertDemoComponent)
+  },
+  {
+    path: 'demo/tabs',
+    loadComponent: () => import('./demo/tabs/tabs-demo.component')
+      .then(m => m.TabsDemoComponent)
   }
 ];

@@ -1,0 +1,13 @@
+/* Add custom styles for checkbox demo if needed */
+:host {
+  display: block;
+}
+
+/* Checkbox state attributes */
+ui-checkbox[data-state="checked"] {
+  /* Styles applied via component classes */
+}
+
+ui-checkbox[data-state="unchecked"] {
+  /* Styles applied via component classes */
+}

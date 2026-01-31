@@ -1,0 +1,115 @@
+<div class="container max-w-2xl mx-auto py-8 px-4">
+  <div class="mb-8">
+    <h1 class="text-xl font-semibold mb-2">Checkbox</h1>
+    <p class="text-sm text-muted-foreground">
+      Ultra compact checkbox component with multiple variants and states.
+    </p>
+  </div>
+
+  <div class="flex flex-col gap-8">
+    <!-- Basic Examples -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">Basic Examples</h2>
+
+      <div class="flex items-center gap-3">
+        <ui-checkbox
+          id="terms"
+          [checked]="acceptTerms"
+          (checkedChange)="onAcceptTermsChange($event)"
+        ></ui-checkbox>
+        <label spark-label for="terms">Accept terms and conditions</label>
+      </div>
+
+      <div class="flex items-start gap-3">
+        <ui-checkbox
+          id="terms-2"
+          [checked]="primaryCheckbox"
+          (checkedChange)="onPrimaryChange($event)"
+        ></ui-checkbox>
+        <div class="grid gap-2">
+          <label spark-label for="terms-2">Accept terms and conditions</label>
+          <p class="text-muted-foreground text-sm">
+            By clicking this checkbox, you agree to the terms and conditions.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-3">
+        <ui-checkbox
+          id="toggle"
+          [disabled]="true"
+        ></ui-checkbox>
+        <label spark-label for="toggle">Enable notifications</label>
+      </div>
+    </div>
+
+    <!-- With Card Style -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">Card Style Integration</h2>
+
+      <label
+        class="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[ui-checkbox[data-state=checked]]:border-primary has-[ui-checkbox[data-state=checked]]:bg-primary/5 cursor-pointer"
+      >
+        <ui-checkbox
+          id="toggle-2"
+          [checked]="enableNotifications"
+          (checkedChange)="onNotificationsChange($event)"
+        ></ui-checkbox>
+        <div class="grid gap-1.5 font-normal">
+          <p class="text-sm leading-none font-medium">
+            Enable notifications
+          </p>
+          <p class="text-muted-foreground text-sm">
+            You can enable or disable notifications at any time.
+          </p>
+        </div>
+      </label>
+    </div>
+
+    <!-- Disabled States -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">Disabled States</h2>
+
+      <div class="flex items-center gap-3">
+        <ui-checkbox
+          id="disabled-1"
+          [disabled]="true"
+          [checked]="true"
+        ></ui-checkbox>
+        <label spark-label for="disabled-1" class="opacity-50">
+          Disabled checked checkbox
+        </label>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <ui-checkbox
+          id="disabled-2"
+          [disabled]="true"
+          [checked]="false"
+        ></ui-checkbox>
+        <label spark-label for="disabled-2" class="opacity-50">
+          Disabled unchecked checkbox
+        </label>
+      </div>
+    </div>
+
+    <!-- States Display -->
+    <div class="rounded-lg border bg-muted/50 p-4">
+      <h3 class="text-sm font-medium mb-3">Current States</h3>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-muted-foreground">Accept Terms:</span>
+          <span class="font-medium">{{ acceptTerms ? 'Checked' : 'Unchecked' }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-muted-foreground">Enable Notifications:</span>
+          <span class="font-medium">{{ enableNotifications ? 'Checked' : 'Unchecked' }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-muted-foreground">Primary Checkbox:</span>
+          <span class="font-medium">{{ primaryCheckbox ? 'Checked' : 'Unchecked' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

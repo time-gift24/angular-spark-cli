@@ -1,0 +1,4 @@
+/* Add custom styles for tabs demo if needed */
+:host {
+  display: block;
+}

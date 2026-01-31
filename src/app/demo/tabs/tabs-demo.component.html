@@ -1,0 +1,156 @@
+<div class="container max-w-2xl mx-auto py-8 px-4">
+  <div class="mb-8">
+    <h1 class="text-xl font-semibold mb-2">Tabs</h1>
+    <p class="text-sm text-muted-foreground">
+      Organize content into separate panes with interactive tabs.
+    </p>
+  </div>
+
+  <div class="flex flex-col gap-8">
+    <!-- Default Tabs -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">Default Tabs</h2>
+
+      <ui-tabs>
+        <ui-tabs-list>
+          <ui-tabs-trigger
+            value="account"
+            [active]="activeTab === 'account'"
+            (selectTab)="onSelectTab($event)"
+          >
+            Account
+          </ui-tabs-trigger>
+          <ui-tabs-trigger
+            value="password"
+            [active]="activeTab === 'password'"
+            (selectTab)="onSelectTab($event)"
+          >
+            Password
+          </ui-tabs-trigger>
+        </ui-tabs-list>
+
+        <ui-tabs-content [value]="'account'" [active]="activeTab === 'account'">
+          <div spark-card class="w-full">
+            <div spark-card-header>
+              <h3 spark-card-title>Account</h3>
+              <p spark-card-description>
+                Make changes to your account here. Click save when you're done.
+              </p>
+            </div>
+            <div spark-card-content class="grid gap-6">
+              <div class="grid gap-3">
+                <label spark-label for="tabs-demo-name">Name</label>
+                <input
+                  spark-input
+                  id="tabs-demo-name"
+                  value="Pedro Duarte"
+                />
+              </div>
+              <div class="grid gap-3">
+                <label spark-label for="tabs-demo-username">Username</label>
+                <input
+                  spark-input
+                  id="tabs-demo-username"
+                  value="@peduarte"
+                />
+              </div>
+            </div>
+            <div spark-card-footer>
+              <button spark-button>Save changes</button>
+            </div>
+          </div>
+        </ui-tabs-content>
+
+        <ui-tabs-content [value]="'password'" [active]="activeTab === 'password'">
+          <div spark-card class="w-full">
+            <div spark-card-header>
+              <h3 spark-card-title>Password</h3>
+              <p spark-card-description>
+                Change your password here. After saving, you'll be logged out.
+              </p>
+            </div>
+            <div spark-card-content class="grid gap-6">
+              <div class="grid gap-3">
+                <label spark-label for="tabs-demo-current">Current password</label>
+                <input
+                  spark-input
+                  id="tabs-demo-current"
+                  type="password"
+                />
+              </div>
+              <div class="grid gap-3">
+                <label spark-label for="tabs-demo-new">New password</label>
+                <input
+                  spark-input
+                  id="tabs-demo-new"
+                  type="password"
+                />
+              </div>
+            </div>
+            <div spark-card-footer>
+              <button spark-button>Save password</button>
+            </div>
+          </div>
+        </ui-tabs-content>
+      </ui-tabs>
+    </div>
+
+    <!-- Line Variant Tabs -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">Line Variant</h2>
+
+      <ui-tabs>
+        <ui-tabs-list variant="line">
+          <ui-tabs-trigger
+            value="line-account"
+            [active]="activeTab === 'line-account'"
+            (selectTab)="onSelectTab($event)"
+          >
+            Account
+          </ui-tabs-trigger>
+          <ui-tabs-trigger
+            value="line-password"
+            [active]="activeTab === 'line-password'"
+            (selectTab)="onSelectTab($event)"
+          >
+            Password
+          </ui-tabs-trigger>
+          <ui-tabs-trigger
+            value="line-settings"
+            [active]="activeTab === 'line-settings'"
+            (selectTab)="onSelectTab($event)"
+          >
+            Settings
+          </ui-tabs-trigger>
+        </ui-tabs-list>
+
+        <ui-tabs-content [value]="'line-account'" [active]="activeTab === 'line-account'">
+          <div class="rounded-lg border bg-card p-6">
+            <h3 class="text-base font-medium mb-2">Account Settings</h3>
+            <p class="text-sm text-muted-foreground">
+              Manage your account information and preferences.
+            </p>
+          </div>
+        </ui-tabs-content>
+
+        <ui-tabs-content [value]="'line-password'" [active]="activeTab === 'line-password'">
+          <div class="rounded-lg border bg-card p-6">
+            <h3 class="text-base font-medium mb-2">Password Settings</h3>
+            <p class="text-sm text-muted-foreground">
+              Change your password and security settings.
+            </p>
+          </div>
+        </ui-tabs-content>
+
+        <ui-tabs-content [value]="'line-settings'" [active]="activeTab === 'line-settings'">
+          <div class="rounded-lg border bg-card p-6">
+            <h3 class="text-base font-medium mb-2">General Settings</h3>
+            <p class="text-sm text-muted-foreground">
+              Configure your application preferences.
+            </p>
+          </div>
+        </ui-tabs-content>
+      </ui-tabs>
+    </div>
+  </div>
+</div>
