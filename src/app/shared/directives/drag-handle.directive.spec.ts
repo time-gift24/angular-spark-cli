@@ -4,7 +4,7 @@ import { DragHandleDirective } from './drag-handle.directive';
 import { PanelPosition } from '../models';
 
 // Vitest imports
-import { beforeEach, describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, it, expect, vi, afterEach } from 'vitest';
 
 /**
  * Test host component to wrap DragHandleDirective
