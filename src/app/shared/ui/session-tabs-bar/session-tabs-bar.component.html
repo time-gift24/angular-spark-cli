@@ -1,0 +1,14 @@
+<div class="session-tabs-container">
+  @for (session of sortedSessions(); track session.id) {
+    <button
+      [class.active]="session.id === activeSessionId()"
+      (click)="handleSessionClick($event, session.id)"
+      class="session-tab"
+      [attr.aria-label]="'Switch to ' + session.name"
+      [attr.aria-selected]="session.id === activeSessionId()"
+      type="button"
+    >
+      <span class="session-name">{{ session.name }}</span>
+    </button>
+  }
+</div>

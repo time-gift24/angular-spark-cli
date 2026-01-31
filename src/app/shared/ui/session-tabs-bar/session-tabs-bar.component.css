@@ -1,0 +1,26 @@
+/**
+ * Session Tabs Bar Component Styles
+ *
+ * Full styling will be implemented in Phase 4 - Task 4.2
+ * This file provides basic structure only.
+ */
+
+.session-tabs-container {
+  /* Container for all session tabs */
+  /* Will be styled in P4-T4.2 */
+}
+
+.session-tab {
+  /* Individual session tab button */
+  /* Will be styled in P4-T4.2 */
+}
+
+.session-tab.active {
+  /* Active session tab styling */
+  /* Will be styled in P4-T4.2 */
+}
+
+.session-name {
+  /* Session name text */
+  /* Will be styled in P4-T4.2 */
+}
