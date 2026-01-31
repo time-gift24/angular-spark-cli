@@ -13,7 +13,6 @@ export type ButtonSize = 'default' | 'sm' | 'lg' | 'icon';
     '[style]': 'buttonStyle()',
     '[attr.disabled]': 'disabled() ? "" : null',
     '[attr.aria-disabled]': 'disabled()',
-    '(click)': 'handleClick($event)',
   },
   template: `
     <ng-content />
@@ -34,8 +33,7 @@ export class ButtonComponent {
     },
   });
 
-  // eslint-disable-next-line @angular-eslint/no-output-native
-  readonly click = output<MouseEvent>();
+  readonly clicked = output<MouseEvent>();
 
   /**
    * Base button styles - Ultra compact style with lighter weight
@@ -117,20 +115,4 @@ export class ButtonComponent {
       this.class()
     );
   });
-
-  protected handleClick(event: MouseEvent): void {
-    if (this.disabled()) {
-      event.preventDefault();
-      event.stopPropagation();
-      return;
-    }
-
-    // Don't emit click events on anchor tags - let the router handle navigation
-    const nativeElement = this.elementRef.nativeElement as HTMLElement;
-    if (nativeElement.tagName === 'A') {
-      return;
-    }
-
-    this.click.emit(event);
-  }
 }

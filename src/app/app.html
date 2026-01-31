@@ -267,12 +267,13 @@
         <div spark-sheet-header>
           <h3 spark-sheet-title>Button 按钮</h3>
           <p spark-sheet-description>
-            多功能的按钮组件，支持多种变体和尺寸。
+            多功能的按钮组件，支持多种变体、尺寸和状态。
           </p>
         </div>
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-6">
+          <!-- 变体 -->
           <div>
-            <label class="text-sm font-medium mb-2 block">变体</label>
+            <label class="text-sm font-medium mb-3 block">变体 Variants</label>
             <div class="flex gap-2 flex-wrap">
               <button spark-button variant="default">默认</button>
               <button spark-button variant="destructive">破坏</button>
@@ -282,17 +283,71 @@
               <button spark-button variant="link">链接</button>
             </div>
           </div>
+
+          <!-- 尺寸 -->
           <div>
-            <label class="text-sm font-medium mb-2 block">尺寸</label>
+            <label class="text-sm font-medium mb-3 block">尺寸 Sizes</label>
             <div class="flex gap-2 items-center">
-              <button spark-button size="sm">小</button>
-              <button spark-button>默认</button>
-              <button spark-button size="lg">大</button>
+              <button spark-button size="sm">小 Small</button>
+              <button spark-button>默认 Default</button>
+              <button spark-button size="lg">大 Large</button>
             </div>
+          </div>
+
+          <!-- 图标按钮 -->
+          <div>
+            <label class="text-sm font-medium mb-3 block">带图标 With Icons</label>
+            <div class="flex gap-2 flex-wrap">
+              <button spark-button>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+                </svg>
+                用户 User
+              </button>
+              <button spark-button variant="outline">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                主题 Theme
+              </button>
+              <button spark-button variant="secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                </svg>
+                时钟 Clock
+              </button>
+              <button spark-button size="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- 禁用状态 -->
+          <div>
+            <label class="text-sm font-medium mb-3 block">禁用状态 Disabled</label>
+            <div class="flex gap-2 flex-wrap">
+              <button spark-button disabled>禁用默认</button>
+              <button spark-button variant="outline" disabled>禁用轮廓</button>
+              <button spark-button variant="secondary" disabled>禁用次要</button>
+            </div>
+          </div>
+
+          <!-- 说明 -->
+          <div class="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
+            <p class="font-medium text-foreground mb-2">组件特性：</p>
+            <ul class="space-y-1">
+              <li>• 支持默认、轮廓、次要、幽灵、链接等多种变体</li>
+              <li>• 提供小、默认、大三种尺寸</li>
+              <li>• 内置图标支持和图标按钮样式</li>
+              <li>• 完整的禁用状态和无障碍支持</li>
+            </ul>
           </div>
         </div>
         <div spark-sheet-footer>
-          <button spark-button variant="outline" (click)="buttonSheetOpen.set(false)">关闭</button>
+          <a spark-button variant="outline" routerLink="/demo/button" (click)="buttonSheetOpen.set(false)">查看完整文档</a>
+          <button spark-button (click)="buttonSheetOpen.set(false)">关闭</button>
         </div>
       </div>
     }
@@ -306,18 +361,48 @@
             功能丰富的输入框组件，支持验证和多种状态。
           </p>
         </div>
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-6">
+          <!-- 基本用法 -->
           <div>
-            <label class="text-sm font-medium mb-2 block">基本用法</label>
+            <label class="text-sm font-medium mb-3 block">基本用法 Basic</label>
             <input spark-input placeholder="请输入内容..." style="width: 100%">
           </div>
+
+          <!-- 带标签 -->
           <div>
-            <label class="text-sm font-medium mb-2 block">禁用状态</label>
+            <label class="text-sm font-medium mb-3 block">带标签 With Label</label>
+            <div class="space-y-3">
+              <div>
+                <label class="text-sm font-medium mb-1.5 block">用户名 Username</label>
+                <input spark-input placeholder="输入用户名" style="width: 100%">
+              </div>
+              <div>
+                <label class="text-sm font-medium mb-1.5 block">密码 Password</label>
+                <input spark-input type="password" placeholder="输入密码" style="width: 100%">
+              </div>
+            </div>
+          </div>
+
+          <!-- 禁用状态 -->
+          <div>
+            <label class="text-sm font-medium mb-3 block">禁用状态 Disabled</label>
             <input spark-input placeholder="禁用的输入框" disabled style="width: 100%">
+          </div>
+
+          <!-- 说明 -->
+          <div class="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
+            <p class="font-medium text-foreground mb-2">组件特性：</p>
+            <ul class="space-y-1">
+              <li>• 支持多种输入类型（text、password、email 等）</li>
+              <li>• 完整的禁用状态支持</li>
+              <li>• 与 Label 组件配合使用，提供更好的可访问性</li>
+              <li>• 统一的样式和边框设计</li>
+            </ul>
           </div>
         </div>
         <div spark-sheet-footer>
-          <button spark-button variant="outline" (click)="inputSheetOpen.set(false)">关闭</button>
+          <a spark-button variant="outline" routerLink="/demo/input" (click)="inputSheetOpen.set(false)">查看完整文档</a>
+          <button spark-button (click)="inputSheetOpen.set(false)">关闭</button>
         </div>
       </div>
     }
@@ -331,17 +416,53 @@
             多功能的卡片组件，用于组织和展示内容。
           </p>
         </div>
-        <div spark-card class="w-full">
-          <div spark-card-header>
-            <h3 spark-card-title>卡片标题</h3>
-            <p spark-card-description>卡片的描述信息</p>
+        <div class="flex flex-col gap-6">
+          <!-- 基本卡片 -->
+          <div>
+            <label class="text-sm font-medium mb-3 block">基本卡片 Basic</label>
+            <div spark-card class="w-full">
+              <div spark-card-header>
+                <h3 spark-card-title>卡片标题</h3>
+                <p spark-card-description>卡片的描述信息</p>
+              </div>
+              <div spark-card-content>
+                <p class="text-sm">这是卡片的内容区域，可以放置任何内容，包括文本、图片、列表等。</p>
+              </div>
+            </div>
           </div>
-          <div spark-card-content>
-            <p class="text-sm">这是卡片的内容区域，可以放置任何内容。</p>
+
+          <!-- 带操作的卡片 -->
+          <div>
+            <label class="text-sm font-medium mb-3 block">带操作卡片 With Actions</label>
+            <div spark-card class="w-full">
+              <div spark-card-header>
+                <h3 spark-card-title>项目名称</h3>
+                <p spark-card-description>项目描述和相关信息</p>
+              </div>
+              <div spark-card-content>
+                <p class="text-sm text-muted-foreground">这是一个功能丰富的卡片示例，包含标题、描述和操作按钮。</p>
+              </div>
+              <div spark-card-footer>
+                <button spark-button variant="outline" size="sm">取消</button>
+                <button spark-button size="sm">确认</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 说明 -->
+          <div class="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
+            <p class="font-medium text-foreground mb-2">组件特性：</p>
+            <ul class="space-y-1">
+              <li>• 灵活的卡片容器，可自定义内容</li>
+              <li>• 支持标题、描述、内容区域和底部操作</li>
+              <li>• 统一的边距和圆角样式</li>
+              <li>• 适合用于展示相关信息和操作</li>
+            </ul>
           </div>
         </div>
         <div spark-sheet-footer>
-          <button spark-button variant="outline" (click)="cardSheetOpen.set(false)">关闭</button>
+          <a spark-button variant="outline" routerLink="/demo/card" (click)="cardSheetOpen.set(false)">查看完整文档</a>
+          <button spark-button (click)="cardSheetOpen.set(false)">关闭</button>
         </div>
       </div>
     }
@@ -355,19 +476,80 @@
             小型标签和状态指示器组件。
           </p>
         </div>
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-6">
+          <!-- 变体 -->
           <div>
-            <label class="text-sm font-medium mb-2 block">变体</label>
+            <label class="text-sm font-medium mb-3 block">变体 Variants</label>
             <div class="flex gap-2 flex-wrap">
-              <span spark-badge>默认</span>
-              <span spark-badge variant="secondary">次要</span>
-              <span spark-badge variant="destructive">破坏</span>
-              <span spark-badge variant="outline">轮廓</span>
+              <span spark-badge>默认 Default</span>
+              <span spark-badge variant="secondary">次要 Secondary</span>
+              <span spark-badge variant="destructive">破坏 Destructive</span>
+              <span spark-badge variant="outline">轮廓 Outline</span>
+              <span spark-badge variant="ghost">幽灵 Ghost</span>
             </div>
+          </div>
+
+          <!-- 带图标 -->
+          <div>
+            <label class="text-sm font-medium mb-3 block">带图标 With Icons</label>
+            <div class="flex gap-2 flex-wrap">
+              <span spark-badge variant="secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+                </svg>
+                已验证 Verified
+              </span>
+              <span spark-badge variant="destructive">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="m15 9-6 6"/>
+                  <path d="m9 9 6 6"/>
+                </svg>
+                错误 Error
+              </span>
+              <span spark-badge>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                成功 Success
+              </span>
+            </div>
+          </div>
+
+          <!-- 通知徽章 -->
+          <div>
+            <label class="text-sm font-medium mb-3 block">通知徽章 Notification</label>
+            <div class="flex gap-4 flex-wrap">
+              <div class="flex items-center gap-2">
+                <span class="text-sm">消息 Messages</span>
+                <span spark-badge class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">8</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm">警告 Alerts</span>
+                <span spark-badge variant="destructive" class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">3</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm">更新 Updates</span>
+                <span spark-badge variant="outline" class="h-5 min-w-5 rounded-full px-1 font-mono tabular-nums">99+</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 说明 -->
+          <div class="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
+            <p class="font-medium text-foreground mb-2">组件特性：</p>
+            <ul class="space-y-1">
+              <li>• 紧凑的标签样式，适合状态标识</li>
+              <li>• 支持多种颜色变体</li>
+              <li>• 内置图标支持</li>
+              <li>• 可用作通知计数徽章</li>
+            </ul>
           </div>
         </div>
         <div spark-sheet-footer>
-          <button spark-button variant="outline" (click)="badgeSheetOpen.set(false)">关闭</button>
+          <a spark-button variant="outline" routerLink="/demo/badge" (click)="badgeSheetOpen.set(false)">查看完整文档</a>
+          <button spark-button (click)="badgeSheetOpen.set(false)">关闭</button>
         </div>
       </div>
     }
@@ -381,14 +563,48 @@
             视觉分隔线组件，用于内容分组。
           </p>
         </div>
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-6">
+          <!-- 水平分隔线 -->
           <div>
-            <label class="text-sm font-medium mb-2 block">水平分隔线</label>
-            <div spark-separator style="width: 100%"></div>
+            <label class="text-sm font-medium mb-3 block">水平分隔线 Horizontal</label>
+            <p class="text-sm text-muted-foreground mb-3">用于分隔水平方向的内容：</p>
+            <div class="space-y-4">
+              <div>
+                <p class="text-sm">第一部分内容</p>
+              </div>
+              <div spark-separator style="width: 100%"></div>
+              <div>
+                <p class="text-sm">第二部分内容</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 带标签的分隔线 -->
+          <div>
+            <label class="text-sm font-medium mb-3 block">使用场景 Use Cases</label>
+            <div class="space-y-4">
+              <div>
+                <p class="text-sm mb-2">表单区域</p>
+                <div spark-separator style="width: 100%"></div>
+                <p class="text-sm mt-2 text-muted-foreground">另一个区域</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 说明 -->
+          <div class="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
+            <p class="font-medium text-foreground mb-2">组件特性：</p>
+            <ul class="space-y-1">
+              <li>• 简洁的视觉分隔效果</li>
+              <li>• 支持水平方向分隔</li>
+              <li>• 统一的样式和间距</li>
+              <li>• 可用于内容分组和布局分割</li>
+            </ul>
           </div>
         </div>
         <div spark-sheet-footer>
-          <button spark-button variant="outline" (click)="separatorSheetOpen.set(false)">关闭</button>
+          <a spark-button variant="outline" routerLink="/demo/separator" (click)="separatorSheetOpen.set(false)">查看完整文档</a>
+          <button spark-button (click)="separatorSheetOpen.set(false)">关闭</button>
         </div>
       </div>
     }
@@ -402,17 +618,68 @@
             切换开关组件，用于二选一的场景。
           </p>
         </div>
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-6">
+          <!-- 基本用法 -->
           <div>
-            <label class="text-sm font-medium mb-2 block">基本用法</label>
-            <div class="flex gap-4 items-center">
-              <button spark-switch [checked]="true"></button>
-              <span class="text-sm">开启</span>
+            <label class="text-sm font-medium mb-3 block">基本用法 Basic</label>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm">飞行模式 Airplane Mode</span>
+                <button spark-switch [checked]="false"></button>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm">无线局域网 Wi-Fi</span>
+                <button spark-switch [checked]="true"></button>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm">蓝牙 Bluetooth</span>
+                <button spark-switch [checked]="false"></button>
+              </div>
             </div>
+          </div>
+
+          <!-- 不同尺寸 -->
+          <div>
+            <label class="text-sm font-medium mb-3 block">不同尺寸 Sizes</label>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <button spark-switch size="sm" [checked]="true"></button>
+                <span class="text-sm text-muted-foreground">小尺寸 Small</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <button spark-switch [checked]="true"></button>
+                <span class="text-sm text-muted-foreground">默认尺寸 Default</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <button spark-switch size="lg" [checked]="true"></button>
+                <span class="text-sm text-muted-foreground">大尺寸 Large</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 禁用状态 -->
+          <div>
+            <label class="text-sm font-medium mb-3 block">禁用状态 Disabled</label>
+            <div class="flex items-center gap-3">
+              <button spark-switch [checked]="true" disabled></button>
+              <span class="text-sm text-muted-foreground">禁用的开关</span>
+            </div>
+          </div>
+
+          <!-- 说明 -->
+          <div class="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
+            <p class="font-medium text-foreground mb-2">组件特性：</p>
+            <ul class="space-y-1">
+              <li>• 用于二选一的切换场景</li>
+              <li>• 支持多种尺寸</li>
+              <li>• 完整的禁用状态支持</li>
+              <li>• 平滑的切换动画效果</li>
+            </ul>
           </div>
         </div>
         <div spark-sheet-footer>
-          <button spark-button variant="outline" (click)="switchSheetOpen.set(false)">关闭</button>
+          <a spark-button variant="outline" routerLink="/demo/switch" (click)="switchSheetOpen.set(false)">查看完整文档</a>
+          <button spark-button (click)="switchSheetOpen.set(false)">关闭</button>
         </div>
       </div>
     }

@@ -15,7 +15,9 @@ export class SheetTriggerComponent {}
   standalone: true,
   host: {
     '[class]': 'computedClass()',
-    '[style.display]': 'open() ? "block" : "none"',
+    '[style.opacity]': 'open() ? "1" : "0"',
+    '[style.transition]': '"opacity 300ms ease-in-out"',
+    '[style.pointer-events]': 'open() ? "auto" : "none"',
     '(click)': 'close.emit()',
   },
   template: '',
@@ -34,7 +36,10 @@ export class SheetOverlayComponent {
   standalone: true,
   host: {
     '[class]': 'computedClass()',
-    '[style.display]': 'open() ? "flex" : "none"',
+    '[style.transform]': 'computedTransform()',
+    '[style.transition]': '"transform 300ms ease-out, opacity 300ms ease-out"',
+    '[style.opacity]': 'open() ? "1" : "0"',
+    '[style.pointer-events]': 'open() ? "auto" : "none"',
   },
   template: '<ng-content />',
 })
@@ -55,6 +60,20 @@ export class SheetContentComponent {
       'fixed z-50 gap-4 bg-background p-6 shadow-lg overflow-y-auto',
       sideClasses[side] || sideClasses.right
     );
+  });
+
+  protected computedTransform = computed(() => {
+    const open = this.open();
+    const side = this.side();
+
+    const transforms: Record<SheetSide, string> = {
+      top: open ? 'translateY(0)' : 'translateY(-100%)',
+      bottom: open ? 'translateY(0)' : 'translateY(100%)',
+      left: open ? 'translateX(0)' : 'translateX(-100%)',
+      right: open ? 'translateX(0)' : 'translateX(100%)',
+    };
+
+    return transforms[side] || transforms.right;
   });
 }
 
