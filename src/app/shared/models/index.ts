@@ -1,1 +1,1 @@
-export { ChatMessage, MessageAction, type ChatMessageRole } from './chat-message.interface';
+export type { ChatMessage, MessageAction, ChatMessageRole } from './chat-message.interface';
