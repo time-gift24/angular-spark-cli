@@ -8,172 +8,127 @@
       </p>
     </div>
 
-    <!-- Basic Alerts Section -->
+    <!-- Default Alert -->
     <div class="demo-section">
-      <h2>基础提示框</h2>
-      <p class="text-sm text-muted-foreground">常用样式的提示框示例</p>
-      <div class="alert-list">
-        @for (item of basicAlerts; track item.title) {
-          <ui-alert [variant]="item.variant">
-            @if (shouldShowIcon(item.icon)) {
-              @if (item.icon === 'info') {
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-                  <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
-                </svg>
-              }
-              @if (item.icon === 'error') {
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-                  <circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.2"/>
-                  <path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
-                </svg>
-              }
-            }
-            @if (hasTitle(item)) {
-              <ui-alert-title>{{ item.title }}</ui-alert-title>
-            }
-            @if (hasDescription(item)) {
-              <ui-alert-description>{{ item.description }}</ui-alert-description>
-            }
+      <h2>默认提示框</h2>
+      <p class="text-sm text-muted-foreground">基础样式的提示框</p>
+      <div class="mt-4">
+        <ui-alert>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+            <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
+          </svg>
+          <ui-alert-title>提示信息</ui-alert-title>
+          <ui-alert-description>这是一个默认样式的提示框，用于展示一般信息。</ui-alert-description>
+        </ui-alert>
+      </div>
+    </div>
+
+    <!-- Destructive Alert -->
+    <div class="demo-section">
+      <h2>警告提示框</h2>
+      <p class="text-sm text-muted-foreground">用于展示错误或危险操作</p>
+      <div class="mt-4">
+        <ui-alert variant="destructive">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.2"/>
+            <path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
+          </svg>
+          <ui-alert-title>错误提示</ui-alert-title>
+          <ui-alert-description>这是一个警告样式的提示框，用于展示错误或危险操作。</ui-alert-description>
+        </ui-alert>
+      </div>
+    </div>
+
+    <!-- Success Alert -->
+    <div class="demo-section">
+      <h2>成功提示框</h2>
+      <p class="text-sm text-muted-foreground">操作成功的提示</p>
+      <div class="mt-4">
+        <ui-alert>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.2"/>
+            <path d="M10.97 4.97a.75.75 0 011.07 1.05l-3.992 4.99a.75.75 0 01-1.08.02L4.324 8.384a.75.75 0 111.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 01.02-.022z"/>
+          </svg>
+          <ui-alert-title>操作成功</ui-alert-title>
+          <ui-alert-description>您的更改已成功保存！</ui-alert-description>
+        </ui-alert>
+      </div>
+    </div>
+
+    <!-- Alert Without Icon -->
+    <div class="demo-section">
+      <h2>无图标提示框</h2>
+      <p class="text-sm text-muted-foreground">不带图标的简洁提示框</p>
+      <div class="mt-4">
+        <ui-alert>
+          <ui-alert-title>提示信息</ui-alert-title>
+          <ui-alert-description>这是一个不带图标的提示框。</ui-alert-description>
+        </ui-alert>
+      </div>
+    </div>
+
+    <!-- Alert Without Title -->
+    <div class="demo-section">
+      <h2>仅描述提示框</h2>
+      <p class="text-sm text-muted-foreground">只有描述内容的提示框</p>
+      <div class="mt-4">
+        <ui-alert>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+            <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
+          </svg>
+          <ui-alert-description>仅描述内容的提示框，没有标题。</ui-alert-description>
+        </ui-alert>
+      </div>
+    </div>
+
+    <!-- Alert With Rich Description -->
+    <div class="demo-section">
+      <h2>富文本描述</h2>
+      <p class="text-sm text-muted-foreground">包含详细信息的提示框</p>
+      <div class="mt-4">
+        <ui-alert variant="destructive">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.2"/>
+            <path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
+          </svg>
+          <ui-alert-title>支付失败</ui-alert-title>
+          <ui-alert-description>
+            无法处理您的支付。请验证您的账单信息并重试。
+          </ui-alert-description>
+        </ui-alert>
+      </div>
+    </div>
+
+    <!-- Inline Alert -->
+    <div class="demo-section">
+      <h2>内联提示框</h2>
+      <p class="text-sm text-muted-foreground">在卡片内部的提示框</p>
+      <div class="mt-4">
+        <div class="rounded-lg border bg-card p-6">
+          <h3 class="text-base font-medium mb-2">账户设置</h3>
+          <p class="text-sm text-muted-foreground mb-4">
+            管理您的账户设置和偏好
+          </p>
+          <ui-alert>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+              <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
+            </svg>
+            <ui-alert-title>更改将立即生效</ui-alert-title>
+            <ui-alert-description>
+              修改账户设置后，更改将立即应用到您的账户。请确保仔细检查后再保存。
+            </ui-alert-description>
           </ui-alert>
-        }
+        </div>
       </div>
     </div>
 
-    <!-- Icon Alerts Section -->
-    <div class="demo-section">
-      <h2>图标样式</h2>
-      <p class="text-sm text-muted-foreground">带有不同类型图标的提示框</p>
-      <div class="alert-list">
-        @for (item of iconAlerts; track item.title) {
-          <ui-alert [variant]="item.variant">
-            @if (shouldShowIcon(item.icon)) {
-              @if (item.icon === 'success') {
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-                  <circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.2"/>
-                  <path d="M10.97 4.97a.75.75 0 011.07 1.05l-3.992 4.99a.75.75 0 01-1.08.02L4.324 8.384a.75.75 0 111.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 01.02-.022z"/>
-                </svg>
-              }
-              @if (item.icon === 'warning') {
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-                  <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
-                </svg>
-              }
-              @if (item.icon === 'error') {
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-                  <circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.2"/>
-                  <path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
-                </svg>
-              }
-            }
-            @if (hasTitle(item)) {
-              <ui-alert-title>{{ item.title }}</ui-alert-title>
-            }
-            @if (hasDescription(item)) {
-              <ui-alert-description>{{ item.description }}</ui-alert-description>
-            }
-          </ui-alert>
-        }
-      </div>
-    </div>
-
-    <!-- Simple Alerts Section -->
-    <div class="demo-section">
-      <h2>简洁样式</h2>
-      <p class="text-sm text-muted-foreground">无标题或无描述的简洁提示框</p>
-      <div class="alert-list">
-        @for (item of simpleAlerts; track item.title) {
-          <ui-alert [variant]="item.variant">
-            @if (shouldShowIcon(item.icon)) {
-              @if (item.icon === 'info') {
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-                  <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
-                </svg>
-              }
-            }
-            @if (hasTitle(item)) {
-              <ui-alert-title>{{ item.title }}</ui-alert-title>
-            }
-            @if (hasDescription(item)) {
-              <ui-alert-description>{{ item.description }}</ui-alert-description>
-            }
-          </ui-alert>
-        }
-      </div>
-    </div>
-
-    <!-- Use Cases Section -->
-    <div class="demo-section">
-      <h2>实际使用场景</h2>
-      <p class="text-sm text-muted-foreground">各种实际应用场景中的提示框示例</p>
-      <div class="use-case-list">
-        @for (useCase of useCaseAlerts; track useCase.name) {
-          <div class="use-case-item">
-            <div class="use-case-header">
-              <h3>{{ useCase.name }}</h3>
-              <p class="text-sm text-muted-foreground">{{ useCase.description }}</p>
-            </div>
-            @if (useCase.inline) {
-              <div class="inline-demo">
-                <div class="rounded-lg border bg-card p-6">
-                  <h4 class="text-base font-medium mb-2">账户设置</h4>
-                  <p class="text-sm text-muted-foreground mb-4">
-                    管理您的账户设置和偏好
-                  </p>
-                  <ui-alert [variant]="useCase.alert.variant">
-                    @if (shouldShowIcon(useCase.alert.icon)) {
-                      @if (useCase.alert.icon === 'info') {
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-                          <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
-                        </svg>
-                      }
-                    }
-                    @if (hasTitle(useCase.alert)) {
-                      <ui-alert-title>{{ useCase.alert.title }}</ui-alert-title>
-                    }
-                    @if (hasDescription(useCase.alert)) {
-                      <ui-alert-description>{{ useCase.alert.description }}</ui-alert-description>
-                    }
-                  </ui-alert>
-                </div>
-              </div>
-            } @else {
-              <div class="use-case-alert">
-                <ui-alert [variant]="useCase.alert.variant">
-                  @if (shouldShowIcon(useCase.alert.icon)) {
-                    @if (useCase.alert.icon === 'error') {
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-                        <circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.2"/>
-                        <path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
-                      </svg>
-                    }
-                    @if (useCase.alert.icon === 'success') {
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-                        <circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.2"/>
-                        <path d="M10.97 4.97a.75.75 0 011.07 1.05l-3.992 4.99a.75.75 0 01-1.08.02L4.324 8.384a.75.75 0 111.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 01.02-.022z"/>
-                      </svg>
-                    }
-                  }
-                  @if (hasTitle(useCase.alert)) {
-                    <ui-alert-title>{{ useCase.alert.title }}</ui-alert-title>
-                  }
-                  @if (hasDescription(useCase.alert)) {
-                    <ui-alert-description>{{ useCase.alert.description }}</ui-alert-description>
-                  }
-                </ui-alert>
-              </div>
-            }
-          </div>
-        }
-      </div>
-    </div>
-
-    <!-- Dark Mode Preview Section -->
+    <!-- Dark Mode Preview -->
     <div class="demo-section">
       <h2>深色模式预览</h2>
       <p class="text-sm text-muted-foreground">查看提示框在深色模式下的效果</p>
-      <div class="dark-preview">
-        <div class="alert-list">
-          <ui-alert variant="default">
+      <div class="dark-preview mt-4">
+        <div class="space-y-4">
+          <ui-alert>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
               <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
             </svg>
@@ -192,11 +147,11 @@
       </div>
     </div>
 
-    <!-- Usage Example Section -->
+    <!-- Usage Example -->
     <div class="demo-section">
       <h2>使用示例</h2>
-      <div class="code-examples">
-        <div class="code-example">
+      <div class="mt-4 space-y-4">
+        <div>
           <p class="text-xs font-semibold mb-2">基础用法：</p>
           <code class="code-block">
             &lt;ui-alert&gt;<br>
@@ -206,7 +161,7 @@
             &lt;/ui-alert&gt;
           </code>
         </div>
-        <div class="code-example">
+        <div>
           <p class="text-xs font-semibold mb-2">警告样式：</p>
           <code class="code-block">
             &lt;ui-alert variant="destructive"&gt;<br>

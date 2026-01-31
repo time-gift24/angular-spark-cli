@@ -4,8 +4,6 @@ import {
   AlertTitleComponent,
   AlertDescriptionComponent
 } from '@app/shared/ui/alert';
-import { basicAlerts, iconAlerts, useCaseAlerts, simpleAlerts } from './examples/alert-examples';
-import type { AlertTemplate, AlertUseCase } from './types/alert-demo.types';
 
 /**
  * Alert Demo Component
@@ -22,31 +20,4 @@ import type { AlertTemplate, AlertUseCase } from './types/alert-demo.types';
     'style': 'display: block; width: 100%;'
   }
 })
-export class AlertDemoComponent {
-  // 示例配置
-  readonly basicAlerts = basicAlerts;
-  readonly iconAlerts = iconAlerts;
-  readonly useCaseAlerts = useCaseAlerts;
-  readonly simpleAlerts = simpleAlerts;
-
-  /**
-   * 检查是否显示图标
-   */
-  shouldShowIcon(icon?: string): boolean {
-    return !!(icon && icon !== 'none');
-  }
-
-  /**
-   * 检查是否有标题
-   */
-  hasTitle(alert: AlertTemplate): boolean {
-    return !!(alert.title && alert.title.trim().length > 0);
-  }
-
-  /**
-   * 检查是否有描述
-   */
-  hasDescription(alert: AlertTemplate): boolean {
-    return !!(alert.description && alert.description.trim().length > 0);
-  }
-}
+export class AlertDemoComponent {}
