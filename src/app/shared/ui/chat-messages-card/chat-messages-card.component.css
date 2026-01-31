@@ -1,0 +1,112 @@
+/**
+ * Chat Messages Card Component - Basic Styling
+ *
+ * Phase 6 Task 6.1: Minimal functional CSS
+ * - Just enough to make the component work
+ * - Full mineral & time theme styling will be added in P6-T6.3
+ */
+
+.messages-card {
+  position: fixed;
+  display: none;
+  flex-direction: column;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.messages-card.visible {
+  display: flex;
+}
+
+/* Drag handle - positioned at top for easy grabbing */
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  background: var(--muted);
+  border-bottom: 1px solid var(--border);
+  cursor: move;
+  user-select: none;
+}
+
+.drag-icon {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  letter-spacing: 2px;
+}
+
+/* Message list - scrollable container */
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--spacing-md);
+}
+
+/* Message item */
+.message {
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.message.role-user {
+  background: var(--secondary);
+  margin-left: var(--spacing-xl);
+}
+
+.message.role-assistant {
+  background: var(--card);
+  margin-right: var(--spacing-xl);
+}
+
+.message.role-system {
+  background: var(--muted);
+  font-style: italic;
+}
+
+.message-content {
+  font-size: var(--font-sm);
+  line-height: 1.5;
+  color: var(--foreground);
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.message-timestamp {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-xs);
+  color: var(--muted-foreground);
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--muted-foreground);
+  font-size: var(--font-sm);
+}
+
+/* Resize handle - positioned at bottom-right corner */
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, var(--muted-foreground) 50%);
+  opacity: 0.5;
+}
+
+.resize-handle:hover {
+  opacity: 1;
+}

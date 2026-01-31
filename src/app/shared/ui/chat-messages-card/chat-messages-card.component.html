@@ -1,0 +1,36 @@
+<div
+  [class.visible]="isVisible()"
+  [style.left.px]="position().x"
+  [style.top.px]="position().y"
+  [style.width.px]="size().width"
+  [style.height.px]="size().height"
+  class="messages-card"
+>
+  <!-- Drag handle for panel positioning -->
+  <div
+    class="drag-handle"
+    [appDragHandle]="position"
+    (positionChange)="positionChange.emit($event)"
+  >
+    <span class="drag-icon">≡ ≡ ≡</span>
+  </div>
+
+  <!-- Scrollable message list -->
+  <div #messageList class="message-list">
+    @for (message of messages(); track message.id) {
+      <div [class.role]="message.role" class="message">
+        <div class="message-content">{{ message.content }}</div>
+        <div class="message-timestamp">{{ message.timestamp | date: 'short' }}</div>
+      </div>
+    } @empty {
+      <div class="empty-state">No messages yet</div>
+    }
+  </div>
+
+  <!-- Resize handle for panel sizing -->
+  <div
+    class="resize-handle"
+    [appResizeHandle]="size"
+    (sizeChange)="sizeChange.emit($event)"
+  ></div>
+</div>
