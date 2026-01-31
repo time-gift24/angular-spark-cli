@@ -71,6 +71,67 @@
   --button-padding-x-lg: 0.75rem;  /* 12px */
 
   --button-padding-y: 0.375rem;    /* 6px - compact */
+
+  /* === Component Sizing Tokens === */
+
+  /* Badge */
+  --badge-padding-x: 0.5rem;   /* 8px */
+  --badge-padding-y: 0.125rem; /* 2px */
+  --badge-radius: 9999px;
+
+  /* Card */
+  --card-padding: 1.5rem;      /* 24px */
+  --card-padding-sm: 1rem;     /* 16px */
+
+  /* Checkbox */
+  --checkbox-size: 1rem;              /* 16px */
+  --checkbox-icon-size: 0.875rem;     /* 14px */
+  --checkbox-border-radius: 4px;
+
+  /* Icon sizing */
+  --icon-size-xs: 0.75rem;     /* 12px */
+  --icon-size-sm: 0.875rem;    /* 14px */
+  --icon-size-md: 1rem;        /* 16px */
+
+  /* Input */
+  --input-padding-x: 0.75rem;  /* 12px */
+  --input-padding-y: 0.25rem;  /* 4px */
+
+  /* Alert */
+  --alert-padding-x: 1rem;     /* 16px */
+  --alert-padding-y: 0.75rem;  /* 12px */
+  --alert-radius: var(--radius-lg);
+
+  /* Switch */
+  --switch-width-sm: 1.5rem;         /* 24px */
+  --switch-height-sm: 0.875rem;      /* 14px */
+  --switch-width-md: 2rem;           /* 32px */
+  --switch-height-md: 1.125rem;      /* 18px */
+  --switch-thumb-size-sm: 0.75rem;   /* 12px */
+  --switch-thumb-size-md: 1rem;      /* 16px */
+  --switch-thumb-translate: calc(100% - 2px);
+
+  /* Tabs */
+  --tabs-list-height: 2.25rem;         /* 36px */
+  --tabs-trigger-padding-x: 0.5rem;   /* 8px */
+  --tabs-trigger-padding-y: 0.25rem;  /* 4px */
+  --tabs-trigger-inset: 1px;
+
+  /* Sheet */
+  --sheet-transition-duration: 300ms;
+  --sheet-transition-easing: ease-out;
+  --sheet-overlay-bg: oklch(0 0 0 / 80%);
+  --sheet-padding: 1.5rem;       /* 24px */
+  --sheet-z-overlay: 50;
+  --sheet-z-content: 50;
+  --sheet-max-width: 28rem;      /* 448px */
+
+  /* Animation durations (reusable) */
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
 }
 
 @layer base {

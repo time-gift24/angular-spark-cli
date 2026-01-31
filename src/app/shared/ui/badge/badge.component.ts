@@ -9,6 +9,7 @@ export type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline' |
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
+    '[style]': 'badgeStyle()',
   },
   template: '<ng-content />',
 })
@@ -17,10 +18,17 @@ export class BadgeComponent {
   readonly class = input<string>('');
 
   /**
+   * Computed style for badge padding using CSS tokens
+   */
+  protected badgeStyle = computed(() =>
+    `padding: var(--badge-padding-y) var(--badge-padding-x);`
+  );
+
+  /**
    * Base badge styles - Ultra compact with smooth transitions
    */
   private getBaseClasses(): string {
-    return 'inline-flex items-center justify-center rounded-full border border-transparent px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 gap-1 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden';
+    return 'inline-flex items-center justify-center rounded-full border border-transparent text-xs font-medium w-fit whitespace-nowrap shrink-0 gap-1 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden';
   }
 
   /**

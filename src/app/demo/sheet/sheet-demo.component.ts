@@ -9,6 +9,9 @@ import * as Sheet from '../../shared/ui/sheet';
   imports: [CommonModule, ButtonComponent, Sheet.SheetTriggerComponent, Sheet.SheetOverlayComponent, Sheet.SheetContentComponent, Sheet.SheetHeaderComponent, Sheet.SheetTitleComponent, Sheet.SheetDescriptionComponent, Sheet.SheetFooterComponent, Sheet.SheetCloseComponent],
   templateUrl: './sheet-demo.component.html',
   styleUrls: ['./sheet-demo.component.css'],
+  host: {
+    'style': 'display: block; width: 100%;'
+  }
 })
 export class SheetDemoComponent {
   readonly side = signal<Sheet.SheetSide>('right');

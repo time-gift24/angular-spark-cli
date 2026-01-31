@@ -8,13 +8,13 @@
 }
 
 :host([data-size="default"]) .switch-thumb {
-  width: 1rem;
-  height: 1rem;
+  width: var(--switch-thumb-size-md);
+  height: var(--switch-thumb-size-md);
   background-color: var(--background);
 }
 
 :host([data-size="default"][data-state="checked"]) .switch-thumb {
-  transform: translateX(calc(100% - 2px));
+  transform: translateX(var(--switch-thumb-translate));
 }
 
 :host([data-size="default"][data-state="unchecked"]) .switch-thumb {
@@ -22,13 +22,13 @@
 }
 
 :host([data-size="sm"]) .switch-thumb {
-  width: 0.75rem;
-  height: 0.75rem;
+  width: var(--switch-thumb-size-sm);
+  height: var(--switch-thumb-size-sm);
   background-color: var(--background);
 }
 
 :host([data-size="sm"][data-state="checked"]) .switch-thumb {
-  transform: translateX(calc(100% - 2px));
+  transform: translateX(var(--switch-thumb-translate));
 }
 
 :host([data-size="sm"][data-state="unchecked"]) .switch-thumb {

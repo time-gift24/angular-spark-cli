@@ -15,9 +15,7 @@ export class SheetTriggerComponent {}
   standalone: true,
   host: {
     '[class]': 'computedClass()',
-    '[style.opacity]': 'open() ? "1" : "0"',
-    '[style.transition]': '"opacity 300ms ease-in-out"',
-    '[style.pointer-events]': 'open() ? "auto" : "none"',
+    '[style]': 'overlayStyles()',
     '(click)': 'close.emit()',
   },
   template: '',
@@ -27,7 +25,14 @@ export class SheetOverlayComponent {
   readonly close = output<void>();
 
   protected computedClass = computed(() => {
-    return 'fixed inset-0 z-50 bg-black/80';
+    return 'fixed inset-0 bg-[var(--sheet-overlay-bg)]';
+  });
+
+  protected overlayStyles = computed(() => {
+    const open = this.open();
+    const opacity = open ? '1' : '0';
+    const pointerEvents = open ? 'auto' : 'none';
+    return `opacity: ${opacity}; transition: opacity var(--sheet-transition-duration) var(--sheet-transition-easing); pointer-events: ${pointerEvents}; z-index: var(--sheet-z-overlay);`;
   });
 }
 
@@ -36,10 +41,7 @@ export class SheetOverlayComponent {
   standalone: true,
   host: {
     '[class]': 'computedClass()',
-    '[style.transform]': 'computedTransform()',
-    '[style.transition]': '"transform 300ms ease-out, opacity 300ms ease-out"',
-    '[style.opacity]': 'open() ? "1" : "0"',
-    '[style.pointer-events]': 'open() ? "auto" : "none"',
+    '[style]': 'sheetStyles()',
   },
   template: '<ng-content />',
 })
@@ -57,12 +59,12 @@ export class SheetContentComponent {
     };
 
     return cn(
-      'fixed z-50 gap-4 bg-background p-6 shadow-lg overflow-y-auto',
+      'fixed gap-4 bg-background shadow-lg overflow-y-auto',
       sideClasses[side] || sideClasses.right
     );
   });
 
-  protected computedTransform = computed(() => {
+  protected sheetStyles = computed(() => {
     const open = this.open();
     const side = this.side();
 
@@ -73,7 +75,11 @@ export class SheetContentComponent {
       right: open ? 'translateX(0)' : 'translateX(100%)',
     };
 
-    return transforms[side] || transforms.right;
+    const transform = transforms[side] || transforms.right;
+    const pointerEvents = open ? 'auto' : 'none';
+    const opacity = open ? '1' : '0';
+
+    return `transform: ${transform}; transition: transform var(--sheet-transition-duration) var(--sheet-transition-easing), opacity var(--sheet-transition-duration) var(--sheet-transition-easing); opacity: ${opacity}; pointer-events: ${pointerEvents}; z-index: var(--sheet-z-content); padding: var(--sheet-padding);`;
   });
 }
 

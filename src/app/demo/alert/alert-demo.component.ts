@@ -12,5 +12,8 @@ import {
   imports: [CommonModule, AlertComponent, AlertTitleComponent, AlertDescriptionComponent],
   templateUrl: './alert-demo.component.html',
   styleUrls: ['./alert-demo.component.css'],
+  host: {
+    'style': 'display: block; width: 100%;'
+  }
 })
 export class AlertDemoComponent {}

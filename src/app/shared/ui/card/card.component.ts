@@ -27,6 +27,7 @@ export class CardComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
+    '[style]': 'headerPadding()',
   },
   template: '<ng-content />',
 })
@@ -35,10 +36,12 @@ export class CardHeaderComponent {
 
   protected computedClass = computed(() => {
     return cn(
-      'flex flex-col space-y-1.5 p-6',
+      'flex flex-col space-y-1.5',
       this.class()
     );
   });
+
+  protected headerPadding = computed(() => `padding: var(--card-padding);`);
 }
 
 @Component({
@@ -87,6 +90,7 @@ export class CardDescriptionComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
+    '[style]': 'cardPadding()',
   },
   template: '<ng-content />',
 })
@@ -95,10 +99,11 @@ export class CardContentComponent {
 
   protected computedClass = computed(() => {
     return cn(
-      'p-6 pt-0',
       this.class()
     );
   });
+
+  protected cardPadding = computed(() => `padding: 0 var(--card-padding) var(--card-padding) var(--card-padding);`);
 }
 
 @Component({
@@ -107,6 +112,7 @@ export class CardContentComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
+    '[style]': 'cardFooterPadding()',
   },
   template: '<ng-content />',
 })
@@ -115,10 +121,12 @@ export class CardFooterComponent {
 
   protected computedClass = computed(() => {
     return cn(
-      'flex items-center p-6 pt-0',
+      'flex items-center',
       this.class()
     );
   });
+
+  protected cardFooterPadding = computed(() => `padding: 0 var(--card-padding) var(--card-padding) var(--card-padding);`);
 }
 
 export const CardComponents = [

@@ -9,6 +9,9 @@ import { LabelComponent } from '../../shared/ui/label/label.component';
   imports: [CommonModule, CheckboxComponent, LabelComponent],
   templateUrl: './checkbox-demo.component.html',
   styleUrls: ['./checkbox-demo.component.css'],
+  host: {
+    'style': 'display: block; width: 100%;'
+  }
 })
 export class CheckboxDemoComponent {
   acceptTerms = false;

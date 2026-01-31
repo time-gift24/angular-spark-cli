@@ -14,6 +14,7 @@ export type SwitchSize = 'sm' | 'default';
     '[attr.disabled]': 'disabled() ? "" : null',
     '[attr.data-size]': 'size()',
     '[attr.data-state]': 'checked() ? "checked" : "unchecked"',
+    '[style]': 'switchStyle()',
     '(click)': 'handleClick($event)',
   },
   template: `
@@ -50,6 +51,16 @@ export class SwitchComponent {
   }
 
   /**
+   * Computed styles for switch dimensions using CSS tokens
+   */
+  protected switchStyle = computed(() => {
+    const size = this.size();
+    const height = size === 'sm' ? 'var(--switch-height-sm)' : 'var(--switch-height-md)';
+    const width = size === 'sm' ? 'var(--switch-width-sm)' : 'var(--switch-width-md)';
+    return `width: ${width}; height: ${height};`;
+  });
+
+  /**
    * Base switch styles - Ultra compact with smooth transitions
    */
   private getBaseClasses(): string {
@@ -60,18 +71,13 @@ export class SwitchComponent {
    * Size and state styles using CSS variables
    */
   private getSizeAndStateClasses(): string {
-    const size = this.size();
     const checked = this.checked();
-
-    const sizeClasses = size === 'sm'
-      ? 'h-3.5 w-6'
-      : 'h-[1.15rem] w-8';
 
     const stateClasses = checked
       ? 'data-[state=checked]:bg-primary data-[state=unchecked]:bg-input dark:data-[state=unchecked]:bg-input/80'
       : 'data-[state=checked]:bg-primary data-[state=unchecked]:bg-input dark:data-[state=unchecked]:bg-input/80';
 
-    return `${sizeClasses} ${stateClasses}`;
+    return stateClasses;
   }
 
   /**

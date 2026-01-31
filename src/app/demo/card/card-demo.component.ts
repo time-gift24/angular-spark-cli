@@ -11,5 +11,8 @@ import { LabelComponent } from '../../shared/ui/label/label.component';
   imports: [CommonModule, CardComponents, ButtonComponent, InputComponent, LabelComponent],
   templateUrl: './card-demo.component.html',
   styleUrls: ['./card-demo.component.css'],
+  host: {
+    'style': 'display: block; width: 100%;'
+  }
 })
 export class CardDemoComponent {}

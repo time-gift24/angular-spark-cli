@@ -8,5 +8,8 @@ import { SeparatorComponent } from '../../shared/ui/separator/separator.componen
   imports: [CommonModule, SeparatorComponent],
   templateUrl: './separator-demo.component.html',
   styleUrls: ['./separator-demo.component.css'],
+  host: {
+    'style': 'display: block; width: 100%;'
+  }
 })
 export class SeparatorDemoComponent {}

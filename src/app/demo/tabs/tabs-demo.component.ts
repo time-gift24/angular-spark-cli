@@ -27,6 +27,9 @@ import { LabelComponent } from '../../shared/ui/label/label.component';
   ],
   templateUrl: './tabs-demo.component.html',
   styleUrls: ['./tabs-demo.component.css'],
+  host: {
+    'style': 'display: block; width: 100%;'
+  }
 })
 export class TabsDemoComponent {
   activeTab = 'account';

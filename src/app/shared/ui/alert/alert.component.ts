@@ -11,7 +11,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
 
 const alertVariants = cva(
-  'relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current',
+  'relative w-full rounded-lg border text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current',
   {
     variants: {
       variant: {
@@ -36,6 +36,10 @@ export type AlertVariant = VariantProps<typeof alertVariants>['variant'];
       <ng-content />
     </div>
   `,
+  host: {
+    '[class]': 'computedClass()',
+    '[style.padding]': 'alertPadding()',
+  },
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -48,6 +52,8 @@ export class AlertComponent {
     const variants = alertVariants({ variant: this.variant() });
     return cn(variants, this.class());
   });
+
+  protected alertPadding = computed(() => `var(--alert-padding-y) var(--alert-padding-x)`);
 }
 
 @Component({

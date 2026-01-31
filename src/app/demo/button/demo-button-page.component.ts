@@ -14,7 +14,10 @@ import type { ButtonClickStats } from './types/button-demo.types';
   standalone: true,
   imports: [ButtonComponent, DatePipe],
   templateUrl: './demo-button-page.component.html',
-  styleUrl: './demo-button-page.component.css'
+  styleUrl: './demo-button-page.component.css',
+  host: {
+    'style': 'display: block; width: 100%;'
+  }
 })
 export class DemoButtonPageComponent {
   // 示例配置 - 从 examples 文件导入

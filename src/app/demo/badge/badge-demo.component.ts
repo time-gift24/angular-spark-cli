@@ -8,5 +8,8 @@ import { BadgeComponent } from '../../shared/ui/badge/badge.component';
   imports: [CommonModule, BadgeComponent],
   templateUrl: './badge-demo.component.html',
   styleUrls: ['./badge-demo.component.css'],
+  host: {
+    'style': 'display: block; width: 100%;'
+  }
 })
 export class BadgeDemoComponent {}

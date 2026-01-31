@@ -11,6 +11,9 @@ import { SeparatorComponent } from '../../shared/ui/separator/separator.componen
   imports: [CommonModule, SwitchComponent, LabelComponent, CardComponents, SeparatorComponent],
   templateUrl: './switch-demo.component.html',
   styleUrls: ['./switch-demo.component.css'],
+  host: {
+    'style': 'display: block; width: 100%;'
+  }
 })
 export class SwitchDemoComponent {
   airplaneMode = signal(false);

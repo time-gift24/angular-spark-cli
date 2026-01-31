@@ -9,6 +9,9 @@ import type { InputExample } from './types';
   imports: [CommonModule],
   templateUrl: './input-demo.component.html',
   styleUrls: ['./input-demo.component.css'],
+  host: {
+    'style': 'display: block; width: 100%;'
+  }
 })
 export class InputDemoComponent {
   readonly examples = examples;
