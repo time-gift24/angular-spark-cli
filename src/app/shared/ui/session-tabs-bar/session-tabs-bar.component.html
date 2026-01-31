@@ -1,4 +1,19 @@
 <div class="session-tabs-container">
+  <!-- New Chat Button -->
+  <button
+    class="session-tab new-chat-tab"
+    (click)="handleNewChat($event)"
+    [attr.aria-label]="'New Chat'"
+    type="button"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="new-chat-icon">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+    <span class="session-name">New Chat</span>
+  </button>
+
+  <!-- Session Tabs -->
   @for (session of sortedSessions(); track session.id) {
     <button
       [class.active]="session.id === activeSessionId()"

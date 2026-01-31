@@ -12,25 +12,26 @@
 /**
  * Container for all session tabs
  *
- * Fixed positioning at bottom center of screen
+ * Fixed positioning at bottom center, aligned with input area
  * Provides always-visible session switching UI
  */
 .session-tabs-container {
   position: fixed;
-  /* Position above input area with enough gap for max textarea height
-     Input max: ~136px (120px max-height + padding) + 16px bottom = 152px
-     Add 8px gap: 160px = calc(var(--spacing-xl) * 10) */
-  bottom: calc(var(--spacing-xl) * 10);  /* ~160px - above expanded input area */
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: var(--spacing-sm);  /* 4px - tight spacing for compact design */
-  z-index: 1000;
+  /* Position above input area with small gap */
+  /* Input area: ~60-80px height, add 8px gap */
+  bottom: 120px;  /* Position tabs above input without overlap */
+  left: 0;
+  right: 0;
 
-  /* Maximum width with wrapping for many sessions */
-  max-width: calc(100vw - var(--spacing-xl) * 2);
-  flex-wrap: wrap;
-  justify-content: center;
+  /* Center container with max-width to match input */
+  max-width: 768px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);  /* Match input padding */
+
+  display: flex;
+  gap: var(--spacing-sm);  /* 4px - spacing between tabs */
+  justify-content: flex-start;  /* Left align */
+  z-index: 1000;
 
   /* Smooth fade-in animation */
   animation: fadeIn var(--duration-normal) ease-in;
@@ -56,15 +57,15 @@
 .session-tab {
   background: oklch(from var(--primary) l c h / 0.15);  /* 15% opacity */
   color: var(--primary);
-  padding: var(--spacing-sm) var(--spacing-md);  /* 4px 8px */
-  border-radius: var(--radius-lg);  /* 5px - slightly larger for tabs */
+  padding: 2px var(--spacing-sm);  /* 2px 4px - ultra compact */
+  border-radius: var(--radius-md);  /* 4px - smaller radius */
   border: 1px solid transparent;
 
   /* Typography - compact and light */
   font-family: var(--font-sans);
   font-size: 0.75rem;  /* 12px - text-xs */
   font-weight: 400;  /* font-normal - lighter weight */
-  line-height: 1.25;
+  line-height: 1.4;
   letter-spacing: 0.01em;
 
   /* Reset button defaults */
@@ -152,6 +153,31 @@
 }
 
 /**
+ * New Chat tab styling
+ *
+ * Special styling for the "New Chat" button to distinguish it from session tabs.
+ * Includes icon + text layout and subtle visual differences.
+ */
+.new-chat-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);  /* 2px - tight gap between icon and text */
+  background: oklch(from var(--primary) l c h / 0.1);  /* 10% opacity - lighter than regular tabs */
+  border-color: transparent;
+}
+
+.new-chat-tab .new-chat-icon {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.new-chat-tab:hover {
+  background: oklch(from var(--primary) l c h / 0.2);  /* 20% opacity */
+  border-color: transparent;
+}
+
+/**
  * Dark mode adjustments
  *
  * Enhanced contrast and subtle color shifts for dark backgrounds
@@ -181,16 +207,22 @@
  */
 @media (max-width: 640px) {
   .session-tabs-container {
-    bottom: calc(var(--spacing-xl) * 2);  /* 32px - less space on mobile */
-    gap: var(--spacing-xs);  /* 2px - tighter spacing */
+    bottom: 75px;  /* Adjusted for mobile input height */
+    padding: 0 var(--spacing-sm);  /* Less padding on mobile */
+    gap: var(--spacing-sm);  /* Keep 4px gap between tabs on mobile */
   }
 
   .session-tab {
-    padding: var(--spacing-xs) var(--spacing-sm);  /* 2px 4px */
+    padding: 2px 3px;  /* Ultra compact */
     font-size: 0.6875rem;  /* 11px - slightly smaller */
   }
 
   .session-name {
     max-width: 80px;  /* Shorter max width on mobile */
+  }
+
+  .new-chat-tab .new-chat-icon {
+    width: 12px;
+    height: 12px;
   }
 }

@@ -513,6 +513,50 @@ describe('AiChatPanelComponent', () => {
     });
   });
 
+  describe('createNewSession()', () => {
+    it('should create a new session using sessionState', () => {
+      const createSessionSpy = vi.fn().mockReturnValue('new-sess-id');
+      mockSessionStateService.createSession = createSessionSpy;
+
+      Object.defineProperty(component, 'sessionState', {
+        value: mockSessionStateService,
+        writable: false,
+      });
+
+      component.createNewSession();
+
+      expect(createSessionSpy).toHaveBeenCalled();
+    });
+
+    it('should switch to the newly created session', () => {
+      const newSessionId = 'new-sess-123';
+      const createSessionSpy = vi.fn().mockReturnValue(newSessionId);
+      const switchSessionSpy = vi.fn();
+
+      mockSessionStateService.createSession = createSessionSpy;
+      component.switchSession = switchSessionSpy;
+
+      component.createNewSession();
+
+      expect(createSessionSpy).toHaveBeenCalled();
+      expect(switchSessionSpy).toHaveBeenCalledWith(newSessionId);
+    });
+
+    it('should emit sessionChange event when creating new session', () => {
+      const newSessionId = 'new-sess-456';
+      const createSessionSpy = vi.fn().mockReturnValue(newSessionId);
+      const switchSessionSpy = vi.fn();
+      const emitSpy = vi.spyOn(component.sessionChange, 'emit');
+
+      mockSessionStateService.createSession = createSessionSpy;
+      component.switchSession = switchSessionSpy;
+
+      component.createNewSession();
+
+      expect(emitSpy).toHaveBeenCalledWith(newSessionId);
+    });
+  });
+
   describe('Child Component Integration', () => {
     it('should render ChatMessagesCard component', () => {
       const element = fixture.nativeElement;

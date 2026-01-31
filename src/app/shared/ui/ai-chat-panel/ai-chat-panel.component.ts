@@ -428,6 +428,28 @@ export class AiChatPanelComponent implements OnInit {
   }
 
   /**
+   * Creates a new chat session.
+   *
+   * This method creates a new session with a default name and switches to it.
+   * The new session is automatically set as the active session.
+   *
+   * @example
+   * ```typescript
+   * // User clicks "New Chat" button
+   * createNewSession();
+   * // A new session is created with default name "New Chat"
+   * // The new session becomes active
+   * // sessionChange event is emitted
+   * ```
+   */
+  createNewSession(): void {
+    const newSessionId = this.sessionState.createSession();
+
+    // Switch to the new session
+    this.switchSession(newSessionId);
+  }
+
+  /**
    * Updates the size of the active session's panel.
    *
    * Called when ChatMessagesCard emits a sizeChange event during resize operations.

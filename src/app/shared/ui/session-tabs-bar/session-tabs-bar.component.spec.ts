@@ -19,6 +19,7 @@ import { beforeEach, describe, it, expect, vi } from 'vitest';
       [activeSessionId]="activeSessionId"
       (sessionSelect)="onSessionSelect($event)"
       (sessionToggle)="onSessionToggle()"
+      (newChat)="onNewChat()"
     />
   `,
 })
@@ -28,6 +29,7 @@ class TestHostComponent {
 
   sessionSelectEmitted: string | null = null;
   sessionToggleEmitted = false;
+  newChatEmitted = false;
 
   onSessionSelect(sessionId: string): void {
     this.sessionSelectEmitted = sessionId;
@@ -35,6 +37,10 @@ class TestHostComponent {
 
   onSessionToggle(): void {
     this.sessionToggleEmitted = true;
+  }
+
+  onNewChat(): void {
+    this.newChatEmitted = true;
   }
 
   /**
@@ -70,6 +76,7 @@ class TestHostComponent {
   resetTestState(): void {
     this.sessionSelectEmitted = null;
     this.sessionToggleEmitted = false;
+    this.newChatEmitted = false;
   }
 }
 
@@ -604,6 +611,67 @@ describe('SessionTabsBarComponent', () => {
 
       const sortedSessions = component.sortedSessions();
       expect(sortedSessions.find(s => s.id === 'sess-2')).toBeUndefined();
+    });
+  });
+
+  describe('New Chat Button', () => {
+    it('should render the New Chat button', () => {
+      testHost.addTestSession('sess-1', 'Test Chat', 1000);
+      fixture.detectChanges();
+
+      const newChatButton = fixture.nativeElement.querySelector('.new-chat-tab');
+      expect(newChatButton).toBeTruthy();
+      expect(newChatButton.textContent).toContain('New Chat');
+    });
+
+    it('should render New Chat button before session tabs', () => {
+      testHost.addTestSession('sess-1', 'Chat 1', 1000);
+      testHost.addTestSession('sess-2', 'Chat 2', 2000);
+      fixture.detectChanges();
+
+      const tabButtons = fixture.nativeElement.querySelectorAll('.session-tab');
+      expect(tabButtons.length).toBeGreaterThan(0);
+
+      // First tab should be New Chat button
+      expect(tabButtons[0].classList).toContain('new-chat-tab');
+    });
+
+    it('should emit newChat event when New Chat button is clicked', () => {
+      testHost.addTestSession('sess-1', 'Test Chat', 1000);
+      fixture.detectChanges();
+
+      const newChatButton = fixture.nativeElement.querySelector('.new-chat-tab');
+      newChatButton.click();
+
+      expect(testHost.newChatEmitted).toBe(true);
+    });
+
+    it('should have correct styling for New Chat button', () => {
+      testHost.addTestSession('sess-1', 'Test Chat', 1000);
+      fixture.detectChanges();
+
+      const newChatButton = fixture.nativeElement.querySelector('.new-chat-tab');
+      expect(newChatButton.classList).toContain('session-tab');
+      expect(newChatButton.classList).toContain('new-chat-tab');
+
+      const icon = newChatButton.querySelector('.new-chat-icon');
+      expect(icon).toBeTruthy();
+    });
+
+    it('should not affect session tabs when New Chat is clicked', () => {
+      testHost.addTestSession('sess-1', 'Chat 1', 1000);
+      testHost.setActiveSession('sess-1');
+      fixture.detectChanges();
+
+      testHost.resetTestState();
+      const newChatButton = fixture.nativeElement.querySelector('.new-chat-tab');
+      newChatButton.click();
+
+      // Should not emit sessionSelect or sessionToggle
+      expect(testHost.sessionSelectEmitted).toBeNull();
+      expect(testHost.sessionToggleEmitted).toBe(false);
+      // Should only emit newChat
+      expect(testHost.newChatEmitted).toBe(true);
     });
   });
 });

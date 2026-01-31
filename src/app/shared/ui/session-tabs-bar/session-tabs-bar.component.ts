@@ -113,6 +113,25 @@ export class SessionTabsBarComponent {
   readonly sessionToggle = new EventEmitter<void>();
 
   /**
+   * Event emitted when user clicks the "New Chat" button.
+   *
+   * Parent component should handle this by creating a new session.
+   * Emits no payload.
+   *
+   * @example
+   * ```typescript
+   * (newChat)="handleNewChat()"
+   *
+   * handleNewChat(): void {
+   *   const newSessionId = this.sessionState.createSession();
+   *   this.sessionState.switchSession(newSessionId);
+   * }
+   * ```
+   */
+  @Output()
+  readonly newChat = new EventEmitter<void>();
+
+  /**
    * Computed signal that returns sessions sorted by last updated timestamp.
    *
    * Sorting Logic:
@@ -152,5 +171,18 @@ export class SessionTabsBarComponent {
       // Clicking different session → switch to that session
       this.sessionSelect.emit(sessionId);
     }
+  }
+
+  /**
+   * Handles click events on the "New Chat" button.
+   *
+   * Emits the newChat event for parent component to handle.
+   * Parent component should create a new session and switch to it.
+   *
+   * @param event - The mouse event (prevent default to avoid form submission)
+   */
+  handleNewChat(event: MouseEvent): void {
+    event.preventDefault();
+    this.newChat.emit();
   }
 }
