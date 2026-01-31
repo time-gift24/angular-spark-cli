@@ -97,6 +97,41 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             class="transition-colors hover:text-primary text-muted-foreground">
             Tabs
           </a>
+          <a
+            routerLink="/demo/avatar"
+            routerLinkActive="text-primary font-medium"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="transition-colors hover:text-primary text-muted-foreground">
+            Avatar
+          </a>
+          <a
+            routerLink="/demo/progress"
+            routerLinkActive="text-primary font-medium"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="transition-colors hover:text-primary text-muted-foreground">
+            Progress
+          </a>
+          <a
+            routerLink="/demo/skeleton"
+            routerLinkActive="text-primary font-medium"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="transition-colors hover:text-primary text-muted-foreground">
+            Skeleton
+          </a>
+          <a
+            routerLink="/demo/table"
+            routerLinkActive="text-primary font-medium"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="transition-colors hover:text-primary text-muted-foreground">
+            Table
+          </a>
+          <a
+            routerLink="/demo/slider"
+            routerLinkActive="text-primary font-medium"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="transition-colors hover:text-primary text-muted-foreground">
+            Slider
+          </a>
         </nav>
       </div>
     </nav>
