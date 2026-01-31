@@ -123,22 +123,22 @@ export const DEFAULT_PANEL_POSITION: PanelPosition = {
  * Default panel size
  */
 export const DEFAULT_PANEL_SIZE: PanelSize = {
-  width: 600,
-  height: 400,
+  width: 900,
+  height: 500,
 };
 
 /**
  * Minimum panel size
  */
 export const MIN_PANEL_SIZE: PanelSize = {
-  width: 300,
-  height: 200,
+  width: 400,
+  height: 300,
 };
 
 /**
  * Maximum panel size (responsive)
  */
 export const MAX_PANEL_SIZE: PanelSize = {
-  width: Math.min(900, window.innerWidth * 0.9),
-  height: Math.min(700, window.innerHeight * 0.7),
+  width: Math.min(1200, window.innerWidth * 0.95),
+  height: Math.min(900, window.innerHeight * 0.9),
 };

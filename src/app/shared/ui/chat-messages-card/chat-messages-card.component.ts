@@ -156,7 +156,7 @@ export class ChatMessagesCardComponent {
    * Returns default size if size signal is not yet available.
    */
   get safeSize(): PanelSize {
-    return this.size?.() ?? { width: 768, height: 600 };
+    return this.size?.() ?? { width: 900, height: 500 };
   }
 
   /**
