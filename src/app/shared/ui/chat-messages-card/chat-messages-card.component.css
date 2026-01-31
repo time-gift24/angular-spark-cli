@@ -23,26 +23,10 @@
   display: none;
   flex-direction: column;
 
-  /* Glass morphism effect - 半透明绢黄背景 */
-  background: oklch(0.94 0.012 85 / 90%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-
-  /* Border - 深绢黄边框 */
-  border: 1px solid oklch(0.85 0.015 85);
-  border-radius: var(--radius-xl);
-
-  /* Shadow - 柔和阴影 */
-  box-shadow:
-    0 4px 6px -1px oklch(0.28 0.03 185 / 10%),
-    0 2px 4px -2px oklch(0.28 0.03 185 / 10%),
-    0 8px 12px -2px oklch(0.28 0.03 185 / 8%);
-
   /* Smooth show/hide transitions */
   transition:
     opacity var(--duration-slow) ease,
-    transform var(--duration-slow) ease,
-    box-shadow var(--duration-slow) ease;
+    transform var(--duration-slow) ease;
 
   /* Overflow handling */
   overflow: hidden;
@@ -61,14 +45,6 @@
   pointer-events: none;
   /* Note: transform is applied via inline styles for positioning,
      so we only override opacity and pointer-events here */
-}
-
-/* Hover effect - subtle lift */
-.messages-card.visible:hover {
-  box-shadow:
-    0 10px 15px -3px oklch(0.28 0.03 185 / 12%),
-    0 4px 6px -4px oklch(0.28 0.03 185 / 12%),
-    0 12px 20px -4px oklch(0.28 0.03 185 / 10%);
 }
 
 /* ========================================
@@ -428,23 +404,6 @@
    ======================================== */
 
 @media (prefers-color-scheme: dark) {
-  .messages-card {
-    /* Glass morphism effect - 深石青半透明 */
-    background: oklch(0.24 0.045 230 / 90%);
-    border-color: oklch(0.35 0.04 230 / 50%);
-    box-shadow:
-      0 4px 6px -1px oklch(0 0 0 / 30%),
-      0 2px 4px -2px oklch(0 0 0 / 30%),
-      0 8px 12px -2px oklch(0 0 0 / 25%);
-  }
-
-  .messages-card.visible:hover {
-    box-shadow:
-      0 10px 15px -3px oklch(0 0 0 / 35%),
-      0 4px 6px -4px oklch(0 0 0 / 35%),
-      0 12px 20px -4px oklch(0 0 0 / 30%);
-  }
-
   .drag-handle {
     background: oklch(0.28 0.04 230);
     border-bottom-color: oklch(0.35 0.04 230 / 50%);
