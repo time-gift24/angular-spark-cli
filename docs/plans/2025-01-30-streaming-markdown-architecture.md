@@ -7,15 +7,15 @@
 
 | Phase | Independence | Dependencies | Status |
 | :--- | :--- | :--- | :--- |
-| **P1: Project Infrastructure** | High | None | 🔴 To Do |
-| **P2: Core Domain Models** | High | None | 🔴 To Do |
-| **P3: Preprocessor Service** | Medium | P2 | 🔴 To Do |
-| **P4: Block Parser Service** | Medium | P2 | 🔴 To Do |
-| **P5: Formatter Service** | Medium | P2 | 🔴 To Do |
-| **P6: Block Renderer Component** | Low | P2, P5 | 🔴 To Do |
-| **P7: Streaming Component** | Low | P2, P3, P4, P6 | 🔴 To Do |
-| **P8: Test Page & Routes** | Low | P7 | 🔴 To Do |
-| **P9: Optimization & Testing** | Low | All | 🔴 To Do |
+| **P1: Project Infrastructure** | High | None | 🟢 Done |
+| **P2: Core Domain Models** | High | None | 🟢 Done |
+| **P3: Preprocessor Service** | Medium | P2 | 🟢 Done |
+| **P4: Block Parser Service** | Medium | P2 | 🟢 Done |
+| **P5: Formatter Service** | Medium | P2 | 🟢 Done |
+| **P6: Block Renderer Component** | Low | P2, P5 | 🟢 Done |
+| **P7: Streaming Component** | Low | P2, P3, P4, P6 | 🟢 Done |
+| **P8: Test Page & Routes** | Low | P7 | 🟢 Done |
+| **P9: Optimization & Testing** | Low | All | 🟢 Done |
 
 > **Status Legend:** 🔴 To Do, 🟡 In Progress, 🟢 Done
 

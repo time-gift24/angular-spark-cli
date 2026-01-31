@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Panel Preview - Mineral & Time Theme</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: oklch(0.91 0.015 85);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        /* 背景页面模拟 */
+        .page-background {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            background: oklch(0.91 0.015 85);
+            margin-bottom: 24px;
+        }
+
+        .nav-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: oklch(0.28 0.03 185);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, oklch(0.48 0.07 195), oklch(0.60 0.08 210));
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .content-header {
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: oklch(0.28 0.03 185);
+        }
+
+        .page-desc {
+            font-size: 14px;
+            color: oklch(0.50 0.02 185);
+        }
+
+        .cards-row {
+            display: flex;
+            gap: 24px;
+            height: 200px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: oklch(1 0 0 / 80%);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px oklch(0.28 0.03 185 / 10%);
+        }
+
+        /* ========== AI Chat Components Container ========== */
+        .ai-chat-container {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .ai-chat-container.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-50%) translateY(20px);
+        }
+
+        /* ========== 拖拽和调整大小手柄 ========== */
+        .drag-handle {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px 16px;
+            cursor: grab;
+            transition: all 0.2s;
+            z-index: 1000;
+            pointer-events: auto;
+            user-select: none;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .drag-handle:hover .drag-lines {
+            opacity: 0.5;
+        }
+
+        .drag-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            opacity: 0.25;
+            transition: all 0.2s;
+            pointer-events: none;
+        }
+
+        .drag-line {
+            width: 20px;
+            height: 2px;
+            background: oklch(0.48 0.07 195);
+            border-radius: 1px;
+        }
+
+        /* 调整大小手柄（右下角） */
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 16px;
+            height: 16px;
+            cursor: nwse-resize;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .chat-messages-card:hover .resize-handle {
+            opacity: 0.4;
+        }
+
+        .resize-handle:hover {
+            opacity: 0.6 !important;
+        }
+
+        /* 调整大小指示器 */
+        .resize-indicator {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+        }
+
+        .resize-indicator::before,
+        .resize-indicator::after {
+            content: '';
+            position: absolute;
+            background: oklch(0.48 0.07 195);
+            border-radius: 1px;
+        }
+
+        .resize-indicator::before {
+            width: 10px;
+            height: 2px;
+            bottom: 2px;
+            transform: rotate(45deg);
+            transform-origin: left center;
+        }
+
+        .resize-indicator::after {
+            width: 6px;
+            height: 2px;
+            bottom: 0;
+            right: 0;
+            transform: rotate(45deg);
+            transform-origin: left center;
+        }
+
+        /* ========== 聊天消息卡片（可拖拽和调整大小） ========== */
+        .chat-messages-card {
+            position: relative;
+            background: oklch(0.91 0.015 85 / 95%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 12px;
+            border: 1px solid oklch(0.48 0.07 195 / 30%);
+            box-shadow: 0 -4px 24px oklch(0.28 0.03 185 / 15%);
+            overflow: visible;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .chat-messages-card.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            max-height: 320px;
+            padding: 12px 16px 16px 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            display: flex;
+            width: 100%;
+            animation: messageSlideIn 0.3s ease-out;
+        }
+
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.ai {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-bubble {
+            background: oklch(0.42 0.04 195);
+            color: oklch(1 0 0);
+        }
+
+        .message.ai .message-bubble {
+            background: oklch(0.88 0.015 85 / 80%);
+            border: 1px solid oklch(0.48 0.07 195 / 20%);
+            color: oklch(0.28 0.03 185);
+        }
+
+        .ai-bubble-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: oklch(0.48 0.07 195 / 10%);
+            border: 1px solid oklch(0.48 0.07 195 / 30%);
+            color: oklch(0.48 0.07 195);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-button:hover {
+            background: oklch(0.48 0.07 195 / 20%);
+            border-color: oklch(0.48 0.07 195 / 50%);
+        }
+
+        /* ========== 状态徽章（完全悬浮，无背景） ========== */
+        .status-badges-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideUp 0.4s ease-out 0.1s both;
+            padding: 4px 0;
+        }
+
+        .status-badges-container:hover {
+            transform: scale(1.02);
+        }
+
+        .badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.2s;
+            animation: badgeFadeIn 0.3s ease-out;
+            cursor: pointer;
+        }
+
+        .badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px oklch(0.28 0.03 185 / 15%);
+        }
+
+        @keyframes badgeFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .badge-thinking {
+            background: oklch(0.48 0.07 195 / 15%);
+            border: 1px solid oklch(0.48 0.07 195 / 40%);
+            color: oklch(0.48 0.07 195);
+        }
+
+        .badge-typing {
+            background: oklch(0.60 0.08 210 / 15%);
+            border: 1px solid oklch(0.60 0.08 210 / 40%);
+            color: oklch(0.60 0.08 210);
+        }
+
+        .badge-done {
+            background: oklch(0.55 0.06 195 / 15%);
+            border: 1px solid oklch(0.55 0.06 195 / 40%);
+            color: oklch(0.55 0.06 195);
+        }
+
+        .badge-error {
+            background: oklch(0.50 0.20 25 / 15%);
+            border: 1px solid oklch(0.50 0.20 25 / 40%);
+            color: oklch(0.50 0.20 25);
+        }
+
+        /* 脉动点动画 */
+        .pulsing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: oklch(0.48 0.07 195);
+            box-shadow: 0 0 6px oklch(0.48 0.07 195 / 60%);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.2);
+            }
+        }
+
+        /* 打字指示器 */
+        .typing-indicator {
+            display: flex;
+            gap: 2px;
+            align-items: center;
+            width: 16px;
+            height: 10px;
+        }
+
+        .typing-dot {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: oklch(0.60 0.08 210);
+            animation: bounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-4px);
+            }
+        }
+
+        /* ========== 矩形输入框（上下结构） ========== */
+        .input-container {
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideUp 0.4s ease-out 0.2s both;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 矩形容器 */
+        .input-wrapper {
+            background: oklch(0.91 0.015 85 / 95%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 12px;
+            border: 1px solid oklch(0.48 0.07 195 / 25%);
+            box-shadow: 0 -2px 12px oklch(0.28 0.03 185 / 10%);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: oklch(0.48 0.07 195 / 50%);
+            box-shadow: 0 0 0 3px oklch(0.48 0.07 195 / 10%), 0 -4px 16px oklch(0.28 0.03 185 / 15%);
+        }
+
+        /* 输入区域（上半部分） */
+        .input-area {
+            padding: 12px 16px;
+            border-bottom: 1px solid oklch(0.48 0.07 195 / 10%);
+        }
+
+        .input-field {
+            width: 100%;
+            min-height: 24px;
+            max-height: 120px;
+            background: transparent;
+            border: none;
+            font-size: 13px;
+            color: oklch(0.28 0.03 185);
+            outline: none;
+            resize: none;
+            font-family: inherit;
+            line-height: 1.5;
+            overflow-y: auto;
+        }
+
+        .input-field::placeholder {
+            color: oklch(0.50 0.02 185);
+        }
+
+        /* 滚动条样式 */
+        .input-field::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .input-field::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .input-field::-webkit-scrollbar-thumb {
+            background: oklch(0.85 0.015 85);
+            border-radius: 2px;
+        }
+
+        /* 工具栏（下半部分） */
+        .input-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            gap: 8px;
+        }
+
+        /* 左侧工具按钮组 */
+        .tool-buttons {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .tool-button {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: oklch(0.50 0.02 185);
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .tool-button:hover {
+            background: oklch(0.48 0.07 195 / 10%);
+            color: oklch(0.48 0.07 195);
+        }
+
+        /* 右侧发送按钮 */
+        .send-button {
+            padding: 0 12px;
+            height: 28px;
+            border-radius: 6px;
+            background: oklch(0.48 0.07 195);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.2s;
+            color: oklch(1 0 0);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .send-button:hover {
+            background: oklch(0.42 0.08 195);
+            transform: scale(1.02);
+        }
+
+        .send-button:active {
+            transform: scale(0.98);
+        }
+
+        .send-button:disabled {
+            background: oklch(0.88 0.015 85);
+            color: oklch(0.60 0.02 185);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .send-icon {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .ai-chat-container {
+                left: 8px;
+                right: 8px;
+                width: auto;
+                bottom: 8px;
+            }
+        }
+
+        /* 滚动条样式 */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: oklch(1 0 0 / 50%);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: oklch(0.85 0.015 85);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: oklch(0.80 0.015 85);
+        }
+    </style>
+</head>
+<body>
+    <div class="page-background">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <div class="nav-title">Angular Spark App</div>
+            <div class="user-avatar"></div>
+        </nav>
+
+        <!-- 主要内容 -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1 class="page-title">Dashboard Overview</h1>
+                <p class="page-desc">Welcome to your dashboard. Try the AI assistant floating at the bottom.</p>
+            </div>
+
+            <div class="cards-row">
+                <div class="stat-card"></div>
+                <div class="stat-card"></div>
+                <div class="stat-card"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- AI Chat Components Container -->
+    <div class="ai-chat-container" id="aiChatContainer">
+        <!-- 1. 聊天消息卡片（可拖拽、可调整大小） -->
+        <div class="chat-messages-card" id="chatMessagesCard">
+            <!-- 拖拽手柄（顶部横向三道线） -->
+            <div class="drag-handle" id="dragHandle" title="Drag to move">
+                <div class="drag-lines">
+                    <div class="drag-line"></div>
+                    <div class="drag-line"></div>
+                    <div class="drag-line"></div>
+                </div>
+            </div>
+
+            <!-- 调整大小手柄（右下角） -->
+            <div class="resize-handle" id="resizeHandle" title="Drag to resize">
+                <div class="resize-indicator"></div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message user">
+                    <div class="message-bubble">
+                        Help me analyze my dashboard data
+                    </div>
+                </div>
+
+                <div class="message ai">
+                    <div class="message-bubble">
+                        <div class="ai-bubble-content">
+                            <p>I can see you have 3 key metrics showing positive trends this month. Would you like me to dive deeper into any specific area?</p>
+                            <div class="action-buttons">
+                                <button class="action-button">📊 View Analytics</button>
+                                <button class="action-button">💡 Suggestions</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message user">
+                    <div class="message-bubble">
+                        Show me the analytics
+                    </div>
+                </div>
+
+                <div class="message ai">
+                    <div class="message-bubble">
+                        <p>Great! Here's what I found:</p>
+                        <ul style="margin-left: 20px; margin-top: 8px;">
+                            <li>User engagement up 23%</li>
+                            <li>Revenue growth of 15%</li>
+                            <li>New feature adoption at 67%</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 状态徽章（完全悬浮，无背景） -->
+        <div class="status-badges-container" id="statusBadgesContainer">
+            <div class="badge badge-done" onclick="togglePanel()">
+                <span>✓</span>
+                <span>Done</span>
+            </div>
+        </div>
+
+        <!-- 3. 输入框（矩形，上下结构） -->
+        <div class="input-container">
+            <div class="input-wrapper">
+                <!-- 上部：输入区域 -->
+                <div class="input-area">
+                    <textarea
+                        class="input-field"
+                        id="inputField"
+                        placeholder="Ask AI anything..."
+                        rows="1"
+                    ></textarea>
+                </div>
+
+                <!-- 下部：工具栏 -->
+                <div class="input-toolbar">
+                    <!-- 左侧：工具按钮 -->
+                    <div class="tool-buttons">
+                        <button class="tool-button" title="Add file">📎</button>
+                        <button class="tool-button" title="Add image">🖼️</button>
+                        <button class="tool-button" title="Voice input">🎤</button>
+                    </div>
+
+                    <!-- 右侧：发送按钮 -->
+                    <button class="send-button" id="sendButton" disabled>
+                        <span>Send</span>
+                        <span class="send-icon">↑</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 拖拽功能（仅聊天卡片）- 强化版本
+        const dragHandle = document.getElementById('dragHandle');
+        const chatMessagesCard = document.getElementById('chatMessagesCard');
+
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+
+        // 使用捕获阶段确保最先处理
+        dragHandle.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            isDragging = true;
+            const rect = chatMessagesCard.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+
+            document.addEventListener('mousemove', onMouseMove, { capture: false });
+            document.addEventListener('mouseup', onMouseUp, { capture: false });
+
+            chatMessagesCard.style.transition = 'none';
+        }, { capture: true }); // 使用捕获阶段
+
+        dragHandle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+        }, { capture: true });
+
+        function onMouseMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            const x = e.clientX - dragOffset.x;
+            const y = e.clientY - dragOffset.y;
+
+            chatMessagesCard.style.position = 'fixed';
+            chatMessagesCard.style.left = x + 'px';
+            chatMessagesCard.style.top = y + 'px';
+            chatMessagesCard.style.bottom = 'auto';
+        }
+
+        function onMouseUp(e) {
+            if (!isDragging) return;
+            isDragging = false;
+
+            chatMessagesCard.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        }
+
+        // 触摸支持
+        dragHandle.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            const touch = e.touches[0];
+            isDragging = true;
+
+            const rect = chatMessagesCard.getBoundingClientRect();
+            dragOffset.x = touch.clientX - rect.left;
+            dragOffset.y = touch.clientY - rect.top;
+
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+
+            chatMessagesCard.style.transition = 'none';
+        }, { passive: false, capture: true });
+
+        function onTouchMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            const touch = e.touches[0];
+            const x = touch.clientX - dragOffset.x;
+            const y = touch.clientY - dragOffset.y;
+
+            chatMessagesCard.style.position = 'fixed';
+            chatMessagesCard.style.left = x + 'px';
+            chatMessagesCard.style.top = y + 'px';
+            chatMessagesCard.style.bottom = 'auto';
+        }
+
+        function onTouchEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+
+            chatMessagesCard.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+
+            document.removeEventListener('touchmove', onTouchMove);
+            document.removeEventListener('touchend', onTouchEnd);
+        }
+
+        // 调整大小功能（仅聊天卡片）
+        const resizeHandle = document.getElementById('resizeHandle');
+        let isResizing = false;
+        let resizeStartX, resizeStartY, initialWidth, initialHeight;
+
+        resizeHandle.addEventListener('mousedown', startResize);
+        resizeHandle.addEventListener('touchstart', startResize, { passive: false });
+
+        function startResize(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizing = true;
+
+            const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+            const clientY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
+
+            resizeStartX = clientX;
+            resizeStartY = clientY;
+
+            const rect = chatMessagesCard.getBoundingClientRect();
+            initialWidth = rect.width;
+            initialHeight = rect.height;
+
+            document.addEventListener('mousemove', resize);
+            document.addEventListener('mouseup', stopResize);
+            document.addEventListener('touchmove', resize, { passive: false });
+            document.addEventListener('touchend', stopResize);
+
+            chatMessagesCard.style.transition = 'none';
+        }
+
+        function resize(e) {
+            if (!isResizing) return;
+            e.preventDefault();
+
+            const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
+            const clientY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
+
+            const deltaX = clientX - resizeStartX;
+            const deltaY = clientY - resizeStartY;
+
+            const newWidth = Math.max(300, initialWidth + deltaX);
+            const newHeight = Math.max(200, initialHeight + deltaY);
+
+            chatMessagesCard.style.width = newWidth + 'px';
+            chatMessagesCard.style.height = newHeight + 'px';
+        }
+
+        function stopResize() {
+            isResizing = false;
+            chatMessagesCard.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            document.removeEventListener('mousemove', resize);
+            document.removeEventListener('mouseup', stopResize);
+            document.removeEventListener('touchmove', resize);
+            document.removeEventListener('touchend', stopResize);
+        }
+
+        function togglePanel() {
+            const chatCard = document.getElementById('chatMessagesCard');
+            chatCard.classList.toggle('collapsed');
+        }
+
+        // 右击关闭
+        document.getElementById('aiChatContainer').addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            const container = document.getElementById('aiChatContainer');
+            container.classList.add('hidden');
+
+            // 3秒后自动恢复（可选）
+            setTimeout(() => {
+                container.classList.remove('hidden');
+            }, 3000);
+        });
+
+        // 输入框交互
+        const inputField = document.getElementById('inputField');
+        const sendButton = document.getElementById('sendButton');
+        const chatMessages = document.getElementById('chatMessages');
+        const statusBadgesContainer = document.getElementById('statusBadgesContainer');
+
+        // Textarea 自动调整高度
+        inputField.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+
+            // 启用/禁用发送按钮
+            if (this.value.trim()) {
+                sendButton.disabled = false;
+            } else {
+                sendButton.disabled = true;
+            }
+        });
+
+        // Enter 发送（Shift+Enter 换行）
+        inputField.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!sendButton.disabled) {
+                    sendMessage();
+                }
+            }
+        });
+
+        sendButton.addEventListener('click', sendMessage);
+
+        function sendMessage() {
+            const message = inputField.value.trim();
+            if (!message) return;
+
+            // 添加用户消息
+            addMessage(message, 'user');
+
+            // 重置输入框
+            inputField.value = '';
+            inputField.style.height = 'auto';
+            sendButton.disabled = true;
+
+            // 添加 Thinking Badge
+            addBadge('thinking', 'Thinking...');
+
+            // 模拟 AI 思考
+            setTimeout(() => {
+                // 移除 Thinking Badge，添加 Typing Badge
+                removeLastBadge();
+                addBadge('typing', 'Typing');
+
+                // 模拟 AI 输入
+                setTimeout(() => {
+                    // 移除 Typing Badge，添加消息和 Done Badge
+                    removeLastBadge();
+                    const responses = [
+                        'Based on my analysis, I found several interesting patterns in your data.',
+                        'Great question! Let me break this down for you.',
+                        'I\'ve processed your request. Here are my findings.'
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addMessage(randomResponse, 'ai');
+                    addBadge('done', 'Done');
+                }, 2000);
+            }, 1500);
+        }
+
+        function addMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const bubbleContent = type === 'ai'
+                ? `<div class="ai-bubble-content"><p>${text}</p></div>`
+                : text;
+
+            messageDiv.innerHTML = `<div class="message-bubble">${bubbleContent}</div>`;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addBadge(type, text) {
+            const badge = document.createElement('div');
+            badge.className = `badge badge-${type}`;
+
+            if (type === 'thinking') {
+                badge.innerHTML = `<div class="pulsing-dot"></div><span>${text}</span>`;
+            } else if (type === 'typing') {
+                badge.innerHTML = `
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                    <span>${text}</span>
+                `;
+            } else if (type === 'done') {
+                badge.innerHTML = `<span>✓</span><span>${text}</span>`;
+            } else if (type === 'error') {
+                badge.innerHTML = `<span>⚠</span><span>${text}</span>`;
+            }
+
+            badge.onclick = (e) => {
+                e.stopPropagation();
+                togglePanel();
+            };
+
+            statusBadgesContainer.appendChild(badge);
+        }
+
+        function removeLastBadge() {
+            if (statusBadgesContainer.lastChild) {
+                statusBadgesContainer.removeChild(statusBadgesContainer.lastChild);
+            }
+        }
+    </script>
+</body>
+</html>
