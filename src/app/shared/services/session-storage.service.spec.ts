@@ -3,7 +3,24 @@ import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
 import { SessionStorageService } from './session-storage.service';
 import { SessionData } from '../models';
 
-// Mock localStorage
+// Setup localStorage polyfill for Node environment
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: (key: string) => store[key] ?? null,
+    setItem: (key: string, value: string) => { store[key] = value; },
+    removeItem: (key: string) => { delete store[key]; },
+    clear: () => { store = {}; },
+  };
+})();
+
+// Define globally before tests run
+Object.defineProperty(globalThis, 'localStorage', {
+  value: localStorageMock,
+  writable: true
+});
+
+// Mock localStorage wrapper for cleaner test code
 const mockLocalStorage = {
   store: {} as Record<string, string>,
   getItem(key: string): string | null {
