@@ -1,0 +1,21 @@
+<div class="input-container">
+  <textarea
+    [style.height.px]="textareaHeight()"
+    [value]="inputValue()"
+    (input)="handleInput($event)"
+    (keydown)="handleKeydown($event)"
+    (focus)="handleFocus()"
+    (blur)="handleBlur()"
+    placeholder="Ask AI anything..."
+    class="chat-textarea"
+    rows="1"
+  ></textarea>
+  <button
+    [disabled]="!canSend()"
+    (click)="sendMessage()"
+    class="send-button"
+    type="button"
+  >
+    Send
+  </button>
+</div>
