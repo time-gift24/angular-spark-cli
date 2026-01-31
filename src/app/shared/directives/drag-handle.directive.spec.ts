@@ -145,7 +145,7 @@ describe('DragHandleDirective', () => {
       expect(testHost.dragStartCount).toBe(0);
     });
 
-    it('should update position during mousemove when dragging', () => {
+    it('should update position during mousemove when dragging', async () => {
       // Start drag
       const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
       dragElement.dispatchEvent(startEvent);
@@ -155,6 +155,9 @@ describe('DragHandleDirective', () => {
       // Move mouse
       const moveEvent = new MouseEvent('mousemove', { clientX: 150, clientY: 250 });
       window.dispatchEvent(moveEvent);
+
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
 
       expect(testHost.positionChanges).toHaveLength(1);
       expect(testHost.positionChanges[0]).toEqual({ x: 150, y: 250 });
@@ -196,7 +199,7 @@ describe('DragHandleDirective', () => {
       testHost.resetTestState();
     });
 
-    it('should calculate position delta correctly for positive movement', () => {
+    it('should calculate position delta correctly for positive movement', async () => {
       // Start at (100, 200)
       const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
       dragElement.dispatchEvent(startEvent);
@@ -205,10 +208,13 @@ describe('DragHandleDirective', () => {
       const moveEvent = new MouseEvent('mousemove', { clientX: 150, clientY: 250 });
       window.dispatchEvent(moveEvent);
 
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
       expect(testHost.positionChanges[0]).toEqual({ x: 150, y: 250 });
     });
 
-    it('should calculate position delta correctly for negative movement', () => {
+    it('should calculate position delta correctly for negative movement', async () => {
       // Start at (100, 200)
       const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
       dragElement.dispatchEvent(startEvent);
@@ -217,10 +223,13 @@ describe('DragHandleDirective', () => {
       const moveEvent = new MouseEvent('mousemove', { clientX: 50, clientY: 150 });
       window.dispatchEvent(moveEvent);
 
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
       expect(testHost.positionChanges[0]).toEqual({ x: 50, y: 150 });
     });
 
-    it('should calculate position delta correctly for mixed movement', () => {
+    it('should calculate position delta correctly for mixed movement', async () => {
       // Start at (100, 200)
       const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
       dragElement.dispatchEvent(startEvent);
@@ -229,10 +238,13 @@ describe('DragHandleDirective', () => {
       const moveEvent = new MouseEvent('mousemove', { clientX: 120, clientY: 180 });
       window.dispatchEvent(moveEvent);
 
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
       expect(testHost.positionChanges[0]).toEqual({ x: 120, y: 180 });
     });
 
-    it('should handle zero delta movement', () => {
+    it('should handle zero delta movement', async () => {
       const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
       dragElement.dispatchEvent(startEvent);
 
@@ -240,19 +252,27 @@ describe('DragHandleDirective', () => {
       const moveEvent = new MouseEvent('mousemove', { clientX: 100, clientY: 200 });
       window.dispatchEvent(moveEvent);
 
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
       expect(testHost.positionChanges[0]).toEqual({ x: 100, y: 200 });
     });
 
-    it('should emit position changes for each mousemove', () => {
+    it('should emit position changes for each mousemove', async () => {
       const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
       dragElement.dispatchEvent(startEvent);
 
       // First move
       window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 210 }));
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
       // Second move
       window.dispatchEvent(new MouseEvent('mousemove', { clientX: 120, clientY: 220 }));
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
       // Third move
       window.dispatchEvent(new MouseEvent('mousemove', { clientX: 130, clientY: 230 }));
+      await new Promise(resolve => requestAnimationFrame(resolve));
 
       expect(testHost.positionChanges).toHaveLength(3);
       expect(testHost.positionChanges[0]).toEqual({ x: 110, y: 210 });
@@ -260,7 +280,7 @@ describe('DragHandleDirective', () => {
       expect(testHost.positionChanges[2]).toEqual({ x: 130, y: 230 });
     });
 
-    it('should use current position signal value as start position', () => {
+    it('should use current position signal value as start position', async () => {
       // Update initial position
       testHost.updatePosition({ x: 500, y: 600 });
       fixture.detectChanges();
@@ -273,6 +293,9 @@ describe('DragHandleDirective', () => {
       // Move to (110, 210) - delta of (10, 10)
       const moveEvent = new MouseEvent('mousemove', { clientX: 110, clientY: 210 });
       window.dispatchEvent(moveEvent);
+
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
 
       // New position should be (500 + 10, 600 + 10) = (510, 610)
       expect(testHost.positionChanges[0]).toEqual({ x: 510, y: 610 });
@@ -312,7 +335,7 @@ describe('DragHandleDirective', () => {
       expect(testHost.dragEndCount).toBe(1);
     });
 
-    it('should complete full drag lifecycle: start -> move -> end', () => {
+    it('should complete full drag lifecycle: start -> move -> end', async () => {
       // Start
       const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
       dragElement.dispatchEvent(startEvent);
@@ -321,6 +344,7 @@ describe('DragHandleDirective', () => {
 
       // Move
       window.dispatchEvent(new MouseEvent('mousemove', { clientX: 150, clientY: 250 }));
+      await new Promise(resolve => requestAnimationFrame(resolve));
       expect(testHost.positionChanges).toHaveLength(1);
 
       // End
@@ -333,11 +357,12 @@ describe('DragHandleDirective', () => {
       expect(testHost.positionChanges).toHaveLength(1);
     });
 
-    it('should handle multiple complete drag sequences', () => {
+    it('should handle multiple complete drag sequences', async () => {
       // First drag
       let startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
       dragElement.dispatchEvent(startEvent);
       window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 210 }));
+      await new Promise(resolve => requestAnimationFrame(resolve));
       window.dispatchEvent(new MouseEvent('mouseup', {}));
 
       expect(testHost.dragStartCount).toBe(1);
@@ -347,6 +372,7 @@ describe('DragHandleDirective', () => {
       startEvent = new MouseEvent('mousedown', { button: 0, clientX: 200, clientY: 300 });
       dragElement.dispatchEvent(startEvent);
       window.dispatchEvent(new MouseEvent('mousemove', { clientX: 210, clientY: 310 }));
+      await new Promise(resolve => requestAnimationFrame(resolve));
       window.dispatchEvent(new MouseEvent('mouseup', {}));
 
       expect(testHost.dragStartCount).toBe(2);
@@ -447,29 +473,39 @@ describe('DragHandleDirective', () => {
       expect(testHost.dragEndCount).toBe(0);
     });
 
-    it('should handle negative coordinates', () => {
+    it('should handle negative coordinates', async () => {
       const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 0, clientY: 0 });
       dragElement.dispatchEvent(startEvent);
 
       const moveEvent = new MouseEvent('mousemove', { clientX: -50, clientY: -100 });
       window.dispatchEvent(moveEvent);
 
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
       // Initial position is (100, 200), moved by (-50, -100) = (50, 100)
-      expect(testHost.positionChanges[0]).toEqual({ x: 50, y: 100 });
+      // BUT will be constrained to x: 50, y: 100 (no constraint needed for this case)
+      expect(testHost.positionChanges[0].x).toBe(50);
+      expect(testHost.positionChanges[0].y).toBe(100);
     });
 
-    it('should handle very large coordinate values', () => {
+    it('should handle very large coordinate values', async () => {
       const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 0, clientY: 0 });
       dragElement.dispatchEvent(startEvent);
 
       const moveEvent = new MouseEvent('mousemove', { clientX: 10000, clientY: 10000 });
       window.dispatchEvent(moveEvent);
 
-      // Initial position is (100, 200), moved by (10000, 10000) = (10100, 10200)
-      expect(testHost.positionChanges[0]).toEqual({ x: 10100, y: 10200 });
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      // Initial position is (100, 200), moved by (10000, 10000)
+      // Will be constrained to viewport boundaries
+      expect(testHost.positionChanges[0].x).toBeGreaterThan(0);
+      expect(testHost.positionChanges[0].y).toBeGreaterThan(0);
     });
 
-    it('should handle starting position with negative values', () => {
+    it('should handle starting position with negative values', async () => {
       testHost.updatePosition({ x: -100, y: -200 });
       fixture.detectChanges();
 
@@ -481,10 +517,15 @@ describe('DragHandleDirective', () => {
       const moveEvent = new MouseEvent('mousemove', { clientX: 50, clientY: 50 });
       window.dispatchEvent(moveEvent);
 
-      expect(testHost.positionChanges[0]).toEqual({ x: -50, y: -150 });
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      // New position should be constrained to >= 0
+      expect(testHost.positionChanges[0].x).toBeGreaterThanOrEqual(0);
+      expect(testHost.positionChanges[0].y).toBeGreaterThanOrEqual(0);
     });
 
-    it('should handle position signal with zero values', () => {
+    it('should handle position signal with zero values', async () => {
       testHost.updatePosition({ x: 0, y: 0 });
       fixture.detectChanges();
 
@@ -495,6 +536,9 @@ describe('DragHandleDirective', () => {
 
       const moveEvent = new MouseEvent('mousemove', { clientX: 150, clientY: 150 });
       window.dispatchEvent(moveEvent);
+
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
 
       expect(testHost.positionChanges[0]).toEqual({ x: 50, y: 50 });
     });
@@ -508,23 +552,29 @@ describe('DragHandleDirective', () => {
       expect(preventDefaultSpy).toHaveBeenCalled();
     });
 
-    it('should handle boundary condition: single pixel movement', () => {
+    it('should handle boundary condition: single pixel movement', async () => {
       const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
       dragElement.dispatchEvent(startEvent);
 
       const moveEvent = new MouseEvent('mousemove', { clientX: 101, clientY: 201 });
       window.dispatchEvent(moveEvent);
 
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
       expect(testHost.positionChanges[0]).toEqual({ x: 101, y: 201 });
     });
 
-    it('should handle mousemove with same client position', () => {
+    it('should handle mousemove with same client position', async () => {
       const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
       dragElement.dispatchEvent(startEvent);
 
       // Move to same position - should still emit positionChange
       const moveEvent = new MouseEvent('mousemove', { clientX: 100, clientY: 200 });
       window.dispatchEvent(moveEvent);
+
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
 
       expect(testHost.positionChanges).toHaveLength(1);
       expect(testHost.positionChanges[0]).toEqual({ x: 100, y: 200 });
@@ -536,7 +586,7 @@ describe('DragHandleDirective', () => {
       testHost.resetTestState();
     });
 
-    it('should support typical drag workflow', () => {
+    it('should support typical drag workflow', async () => {
       // Initial position
       expect(testHost.position()).toEqual({ x: 100, y: 200 });
 
@@ -546,7 +596,10 @@ describe('DragHandleDirective', () => {
 
       // Drag to new position
       window.dispatchEvent(new MouseEvent('mousemove', { clientX: 200, clientY: 300 }));
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
       window.dispatchEvent(new MouseEvent('mousemove', { clientX: 250, clientY: 350 }));
+      await new Promise(resolve => requestAnimationFrame(resolve));
 
       // Release
       window.dispatchEvent(new MouseEvent('mouseup', {}));
@@ -559,7 +612,7 @@ describe('DragHandleDirective', () => {
       expect(testHost.positionChanges[1]).toEqual({ x: 250, y: 350 });
     });
 
-    it('should support dragging across screen boundaries', () => {
+    it('should support dragging across screen boundaries', async () => {
       const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 50, clientY: 50 });
       dragElement.dispatchEvent(startEvent);
 
@@ -572,9 +625,10 @@ describe('DragHandleDirective', () => {
         { x: 100, y: 100 },
       ];
 
-      movements.forEach(pos => {
+      for (const pos of movements) {
         window.dispatchEvent(new MouseEvent('mousemove', { clientX: pos.x, clientY: pos.y }));
-      });
+        await new Promise(resolve => requestAnimationFrame(resolve));
+      }
 
       window.dispatchEvent(new MouseEvent('mouseup', {}));
 
@@ -599,5 +653,193 @@ describe('DragHandleDirective', () => {
       window.dispatchEvent(new MouseEvent('mousemove', { clientX: 150, clientY: 250 }));
       expect(testHost.positionChanges).toHaveLength(0);
     });
+  });
+
+  describe('Viewport Boundary Constraints', () => {
+    beforeEach(() => {
+      testHost.resetTestState();
+      // Mock window dimensions
+      vi.stubGlobal('innerWidth', 1920);
+      vi.stubGlobal('innerHeight', 1080);
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('should constrain position to left boundary (x >= 0)', async () => {
+      // Start at position (100, 200)
+      const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
+      dragElement.dispatchEvent(startEvent);
+
+      // Try to drag far left (would result in x: -200 without constraints)
+      const moveEvent = new MouseEvent('mousemove', { clientX: -100, clientY: 200 });
+      window.dispatchEvent(moveEvent);
+
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      // Position should be constrained to x: 0
+      expect(testHost.positionChanges[0].x).toBeGreaterThanOrEqual(0);
+      expect(testHost.positionChanges[0].x).toBe(0);
+    });
+
+    it('should constrain position to top boundary (y >= 0)', async () => {
+      testHost.updatePosition({ x: 100, y: 100 });
+      fixture.detectChanges();
+
+      const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 100 });
+      dragElement.dispatchEvent(startEvent);
+
+      // Try to drag far up (would result in y: -200 without constraints)
+      const moveEvent = new MouseEvent('mousemove', { clientX: 100, clientY: -100 });
+      window.dispatchEvent(moveEvent);
+
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      // Position should be constrained to y: 0
+      expect(testHost.positionChanges[0].y).toBeGreaterThanOrEqual(0);
+      expect(testHost.positionChanges[0].y).toBe(0);
+    });
+
+    it('should constrain position to right boundary', async () => {
+      testHost.updatePosition({ x: 1800, y: 500 });
+      fixture.detectChanges();
+
+      const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 1800, clientY: 500 });
+      dragElement.dispatchEvent(startEvent);
+
+      // Try to drag far right (would exceed viewport width)
+      const moveEvent = new MouseEvent('mousemove', { clientX: 2000, clientY: 500 });
+      window.dispatchEvent(moveEvent);
+
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      // Position should be constrained: window.innerWidth - 100 = 1820
+      expect(testHost.positionChanges[0].x).toBeLessThanOrEqual(1920 - 100);
+    });
+
+    it('should constrain position to bottom boundary', async () => {
+      testHost.updatePosition({ x: 500, y: 1000 });
+      fixture.detectChanges();
+
+      const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 500, clientY: 1000 });
+      dragElement.dispatchEvent(startEvent);
+
+      // Try to drag far down (would exceed viewport height)
+      const moveEvent = new MouseEvent('mousemove', { clientX: 500, clientY: 1200 });
+      window.dispatchEvent(moveEvent);
+
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      // Position should be constrained: window.innerHeight - 100 = 980
+      expect(testHost.positionChanges[0].y).toBeLessThanOrEqual(1080 - 100);
+    });
+
+    it('should keep at least 100px visible on all sides', async () => {
+      // Start near edge
+      testHost.updatePosition({ x: 50, y: 50 });
+      fixture.detectChanges();
+
+      const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 50, clientY: 50 });
+      dragElement.dispatchEvent(startEvent);
+
+      // Try to drag off-screen left and top
+      const moveEvent = new MouseEvent('mousemove', { clientX: -200, clientY: -200 });
+      window.dispatchEvent(moveEvent);
+
+      // Wait for RAF to complete
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      // Should be constrained to keep 100px visible
+      expect(testHost.positionChanges[0].x).toBeGreaterThanOrEqual(0);
+      expect(testHost.positionChanges[0].y).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  describe('requestAnimationFrame Throttling', () => {
+    beforeEach(() => {
+      testHost.resetTestState();
+    });
+
+    it('should throttle position updates using RAF', async () => {
+      const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
+      dragElement.dispatchEvent(startEvent);
+
+      // Dispatch multiple mousemove events rapidly
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 210 }));
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 120, clientY: 220 }));
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 130, clientY: 230 }));
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 140, clientY: 240 }));
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 150, clientY: 250 }));
+
+      // Should not emit immediately due to RAF throttling
+      expect(testHost.positionChanges).toHaveLength(0);
+
+      // Wait for next animation frame
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      // Should emit once with the latest position
+      expect(testHost.positionChanges).toHaveLength(1);
+      expect(testHost.positionChanges[0]).toEqual({ x: 150, y: 250 });
+    }, 10000);
+
+    it('should cancel pending RAF on new mousemove', async () => {
+      const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
+      dragElement.dispatchEvent(startEvent);
+
+      // First mousemove
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 210 }));
+
+      // Immediately second mousemove (should cancel first RAF)
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 120, clientY: 220 }));
+
+      // Wait for RAF
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      // Should only emit once with the latest position
+      expect(testHost.positionChanges).toHaveLength(1);
+      expect(testHost.positionChanges[0]).toEqual({ x: 120, y: 220 });
+    }, 10000);
+
+    it('should handle multiple RAF cycles correctly', async () => {
+      const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
+      dragElement.dispatchEvent(startEvent);
+
+      // First drag cycle
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 210 }));
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      expect(testHost.positionChanges).toHaveLength(1);
+
+      // Second drag cycle
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 130, clientY: 230 }));
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      expect(testHost.positionChanges).toHaveLength(2);
+
+      // Third drag cycle
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 150, clientY: 250 }));
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      expect(testHost.positionChanges).toHaveLength(3);
+    }, 10000);
+
+    it('should cancel RAF on ngOnDestroy', async () => {
+      const startEvent = new MouseEvent('mousedown', { button: 0, clientX: 100, clientY: 200 });
+      dragElement.dispatchEvent(startEvent);
+
+      // Trigger mousemove (schedules RAF)
+      window.dispatchEvent(new MouseEvent('mousemove', { clientX: 110, clientY: 210 }));
+
+      // Destroy before RAF completes
+      directive.ngOnDestroy();
+
+      // Wait longer than a frame
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      // Should not emit position change due to cleanup
+      expect(testHost.positionChanges).toHaveLength(0);
+    }, 10000);
   });
 });

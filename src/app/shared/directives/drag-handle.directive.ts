@@ -14,6 +14,12 @@ import { PanelPosition } from '../models';
  * - Drag lifecycle events (dragStart, dragEnd, positionChange)
  * - CSS transition management for smooth UX
  * - Automatic cleanup on destroy
+ * - Viewport boundary constraints to prevent off-screen dragging
+ * - requestAnimationFrame throttling for optimal performance
+ *
+ * Known limitations:
+ * - TODO: Keyboard accessibility not implemented (future enhancement)
+ * - TODO: Touch event support not implemented (future enhancement)
  *
  * Usage:
  * ```html
@@ -83,6 +89,12 @@ export class DragHandleDirective implements OnInit, OnDestroy {
    */
   private boundMouseUp?: () => void;
 
+  /**
+   * RequestAnimationFrame ID for throttling position updates.
+   * Ensures position changes only emit once per frame for optimal performance.
+   */
+  private rafId?: number;
+
   ngOnInit(): void {
     // Create bound handlers once for efficient addEventListener/removeEventListener
     this.boundMouseMove = this.onMouseMove.bind(this);
@@ -93,6 +105,12 @@ export class DragHandleDirective implements OnInit, OnDestroy {
     // Clean up event listeners if component is destroyed during drag
     if (this.isDragging) {
       this.removeGlobalListeners();
+    }
+
+    // Cancel any pending RAF update
+    if (this.rafId !== undefined) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = undefined;
     }
   }
 
@@ -120,21 +138,43 @@ export class DragHandleDirective implements OnInit, OnDestroy {
   /**
    * Handles mousemove event during drag.
    * Calculates new position based on mouse delta and emits positionChange.
+   *
+   * Features:
+   * - requestAnimationFrame throttling to prevent excessive re-renders
+   * - Viewport boundary constraints to prevent off-screen dragging
    */
   private onMouseMove(event: MouseEvent): void {
     if (!this.isDragging) {
       return;
     }
 
-    const deltaX = event.clientX - this.startMousePosition.x;
-    const deltaY = event.clientY - this.startMousePosition.y;
+    // Cancel any pending RAF update to ensure we only emit once per frame
+    if (this.rafId !== undefined) {
+      cancelAnimationFrame(this.rafId);
+    }
 
-    const newPosition: PanelPosition = {
-      x: this.startPosition.x + deltaX,
-      y: this.startPosition.y + deltaY,
-    };
+    // Schedule position update for next animation frame
+    this.rafId = requestAnimationFrame(() => {
+      const deltaX = event.clientX - this.startMousePosition.x;
+      const deltaY = event.clientY - this.startMousePosition.y;
 
-    this.positionChange.emit(newPosition);
+      let newX = this.startPosition.x + deltaX;
+      let newY = this.startPosition.y + deltaY;
+
+      // Constrain to viewport boundaries
+      // Keep at least 100px of the panel visible on screen
+      const minVisibleSize = 100;
+      newX = Math.max(0, Math.min(newX, window.innerWidth - minVisibleSize));
+      newY = Math.max(0, Math.min(newY, window.innerHeight - minVisibleSize));
+
+      const newPosition: PanelPosition = {
+        x: newX,
+        y: newY,
+      };
+
+      this.positionChange.emit(newPosition);
+      this.rafId = undefined;
+    });
   }
 
   /**
