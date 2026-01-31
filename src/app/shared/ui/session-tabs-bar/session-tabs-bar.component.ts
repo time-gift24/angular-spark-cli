@@ -63,17 +63,18 @@ export class SessionTabsBarComponent {
    * @required
    */
   @Input({ required: true })
-  sessions!: Signal<Map<string, SessionData>>;
+  sessions: Signal<Map<string, SessionData>>;
 
   /**
    * Signal containing the ID of the currently active session.
    *
    * Used to highlight the active tab and determine click behavior.
+   * Note: An empty string indicates no active session.
    *
    * @required
    */
   @Input({ required: true })
-  activeSessionId!: Signal<string>;
+  activeSessionId: Signal<string>;
 
   /**
    * Event emitted when a user selects a different session.
