@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, Output, signal, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { LiquidGlassDirective } from '../liquid-glass';
 
 @Component({
   selector: 'app-chat-input',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LiquidGlassDirective],
   templateUrl: './chat-input.component.html',
   styleUrls: ['./chat-input.component.css'],
 })

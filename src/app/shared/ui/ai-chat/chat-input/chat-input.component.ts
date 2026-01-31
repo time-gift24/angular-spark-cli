@@ -1,7 +1,8 @@
 /**
  * Chat Input Component
- * Auto-expanding textarea with toolbar
+ * Modern pill-style input with liquid-glass effect
  * Mineral & Time Theme - Angular 20+
+ * Inspired by Claude/Gemini design patterns
  */
 
 import {
@@ -15,18 +16,30 @@ import {
   afterNextRender,
 } from '@angular/core';
 import { EventEmitter } from '@angular/core';
+import { LiquidGlassDirective } from '../../liquid-glass';
 
 /**
- * Chat input component
- * Auto-expanding textarea with send button and tool buttons
+ * Chat input component with modern pill design
+ * Single unified rectangle with liquid-glass effect
+ * Icon buttons integrated inline
  */
 @Component({
   selector: 'ai-chat-input',
   standalone: true,
+  imports: [LiquidGlassDirective],
   template: `
     <div class="input-container">
-      <div class="input-wrapper" [class.focus-within]="isFocused()">
-        <!-- Input Area -->
+      <div
+        liquidGlass
+        lgTheme="mineral-light"
+        lgCornerRadius="16px"
+        [lgBlurAmount]="0.9"
+        [lgDisplacementScale]="0"
+        lgAriaLabel="AI chat input"
+        class="input-wrapper"
+        [class.focus-within]="isFocused()"
+      >
+        <!-- Input Area (Top) -->
         <div class="input-area">
           <textarea
             #textarea
@@ -43,92 +56,68 @@ import { EventEmitter } from '@angular/core';
           ></textarea>
         </div>
 
-        <!-- Toolbar -->
-        <div class="input-toolbar">
-          <!-- Tool Buttons -->
-          <div class="tool-buttons">
+        <!-- Toolbar (Bottom) -->
+        <div class="toolbar">
+          <!-- Left Tools -->
+          <div class="tool-buttons-left">
             <button
               type="button"
-              class="tool-button"
+              class="icon-button"
               title="Add file"
               (click)="onFileClick()"
               [attr.aria-label]="'Add file'"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
               </svg>
             </button>
 
             <button
               type="button"
-              class="tool-button"
+              class="icon-button"
               title="Add image"
               (click)="onImageClick()"
               [attr.aria-label]="'Add image'"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
                 <circle cx="9" cy="9" r="2" />
                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
               </svg>
             </button>
+          </div>
 
+          <!-- Right Actions -->
+          <div class="action-buttons-right">
             <button
               type="button"
-              class="tool-button"
+              class="icon-button voice-button"
               title="Voice input"
               (click)="onVoiceClick()"
               [attr.aria-label]="'Voice input'"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                 <line x1="12" x2="12" y1="19" y2="22" />
               </svg>
             </button>
-          </div>
 
-          <!-- Send Button -->
-          <button
-            type="button"
-            class="send-button"
-            [disabled]="!canSend()"
-            (click)="onSend()"
-            [attr.aria-label]="'Send message'"
-          >
-            <span>Send</span>
-            <span class="send-icon">↑</span>
-          </button>
+            <!-- Circular Send Button -->
+            <button
+              type="button"
+              class="send-button"
+              [class.send-active]="canSend()"
+              [disabled]="!canSend()"
+              (click)="onSend()"
+              [attr.aria-label]="'Send message'"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 2L11 13" />
+                <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -138,35 +127,21 @@ import { EventEmitter } from '@angular/core';
       .input-container {
         position: relative;
         width: 100%;
-        max-width: 800px;
-        transition: all var(--duration-normal) ease;
-        animation: slideUp 0.4s ease-out 0.2s both;
+        max-width: 768px;
+        margin: 0 auto;
+        margin-bottom: 16px;
       }
 
       .input-wrapper {
-        background: oklch(0.91 0.015 85 / 95%);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-radius: 12px;
-        border: 1px solid oklch(0.48 0.07 195 / 25%);
-        box-shadow: 0 -2px 12px oklch(0.28 0.03 185 / 10%);
-        overflow: hidden;
-        transition: all var(--duration-fast) ease;
+        position: relative;
       }
 
-      .input-wrapper.focus-within {
-        border-color: oklch(0.48 0.07 195 / 50%);
-        box-shadow:
-          0 0 0 3px oklch(0.48 0.07 195 / 10%),
-          0 -4px 16px oklch(0.28 0.03 185 / 15%);
-      }
-
-      /* Input Area */
       .input-area {
         padding: 12px 16px;
-        border-bottom: 1px solid oklch(0.48 0.07 195 / 10%);
+        padding-bottom: 8px;
       }
 
+      /* Text input */
       .input-field {
         width: 100%;
         min-height: 24px;
@@ -174,21 +149,22 @@ import { EventEmitter } from '@angular/core';
         background: transparent;
         border: none;
         font-family: var(--font-sans);
-        font-size: 13px;
+        font-size: 14px;
+        font-weight: 400;
         color: oklch(0.28 0.03 185);
         outline: none;
         resize: none;
         line-height: 1.5;
         overflow-y: auto;
+        padding: 0;
       }
 
       .input-field::placeholder {
-        color: oklch(0.50 0.02 185);
+        color: oklch(0.55 0.02 185);
       }
 
-      /* Scrollbar styles */
       .input-field::-webkit-scrollbar {
-        width: 4px;
+        width: 3px;
       }
 
       .input-field::-webkit-scrollbar-track {
@@ -196,30 +172,39 @@ import { EventEmitter } from '@angular/core';
       }
 
       .input-field::-webkit-scrollbar-thumb {
-        background: oklch(0.85 0.015 85);
+        background: oklch(0.75 0.015 85 / 50%);
         border-radius: 2px;
       }
 
-      /* Toolbar */
-      .input-toolbar {
+      /* Toolbar (Bottom) */
+      .toolbar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 8px 12px;
+        padding: 6px 12px;
+        padding-bottom: 10px;
         gap: 8px;
       }
 
-      /* Tool Buttons */
-      .tool-buttons {
+      /* Left tool buttons */
+      .tool-buttons-left {
+        display: flex;
+        gap: 2px;
+        align-items: center;
+      }
+
+      /* Right action buttons */
+      .action-buttons-right {
         display: flex;
         gap: 4px;
         align-items: center;
       }
 
-      .tool-button {
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
+      /* Icon buttons */
+      .icon-button {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
         background: transparent;
         border: none;
         cursor: pointer;
@@ -227,86 +212,151 @@ import { EventEmitter } from '@angular/core';
         align-items: center;
         justify-content: center;
         color: oklch(0.50 0.02 185);
-        transition: all var(--duration-fast) ease;
+        transition: all var(--duration-instant) ease;
         padding: 0;
       }
 
-      .tool-button:hover {
-        background: oklch(0.48 0.07 195 / 10%);
+      .icon-button svg {
+        width: 16px;
+        height: 16px;
+        stroke-width: 1.75;
+      }
+
+      .icon-button:hover {
+        background: oklch(0.48 0.07 195 / 8%);
         color: oklch(0.48 0.07 195);
       }
 
-      .tool-button:focus-visible {
-        outline: 2px solid oklch(0.48 0.07 195);
-        outline-offset: 2px;
+      .icon-button:focus-visible {
+        outline: 2px solid oklch(0.48 0.07 195 / 50%);
+        outline-offset: 1px;
       }
 
-      /* Send Button */
+      /* Voice button special style */
+      .voice-button:hover {
+        background: oklch(0.70 0.12 75 / 10%);
+        color: oklch(0.70 0.12 75);
+      }
+
+      /* Circular send button */
       .send-button {
-        padding: 0 12px;
-        height: 28px;
-        border-radius: 6px;
-        background: oklch(0.48 0.07 195);
-        border: none;
-        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: oklch(0.85 0.015 85);
+        border: 1px solid oklch(0.48 0.07 195 / 15%);
+        cursor: not-allowed;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
         transition: all var(--duration-fast) ease;
-        color: oklch(1 0 0);
-        font-family: var(--font-sans);
-        font-size: 12px;
-        font-weight: 500;
+        color: oklch(0.50 0.02 185);
+        padding: 0;
+        opacity: 0.5;
       }
 
-      .send-button:hover:not(:disabled) {
+      .send-button svg {
+        width: 14px;
+        height: 14px;
+        stroke-width: 2;
+        transition: transform var(--duration-fast) ease;
+      }
+
+      .send-button.send-active {
+        cursor: pointer;
+        background: oklch(0.48 0.07 195);
+        border-color: oklch(0.48 0.07 195);
+        color: oklch(0.98 0.01 85);
+        opacity: 1;
+      }
+
+      .send-button.send-active:hover {
         background: oklch(0.42 0.08 195);
-        transform: scale(1.02);
+        transform: scale(1.06);
       }
 
-      .send-button:active:not(:disabled) {
-        transform: scale(0.98);
+      .send-button.send-active:active {
+        transform: scale(0.96);
       }
 
-      .send-button:disabled {
-        background: oklch(0.88 0.015 85);
-        color: oklch(0.60 0.02 185);
-        cursor: not-allowed;
-        transform: none;
+      .send-button.send-active svg {
+        transform: translateX(1px) translateY(1px);
       }
 
       .send-button:focus-visible {
-        outline: 2px solid oklch(0.48 0.07 195);
+        outline: 2px solid oklch(0.48 0.07 195 / 50%);
         outline-offset: 2px;
       }
 
-      .send-icon {
-        font-size: 14px;
-        font-weight: 600;
-      }
-
-      /* Animations */
-      @keyframes slideUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
       /* Responsive */
-      @media (max-width: 768px) {
+      @media (max-width: 640px) {
         .input-container {
-          max-width: 100%;
+          margin-bottom: 12px;
         }
 
-        .input-wrapper {
-          border-radius: 12px;
+        .input-area {
+          padding: 10px 12px;
+          padding-bottom: 6px;
         }
+
+        .toolbar {
+          padding: 4px 10px;
+          padding-bottom: 8px;
+        }
+
+        .icon-button,
+        .send-button {
+          width: 28px;
+          height: 28px;
+        }
+
+        .icon-button svg {
+          width: 15px;
+          height: 15px;
+        }
+
+        .send-button svg {
+          width: 13px;
+          height: 13px;
+        }
+
+        .input-field {
+          font-size: 14px;
+        }
+      }
+
+      /* Dark mode support */
+      .dark .input-field {
+        color: oklch(0.94 0.015 85);
+      }
+
+      .dark .input-field::placeholder {
+        color: oklch(0.65 0.035 195);
+      }
+
+      .dark .icon-button {
+        color: oklch(0.65 0.035 195);
+      }
+
+      .dark .icon-button:hover {
+        background: oklch(0.62 0.08 195 / 12%);
+        color: oklch(0.62 0.08 195);
+      }
+
+      .dark .send-button {
+        background: oklch(0.30 0.04 230);
+        border-color: oklch(0.48 0.07 195 / 12%);
+        color: oklch(0.65 0.035 195);
+      }
+
+      .dark .send-button.send-active {
+        background: oklch(0.62 0.08 195);
+        border-color: oklch(0.62 0.08 195);
+        color: oklch(0.20 0.04 230);
+      }
+
+      .dark .send-button.send-active:hover {
+        background: oklch(0.68 0.07 195);
       }
     `,
   ],
