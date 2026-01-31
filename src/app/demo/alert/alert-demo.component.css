@@ -97,9 +97,4 @@
   word-break: break-word;
 }
 
-/* Icon SVG styling */
-ui-alert div[innerhtml] svg {
-  display: block;
-  width: 1rem;
-  height: 1rem;
-}
+/* Alert component already handles SVG sizing */
