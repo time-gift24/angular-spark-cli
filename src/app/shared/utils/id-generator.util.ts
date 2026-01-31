@@ -93,32 +93,64 @@ export class IdGenerator {
    * Uses Math.random() converted to base-36 (0-9, a-z) to create
    * a random string component for IDs.
    *
+   * Handles the edge case where Math.random() returns 0 by ensuring
+   * the string always has the correct length through padding if needed.
+   *
+   * Note: Math.random() is not cryptographically secure, but is acceptable
+   * for this use case as these IDs are for session management, not security.
+   *
    * @private
-   * @returns A random string of length 9
+   * @returns A random string of exactly 9 characters
    */
   private static generateRandomString(): string {
-    return Math.random().toString(36).substring(2, 2 + this.RANDOM_LENGTH);
+    // Generate random string using base-36 encoding
+    let random = Math.random().toString(36).substring(2);
+
+    // Handle edge case: if Math.random() returns 0, pad with zeros
+    // This ensures we always get exactly RANDOM_LENGTH characters
+    while (random.length < this.RANDOM_LENGTH) {
+      random += Math.random().toString(36).substring(2);
+    }
+
+    return random.substring(0, this.RANDOM_LENGTH);
   }
 
   /**
    * Checks if an ID already exists in the given set.
    *
-   * This method is used for collision detection. In the current implementation,
-   * it returns false (no collision) as the timestamp + random combination
-   * makes collisions extremely unlikely.
+   * This method provides collision detection for ID generation. It is designed
+   * to be used by SessionStateService (Phase 2.1) when creating new sessions to
+   * ensure no duplicate session IDs are created.
    *
-   * Future implementations may integrate with SessionStateService's sessions
-   * Map to provide actual collision detection when needed.
+   * Current Usage:
+   * - Not currently called by generateSessionId() or generateMessageId()
+   * - The timestamp + random combination makes collisions extremely unlikely
+   * - Will be integrated in Phase 2.1 when SessionStateService is implemented
+   *
+   * Design Rationale:
+   * - The optional existingIds parameter allows flexibility
+   * - Returns false when no Set is provided (no collision checking needed yet)
+   * - Will be called with SessionStateService's sessions Map keys in Phase 2.1
    *
    * @param id - The ID to check for collisions
-   * @param existingIds - Optional set of existing IDs to check against
-   * @returns true if the ID exists (collision), false otherwise
+   * @param existingIds - Optional set of existing IDs to check against.
+   *                      When omitted, returns false (no collision)
+   * @returns true if the ID exists in the set (collision detected), false otherwise
    *
    * @example
    * ```typescript
-   * const existingIds = new Set(['sess-123', 'msg-456']);
-   * const hasCollision = IdGenerator['checkCollision']('sess-123', existingIds);
-   * console.log(hasCollision); // true
+   * // Example usage in Phase 2.1 (SessionStateService):
+   * const existingSessionIds = new Set([
+   *   'sess-1738300800000-abc123xyz',
+   *   'sess-1738300801000-def456uvw'
+   * ]);
+   *
+   * const newId = IdGenerator.generateSessionId();
+   * const hasCollision = IdGenerator['checkCollision'](newId, existingSessionIds);
+   *
+   * if (hasCollision) {
+   *   // Regenerate ID with different timestamp
+   * }
    * ```
    *
    * @private

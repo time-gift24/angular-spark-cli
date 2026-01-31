@@ -186,6 +186,25 @@ describe('IdGenerator', () => {
       expect(ids.size).toBe(1000);
     });
 
+    it('should handle edge case where Math.random() returns very small values', () => {
+      // Test that we always get 9-character random strings
+      // even when Math.random() returns values close to 0
+      const ids: string[] = [];
+
+      // Generate many IDs to increase chance of hitting edge cases
+      for (let i = 0; i < 100; i++) {
+        ids.push(IdGenerator.generateSessionId());
+        ids.push(IdGenerator.generateMessageId());
+      }
+
+      // All IDs should have exactly 9 characters in the random part
+      ids.forEach(id => {
+        const parts = id.split('-');
+        expect(parts[2]).toHaveLength(9);
+        expect(parts[2]).toMatch(/^[a-z0-9]{9}$/);
+      });
+    });
+
     it('should generate valid IDs at system time boundaries', () => {
       // Generate IDs around a timestamp change
       const ids: string[] = [];
@@ -239,6 +258,33 @@ describe('IdGenerator', () => {
       expect(message1.startsWith('msg-')).toBe(true);
       expect(message2.startsWith('msg-')).toBe(true);
       expect(message3.startsWith('msg-')).toBe(true);
+    });
+
+    it('should demonstrate collision detection usage for Phase 2.1', () => {
+      // This test demonstrates how checkCollision will be used in Phase 2.1
+      // when SessionStateService is implemented
+      const existingIds = new Set<string>([
+        'sess-1738300800000-abc123xyz',
+        'sess-1738300801000-def456uvw',
+        'msg-1738300802000-ghi789rst'
+      ]);
+
+      // Access the private method using bracket notation for testing
+      const checkCollision = IdGenerator['checkCollision'] as (
+        id: string,
+        existingIds?: Set<string>
+      ) => boolean;
+
+      // Test existing ID - should detect collision
+      const existingId = 'sess-1738300800000-abc123xyz';
+      expect(checkCollision(existingId, existingIds)).toBe(true);
+
+      // Test new ID - should not detect collision
+      const newId = 'sess-1738300803000-jkl012mno';
+      expect(checkCollision(newId, existingIds)).toBe(false);
+
+      // Test with no existingIds set - should return false (no collision)
+      expect(checkCollision(newId)).toBe(false);
     });
 
     it('should support multiple concurrent sessions', () => {
