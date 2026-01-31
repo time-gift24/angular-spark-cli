@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, signal } from '@angular/core';
+import { Component, signal, DebugElement } from '@angular/core';
 import { ChatMessagesCardComponent } from './chat-messages-card.component';
 import { By } from '@angular/platform-browser';
 import { ChatMessage, ChatMessageRole, PanelPosition, PanelSize } from '../../models';
 
 // Vitest imports
-import { beforeEach, describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 @Component({
   standalone: true,
@@ -439,7 +439,7 @@ describe('ChatMessagesCardComponent', () => {
       expect(component.scrollToBottom).toBeDefined();
     });
 
-    it('should call smoothScrollToBottom when messageListRef exists', () => {
+    it('should call performScroll when messageListRef exists', () => {
       component.messages = signal([]);
       component.isVisible = signal(true);
       component.position = signal({ x: 0, y: 0 });
@@ -447,15 +447,16 @@ describe('ChatMessagesCardComponent', () => {
 
       fixture.detectChanges();
 
-      const smoothScrollSpy = vi.spyOn(component as any, 'smoothScrollToBottom');
+      const performScrollSpy = vi.spyOn(component as any, 'performScroll');
       component.scrollToBottom();
 
-      expect(smoothScrollSpy).toHaveBeenCalledWith(
-        component.messageListRef().nativeElement
+      expect(performScrollSpy).toHaveBeenCalledWith(
+        component.messageListRef().nativeElement,
+        'smooth'
       );
     });
 
-    it('should update scrollTop to scrollHeight', () => {
+    it('should use native scrollTo API', () => {
       component.messages = signal([]);
       component.isVisible = signal(true);
       component.position = signal({ x: 0, y: 0 });
@@ -464,17 +465,14 @@ describe('ChatMessagesCardComponent', () => {
       fixture.detectChanges();
 
       const messageListEl = component.messageListRef().nativeElement;
+      const scrollToSpy = vi.spyOn(messageListEl, 'scrollTo');
 
-      // Mock scrollHeight as a read-only property
-      Object.defineProperty(messageListEl, 'scrollHeight', {
-        value: 1000,
-        writable: false,
-        configurable: true,
+      component.scrollToBottom('smooth');
+
+      expect(scrollToSpy).toHaveBeenCalledWith({
+        top: messageListEl.scrollHeight,
+        behavior: 'smooth',
       });
-
-      component.scrollToBottom();
-
-      expect(messageListEl.scrollTop).toBe(1000);
     });
 
     it('should handle scrollHeight changes', () => {
@@ -486,6 +484,7 @@ describe('ChatMessagesCardComponent', () => {
       fixture.detectChanges();
 
       const messageListEl = component.messageListRef().nativeElement;
+      const scrollToSpy = vi.spyOn(messageListEl, 'scrollTo');
 
       // First scroll - mock scrollHeight as 500
       Object.defineProperty(messageListEl, 'scrollHeight', {
@@ -494,7 +493,10 @@ describe('ChatMessagesCardComponent', () => {
         configurable: true,
       });
       component.scrollToBottom();
-      expect(messageListEl.scrollTop).toBe(500);
+      expect(scrollToSpy).toHaveBeenCalledWith({
+        top: 500,
+        behavior: 'smooth',
+      });
 
       // Second scroll with increased content - mock scrollHeight as 1500
       Object.defineProperty(messageListEl, 'scrollHeight', {
@@ -503,7 +505,10 @@ describe('ChatMessagesCardComponent', () => {
         configurable: true,
       });
       component.scrollToBottom();
-      expect(messageListEl.scrollTop).toBe(1500);
+      expect(scrollToSpy).toHaveBeenCalledWith({
+        top: 1500,
+        behavior: 'smooth',
+      });
     });
 
     it('should not throw error when messageListRef is null', () => {
@@ -518,38 +523,47 @@ describe('ChatMessagesCardComponent', () => {
     });
   });
 
-  describe('smoothScrollToBottom Private Method', () => {
+  describe('performScroll Private Method', () => {
     it('should set element.scrollTop to element.scrollHeight', () => {
       const mockElement = {
-        scrollTop: 0,
+        scrollTo: vi.fn(),
         scrollHeight: 1000,
       } as unknown as HTMLDivElement;
 
-      component['smoothScrollToBottom'](mockElement);
+      component['performScroll'](mockElement, 'auto');
 
-      expect(mockElement.scrollTop).toBe(1000);
+      expect(mockElement.scrollTo).toHaveBeenCalledWith({
+        top: 1000,
+        behavior: 'auto',
+      });
     });
 
     it('should handle zero scrollHeight', () => {
       const mockElement = {
-        scrollTop: 100,
+        scrollTo: vi.fn(),
         scrollHeight: 0,
       } as unknown as HTMLDivElement;
 
-      component['smoothScrollToBottom'](mockElement);
+      component['performScroll'](mockElement, 'auto');
 
-      expect(mockElement.scrollTop).toBe(0);
+      expect(mockElement.scrollTo).toHaveBeenCalledWith({
+        top: 0,
+        behavior: 'auto',
+      });
     });
 
     it('should handle large scrollHeight values', () => {
       const mockElement = {
-        scrollTop: 0,
+        scrollTo: vi.fn(),
         scrollHeight: 100000,
       } as unknown as HTMLDivElement;
 
-      component['smoothScrollToBottom'](mockElement);
+      component['performScroll'](mockElement, 'auto');
 
-      expect(mockElement.scrollTop).toBe(100000);
+      expect(mockElement.scrollTo).toHaveBeenCalledWith({
+        top: 100000,
+        behavior: 'auto',
+      });
     });
   });
 
@@ -670,6 +684,338 @@ describe('ChatMessagesCardComponent', () => {
 
       messagesCard = hostFixture.debugElement.query(By.css('.messages-card'));
       expect(messagesCard.classes['visible']).toBeUndefined();
+    });
+  });
+
+  describe('Enhanced Scroll Behavior (P6-T6.2)', () => {
+    describe('isUserNearBottom Computed Signal', () => {
+      it('should be defined', () => {
+        component.messages = signal([]);
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        expect(component.isUserNearBottom).toBeDefined();
+      });
+
+      it('should return true when element is at bottom', () => {
+        component.messages = signal([]);
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        Object.defineProperty(messageListEl, 'scrollHeight', { value: 1000, configurable: true });
+        Object.defineProperty(messageListEl, 'clientHeight', { value: 500, configurable: true });
+        messageListEl.scrollTop = 500; // At bottom
+
+        fixture.detectChanges();
+
+        expect(component.isUserNearBottom()).toBe(true);
+      });
+
+      it('should return true when element is near bottom (within threshold)', () => {
+        component.messages = signal([]);
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        Object.defineProperty(messageListEl, 'scrollHeight', { value: 1000, configurable: true });
+        Object.defineProperty(messageListEl, 'clientHeight', { value: 500, configurable: true });
+        messageListEl.scrollTop = 460; // 40px from bottom (within 50px threshold)
+
+        fixture.detectChanges();
+
+        expect(component.isUserNearBottom()).toBe(true);
+      });
+
+      it('should return false when element is far from bottom', () => {
+        component.messages = signal([]);
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        Object.defineProperty(messageListEl, 'scrollHeight', { value: 1000, configurable: true });
+        Object.defineProperty(messageListEl, 'clientHeight', { value: 500, configurable: true });
+        messageListEl.scrollTop = 200; // 300px from bottom (outside threshold)
+
+        fixture.detectChanges();
+
+        expect(component.isUserNearBottom()).toBe(false);
+      });
+
+      it('should return true when element is at top of long content', () => {
+        component.messages = signal([]);
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        Object.defineProperty(messageListEl, 'scrollHeight', { value: 5000, configurable: true });
+        Object.defineProperty(messageListEl, 'clientHeight', { value: 500, configurable: true });
+        messageListEl.scrollTop = 0; // At top
+
+        fixture.detectChanges();
+
+        expect(component.isUserNearBottom()).toBe(false);
+      });
+    });
+
+    describe('scrollToBottom with Behavior Parameter', () => {
+      it('should default to smooth scroll behavior', () => {
+        component.messages = signal([]);
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        const scrollToSpy = vi.spyOn(messageListEl, 'scrollTo');
+
+        component.scrollToBottom();
+
+        expect(scrollToSpy).toHaveBeenCalledWith({
+          top: messageListEl.scrollHeight,
+          behavior: 'smooth',
+        });
+      });
+
+      it('should support instant scroll with auto behavior', () => {
+        component.messages = signal([]);
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        const scrollToSpy = vi.spyOn(messageListEl, 'scrollTo');
+
+        component.scrollToBottom('auto');
+
+        expect(scrollToSpy).toHaveBeenCalledWith({
+          top: messageListEl.scrollHeight,
+          behavior: 'auto',
+        });
+      });
+
+      it('should support smooth scroll explicitly', () => {
+        component.messages = signal([]);
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        const scrollToSpy = vi.spyOn(messageListEl, 'scrollTo');
+
+        component.scrollToBottom('smooth');
+
+        expect(scrollToSpy).toHaveBeenCalledWith({
+          top: messageListEl.scrollHeight,
+          behavior: 'smooth',
+        });
+      });
+    });
+
+    describe('Auto-Scroll on New Message', () => {
+      it('should auto-scroll when new message arrives and user is near bottom', () => {
+        const messagesSignal = signal([mockMessages[0]]);
+        component.messages = messagesSignal;
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        Object.defineProperty(messageListEl, 'scrollHeight', { value: 1000, configurable: true });
+        Object.defineProperty(messageListEl, 'clientHeight', { value: 500, configurable: true });
+        messageListEl.scrollTop = 500; // At bottom
+
+        const scrollToSpy = vi.spyOn(messageListEl, 'scrollTo');
+
+        // Add new message
+        messagesSignal.set([...mockMessages]);
+        fixture.detectChanges();
+
+        // Wait for setTimeout in effect
+        vi.advanceTimersByTime(0);
+        vi.runAllTimers();
+
+        expect(scrollToSpy).toHaveBeenCalled();
+      });
+
+      it('should NOT auto-scroll when user is reading (not near bottom)', () => {
+        const messagesSignal = signal([mockMessages[0]]);
+        component.messages = messagesSignal;
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        Object.defineProperty(messageListEl, 'scrollHeight', { value: 1000, configurable: true });
+        Object.defineProperty(messageListEl, 'clientHeight', { value: 500, configurable: true });
+        messageListEl.scrollTop = 200; // Far from bottom (user reading)
+
+        const scrollToSpy = vi.spyOn(messageListEl, 'scrollTo');
+
+        // Add new message
+        messagesSignal.set([...mockMessages]);
+        fixture.detectChanges();
+
+        // Wait for setTimeout in effect
+        vi.advanceTimersByTime(0);
+        vi.runAllTimers();
+
+        expect(scrollToSpy).not.toHaveBeenCalled();
+      });
+
+      it('should use smooth scroll when auto-scrolling', () => {
+        const messagesSignal = signal([mockMessages[0]]);
+        component.messages = messagesSignal;
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        Object.defineProperty(messageListEl, 'scrollHeight', { value: 1000, configurable: true });
+        Object.defineProperty(messageListEl, 'clientHeight', { value: 500, configurable: true });
+        messageListEl.scrollTop = 500; // At bottom
+
+        const scrollToSpy = vi.spyOn(messageListEl, 'scrollTo');
+
+        // Add new message
+        messagesSignal.set([...mockMessages]);
+        fixture.detectChanges();
+
+        // Wait for setTimeout in effect
+        vi.advanceTimersByTime(0);
+        vi.runAllTimers();
+
+        expect(scrollToSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            behavior: 'smooth',
+          })
+        );
+      });
+    });
+
+    describe('performScroll Private Method', () => {
+      it('should call element.scrollTo with correct parameters', () => {
+        component.messages = signal([]);
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        const scrollToSpy = vi.spyOn(messageListEl, 'scrollTo');
+
+        component['performScroll'](messageListEl, 'smooth');
+
+        expect(scrollToSpy).toHaveBeenCalledWith({
+          top: messageListEl.scrollHeight,
+          behavior: 'smooth',
+        });
+      });
+
+      it('should handle auto behavior', () => {
+        component.messages = signal([]);
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        const scrollToSpy = vi.spyOn(messageListEl, 'scrollTo');
+
+        component['performScroll'](messageListEl, 'auto');
+
+        expect(scrollToSpy).toHaveBeenCalledWith({
+          top: messageListEl.scrollHeight,
+          behavior: 'auto',
+        });
+      });
+    });
+
+    describe('Scroll Position Edge Cases', () => {
+      it('should handle empty message list', () => {
+        component.messages = signal([]);
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        const scrollToSpy = vi.spyOn(messageListEl, 'scrollTo');
+
+        component.scrollToBottom('smooth');
+
+        expect(scrollToSpy).toHaveBeenCalledWith({
+          top: 0,
+          behavior: 'smooth',
+        });
+      });
+
+      it('should handle very large scroll heights', () => {
+        component.messages = signal([]);
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        Object.defineProperty(messageListEl, 'scrollHeight', { value: 1000000, configurable: true });
+        const scrollToSpy = vi.spyOn(messageListEl, 'scrollTo');
+
+        component.scrollToBottom('smooth');
+
+        expect(scrollToSpy).toHaveBeenCalledWith({
+          top: 1000000,
+          behavior: 'smooth',
+        });
+      });
+
+      it('should handle zero client height', () => {
+        component.messages = signal([]);
+        component.isVisible = signal(true);
+        component.position = signal({ x: 0, y: 0 });
+        component.size = signal({ width: 400, height: 600 });
+
+        fixture.detectChanges();
+
+        const messageListEl = component.messageListRef().nativeElement;
+        Object.defineProperty(messageListEl, 'clientHeight', { value: 0, configurable: true });
+        messageListEl.scrollTop = 0;
+
+        fixture.detectChanges();
+
+        // Should not throw error
+        expect(() => component.isUserNearBottom()).not.toThrow();
+      });
     });
   });
 });
