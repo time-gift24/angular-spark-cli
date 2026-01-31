@@ -11,6 +11,8 @@ Implement shadcn/ui-inspired components in Angular 20+ using Tailwind CSS v4's `
 
 **Core principle:** Reference, don't translate. Analyze React patterns, then implement idiomatic Angular.
 
+**Complete workflow:** Component → Demo Page → Route → Navigation (ALL required)
+
 ## When to Use
 
 ✅ Building shadcn-inspired Angular components with Tailwind v4
@@ -72,11 +74,101 @@ export class ButtonComponent {
 
 ## Implementation Steps
 
-1. **Use MCP first:** "Use shadcn MCP to view [component]"
-2. **Define tokens in @theme:** Extract colors, spacing, variants to `src/styles.css`
-3. **Create standalone component:** `ng g c shared/ui/button --standalone`
-4. **Use Signals:** `variant = input<Type>('default')`
-5. **Template:** New control flow (`@if`, `@for`)
+**Complete workflow from component to demo page:**
+
+### 1. Use MCP to Reference Design
+```
+"Use shadcn MCP to view [component-name]"
+```
+
+### 2. Define Tokens in @theme
+Extract colors, spacing, variants to `src/styles.css`:
+```css
+@theme {
+  --color-primary-500: hsl(210 100% 50%);
+  --spacing-4: 1rem;
+  --radius-md: 0.375rem;
+}
+```
+
+### 3. Create Standalone Component
+```bash
+ng g c shared/ui/button --standalone
+```
+
+### 4. Implement with Signals
+- Use `input()` for props
+- Use `computed()` for variants
+- Use new control flow (`@if`, `@for`)
+
+### 5. **Create Demo Page** (REQUIRED - Don't Skip!)
+```bash
+ng g c demo/button --standalone
+```
+
+**Demo page structure:**
+```
+src/app/demo/button/
+├── button-demo.component.ts      # Demo logic + examples config
+├── button-demo.component.html    # Showcase all variants
+├── button-demo.component.css     # Demo-specific styles
+├── types/
+│   └── button-demo.types.ts      # TypeScript interfaces
+└── examples/
+    └── button-examples.ts        # Example configurations
+```
+
+**Demo page pattern:**
+```typescript
+@Component({
+  selector: 'app-button-demo',
+  standalone: true,
+  imports: [ButtonComponent], // Import UI component
+  template: `
+    <h1>Button</h1>
+    @for (variant of buttonVariants; track variant.label) {
+      <ui-button [variant]="variant.variant">
+        {{ variant.label }}
+      </ui-button>
+    }
+  `
+})
+export class ButtonDemoComponent {
+  readonly buttonVariants = [/* example configs */];
+}
+```
+
+### 6. **Add Route** (REQUIRED - Don't Skip!)
+Add to `src/app/app.routes.ts`:
+```typescript
+{
+  path: 'demo',
+  loadComponent: () => import('./shared/layout/main-layout.component')
+    .then(m => m.MainLayoutComponent),
+  children: [
+    {
+      path: 'button',  // ← Add this
+      loadComponent: () => import('./demo/button/button-demo.component')
+        .then(m => m.ButtonDemoComponent)
+    },
+    // ... other demo routes
+  ]
+}
+```
+
+### 7. **Add Navigation Link** (REQUIRED - Don't Skip!)
+Add to `src/app/shared/layout/nav.component.ts`:
+```typescript
+<a
+  routerLink="/demo/button"
+  routerLinkActive="text-primary font-medium"
+  [routerLinkActiveOptions]="{ exact: true }"
+  class="transition-colors hover:text-primary text-muted-foreground">
+  Button
+</a>
+```
+
+**Keep links alphabetically sorted** for consistency.
 
 ## Common Mistakes
 
@@ -84,6 +176,10 @@ export class ButtonComponent {
 ❌ **React libraries** - No CVA, clsx, tailwind-merge (use computed())
 ❌ **CSS variables** - Use `@theme`, not `:root`
 ❌ **React patterns** - Use Signals, not setter-based @Input
+❌ **Skipping demo page** - Component exists but no way to see it
+❌ **Forgetting route** - Demo page created but 404 when accessed
+❌ **Missing nav link** - Route exists but users can't find it
+❌ **Hardcoding nav links** - Should follow alphabetical order pattern
 
 ## Red Flags - STOP When You See These
 
@@ -93,12 +189,32 @@ export class ButtonComponent {
 - Using `@Input() set` setters for variants
 - Converting React code line-by-line
 - Not using shadcn MCP to reference implementation
+- **Creating component WITHOUT demo page** - Every component needs a demo!
+- **Creating demo page WITHOUT adding route** - Route is required for access!
+- **Adding route WITHOUT navigation link** - Users can't find your demo!
+- **Thinking "I'll add demo later"** - Do it now, or it won't happen
 
 **All of these mean: Stop. Re-read this skill. Start over.**
 
 ## Quick Reference
 
-- **Create:** `ng g c shared/ui/button --standalone`
-- **MCP:** `"使用 shadcn MCP 查看 [component]"`
+**Component Creation:**
+- **UI Component:** `ng g c shared/ui/button --standalone`
+- **Demo Page:** `ng g c demo/button --standalone`
+- **MCP Query:** `"使用 shadcn MCP 查看 [component]"`
+
+**Routing & Navigation:**
+- **Route:** Add to `app.routes.ts` under `demo` children
+- **Nav Link:** Add to `nav.component.ts` (alphabetically sorted)
+- **Pattern:** Load component with `loadComponent()` + dynamic import
+
+**Styling:**
 - **Token:** `@theme { --token-name: value; }`
 - **Use:** `<div class="bg-token-name">Content</div>`
+- **Variants:** `computed(() => baseClasses + variantClasses())`
+
+**Angular Patterns:**
+- **Inputs:** `variant = input<Type>('default')`
+- **Outputs:** `@Output() click = new EventEmitter<void>()`
+- **Lists:** `@for (item of items; trackBy: id) { ... }`
+- **Conditionals:** `@if (condition) { ... }`

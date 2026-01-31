@@ -132,6 +132,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             class="transition-colors hover:text-primary text-muted-foreground">
             Slider
           </a>
+          <a
+            routerLink="/demo/liquid-glass"
+            routerLinkActive="text-primary font-medium"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="transition-colors hover:text-primary text-muted-foreground">
+            Liquid Glass
+          </a>
         </nav>
       </div>
     </nav>

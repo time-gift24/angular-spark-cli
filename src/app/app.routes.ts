@@ -87,6 +87,11 @@ export const routes: Routes = [
         path: 'slider',
         loadComponent: () => import('./demo/slider/slider-demo/slider-demo')
           .then(m => m.SliderDemoComponent)
+      },
+      {
+        path: 'liquid-glass',
+        loadComponent: () => import('./demo/liquid-glass/liquid-glass-demo.component')
+          .then(m => m.LiquidGlassDemoComponent)
       }
     ]
   }
