@@ -8,6 +8,10 @@
 
 .messages-card {
   position: fixed;
+  /* Initial positioning - overridden by [style] bindings */
+  bottom: calc(var(--spacing-xl) * 5);
+  left: 50%;
+  transform: translateX(-50%);
   display: none;
   flex-direction: column;
   background: var(--background);

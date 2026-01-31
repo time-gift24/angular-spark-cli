@@ -57,26 +57,30 @@ export class ChatMessagesCardComponent {
    * Signal containing the array of chat messages to display.
    * Messages are rendered in chronological order using @for loop.
    */
-  @Input({ required: true }) messages!: Signal<ChatMessage[]>;
+  @Input()
+  messages: Signal<ChatMessage[]>;
 
   /**
    * Signal controlling the visibility of the messages card.
    * When false, the card is hidden (collapsed state).
    * When true, the card is visible and interactive.
    */
-  @Input({ required: true }) isVisible!: Signal<boolean>;
+  @Input()
+  isVisible: Signal<boolean>;
 
   /**
    * Signal containing the current position of the panel.
    * Used by DragHandleDirective to track and update position.
    */
-  @Input({ required: true }) position!: Signal<PanelPosition>;
+  @Input()
+  position: Signal<PanelPosition>;
 
   /**
    * Signal containing the current size of the panel.
    * Used by ResizeHandleDirective to track and update size.
    */
-  @Input({ required: true }) size!: Signal<PanelSize>;
+  @Input()
+  size: Signal<PanelSize>;
 
   /**
    * Emits when the panel position changes during drag operations.
@@ -89,6 +93,38 @@ export class ChatMessagesCardComponent {
    * Parent components should update their size state when this fires.
    */
   @Output() sizeChange = new EventEmitter<PanelSize>();
+
+  /**
+   * Safe getter for position that handles undefined during component initialization.
+   * Returns default position if position signal is not yet available.
+   */
+  get safePosition(): PanelPosition {
+    return this.position?.() ?? { x: 0, y: 0 };
+  }
+
+  /**
+   * Safe getter for size that handles undefined during component initialization.
+   * Returns default size if size signal is not yet available.
+   */
+  get safeSize(): PanelSize {
+    return this.size?.() ?? { width: 400, height: 600 };
+  }
+
+  /**
+   * Safe getter for visibility that handles undefined during component initialization.
+   * Returns false if isVisible signal is not yet available.
+   */
+  get safeIsVisible(): boolean {
+    return this.isVisible?.() ?? false;
+  }
+
+  /**
+   * Safe getter for messages that handles undefined during component initialization.
+   * Returns empty array if messages signal is not yet available.
+   */
+  get safeMessages(): ChatMessage[] {
+    return this.messages?.() ?? [];
+  }
 
   /**
    * Reference to the message list container element.
@@ -118,10 +154,12 @@ export class ChatMessagesCardComponent {
    * ```
    */
   scrollToBottom(): void {
-    const messageListEl = this.messageListRef().nativeElement;
-    if (messageListEl) {
-      this.smoothScrollToBottom(messageListEl);
+    const messageListEl = this.messageListRef()?.nativeElement;
+    if (!messageListEl) {
+      console.warn('[ChatMessagesCard] Cannot scroll: message list not initialized');
+      return;
     }
+    this.smoothScrollToBottom(messageListEl);
   }
 
   /**

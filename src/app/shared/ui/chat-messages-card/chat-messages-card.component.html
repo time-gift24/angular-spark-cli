@@ -1,12 +1,13 @@
 <div
-  [class.visible]="isVisible()"
-  [style.left.px]="position().x"
-  [style.top.px]="position().y"
-  [style.width.px]="size().width"
-  [style.height.px]="size().height"
+  [class.visible]="safeIsVisible"
+  [style.left.px]="safePosition.x"
+  [style.top.px]="safePosition.y"
+  [style.width.px]="safeSize.width"
+  [style.height.px]="safeSize.height"
   class="messages-card"
 >
   <!-- Drag handle for panel positioning -->
+  <!-- Note: Directive expects Signal<PanelPosition> input via [appDragHandle] alias -->
   <div
     class="drag-handle"
     [appDragHandle]="position"
@@ -17,17 +18,22 @@
 
   <!-- Scrollable message list -->
   <div #messageList class="message-list">
-    @for (message of messages(); track message.id) {
-      <div [class.role]="message.role" class="message">
+    @for (message of safeMessages; track message.id) {
+      <div [class.role-user]="message.role === 'user'"
+           [class.role-assistant]="message.role === 'assistant'"
+           [class.role-system]="message.role === 'system'"
+           class="message">
         <div class="message-content">{{ message.content }}</div>
         <div class="message-timestamp">{{ message.timestamp | date: 'short' }}</div>
       </div>
     } @empty {
+      <!-- Enhancement: Empty state for better UX (not in original spec) -->
       <div class="empty-state">No messages yet</div>
     }
   </div>
 
   <!-- Resize handle for panel sizing -->
+  <!-- Note: Directive expects Signal<PanelSize> input via [appResizeHandle] alias -->
   <div
     class="resize-handle"
     [appResizeHandle]="size"

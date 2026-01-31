@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { ChatMessagesCardComponent } from './chat-messages-card.component';
 import { By } from '@angular/platform-browser';
-import { ChatMessage, PanelPosition, PanelSize } from '../../models';
+import { ChatMessage, ChatMessageRole, PanelPosition, PanelSize } from '../../models';
 
 // Vitest imports
 import { beforeEach, describe, it, expect, vi } from 'vitest';
@@ -48,13 +48,13 @@ describe('ChatMessagesCardComponent', () => {
   const mockMessages: ChatMessage[] = [
     {
       id: 'msg-1',
-      role: 'user',
+      role: 'user' as ChatMessageRole,
       content: 'Hello, AI!',
       timestamp: Date.now() - 1000,
     },
     {
       id: 'msg-2',
-      role: 'assistant',
+      role: 'assistant' as ChatMessageRole,
       content: 'Hello! How can I help you today?',
       timestamp: Date.now(),
     },
@@ -328,7 +328,7 @@ describe('ChatMessagesCardComponent', () => {
         ...initialMessages,
         {
           id: 'msg-3',
-          role: 'user',
+          role: 'user' as ChatMessageRole,
           content: 'Can you help me?',
           timestamp: Date.now(),
         },
@@ -372,7 +372,7 @@ describe('ChatMessagesCardComponent', () => {
     it('should render system messages with role-system class', () => {
       const systemMessage: ChatMessage = {
         id: 'msg-sys',
-        role: 'system',
+        role: 'system' as ChatMessageRole,
         content: 'System notification',
         timestamp: Date.now(),
       };
@@ -387,7 +387,7 @@ describe('ChatMessagesCardComponent', () => {
     it('should handle large message arrays', () => {
       const largeMessages: ChatMessage[] = Array.from({ length: 100 }, (_, i) => ({
         id: `msg-${i}`,
-        role: i % 2 === 0 ? 'user' : 'assistant',
+        role: (i % 2 === 0 ? 'user' : 'assistant') as ChatMessageRole,
         content: `Message ${i}`,
         timestamp: Date.now() + i * 1000,
       }));
@@ -464,7 +464,13 @@ describe('ChatMessagesCardComponent', () => {
       fixture.detectChanges();
 
       const messageListEl = component.messageListRef().nativeElement;
-      messageListEl.scrollHeight = 1000;
+
+      // Mock scrollHeight as a read-only property
+      Object.defineProperty(messageListEl, 'scrollHeight', {
+        value: 1000,
+        writable: false,
+        configurable: true,
+      });
 
       component.scrollToBottom();
 
@@ -481,13 +487,21 @@ describe('ChatMessagesCardComponent', () => {
 
       const messageListEl = component.messageListRef().nativeElement;
 
-      // First scroll
-      messageListEl.scrollHeight = 500;
+      // First scroll - mock scrollHeight as 500
+      Object.defineProperty(messageListEl, 'scrollHeight', {
+        value: 500,
+        writable: false,
+        configurable: true,
+      });
       component.scrollToBottom();
       expect(messageListEl.scrollTop).toBe(500);
 
-      // Second scroll with increased content
-      messageListEl.scrollHeight = 1500;
+      // Second scroll with increased content - mock scrollHeight as 1500
+      Object.defineProperty(messageListEl, 'scrollHeight', {
+        value: 1500,
+        writable: false,
+        configurable: true,
+      });
       component.scrollToBottom();
       expect(messageListEl.scrollTop).toBe(1500);
     });
