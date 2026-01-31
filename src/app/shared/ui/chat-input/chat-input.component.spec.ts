@@ -267,4 +267,122 @@ describe('ChatInputComponent', () => {
       expect(button).toBeTruthy();
     });
   });
+
+  describe('Auto-Expanding Textarea (P5-T5.2)', () => {
+    it('should initialize with MIN_HEIGHT', () => {
+      expect(component.textareaHeight()).toBe(component.MIN_HEIGHT);
+    });
+
+    it('should call adjustHeight when input changes', () => {
+      hostFixture.detectChanges();
+
+      // Get the actual ChatInputComponent instance from the test host
+      const chatInputComponent = hostFixture.debugElement.children[0].componentInstance;
+      const textarea = hostFixture.debugElement.query(By.css('textarea')).nativeElement;
+      const adjustHeightSpy = vi.spyOn(chatInputComponent as any, 'adjustHeight');
+
+      textarea.value = 'Line 1\nLine 2';
+      textarea.dispatchEvent(new Event('input'));
+
+      hostFixture.detectChanges();
+
+      expect(adjustHeightSpy).toHaveBeenCalledWith(textarea);
+    });
+
+    it('should adjust height via adjustHeight method', () => {
+      const mockTextarea = {
+        scrollHeight: 50,
+      } as unknown as HTMLTextAreaElement;
+
+      component['adjustHeight'](mockTextarea);
+
+      expect(component.textareaHeight()).toBe(50);
+    });
+
+    it('should enforce MAX_HEIGHT constraint in adjustHeight', () => {
+      const mockTextarea = {
+        scrollHeight: 200,
+      } as unknown as HTMLTextAreaElement;
+
+      component['adjustHeight'](mockTextarea);
+
+      expect(component.textareaHeight()).toBe(component.MAX_HEIGHT);
+    });
+
+    it('should reset to MIN_HEIGHT when input is empty', () => {
+      // First, set a larger height
+      component.textareaHeight.set(60);
+      expect(component.textareaHeight()).toBe(60);
+
+      const mockTextarea = {
+        scrollHeight: 24,
+      } as unknown as HTMLTextAreaElement;
+
+      component['adjustHeight'](mockTextarea);
+
+      expect(component.textareaHeight()).toBe(component.MIN_HEIGHT);
+    });
+
+    it('should calculate height correctly for various scroll heights', () => {
+      // Test with scrollHeight <= MIN_HEIGHT
+      expect(component['calculateTextareaHeight'](20)).toBe(component.MIN_HEIGHT);
+
+      // Test with scrollHeight between MIN and MAX
+      expect(component['calculateTextareaHeight'](50)).toBe(50);
+      expect(component['calculateTextareaHeight'](80)).toBe(80);
+
+      // Test with scrollHeight > MAX_HEIGHT
+      expect(component['calculateTextareaHeight'](150)).toBe(component.MAX_HEIGHT);
+    });
+  });
+
+  describe('Enhanced Keyboard Interactions (P5-T5.3)', () => {
+    it('should identify Enter key as send key', () => {
+      const event = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: false });
+      expect(component['isSendKey'](event)).toBe(true);
+    });
+
+    it('should not identify Shift+Enter as send key', () => {
+      const event = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: true });
+      expect(component['isSendKey'](event)).toBe(false);
+    });
+
+    it('should not identify other keys as send key', () => {
+      const event = new KeyboardEvent('keydown', { key: 'a', shiftKey: false });
+      expect(component['isSendKey'](event)).toBe(false);
+    });
+
+    it('should send message and prevent default on Enter key', () => {
+      hostComponent.canSend.set(true);
+      hostFixture.detectChanges();
+
+      const textarea = hostFixture.debugElement.query(By.css('textarea')).nativeElement;
+      const event = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: false });
+      const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+
+      textarea.dispatchEvent(event);
+
+      hostFixture.detectChanges();
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
+      expect(hostComponent.messageSendEvents).toBe(1);
+    });
+
+    it('should allow newline with Shift+Enter', () => {
+      hostComponent.canSend.set(true);
+      hostFixture.detectChanges();
+
+      const textarea = hostFixture.debugElement.query(By.css('textarea')).nativeElement;
+      const event = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: true });
+      const preventDefaultSpy = vi.spyOn(event, 'preventDefault');
+
+      textarea.dispatchEvent(event);
+
+      hostFixture.detectChanges();
+
+      expect(preventDefaultSpy).not.toHaveBeenCalled();
+      expect(hostComponent.messageSendEvents).toBe(0);
+    });
+  });
 });
+

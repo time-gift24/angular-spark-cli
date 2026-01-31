@@ -23,11 +23,15 @@ export class ChatInputComponent {
   /**
    * Handle textarea input changes
    * Updates the textarea model and emits the inputChange event
+   * Also adjusts textarea height based on content
    */
   handleInput(event: Event): void {
     const textarea = event.target as HTMLTextAreaElement;
     const value = textarea.value;
     this.inputChange.emit(value);
+
+    // Adjust height after emitting the input change
+    this.adjustHeight(textarea);
   }
 
   /**
@@ -35,10 +39,45 @@ export class ChatInputComponent {
    * Send message on Enter (without Shift), allow newline with Shift+Enter
    */
   handleKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    if (this.isSendKey(event)) {
       event.preventDefault();
       this.sendMessage();
     }
+  }
+
+  /**
+   * Check if the key combination should trigger message send
+   * Returns true for Enter key without Shift modifier
+   */
+  private isSendKey(event: KeyboardEvent): boolean {
+    return event.key === 'Enter' && !event.shiftKey;
+  }
+
+  /**
+   * Calculate the appropriate textarea height based on scroll height
+   * Enforces MIN_HEIGHT and MAX_HEIGHT constraints
+   */
+  private calculateTextareaHeight(scrollHeight: number): number {
+    // Reset to MIN_HEIGHT if input is empty
+    if (scrollHeight <= this.MIN_HEIGHT) {
+      return this.MIN_HEIGHT;
+    }
+
+    // Enforce MAX_HEIGHT constraint
+    if (scrollHeight > this.MAX_HEIGHT) {
+      return this.MAX_HEIGHT;
+    }
+
+    return scrollHeight;
+  }
+
+  /**
+   * Adjust textarea height based on its content
+   * Called after input changes to auto-expand the textarea
+   */
+  private adjustHeight(element: HTMLTextAreaElement): void {
+    const newHeight = this.calculateTextareaHeight(element.scrollHeight);
+    this.textareaHeight.set(newHeight);
   }
 
   /**
