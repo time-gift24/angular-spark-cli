@@ -157,6 +157,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
             Liquid Glass
           </a>
+          <a
+            routerLink="/demo/ai-chat-panel"
+            routerLinkActive="bg-accent text-accent-foreground"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+            AI Chat Panel
+          </a>
         </nav>
       </div>
     </nav>
