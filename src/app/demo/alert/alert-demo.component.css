@@ -1,4 +1,105 @@
-/* Add custom styles for alert demo if needed */
-:host {
+/* Alert Demo Component Styles */
+
+.demo-section {
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--border);
+}
+
+.demo-section:last-child {
+  border-bottom: none;
+}
+
+.demo-section h2 {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin-bottom: var(--spacing-sm);
+  color: var(--foreground);
+}
+
+.demo-section h3 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: var(--spacing-sm);
+  color: var(--foreground);
+}
+
+/* Alert List */
+.alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+}
+
+/* Use Case List */
+.use-case-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-md);
+}
+
+.use-case-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.use-case-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.use-case-alert {
+  margin-top: var(--spacing-xs);
+}
+
+/* Inline Demo */
+.inline-demo {
+  margin-top: var(--spacing-sm);
+}
+
+/* Dark Preview */
+.dark-preview {
+  background: oklch(0.20 0.04 230);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-top: var(--spacing-md);
+}
+
+/* Code Examples */
+.code-examples {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+}
+
+.code-example {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.code-block {
   display: block;
+  background: var(--muted);
+  color: var(--foreground);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Icon SVG styling */
+ui-alert div[innerhtml] svg {
+  display: block;
+  width: 1rem;
+  height: 1rem;
 }

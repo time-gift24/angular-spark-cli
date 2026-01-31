@@ -1,110 +1,171 @@
-<div class="container max-w-2xl mx-auto py-8 px-4">
-  <div class="mb-8">
-    <h1 class="text-xl font-semibold mb-2">Alert</h1>
-    <p class="text-sm text-muted-foreground">
-      Display alert messages with different variants and styles.
-    </p>
-  </div>
-
-  <div class="flex flex-col gap-6">
-    <!-- Default Alert -->
-    <div class="space-y-4">
-      <h2 class="text-lg font-medium">Default Alert</h2>
-
-      <ui-alert>
-        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 16 16" fill="currentColor">
-          <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
-        </svg>
-        <ui-alert-title>Information</ui-alert-title>
-        <ui-alert-description>
-          This is a default alert with icon, title and description.
-        </ui-alert-description>
-      </ui-alert>
+<div class="min-h-screen bg-background p-6">
+  <div class="mx-auto max-w-4xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+      <h1>Alert Component</h1>
+      <p class="text-muted-foreground">
+        灵活且可访问的提示框组件，采用矿物与时光主题设计
+      </p>
     </div>
 
-    <!-- Success Alert -->
-    <div class="space-y-4">
-      <h2 class="text-lg font-medium">Success Alert</h2>
-
-      <ui-alert>
-        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 16 16" fill="currentColor">
-          <circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.2"/>
-          <path d="M10.97 4.97a.75.75 0 011.07 1.05l-3.992 4.99a.75.75 0 01-1.08.02L4.324 8.384a.75.75 0 111.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 01.02-.022z"/>
-        </svg>
-        <ui-alert-title>Success! Your changes have been saved</ui-alert-title>
-        <ui-alert-description>
-          This is an alert with icon, title and description.
-        </ui-alert-description>
-      </ui-alert>
+    <!-- Basic Alerts Section -->
+    <div class="demo-section">
+      <h2>基础提示框</h2>
+      <p class="text-sm text-muted-foreground">常用样式的提示框示例</p>
+      <div class="alert-list">
+        @for (item of basicAlerts; track item.title) {
+          <ui-alert [variant]="item.variant">
+            @if (shouldShowIcon(item.icon)) {
+              <div [innerHTML]="getIconSvg(item.icon ?? 'info')"></div>
+            }
+            @if (hasTitle(item)) {
+              <ui-alert-title>{{ item.title }}</ui-alert-title>
+            }
+            @if (hasDescription(item)) {
+              <ui-alert-description>{{ item.description }}</ui-alert-description>
+            }
+          </ui-alert>
+        }
+      </div>
     </div>
 
-    <!-- Warning Alert -->
-    <div class="space-y-4">
-      <h2 class="text-lg font-medium">Warning Alert</h2>
-
-      <ui-alert>
-        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 16 16" fill="currentColor">
-          <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
-        </svg>
-        <ui-alert-title>Warning</ui-alert-title>
-        <ui-alert-description>
-          Please review your information before proceeding.
-        </ui-alert-description>
-      </ui-alert>
+    <!-- Icon Alerts Section -->
+    <div class="demo-section">
+      <h2>图标样式</h2>
+      <p class="text-sm text-muted-foreground">带有不同类型图标的提示框</p>
+      <div class="alert-list">
+        @for (item of iconAlerts; track item.title) {
+          <ui-alert [variant]="item.variant">
+            @if (shouldShowIcon(item.icon)) {
+              <div [innerHTML]="getIconSvg(item.icon ?? 'info')"></div>
+            }
+            @if (hasTitle(item)) {
+              <ui-alert-title>{{ item.title }}</ui-alert-title>
+            }
+            @if (hasDescription(item)) {
+              <ui-alert-description>{{ item.description }}</ui-alert-description>
+            }
+          </ui-alert>
+        }
+      </div>
     </div>
 
-    <!-- Destructive Alert -->
-    <div class="space-y-4">
-      <h2 class="text-lg font-medium">Destructive Alert</h2>
-
-      <ui-alert variant="destructive">
-        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 16 16" fill="currentColor">
-          <circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.2"/>
-          <path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
-        </svg>
-        <ui-alert-title>Unable to process your payment.</ui-alert-title>
-        <ui-alert-description>
-          <p>Please verify your billing information and try again.</p>
-          <ul class="list-inside list-disc text-sm mt-2 space-y-1">
-            <li>Check your card details</li>
-            <li>Ensure sufficient funds</li>
-            <li>Verify billing address</li>
-          </ul>
-        </ui-alert-description>
-      </ui-alert>
+    <!-- Simple Alerts Section -->
+    <div class="demo-section">
+      <h2>简洁样式</h2>
+      <p class="text-sm text-muted-foreground">无标题或无描述的简洁提示框</p>
+      <div class="alert-list">
+        @for (item of simpleAlerts; track item.title) {
+          <ui-alert [variant]="item.variant">
+            @if (shouldShowIcon(item.icon)) {
+              <div [innerHTML]="getIconSvg(item.icon ?? 'info')"></div>
+            }
+            @if (hasTitle(item)) {
+              <ui-alert-title>{{ item.title }}</ui-alert-title>
+            }
+            @if (hasDescription(item)) {
+              <ui-alert-description>{{ item.description }}</ui-alert-description>
+            }
+          </ui-alert>
+        }
+      </div>
     </div>
 
-    <!-- Alert Without Description -->
-    <div class="space-y-4">
-      <h2 class="text-lg font-medium">Alert Without Description</h2>
-
-      <ui-alert>
-        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 16 16" fill="currentColor">
-          <path fill-rule="evenodd" d="M15 8A7 7 0 111 8a7 7 0 0114 0zm-6 3.5A1.5 1.5 0 109.5 10 1.5 1.5 0 009 11.5zm-.25-6a.75.75 0 00-1.5 0v4a.75.75 0 001.5 0v-4z" clip-rule="evenodd"/>
-        </svg>
-        <ui-alert-title>
-          This Alert has a title and an icon. No description.
-        </ui-alert-title>
-      </ui-alert>
+    <!-- Use Cases Section -->
+    <div class="demo-section">
+      <h2>实际使用场景</h2>
+      <p class="text-sm text-muted-foreground">各种实际应用场景中的提示框示例</p>
+      <div class="use-case-list">
+        @for (useCase of useCaseAlerts; track useCase.name) {
+          <div class="use-case-item">
+            <div class="use-case-header">
+              <h3>{{ useCase.name }}</h3>
+              <p class="text-sm text-muted-foreground">{{ useCase.description }}</p>
+            </div>
+            @if (useCase.inline) {
+              <div class="inline-demo">
+                <div class="rounded-lg border bg-card p-6">
+                  <h4 class="text-base font-medium mb-2">账户设置</h4>
+                  <p class="text-sm text-muted-foreground mb-4">
+                    管理您的账户设置和偏好
+                  </p>
+                  <ui-alert [variant]="useCase.alert.variant">
+                    @if (shouldShowIcon(useCase.alert.icon)) {
+                      <div [innerHTML]="getIconSvg(useCase.alert.icon ?? 'info')"></div>
+                    }
+                    @if (hasTitle(useCase.alert)) {
+                      <ui-alert-title>{{ useCase.alert.title }}</ui-alert-title>
+                    }
+                    @if (hasDescription(useCase.alert)) {
+                      <ui-alert-description>{{ useCase.alert.description }}</ui-alert-description>
+                    }
+                  </ui-alert>
+                </div>
+              </div>
+            } @else {
+              <div class="use-case-alert">
+                <ui-alert [variant]="useCase.alert.variant">
+                  @if (shouldShowIcon(useCase.alert.icon)) {
+                    <div [innerHTML]="getIconSvg(useCase.alert.icon ?? 'info')"></div>
+                  }
+                  @if (hasTitle(useCase.alert)) {
+                    <ui-alert-title>{{ useCase.alert.title }}</ui-alert-title>
+                  }
+                  @if (hasDescription(useCase.alert)) {
+                    <ui-alert-description>{{ useCase.alert.description }}</ui-alert-description>
+                  }
+                </ui-alert>
+              </div>
+            }
+          </div>
+        }
+      </div>
     </div>
 
-    <!-- Inline Alert -->
-    <div class="space-y-4">
-      <h2 class="text-lg font-medium">Inline Alert</h2>
+    <!-- Dark Mode Preview Section -->
+    <div class="demo-section">
+      <h2>深色模式预览</h2>
+      <p class="text-sm text-muted-foreground">查看提示框在深色模式下的效果</p>
+      <div class="dark-preview">
+        <div class="alert-list">
+          <ui-alert variant="default">
+            <div [innerHTML]="getIconSvg('info')"></div>
+            <ui-alert-title>深色模式提示</ui-alert-title>
+            <ui-alert-description>这是在深色模式下显示的提示框样式。</ui-alert-description>
+          </ui-alert>
+          <ui-alert variant="destructive">
+            <div [innerHTML]="getIconSvg('error')"></div>
+            <ui-alert-title>深色模式警告</ui-alert-title>
+            <ui-alert-description>这是在深色模式下显示的警告提示框样式。</ui-alert-description>
+          </ui-alert>
+        </div>
+      </div>
+    </div>
 
-      <div class="rounded-lg border bg-card p-6">
-        <h3 class="text-base font-medium mb-4">Account Settings</h3>
-        <p class="text-sm text-muted-foreground mb-4">
-          Manage your account settings and preferences.
-        </p>
-        <ui-alert class="mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 16 16" fill="currentColor">
-            <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
-          </svg>
-          <ui-alert-description>
-            Changes will take effect immediately. Make sure to review before saving.
-          </ui-alert-description>
-        </ui-alert>
+    <!-- Usage Example Section -->
+    <div class="demo-section">
+      <h2>使用示例</h2>
+      <div class="code-examples">
+        <div class="code-example">
+          <p class="text-xs font-semibold mb-2">基础用法：</p>
+          <code class="code-block">
+            &lt;ui-alert&gt;<br>
+            &nbsp;&nbsp;&lt;svg&gt;...&lt;/svg&gt;<br>
+            &nbsp;&nbsp;&lt;ui-alert-title&gt;提示信息&lt;/ui-alert-title&gt;<br>
+            &nbsp;&nbsp;&lt;ui-alert-description&gt;这是提示内容&lt;/ui-alert-description&gt;<br>
+            &lt;/ui-alert&gt;
+          </code>
+        </div>
+        <div class="code-example">
+          <p class="text-xs font-semibold mb-2">警告样式：</p>
+          <code class="code-block">
+            &lt;ui-alert variant="destructive"&gt;<br>
+            &nbsp;&nbsp;&lt;svg&gt;...&lt;/svg&gt;<br>
+            &nbsp;&nbsp;&lt;ui-alert-title&gt;错误提示&lt;/ui-alert-title&gt;<br>
+            &nbsp;&nbsp;&lt;ui-alert-description&gt;错误描述内容&lt;/ui-alert-description&gt;<br>
+            &lt;/ui-alert&gt;
+          </code>
+        </div>
       </div>
     </div>
   </div>
