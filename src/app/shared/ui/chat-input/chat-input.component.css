@@ -43,25 +43,31 @@
   font-size: var(--font-size-xs);
   font-weight: 400;
   color: var(--primary-foreground);
-  background: var(--primary);
+  /* Use OKLCH from primary color for consistency with mineral theme */
+  background: oklch(from var(--primary) l c h);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: opacity 150ms ease, transform 100ms ease;
+  transition: all var(--duration-fast) ease;
   white-space: nowrap;
 }
 
 .send-button:hover:not(:disabled) {
-  opacity: 0.9;
+  /* Slightly lighter on hover using OKLCH transparency */
+  background: oklch(from var(--primary) calc(l + 0.03) c h);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px oklch(from var(--primary) l c h / 0.2);
 }
 
 .send-button:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.98) translateY(0);
 }
 
 .send-button:disabled {
-  background: var(--muted);
+  /* Use muted color with OKLCH syntax */
+  background: oklch(from var(--muted) l c h);
   color: var(--muted-foreground);
   cursor: not-allowed;
   opacity: 0.6;
+  transform: none;
 }

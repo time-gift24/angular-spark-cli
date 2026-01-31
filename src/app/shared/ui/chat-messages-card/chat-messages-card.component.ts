@@ -102,9 +102,52 @@ export class ChatMessagesCardComponent {
   /**
    * Safe getter for position that handles undefined during component initialization.
    * Returns default position if position signal is not yet available.
+   *
+   * When position is { x: 0, y: 0 }, calculates a centered position
+   * that avoids overlap with session tabs and input at the bottom.
    */
   get safePosition(): PanelPosition {
-    return this.position?.() ?? { x: 0, y: 0 };
+    const pos = this.position?.();
+    if (!pos) {
+      // Calculate centered position for initial render
+      return this.calculateCenteredPosition();
+    }
+
+    // If position is still default { x: 0, y: 0 }, calculate centered position
+    if (pos.x === 0 && pos.y === 0) {
+      return this.calculateCenteredPosition();
+    }
+
+    return pos;
+  }
+
+  /**
+   * Calculates a centered position for the messages card.
+   *
+   * Positioning strategy:
+   * - Horizontal center: 50% of viewport width minus half panel width
+   * - Vertical position: 200px from bottom (above tabs and input)
+   *
+   * This ensures the card appears centered horizontally and positioned
+   * above the always-visible session tabs and input area.
+   *
+   * @private
+   */
+  private calculateCenteredPosition(): PanelPosition {
+    const panelWidth = this.safeSize.width;
+    const panelHeight = this.safeSize.height;
+
+    // Horizontal center: (viewportWidth - panelWidth) / 2
+    const centerX = (window.innerWidth - panelWidth) / 2;
+
+    // Vertical position: 200px from bottom
+    // This leaves space for session tabs (~48px) + input (~40px) + gaps (~112px)
+    const centerY = window.innerHeight - panelHeight - 200;
+
+    return {
+      x: Math.max(0, centerX), // Ensure non-negative
+      y: Math.max(0, centerY)
+    };
   }
 
   /**

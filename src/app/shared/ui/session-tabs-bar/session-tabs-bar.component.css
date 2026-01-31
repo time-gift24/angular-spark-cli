@@ -17,7 +17,10 @@
  */
 .session-tabs-container {
   position: fixed;
-  bottom: calc(var(--spacing-xl) * 3);  /* ~48px - above input area */
+  /* Position above input area with enough gap for max textarea height
+     Input max: ~136px (120px max-height + padding) + 16px bottom = 152px
+     Add 8px gap: 160px = calc(var(--spacing-xl) * 10) */
+  bottom: calc(var(--spacing-xl) * 10);  /* ~160px - above expanded input area */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
