@@ -1,0 +1,89 @@
+<div class="demo-container">
+  <header class="demo-header">
+    <h1>AI Chat Panel Demo</h1>
+    <p class="subtitle">Multiple sessions with always-visible input and session tabs</p>
+  </header>
+
+  <main class="demo-content">
+    <!-- Features Section -->
+    <section class="features-section">
+      <h2>Features</h2>
+      <ul class="features-list">
+        <li>✅ Session tabs always visible at bottom</li>
+        <li>✅ Input box always ready</li>
+        <li>✅ Click session tab to switch sessions</li>
+        <li>✅ Click active tab to toggle messages card</li>
+        <li>✅ Drag messages card by top handle</li>
+        <li>✅ Resize messages card from bottom-right</li>
+        <li>✅ Per-session position and size memory</li>
+        <li>✅ localStorage persistence</li>
+        <li>✅ Simulated AI responses for demo</li>
+      </ul>
+    </section>
+
+    <!-- Instructions Section -->
+    <section class="instructions-section">
+      <h2>How to Use</h2>
+      <div class="instructions-grid">
+        <div class="instruction-item">
+          <h3>1. Start Chatting</h3>
+          <p>Type a message in the input box at the bottom and press Enter to send.</p>
+        </div>
+        <div class="instruction-item">
+          <h3>2. Create Sessions</h3>
+          <p>Click the "+" button in the session tabs bar to create a new chat session.</p>
+        </div>
+        <div class="instruction-item">
+          <h3>3. Switch Sessions</h3>
+          <p>Click on any session tab to switch to that session. Your draft is preserved.</p>
+        </div>
+        <div class="instruction-item">
+          <h3>4. Toggle Panel</h3>
+          <p>Click the active session tab to show/hide the messages panel.</p>
+        </div>
+        <div class="instruction-item">
+          <h3>5. Move Panel</h3>
+          <p>Drag the panel by the top handle to reposition it anywhere on screen.</p>
+        </div>
+        <div class="instruction-item">
+          <h3>6. Resize Panel</h3>
+          <p>Drag the bottom-right corner to resize the messages panel.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Event Tracking Section -->
+    <section class="events-section">
+      <h2>Event Tracking</h2>
+      <div class="events-grid">
+        <div class="event-item">
+          <span class="event-label">Messages Sent:</span>
+          <span class="event-value">{{ eventCounters().messageSend }}</span>
+        </div>
+        <div class="event-item">
+          <span class="event-label">Session Changes:</span>
+          <span class="event-value">{{ eventCounters().sessionChange }}</span>
+        </div>
+        <div class="event-item">
+          <span class="event-label">Panel Toggles:</span>
+          <span class="event-value">{{ eventCounters().panelToggle }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Component Section -->
+    <section class="component-section">
+      <div class="component-header">
+        <h2>Live Demo</h2>
+        <p class="hint">Try the interactive component below. All events are logged to the console.</p>
+      </div>
+
+      <spark-ai-chat-panel
+        [apiEndpoint]="apiEndpoint()"
+        (messageSend)="handleMessageSend($event)"
+        (sessionChange)="handleSessionChange($event)"
+        (panelToggle)="handlePanelToggle($event)"
+      />
+    </section>
+  </main>
+</div>

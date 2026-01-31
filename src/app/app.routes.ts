@@ -97,6 +97,11 @@ export const routes: Routes = [
         path: 'context-menu',
         loadComponent: () => import('./demo/context-menu/context-menu-demo.component')
           .then(m => m.ContextMenuDemoComponent)
+      },
+      {
+        path: 'ai-chat-panel',
+        loadComponent: () => import('./demo/ai-chat-panel/demo-ai-chat-panel.component')
+          .then(m => m.DemoAiChatPanelComponent)
       }
     ]
   }
