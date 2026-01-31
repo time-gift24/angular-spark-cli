@@ -62,24 +62,9 @@
   height: calc(var(--spacing-lg) * 2); /* 24px */
   padding: var(--spacing-sm) 0;
 
-  /* Visual styling - 深绢黄背景 */
-  background: oklch(0.92 0.02 85);
-  border-bottom: 1px solid oklch(0.85 0.015 85);
-
   /* Interaction */
   cursor: move;
   user-select: none;
-
-  /* Subtle hover effect */
-  transition: background-color var(--duration-fast) ease;
-}
-
-.drag-handle:hover {
-  background: oklch(0.90 0.018 85);
-}
-
-.drag-handle:active {
-  background: oklch(0.88 0.018 85);
 }
 
 /* Drag icon - visual indicator */
@@ -404,15 +389,6 @@
    ======================================== */
 
 @media (prefers-color-scheme: dark) {
-  .drag-handle {
-    background: oklch(0.28 0.04 230);
-    border-bottom-color: oklch(0.35 0.04 230 / 50%);
-  }
-
-  .drag-handle:hover {
-    background: oklch(0.32 0.045 230);
-  }
-
   .drag-icon {
     color: oklch(0.65 0.035 195);
   }
