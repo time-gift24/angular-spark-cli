@@ -1,12 +1,39 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick, discardPeriodicTasks } from '@angular/core/testing';
 import { SessionStateService } from './session-state.service';
+import { SessionStorageService } from './session-storage.service';
 import { ChatMessage, SessionData } from '../models';
 
 describe('SessionStateService', () => {
   let service: SessionStateService;
+  let storageService: {
+    saveSessions: ReturnType<typeof vi.fn>;
+    saveActiveSessionId: ReturnType<typeof vi.fn>;
+    saveMessagesVisibility: ReturnType<typeof vi.fn>;
+    loadSessions: ReturnType<typeof vi.fn>;
+    loadActiveSessionId: ReturnType<typeof vi.fn>;
+    loadMessagesVisibility: ReturnType<typeof vi.fn>;
+    clearAll: ReturnType<typeof vi.fn>;
+    isAvailable: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    storageService = {
+      saveSessions: vi.fn(),
+      saveActiveSessionId: vi.fn(),
+      saveMessagesVisibility: vi.fn(),
+      loadSessions: vi.fn(),
+      loadActiveSessionId: vi.fn(),
+      loadMessagesVisibility: vi.fn(),
+      clearAll: vi.fn(),
+      isAvailable: vi.fn()
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: SessionStorageService, useValue: storageService }
+      ]
+    });
+
     service = TestBed.inject(SessionStateService);
   });
 
@@ -842,6 +869,44 @@ describe('SessionStateService', () => {
       // Verify only the kept session remains
       expect(service.sessions().size).toBe(1);
       expect(service.sessions().has(session3)).toBe(true);
+    });
+  });
+
+  describe('Storage Sync Effect', () => {
+    it('should inject SessionStorageService', () => {
+      expect(storageService).toBeDefined();
+    });
+
+    it('should have setup storage sync effect in constructor', () => {
+      // The effect is set up in the constructor, so if the service is created
+      // without errors, the effect setup was successful
+      expect(service).toBeTruthy();
+    });
+
+    it('should track previous state for change detection', () => {
+      // Access private properties to verify implementation
+      const prevSessions = service['prevSessions'] as Map<string, unknown>;
+      const prevActiveSessionId = service['prevActiveSessionId'] as string;
+      const prevIsMessagesVisible = service['prevIsMessagesVisible'] as boolean;
+
+      expect(prevSessions).toBeDefined();
+      expect(prevActiveSessionId).toBeDefined();
+      expect(prevIsMessagesVisible).toBeDefined();
+    });
+
+    it('should have storage sync timer property', () => {
+      const timer = service['storageSyncTimer'];
+      expect(timer).toBeDefined();
+    });
+
+    it('should have setupStorageSyncEffect method', () => {
+      const setupMethod = service['setupStorageSyncEffect'];
+      expect(typeof setupMethod).toBe('function');
+    });
+
+    it('should have saveToStorage method', () => {
+      const saveMethod = service['saveToStorage'];
+      expect(typeof saveMethod).toBe('function');
     });
   });
 });

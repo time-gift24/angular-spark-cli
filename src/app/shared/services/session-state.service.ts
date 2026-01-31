@@ -1,6 +1,7 @@
-import { Injectable, signal, computed, Signal } from '@angular/core';
+import { Injectable, signal, computed, Signal, effect, inject } from '@angular/core';
 import { SessionData, ChatMessage, PanelPosition, PanelSize } from '../models';
 import { IdGenerator } from '../utils';
+import { SessionStorageService } from './session-storage.service';
 
 /**
  * Default panel position when creating a new session.
@@ -68,9 +69,12 @@ const DEFAULT_SESSION_NAME = 'New Chat';
  * ```
  *
  * @Phase 2.1 - Core state management implementation
+ * @Phase 3.2 - Storage sync effect integration
  */
 @Injectable({ providedIn: 'root' })
 export class SessionStateService {
+  private readonly storage = inject(SessionStorageService);
+
   /**
    * Map of all sessions, keyed by session ID.
    *
@@ -162,6 +166,133 @@ export class SessionStateService {
     const inputValue = this.activeInputValue();
     return inputValue.trim().length > 0;
   });
+
+  /**
+   * Debounce timer for storage sync operations.
+   *
+   * Prevents excessive localStorage writes by batching rapid state changes.
+   * Uses 500ms delay to balance between responsiveness and performance.
+   *
+   * @private
+   */
+  private storageSyncTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /**
+   * Previous values for change detection.
+   *
+   * Tracks previous state to avoid redundant localStorage writes when values haven't actually changed.
+   *
+   * @private
+   */
+  private prevSessions = new Map<string, SessionData>();
+  private prevActiveSessionId = '';
+  private prevIsMessagesVisible = true;
+
+  constructor() {
+    this.setupStorageSyncEffect();
+  }
+
+  /**
+   * Sets up automatic synchronization of state changes to localStorage.
+   *
+   * This effect watches all state signals and persists changes to localStorage
+   * with debouncing to prevent excessive writes. The debouncing ensures that
+   * rapid state changes (like typing in the input field) don't cause a
+   * localStorage write on every keystroke.
+   *
+   * Debouncing Strategy:
+   * - 500ms delay balances responsiveness and performance
+   * - Each state change resets the timer
+   * - Only the final state after changes stop is written to storage
+   *
+   * Change Detection:
+   * - Tracks previous values to avoid redundant writes
+   * - Only writes when actual changes occur
+   * - Prevents unnecessary localStorage operations
+   *
+   * Synchronized Data:
+   * - sessions: Complete session map with all data
+   * - activeSessionId: Currently active session
+   * - isMessagesVisible: Messages panel visibility state
+   *
+   * @example
+   * ```typescript
+   * // User types in input field
+   * this.updateInputValue('H');  // Timer starts
+   * this.updateInputValue('He'); // Timer resets
+   * this.updateInputValue('Hel'); // Timer resets
+   * this.updateInputValue('Hell'); // Timer resets
+   * this.updateInputValue('Hello'); // Timer resets
+   * // 500ms later: Single localStorage write occurs
+   * ```
+   *
+   * @private
+   */
+  private setupStorageSyncEffect(): void {
+    effect(() => {
+      // Read all signals to establish tracking
+      const sessions = this.sessions();
+      const activeSessionId = this.activeSessionId();
+      const isMessagesVisible = this.isMessagesVisible();
+
+      // Clear any pending timer
+      if (this.storageSyncTimer !== null) {
+        clearTimeout(this.storageSyncTimer);
+      }
+
+      // Set up debounced save
+      this.storageSyncTimer = setTimeout(() => {
+        this.saveToStorage(sessions, activeSessionId, isMessagesVisible);
+      }, 500);
+    });
+  }
+
+  /**
+   * Saves state to localStorage if values have changed.
+   *
+   * Compares current state with previous values to avoid redundant writes.
+   * Only writes when actual changes are detected, reducing unnecessary
+   * localStorage operations.
+   *
+   * @param sessions - Current sessions map
+   * @param activeSessionId - Current active session ID
+   * @param isMessagesVisible - Current messages visibility state
+   *
+   * @private
+   */
+  private saveToStorage(
+    sessions: Map<string, SessionData>,
+    activeSessionId: string,
+    isMessagesVisible: boolean
+  ): void {
+    // Check if sessions map has changed (size or content)
+    const sessionsChanged =
+      sessions.size !== this.prevSessions.size ||
+      Array.from(sessions.entries()).some(([id, session]) => {
+        const prevSession = this.prevSessions.get(id);
+        if (!prevSession) return true;
+
+        // Compare session data (check lastUpdated for changes)
+        return session.lastUpdated !== prevSession.lastUpdated;
+      });
+
+    if (sessionsChanged) {
+      this.storage.saveSessions(sessions);
+      this.prevSessions = new Map(sessions);
+    }
+
+    // Check if activeSessionId has changed
+    if (activeSessionId !== this.prevActiveSessionId) {
+      this.storage.saveActiveSessionId(activeSessionId);
+      this.prevActiveSessionId = activeSessionId;
+    }
+
+    // Check if isMessagesVisible has changed
+    if (isMessagesVisible !== this.prevIsMessagesVisible) {
+      this.storage.saveMessagesVisibility(isMessagesVisible);
+      this.prevIsMessagesVisible = isMessagesVisible;
+    }
+  }
 
   /**
    * Switches to a different session with automatic draft preservation.
