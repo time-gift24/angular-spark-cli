@@ -62,6 +62,31 @@ export const routes: Routes = [
         path: 'tabs',
         loadComponent: () => import('./demo/tabs/tabs-demo.component')
           .then(m => m.TabsDemoComponent)
+      },
+      {
+        path: 'avatar',
+        loadComponent: () => import('./demo/avatar/avatar-demo/avatar-demo')
+          .then(m => m.AvatarDemoComponent)
+      },
+      {
+        path: 'progress',
+        loadComponent: () => import('./demo/progress/progress-demo/progress-demo')
+          .then(m => m.ProgressDemoComponent)
+      },
+      {
+        path: 'skeleton',
+        loadComponent: () => import('./demo/skeleton/skeleton-demo/skeleton-demo')
+          .then(m => m.SkeletonDemoComponent)
+      },
+      {
+        path: 'table',
+        loadComponent: () => import('./demo/table/table-demo/table-demo')
+          .then(m => m.TableDemoComponent)
+      },
+      {
+        path: 'slider',
+        loadComponent: () => import('./demo/slider/slider-demo/slider-demo')
+          .then(m => m.SliderDemoComponent)
       }
     ]
   }

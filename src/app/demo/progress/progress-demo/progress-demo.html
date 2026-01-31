@@ -1,0 +1,39 @@
+<div class="demo-container">
+  <div class="demo-header">
+    <h1>Progress</h1>
+    <p class="text-muted-foreground">Displays progress bars for showing completion status.</p>
+  </div>
+
+  <div class="demo-section">
+    <h2>Basic Progress</h2>
+    <p class="text-sm text-muted-foreground">A simple progress bar with controlled value.</p>
+
+    <div class="demo-example">
+      <ui-progress [value]="progress()" class="w-[60%]" />
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Without Value</h2>
+    <p class="text-sm text-muted-foreground">Indeterminate progress (loading state).</p>
+
+    <div class="demo-example">
+      <ui-progress [value]="0" class="w-[60%]" />
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Different Values</h2>
+    <p class="text-sm text-muted-foreground">Progress bars showing different completion levels.</p>
+
+    <div class="demo-example">
+      <div class="space-y-4 w-[60%]">
+        <ui-progress [value]="0" />
+        <ui-progress [value]="25" />
+        <ui-progress [value]="50" />
+        <ui-progress [value]="75" />
+        <ui-progress [value]="100" />
+      </div>
+    </div>
+  </div>
+</div>
