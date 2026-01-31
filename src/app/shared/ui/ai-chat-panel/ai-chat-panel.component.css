@@ -1,0 +1,26 @@
+/**
+ * AI Chat Panel - Root Orchestrator Component
+ *
+ * Phase 8 Task 8.1: Minimal layout CSS
+ * Phase 8 Task 8.4: Full styling with mineral & time theme
+ *
+ * This component provides basic layout structure for the chat panel.
+ * Full styling will be added in P8-T8.4.
+ */
+
+.ai-chat-panel {
+  /* Container for the entire chat panel */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+/* Future styling will be added in P8-T8.4:
+ * - Mineral & time theme colors
+ * - Spacing and sizing using design tokens
+ * - Responsive breakpoints
+ * - Animations and transitions
+ * - Z-index layering for floating panels
+ */

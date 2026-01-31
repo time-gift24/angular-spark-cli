@@ -1,0 +1,27 @@
+<div class="ai-chat-panel">
+  <!-- Chat Messages Card -->
+  <app-chat-messages-card
+    [messages]="sessionState.activeMessages"
+    [isVisible]="isMessagesVisible"
+    [position]="activeSessionPosition"
+    [size]="activeSessionSize"
+    (positionChange)="updatePosition($event)"
+    (sizeChange)="updateSize($event)"
+  />
+
+  <!-- Session Tabs Bar -->
+  <spark-session-tabs-bar
+    [sessions]="sessions"
+    [activeSessionId]="activeSessionId"
+    (sessionSelect)="switchSession($event)"
+    (sessionToggle)="toggleMessagesVisibility()"
+  />
+
+  <!-- Chat Input -->
+  <app-chat-input
+    [inputValue]="sessionState.activeInputValue"
+    [canSend]="sessionState.canSendMessage"
+    (inputChange)="sessionState.updateInputValue($event)"
+    (messageSend)="sendMessage()"
+  />
+</div>
