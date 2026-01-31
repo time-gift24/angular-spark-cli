@@ -13,9 +13,45 @@ import { PanelSize } from '../models';
  * - Real-time size updates via Signal integration
  * - Resize lifecycle events (resizeStart, resizeEnd, sizeChange)
  * - Min/max size constraints enforcement
- * - CSS transition management for smooth UX
  * - Automatic cleanup on destroy
  * - requestAnimationFrame throttling for optimal performance
+ *
+ * Transition Handling:
+ *
+ * This directive provides lifecycle events that parent components should use to
+ * disable CSS transitions during resize operations. This prevents laggy/jerky
+ * behavior that occurs when CSS transitions conflict with JavaScript-driven size
+ * updates.
+ *
+ * The directive emits two events for transition management:
+ * - (resizeStart): Fired when resize begins - use to disable CSS transitions
+ * - (resizeEnd): Fired when resize ends - use to re-enable CSS transitions
+ *
+ * Example implementation in parent component:
+ * ```typescript
+ * @Component({ ... })
+ * class MyComponent {
+ *   isResizing = false;
+ *
+ *   onResizeStart() {
+ *     this.isResizing = true;
+ *   }
+ *
+ *   onResizeEnd() {
+ *     this.isResizing = false;
+ *   }
+ * }
+ * ```
+ *
+ * And in the template:
+ * ```html
+ * <div [style.transition]="isResizing ? 'none' : 'all 0.2s'"
+ *      [appResizeHandle]="size"
+ *      (resizeStart)="onResizeStart()"
+ *      (resizeEnd)="onResizeEnd()">
+ *   Resize me!
+ * </div>
+ * ```
  *
  * Known limitations:
  * - TODO: Keyboard accessibility not implemented (future enhancement)
