@@ -1,3 +1,73 @@
+/* Progress Component - 矿物与时光主题 */
+
 :host {
   display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  background-color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+/* Progress Indicator - 矿物质感的进度条 */
+::slotted([data-progress-indicator]) {
+  height: 100%;
+  width: 100%;
+  background-color: var(--primary);
+  transition: transform var(--duration-normal) var(--ease-out),
+              background-color var(--duration-normal) var(--ease-out);
+  transform-origin: left;
+}
+
+/* Animated variant - 矿物光泽流动效果 */
+:host([data-animate="true"]) ::slotted([data-progress-indicator]) {
+  animation: progress-shimmer 2s linear infinite;
+  background: linear-gradient(
+    90deg,
+    var(--primary) 0%,
+    var(--primary) 40%,
+    var(--accent) 50%,
+    var(--primary) 60%,
+    var(--primary) 100%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes progress-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Size variants */
+:host([data-size="sm"]) {
+  height: 0.25rem; /* 4px */
+}
+
+:host([data-size="default"]) {
+  height: 0.5rem; /* 8px */
+}
+
+:host([data-size="lg"]) {
+  height: 0.75rem; /* 12px */
+}
+
+/* Indeterminate state */
+:host([data-state="indeterminate"]) ::slotted([data-progress-indicator]) {
+  animation: progress-indeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }

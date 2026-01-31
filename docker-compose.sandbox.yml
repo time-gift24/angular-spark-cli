@@ -1,0 +1,48 @@
+# Docker Compose for Angular Spark CLI Development Sandbox
+version: '3.8'
+
+services:
+  angular-spark-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.sandbox
+    container_name: angular-spark-sandbox
+    volumes:
+      # Mount source code for hot-reload
+      - .:/workspace
+      # Use named volume for node_modules to avoid conflicts
+      - node_modules:/workspace/node_modules
+    ports:
+      - "4200:4200"  # Angular dev server
+      - "24678:24678"  # Vitest / Vite dev server
+    environment:
+      # YOLO Mode - Auto-confirm all Claude Code operations
+      - CLAUDE_YOLO_MODE=true
+      - CLAUDE_AUTO_CONFIRM=true
+      - CLAUDE_SKIP_CONFIRMATIONS=true
+      # Angular environment
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true  # Enable file watching in Docker
+    command: npm start
+    # For interactive shell:
+    # command: /bin/bash -c "npm start && tail -f /dev/null"
+
+  # Service for running Claude Code interactively
+  claude-shell:
+    build:
+      context: .
+      dockerfile: Dockerfile.sandbox
+    container_name: angular-spark-claude
+    volumes:
+      - .:/workspace
+      - node_modules:/workspace/node_modules
+    environment:
+      - CLAUDE_YOLO_MODE=true
+      - CLAUDE_AUTO_CONFIRM=true
+    # Keep container running for interactive use
+    command: tail -f /dev/null
+    stdin_open: true
+    tty: true
+
+volumes:
+  node_modules:

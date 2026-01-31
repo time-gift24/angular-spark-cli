@@ -1,4 +1,106 @@
-/* Table styles - using native HTML table elements */
+/* Table Component - 矿物与时光主题 */
+
 :host {
   display: contents;
+}
+
+/* Table base styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  caption-side: bottom;
+  font-size: 0.875rem; /* text-sm */
+}
+
+/* Caption - 表格标题 */
+caption {
+  margin-top: var(--spacing-lg);
+  color: var(--muted-foreground);
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+/* Table Header */
+thead {
+  border-bottom: 1px solid var(--border);
+}
+
+thead tr {
+  border-bottom: 1px solid var(--border);
+}
+
+/* Table Header Cells */
+th {
+  height: 3rem; /* h-12 */
+  padding: 0 var(--spacing-xl);
+  text-align: left;
+  vertical-align: middle;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+th:has([role="checkbox"]) {
+  padding-right: 0;
+}
+
+/* Table Body */
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+tbody tr:last-child {
+  border-bottom: none;
+}
+
+/* Hover effect - 矿物质感悬停 */
+tbody tr:hover {
+  background-color: var(--muted);
+}
+
+/* Selected state */
+tbody tr[data-state="selected"] {
+  background-color: var(--accent);
+}
+
+/* Table Body Cells */
+td {
+  padding: var(--spacing-xl);
+  vertical-align: middle;
+}
+
+td:has([role="checkbox"]) {
+  padding-right: 0;
+}
+
+/* Table Footer */
+tfoot {
+  border-top: 1px solid var(--border);
+  background-color: oklch(from var(--muted) calc(l + 0.02) c h / 0.5);
+}
+
+tfoot tr {
+  font-weight: 500;
+}
+
+tfoot tr:last-child {
+  border-bottom: none;
+}
+
+/* Responsive table wrapper */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Striped rows variant */
+table[data-variant="striped"] tbody tr:nth-child(even) {
+  background-color: oklch(from var(--muted) calc(l + 0.01) c h / 0.3);
+}
+
+table[data-variant="striped"] tbody tr:nth-child(even):hover {
+  background-color: var(--muted);
 }

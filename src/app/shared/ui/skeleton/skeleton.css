@@ -1,3 +1,40 @@
+/* Skeleton Component - 矿物与时光主题 */
+
 :host {
   display: block;
+}
+
+/* Skeleton Base - 矿物质感加载占位符 */
+:host {
+  background-color: var(--muted);
+  border-radius: var(--radius-md);
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  pointer-events: none;
+}
+
+/* Pulse Animation - 柔和的矿物光泽脉动 */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+    background-color: var(--muted);
+  }
+  50% {
+    opacity: 0.5;
+    background-color: var(--muted-foreground / 0.1);
+  }
+}
+
+/* Fade-in animation for delayed loading */
+:host(.delayed) {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite,
+             skeleton-fade-in var(--duration-slow) var(--ease-out);
+}
+
+@keyframes skeleton-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

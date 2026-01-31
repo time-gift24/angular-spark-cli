@@ -1,7 +1,6 @@
 import { Component, input } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavComponent } from './nav.component';
-import { FooterComponent } from './footer.component';
 
 /**
  * MainLayoutComponent - Reusable layout wrapper for demo pages
@@ -16,7 +15,7 @@ import { FooterComponent } from './footer.component';
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, NavComponent, FooterComponent],
+  imports: [RouterOutlet, NavComponent],
   template: `
     <div class="min-h-screen bg-background flex flex-col md:flex-row">
       @if (showHeader()) {
