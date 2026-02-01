@@ -56,8 +56,11 @@
   <div
     class="resize-handle resize-handle-top-right"
     [appResizeHandle]="size"
+    [resizeMode]="'top-right'"
+    [position]="position"
     (sizeChange)="sizeChange.emit($event)"
-    title="拖拽调整大小"
+    (positionChange)="positionChange.emit($event)"
+    title="拖拽调整大小（固定底部）"
   >
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="m21 3-6 6m6-6v4.8m0-4.8h-4.8"/>
