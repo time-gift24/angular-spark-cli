@@ -1,0 +1,96 @@
+/* Context Menu Styles */
+/* These are included in the component for portability */
+
+.context-menu-wrapper {
+  background: var(--popover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  padding: var(--spacing-xs) 0;
+  min-width: var(--context-menu-min-width);
+  max-width: var(--context-menu-max-width);
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  height: var(--context-menu-item-height);
+  padding: 0 var(--context-menu-item-padding-x);
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--popover-foreground);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--duration-fast, 150ms) var(--ease-out);
+  position: relative;
+}
+
+.menu-item:hover:not(.disabled) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.menu-item.inset {
+  padding-left: calc(var(--context-menu-item-padding-x) + var(--context-menu-item-inset));
+}
+
+.menu-item.disabled {
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.menu-item.destructive {
+  color: var(--destructive);
+}
+
+.menu-item.destructive:hover:not(.disabled) {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+.menu-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-size-md, 1rem);
+  height: var(--icon-size-md, 1rem);
+  flex-shrink: 0;
+}
+
+.menu-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.menu-label {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.menu-shortcut {
+  margin-left: auto;
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--muted-foreground);
+}
+
+.menu-item:hover .menu-shortcut {
+  color: inherit;
+}
+
+.submenu-trigger {
+  cursor: default;
+}
+
+.submenu-arrow {
+  margin-left: auto;
+  width: 12px;
+  height: 12px;
+  color: var(--muted-foreground);
+}
+
+.menu-item:hover .submenu-arrow {
+  color: inherit;
+}

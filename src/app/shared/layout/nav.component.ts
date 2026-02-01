@@ -88,6 +88,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             Checkbox
           </a>
           <a
+            routerLink="/demo/context-menu"
+            routerLinkActive="bg-accent text-accent-foreground"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+            Context Menu
+          </a>
+          <a
             routerLink="/demo/alert"
             routerLinkActive="bg-accent text-accent-foreground"
             [routerLinkActiveOptions]="{ exact: true }"

@@ -145,6 +145,13 @@
   --slider-thumb-size: 1rem;     /* 16px */
   --slider-thumb-scale: 1.25;    /* 20px - hover/focus */
 
+  /* Context Menu */
+  --context-menu-min-width: 10rem;     /* 160px */
+  --context-menu-max-width: 16rem;     /* 256px */
+  --context-menu-item-height: 2rem;    /* 32px */
+  --context-menu-item-padding-x: 0.75rem;  /* 12px */
+  --context-menu-item-inset: 0.75rem;      /* 12px - for inset items */
+
   /* Animation durations (reusable) */
   --duration-instant: 100ms;
   --duration-fast: 150ms;
