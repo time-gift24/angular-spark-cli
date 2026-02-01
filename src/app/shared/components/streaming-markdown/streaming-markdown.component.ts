@@ -31,7 +31,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subject, Subscription, of } from 'rxjs';
-import { tap, takeUntil, catchError, switchMap } from 'rxjs/operators';
+import { tap, takeUntil, catchError, switchMap, first } from 'rxjs/operators';
 import { BlockRendererComponent } from './renderers/block-renderer.component';
 import {
   MarkdownBlock,
@@ -47,6 +47,7 @@ import {
   IBlockParser,
   BlockParser
 } from './core/block-parser';
+import { ShiniHighlighter } from './core/shini-highlighter';
 
 /**
  * Configuration for the RxJS streaming pipeline.
@@ -139,7 +140,7 @@ export interface IChangeDetector {
   styles: [`
     /* Markdown Block Styles */
     .markdown-block {
-      margin-bottom: var(--spacing-lg);
+      margin-bottom: var(--spacing-sm);
       padding: var(--spacing-md);
       border-radius: var(--radius-md);
       line-height: 1.6;
@@ -147,8 +148,8 @@ export interface IChangeDetector {
 
     /* Paragraph spacing - use ::ng-deep to penetrate ViewEncapsulation */
     .markdown-block ::ng-deep p {
-      margin-top: var(--spacing-md);
-      margin-bottom: var(--spacing-md);
+      margin-top: 0;
+      margin-bottom: var(--spacing-sm);
     }
 
     .markdown-block.block-paragraph {
@@ -157,8 +158,8 @@ export interface IChangeDetector {
 
     .markdown-block.block-heading {
       font-weight: 600;
-      margin-top: var(--spacing-xl);
-      margin-bottom: var(--spacing-md);
+      margin-top: var(--spacing-md);
+      margin-bottom: 0;
     }
 
     .markdown-block.block-code {
@@ -316,18 +317,21 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy 
    * @param preprocessor - Markdown preprocessor service for syntax correction
    * @param parser - Block parser service for converting markdown to blocks
    * @param cdr - Change detector reference for OnPush optimization
+   * @param shini - Shiki highlighter service for code syntax highlighting
    */
   constructor(
     private preprocessor: MarkdownPreprocessor,
     private parser: BlockParser,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private shini: ShiniHighlighter
   ) {}
 
   /**
    * Component initialization hook.
-   * Sets up the RxJS streaming pipeline.
+   * Sets up the RxJS streaming pipeline and initializes Shini.
    *
    * Pipeline implementation:
+   * - Initialize Shini highlighter (async, non-blocking)
    * - Subscribe to stream$
    * - Process each chunk through preprocessor
    * - Accumulate raw content
@@ -339,7 +343,14 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy 
     console.log('[StreamingMarkdownComponent] ngOnInit called');
     console.log('[StreamingMarkdownComponent] stream$ input:', this.stream$);
 
-    // Set up the streaming pipeline
+    // Initialize Shini highlighter asynchronously (don't block streaming)
+    this.shini.initialize().then(() => {
+      console.log('[StreamingMarkdownComponent] Shini initialized successfully');
+    }).catch((error) => {
+      console.error('[StreamingMarkdownComponent] Shini initialization failed:', error);
+    });
+
+    // Set up the streaming pipeline immediately
     this.subscribeToStream();
   }
 
