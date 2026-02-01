@@ -210,6 +210,14 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             >
               Session Tabs & Input
             </a>
+            <a
+              routerLink="/demo/streaming-markdown"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Streaming Markdown
+            </a>
           </div>
         </nav>
       </div>

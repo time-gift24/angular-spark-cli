@@ -134,6 +134,13 @@ export const routes: Routes = [
             (m) => m.DemoAiChatPanelComponent,
           ),
       },
+      {
+        path: 'streaming-markdown',
+        loadComponent: () =>
+          import('./demo/streaming-markdown/demo-streaming-markdown.component').then(
+            (m) => m.DemoStreamingMarkdownComponent,
+          ),
+      },
     ],
   },
 ];

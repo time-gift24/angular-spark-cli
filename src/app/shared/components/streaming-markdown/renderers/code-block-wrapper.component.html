@@ -1,0 +1,24 @@
+<div class="code-block-wrapper">
+  @if (showCopyButton || showLanguageTag) {
+    <div class="code-toolbar">
+      @if (showLanguageTag) {
+        <span class="language-tag">{{ language }}</span>
+      }
+      @if (showCopyButton) {
+        <button
+          class="copy-button"
+          [attr.aria-label]="getCopyButtonAriaLabel()"
+          (click)="copyToClipboard()">
+          {{ getCopyButtonText() }}
+        </button>
+      }
+    </div>
+  }
+
+  <div
+    [innerHTML]="safeHighlightedHtml()"
+    role="region"
+    [attr.aria-label]="'Code block: ' + language"
+    class="code-content">
+  </div>
+</div>
