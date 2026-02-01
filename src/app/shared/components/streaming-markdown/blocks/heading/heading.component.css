@@ -1,0 +1,58 @@
+/**
+ * Markdown Heading Component Styles
+ *
+ * Follows "矿物与时光" (Mineral & Time) design system:
+ * - Uses CSS variables for colors and spacing
+ * - Ultra compact sizing
+ * - Font weights: 600 for headings
+ */
+
+:host {
+  display: block;
+}
+
+.markdown-heading {
+  font-weight: 600;
+  margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-md);
+  color: var(--foreground);
+  line-height: 1.4;
+}
+
+/* Level-specific sizes */
+.markdown-heading:where(h1) {
+  font-size: 1.25rem;
+}
+
+.markdown-heading:where(h2) {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.markdown-heading:where(h3) {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.markdown-heading:where(h4) {
+  font-size: 0.9375rem; /* 15px */
+}
+
+.markdown-heading:where(h5) {
+  font-size: 0.875rem; /* 14px */
+}
+
+.markdown-heading:where(h6) {
+  font-size: 0.8125rem; /* 13px */
+}
+
+/* Fallback for invalid levels */
+.markdown-heading.fallback {
+  color: var(--destructive);
+  opacity: 0.8;
+}
+
+/* Streaming state */
+.markdown-heading.streaming {
+  opacity: 0.7;
+}
