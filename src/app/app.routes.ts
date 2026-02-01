@@ -64,6 +64,11 @@ export const routes: Routes = [
           .then(m => m.TabsDemoComponent)
       },
       {
+        path: 'tooltip',
+        loadComponent: () => import('./demo/tooltip/tooltip-demo.component')
+          .then(m => m.TooltipDemoComponent)
+      },
+      {
         path: 'avatar',
         loadComponent: () => import('./demo/avatar/avatar-demo/avatar-demo')
           .then(m => m.AvatarDemoComponent)

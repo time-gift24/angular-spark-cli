@@ -102,6 +102,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             Tabs
           </a>
           <a
+            routerLink="/demo/tooltip"
+            routerLinkActive="bg-accent text-accent-foreground"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+            Tooltip
+          </a>
+          <a
             routerLink="/demo/avatar"
             routerLinkActive="bg-accent text-accent-foreground"
             [routerLinkActiveOptions]="{ exact: true }"

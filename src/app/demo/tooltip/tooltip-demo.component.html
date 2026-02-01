@@ -1,0 +1,268 @@
+<div class="min-h-screen bg-background p-6">
+  <div class="mx-auto max-w-4xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+      <h1>Tooltip Component</h1>
+      <p class="text-muted-foreground">
+        灵活且可访问的工具提示组件，采用矿物与时光主题设计
+      </p>
+    </div>
+
+    <!-- Basic Tooltip -->
+    <div class="demo-section">
+      <h2>基础工具提示</h2>
+      <p class="text-sm text-muted-foreground">最简单的工具提示用法</p>
+      <div class="mt-4 flex gap-4">
+        <ui-tooltip>
+          <button ui-tooltip-trigger class="demo-button">
+            悬停查看
+          </button>
+          <div ui-tooltip-content>
+            这是工具提示内容
+          </div>
+        </ui-tooltip>
+      </div>
+    </div>
+
+    <!-- Tooltip Positions -->
+    <div class="demo-section">
+      <h2>工具提示位置</h2>
+      <p class="text-sm text-muted-foreground">支持上、下、左、右四个方向</p>
+      <div class="mt-4 grid grid-cols-4 gap-8">
+        <!-- Top -->
+        <div class="flex justify-center">
+          <ui-tooltip>
+            <button ui-tooltip-trigger class="demo-button">
+              上方提示
+            </button>
+            <div ui-tooltip-content side="top" >
+              显示在上方
+            </div>
+          </ui-tooltip>
+        </div>
+
+        <!-- Right -->
+        <div class="flex justify-center">
+          <ui-tooltip>
+            <button ui-tooltip-trigger class="demo-button">
+              右侧提示
+            </button>
+            <div ui-tooltip-content side="right" >
+              显示在右侧
+            </div>
+          </ui-tooltip>
+        </div>
+
+        <!-- Bottom -->
+        <div class="flex justify-center">
+          <ui-tooltip>
+            <button ui-tooltip-trigger class="demo-button">
+              下方提示
+            </button>
+            <div ui-tooltip-content side="bottom" >
+              显示在下方
+            </div>
+          </ui-tooltip>
+        </div>
+
+        <!-- Left -->
+        <div class="flex justify-center">
+          <ui-tooltip>
+            <button ui-tooltip-trigger class="demo-button">
+              左侧提示
+            </button>
+            <div ui-tooltip-content side="left" >
+              显示在左侧
+            </div>
+          </ui-tooltip>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tooltip with Button -->
+    <div class="demo-section">
+      <h2>按钮工具提示</h2>
+      <p class="text-sm text-muted-foreground">与按钮组件配合使用</p>
+      <div class="mt-4 flex gap-4">
+        <ui-tooltip>
+          <button ui-tooltip-trigger class="demo-button">
+            保存
+          </button>
+          <div ui-tooltip-content >
+            保存当前更改
+          </div>
+        </ui-tooltip>
+
+        <ui-tooltip>
+          <button ui-tooltip-trigger class="demo-button">
+            复制
+          </button>
+          <div ui-tooltip-content >
+            复制到剪贴板
+          </div>
+        </ui-tooltip>
+
+        <ui-tooltip>
+          <button ui-tooltip-trigger class="demo-button" style="background-color: var(--destructive); color: var(--destructive-foreground); border-color: var(--destructive);">
+            删除
+          </button>
+          <div ui-tooltip-content >
+            永久删除此项目
+          </div>
+        </ui-tooltip>
+      </div>
+    </div>
+
+    <!-- Rich Content Tooltip -->
+    <div class="demo-section">
+      <h2>富文本内容</h2>
+      <p class="text-sm text-muted-foreground">支持包含格式化内容的工具提示</p>
+      <div class="mt-4">
+        <ui-tooltip>
+          <button ui-tooltip-trigger class="demo-button">
+            详细信息
+          </button>
+          <div ui-tooltip-content class="whitespace-normal min-w-max">
+            <div class="font-medium mb-1">重要提示</div>
+            <div class="text-xs">这是一个包含多行文本和格式化内容的工具提示示例。</div>
+          </div>
+        </ui-tooltip>
+      </div>
+    </div>
+
+    <!-- Delayed Tooltip -->
+    <div class="demo-section">
+      <h2>延迟显示</h2>
+      <p class="text-sm text-muted-foreground">自定义延迟时间（毫秒）</p>
+      <div class="mt-4 flex gap-4">
+        <ui-tooltip [delayDuration]="0">
+          <button ui-tooltip-trigger class="demo-button">
+            立即显示
+          </button>
+          <div ui-tooltip-content >
+            无延迟
+          </div>
+        </ui-tooltip>
+
+        <ui-tooltip [delayDuration]="500">
+          <button ui-tooltip-trigger class="demo-button">
+            延迟 500ms
+          </button>
+          <div ui-tooltip-content >
+            500毫秒后显示
+          </div>
+        </ui-tooltip>
+
+        <ui-tooltip [delayDuration]="1000">
+          <button ui-tooltip-trigger class="demo-button">
+            延迟 1s
+          </button>
+          <div ui-tooltip-content >
+            1秒后显示
+          </div>
+        </ui-tooltip>
+      </div>
+    </div>
+
+    <!-- Icon Tooltip -->
+    <div class="demo-section">
+      <h2>图标工具提示</h2>
+      <p class="text-sm text-muted-foreground">为图标添加说明</p>
+      <div class="mt-4 flex gap-4 items-center">
+        <ui-tooltip>
+          <button ui-tooltip-trigger class="p-2 hover:bg-muted rounded">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path fill-rule="evenodd" d="M15 8a7 7 0 11-14 0 7 7 0 0114 0zm-7.5-3.75a.75.75 0 00-1.5 0v3.5a.75.75 0 001.5 0v-3.5zm-.75 6.5a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+          <div ui-tooltip-content >
+            查看帮助信息
+          </div>
+        </ui-tooltip>
+
+        <ui-tooltip>
+          <button ui-tooltip-trigger class="p-2 hover:bg-muted rounded">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zm.75 3.75a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0v-4.5zm-.75 6a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+          <div ui-tooltip-content >
+            警告：请注意
+          </div>
+        </ui-tooltip>
+
+        <ui-tooltip>
+          <button ui-tooltip-trigger class="p-2 hover:bg-muted rounded">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM7 5a1 1 0 112 0v3a1 1 0 11-2 0V5zm1 7a1 1 0 100-2 1 1 0 000 2z"/>
+            </svg>
+          </button>
+          <div ui-tooltip-content >
+            设置选项
+          </div>
+        </ui-tooltip>
+      </div>
+    </div>
+
+    <!-- Dark Mode Preview -->
+    <div class="demo-section">
+      <h2>深色模式预览</h2>
+      <p class="text-sm text-muted-foreground">查看工具提示在深色模式下的效果</p>
+      <div class="dark-preview mt-4">
+        <div class="flex gap-4">
+          <ui-tooltip>
+            <button ui-tooltip-trigger class="demo-button">
+              深色模式提示
+            </button>
+            <div ui-tooltip-content>
+              这是深色模式下的工具提示
+            </div>
+          </ui-tooltip>
+
+          <ui-tooltip>
+            <button ui-tooltip-trigger class="demo-button">
+              右侧提示
+            </button>
+            <div ui-tooltip-content side="right" >
+              显示在右侧的工具提示
+            </div>
+          </ui-tooltip>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Example -->
+    <div class="demo-section">
+      <h2>使用示例</h2>
+      <div class="mt-4 space-y-4">
+        <div>
+          <p class="text-xs font-semibold mb-2">基础用法：</p>
+          <code class="code-block">
+            &lt;ui-tooltip&gt;<br>
+            &nbsp;&nbsp;&lt;button ui-tooltip-trigger&gt;悬停&lt;/button&gt;<br>
+            &nbsp;&nbsp;&lt;div ui-tooltip-content&gt;提示内容&lt;/div&gt;<br>
+            &lt;/ui-tooltip&gt;
+          </code>
+        </div>
+        <div>
+          <p class="text-xs font-semibold mb-2">自定义位置：</p>
+          <code class="code-block">
+            &lt;ui-tooltip&gt;<br>
+            &nbsp;&nbsp;&lt;button ui-tooltip-trigger&gt;悬停&lt;/button&gt;<br>
+            &nbsp;&nbsp;&lt;div ui-tooltip-content side="right"&gt;右侧提示&lt;/div&gt;<br>
+            &lt;/ui-tooltip&gt;
+          </code>
+        </div>
+        <div>
+          <p class="text-xs font-semibold mb-2">自定义延迟：</p>
+          <code class="code-block">
+            &lt;ui-tooltip [delayDuration]="500"&gt;<br>
+            &nbsp;&nbsp;&lt;button ui-tooltip-trigger&gt;悬停&lt;/button&gt;<br>
+            &nbsp;&nbsp;&lt;div ui-tooltip-content&gt;500ms后显示&lt;/div&gt;<br>
+            &lt;/ui-tooltip&gt;
+          </code>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
