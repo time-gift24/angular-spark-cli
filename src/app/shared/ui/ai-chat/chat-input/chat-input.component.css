@@ -1,0 +1,89 @@
+/**
+ * Chat Input Component - Custom Styles
+ * Mineral & Time Theme - shadcn integration
+ */
+
+/* Textarea field styles */
+:host {
+  --chat-textarea-color: var(--foreground);
+  --chat-textarea-placeholder: var(--muted-foreground);
+}
+
+.chat-textarea {
+  color: var(--chat-textarea-color);
+}
+
+.chat-textarea::placeholder {
+  color: var(--chat-textarea-placeholder);
+}
+
+/* Dark mode */
+:host(.dark) {
+  --chat-textarea-color: var(--foreground);
+  --chat-textarea-placeholder: var(--muted-foreground);
+}
+
+/* Toolbar icon buttons - using standard button height */
+.chat-toolbar-btn {
+  height: var(--button-height-md) !important;
+  width: var(--button-height-md) !important;
+  color: var(--muted-foreground);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.chat-toolbar-btn:hover {
+  background-color: oklch(var(--primary) / 8%);
+  color: var(--primary);
+}
+
+.chat-toolbar-btn:focus-visible {
+  outline: 2px solid oklch(var(--primary) / 50%);
+  outline-offset: 2px;
+}
+
+/* Voice button special hover effect */
+.chat-voice-btn:hover {
+  background-color: oklch(var(--accent) / 10%);
+  color: var(--accent);
+}
+
+/* Send button - circular with custom states */
+.chat-send-btn {
+  height: var(--button-height-md) !important;
+  width: var(--button-height-md) !important;
+  border-radius: 9999px !important; /* Circular */
+  background-color: var(--secondary);
+  border: 1px solid oklch(var(--primary) / 15%);
+  color: var(--muted-foreground);
+  opacity: 0.5;
+  cursor: not-allowed;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.chat-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Active state (can send) */
+.chat-send-btn:not(:disabled) {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  opacity: 1;
+  cursor: pointer;
+}
+
+.chat-send-btn:not(:disabled):hover {
+  background-color: oklch(var(--color-primary) / 90%);
+  transform: scale(1.06);
+}
+
+.chat-send-btn:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.chat-send-btn:focus-visible {
+  outline: 2px solid oklch(var(--primary) / 50%);
+  outline-offset: 2px;
+}

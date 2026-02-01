@@ -17,6 +17,7 @@ import {
 } from '@angular/core';
 import { EventEmitter } from '@angular/core';
 import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
+import { ButtonComponent } from '@app/shared/ui/button';
 import {
   inputContainer,
   inputWrapper,
@@ -25,19 +26,8 @@ import {
   toolbar,
   toolButtonsLeft,
   actionButtonsRight,
-  iconButton,
-  iconButtonDefault,
-  voiceButtonHover,
-  sendButton,
-  sendButtonActive,
-  sendButtonFocus,
   toolbarIcon,
   sendIcon,
-  darkInputField,
-  darkPlaceholder,
-  darkIconButton,
-  darkSendButton,
-  darkSendButtonActive,
 } from './css';
 import { cn } from '@app/shared/utils';
 
@@ -49,7 +39,8 @@ import { cn } from '@app/shared/utils';
 @Component({
   selector: 'ai-chat-input',
   standalone: true,
-  imports: [LiquidGlassDirective],
+  imports: [LiquidGlassDirective, ButtonComponent],
+  styleUrls: ['./chat-input.component.css'],
   host: {
     '[class]': 'hostClasses()',
   },
@@ -68,6 +59,7 @@ import { cn } from '@app/shared/utils';
         <div [class]="inputAreaClasses()">
           <textarea
             #textarea
+            class="chat-textarea"
             [class]="inputFieldClasses()"
             [placeholder]="placeholder"
             [value]="value"
@@ -86,8 +78,10 @@ import { cn } from '@app/shared/utils';
           <!-- Left Tools -->
           <div [class]="toolButtonsLeftClasses()">
             <button
-              type="button"
-              [class]="fileButtonClasses()"
+              spark-button
+              variant="ghost"
+              size="icon"
+              class="chat-toolbar-btn"
               title="Add file"
               (click)="onFileClick()"
               [attr.aria-label]="'Add file'"
@@ -108,8 +102,10 @@ import { cn } from '@app/shared/utils';
             </button>
 
             <button
-              type="button"
-              [class]="imageButtonClasses()"
+              spark-button
+              variant="ghost"
+              size="icon"
+              class="chat-toolbar-btn"
               title="Add image"
               (click)="onImageClick()"
               [attr.aria-label]="'Add image'"
@@ -133,8 +129,10 @@ import { cn } from '@app/shared/utils';
           <!-- Right Actions -->
           <div [class]="actionButtonsRightClasses()">
             <button
-              type="button"
-              [class]="voiceButtonClasses()"
+              spark-button
+              variant="ghost"
+              size="icon"
+              class="chat-toolbar-btn chat-voice-btn"
               title="Voice input"
               (click)="onVoiceClick()"
               [attr.aria-label]="'Voice input'"
@@ -156,8 +154,10 @@ import { cn } from '@app/shared/utils';
 
             <!-- Circular Send Button -->
             <button
-              type="button"
-              [class]="sendButtonClasses()"
+              spark-button
+              [variant]="canSend() ? 'default' : 'ghost'"
+              size="icon"
+              class="chat-send-btn"
               [disabled]="!canSend()"
               (click)="onSend()"
               [attr.aria-label]="'Send message'"
@@ -245,7 +245,6 @@ export class ChatInputComponent {
   readonly toolbar = toolbar;
   readonly toolButtonsLeft = toolButtonsLeft;
   readonly actionButtonsRight = actionButtonsRight;
-  readonly iconButtonBase = iconButton;
   readonly iconBase = toolbarIcon;
   readonly sendIconBase = sendIcon;
 
@@ -256,9 +255,7 @@ export class ChatInputComponent {
     cn(this.inputWrapper, this.isFocused() ? 'focus-within' : ''),
   );
 
-  protected inputFieldClasses = computed(() =>
-    cn(this.inputFieldBase, darkInputField, darkPlaceholder),
-  );
+  protected inputFieldClasses = computed(() => this.inputFieldBase);
 
   protected inputAreaClasses = computed(() => this.inputArea);
 
@@ -267,28 +264,6 @@ export class ChatInputComponent {
   protected toolButtonsLeftClasses = computed(() => this.toolButtonsLeft);
 
   protected actionButtonsRightClasses = computed(() => this.actionButtonsRight);
-
-  protected fileButtonClasses = computed(() =>
-    cn(this.iconButtonBase, iconButtonDefault, darkIconButton),
-  );
-
-  protected imageButtonClasses = computed(() =>
-    cn(this.iconButtonBase, iconButtonDefault, darkIconButton),
-  );
-
-  protected voiceButtonClasses = computed(() =>
-    cn(this.iconButtonBase, iconButtonDefault, voiceButtonHover, darkIconButton),
-  );
-
-  protected sendButtonClasses = computed(() =>
-    cn(
-      sendButton,
-      darkSendButton,
-      sendButtonFocus,
-      this.canSend() ? sendButtonActive : '',
-      this.canSend() ? darkSendButtonActive : '',
-    ),
-  );
 
   protected iconClasses = computed(() => this.iconBase);
 
