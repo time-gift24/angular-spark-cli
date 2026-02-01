@@ -1,41 +1,459 @@
-<div class="demo-container">
-  <div class="demo-header">
+<div class="demo-page">
+  <div class="demo-page-header">
     <h1>Table</h1>
-    <p class="text-muted-foreground">Display data in a structured table format.</p>
+    <p class="text-muted-foreground">
+      A responsive table component with caption, header, body, footer, and row selection
+      support.
+    </p>
   </div>
 
-  <div class="demo-section">
-    <h2>Basic Table</h2>
-    <p class="text-sm text-muted-foreground">A simple table with header, body and footer.</p>
+  <div class="demo-sections">
+    <!-- 基础表格示例 -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Basic Table</h2>
+        <p class="text-sm text-muted-foreground">
+          A simple table with caption, header, and body displaying invoice data.
+        </p>
+      </div>
 
-    <div class="demo-example">
-      <ui-table>
-        <ui-table-caption>A list of your recent invoices.</ui-table-caption>
-        <ui-table-header>
-          <ui-table-row>
-            <ui-table-head class="w-100px">Invoice</ui-table-head>
-            <ui-table-head>Status</ui-table-head>
-            <ui-table-head>Method</ui-table-head>
-            <ui-table-head class="text-right">Amount</ui-table-head>
-          </ui-table-row>
-        </ui-table-header>
-        <ui-table-body>
-          @for (invoice of invoices; track invoice.invoice) {
-            <ui-table-row>
-              <ui-table-cell class="font-medium">{{ invoice.invoice }}</ui-table-cell>
-              <ui-table-cell>{{ invoice.paymentStatus }}</ui-table-cell>
-              <ui-table-cell>{{ invoice.paymentMethod }}</ui-table-cell>
-              <ui-table-cell class="text-right">{{ invoice.totalAmount }}</ui-table-cell>
-            </ui-table-row>
+      <div class="demo-example">
+        <table spark-table>
+          <caption spark-table-caption>A list of your recent invoices.</caption>
+          <thead spark-table-header>
+            <tr spark-table-row>
+              <th spark-table-head>Invoice</th>
+              <th spark-table-head>Status</th>
+              <th spark-table-head>Method</th>
+              <th spark-table-head class="text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody spark-table-body>
+            @for (invoice of invoices; track invoice.invoice) {
+              <tr spark-table-row>
+                <td spark-table-cell class="font-medium">{{ invoice.invoice }}</td>
+                <td spark-table-cell [class]="getStatusClass(invoice.status)">
+                  {{ invoice.status }}
+                </td>
+                <td spark-table-cell>{{ invoice.method }}</td>
+                <td spark-table-cell class="text-right">{{ invoice.amount }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 带表脚的表格 -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Table with Footer</h2>
+        <p class="text-sm text-muted-foreground">
+          A table with footer showing the total amount of all invoices.
+        </p>
+      </div>
+
+      <div class="demo-example">
+        <table spark-table>
+          <caption spark-table-caption>A list of your recent invoices with total.</caption>
+          <thead spark-table-header>
+            <tr spark-table-row>
+              <th spark-table-head>Invoice</th>
+              <th spark-table-head>Status</th>
+              <th spark-table-head>Method</th>
+              <th spark-table-head class="text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody spark-table-body>
+            @for (invoice of invoices; track invoice.invoice) {
+              <tr spark-table-row>
+                <td spark-table-cell class="font-medium">{{ invoice.invoice }}</td>
+                <td spark-table-cell [class]="getStatusClass(invoice.status)">
+                  {{ invoice.status }}
+                </td>
+                <td spark-table-cell>{{ invoice.method }}</td>
+                <td spark-table-cell class="text-right">{{ invoice.amount }}</td>
+              </tr>
+            }
+          </tbody>
+          <tfoot spark-table-footer>
+            <tr spark-table-row>
+              <td spark-table-cell colspan="3">Total</td>
+              <td spark-table-cell class="text-right font-medium">{{ '$' + totalAmount.toFixed(2) }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <!-- 带选择状态的表格 -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Table with Selected Row</h2>
+        <p class="text-sm text-muted-foreground">
+          A table demonstrating the selected state. The first row is marked as selected.
+        </p>
+      </div>
+
+      <div class="demo-example">
+        <table spark-table>
+          <caption spark-table-caption>Invoice table with a selected row.</caption>
+          <thead spark-table-header>
+            <tr spark-table-row>
+              <th spark-table-head>Invoice</th>
+              <th spark-table-head>Status</th>
+              <th spark-table-head>Method</th>
+              <th spark-table-head class="text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody spark-table-body>
+            @for (invoice of invoices; track invoice.invoice; let isFirst = $first) {
+              <tr spark-table-row [attr.data-state]="isFirst ? 'selected' : null">
+                <td spark-table-cell class="font-medium">{{ invoice.invoice }}</td>
+                <td spark-table-cell [class]="getStatusClass(invoice.status)">
+                  {{ invoice.status }}
+                </td>
+                <td spark-table-cell>{{ invoice.method }}</td>
+                <td spark-table-cell class="text-right">{{ invoice.amount }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 紧凑型表格示例 -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Minimal Table</h2>
+        <p class="text-sm text-muted-foreground">
+          A minimal table without caption or footer, focusing on the data.
+        </p>
+      </div>
+
+      <div class="demo-example">
+        <table spark-table>
+          <thead spark-table-header>
+            <tr spark-table-row>
+              <th spark-table-head>Invoice</th>
+              <th spark-table-head>Status</th>
+              <th spark-table-head>Method</th>
+              <th spark-table-head class="text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody spark-table-body>
+            @for (invoice of invoices.slice(0, 3); track invoice.invoice) {
+              <tr spark-table-row>
+                <td spark-table-cell class="font-medium">{{ invoice.invoice }}</td>
+                <td spark-table-cell [class]="getStatusClass(invoice.status)">
+                  {{ invoice.status }}
+                </td>
+                <td spark-table-cell>{{ invoice.method }}</td>
+                <td spark-table-cell class="text-right">{{ invoice.amount }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 可排序表格示例 -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Sortable Table</h2>
+        <p class="text-sm text-muted-foreground">
+          Click column headers to sort by that column. Toggle between ascending and descending order.
+        </p>
+      </div>
+
+      <div class="demo-example">
+        <table spark-table>
+          <caption spark-table-caption>Click headers to sort the table.</caption>
+          <thead spark-table-header>
+            <tr spark-table-row>
+              <th spark-table-head
+                  class="cursor-pointer hover:bg-muted/50 select-none"
+                  (click)="toggleSort('invoice')">
+                <div class="flex items-center gap-2">
+                  <span>Invoice</span>
+                  <span class="text-muted-foreground">{{ getSortIcon('invoice') }}</span>
+                </div>
+              </th>
+              <th spark-table-head
+                  class="cursor-pointer hover:bg-muted/50 select-none"
+                  (click)="toggleSort('status')">
+                <div class="flex items-center gap-2">
+                  <span>Status</span>
+                  <span class="text-muted-foreground">{{ getSortIcon('status') }}</span>
+                </div>
+              </th>
+              <th spark-table-head
+                  class="cursor-pointer hover:bg-muted/50 select-none"
+                  (click)="toggleSort('method')">
+                <div class="flex items-center gap-2">
+                  <span>Method</span>
+                  <span class="text-muted-foreground">{{ getSortIcon('method') }}</span>
+                </div>
+              </th>
+              <th spark-table-head
+                  class="cursor-pointer hover:bg-muted/50 select-none text-right"
+                  (click)="toggleSort('amount')">
+                <div class="flex items-center justify-end gap-2">
+                  <span>Amount</span>
+                  <span class="text-muted-foreground">{{ getSortIcon('amount') }}</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody spark-table-body>
+            @for (invoice of sortedInvoices(); track invoice.invoice) {
+              <tr spark-table-row>
+                <td spark-table-cell class="font-medium">{{ invoice.invoice }}</td>
+                <td spark-table-cell [class]="getStatusClass(invoice.status)">
+                  {{ invoice.status }}
+                </td>
+                <td spark-table-cell>{{ invoice.method }}</td>
+                <td spark-table-cell class="text-right">{{ invoice.amount }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 可过滤表格示例 -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Filterable Table</h2>
+        <p class="text-sm text-muted-foreground">
+          Use the search input to filter the table. Sorting and filtering work together.
+        </p>
+      </div>
+
+      <div class="demo-example">
+        <div class="flex items-center gap-2 mb-4">
+          <input
+            type="text"
+            [value]="filterText()"
+            (input)="filterText.set($any($event.target).value)"
+            placeholder="Filter all columns..."
+            class="flex h-[var(--input-height)] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          />
+          @if (filterText()) {
+            <button
+              (click)="clearFilter()"
+              class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-[var(--input-height)] px-4 py-2"
+            >
+              Clear
+            </button>
           }
-        </ui-table-body>
-        <ui-table-footer>
-          <ui-table-row>
-            <ui-table-cell colspan="3">Total</ui-table-cell>
-            <ui-table-cell class="text-right">$1,750.00</ui-table-cell>
-          </ui-table-row>
-        </ui-table-footer>
-      </ui-table>
-    </div>
+        </div>
+
+        <table spark-table>
+          <caption spark-table-caption>
+            Showing {{ filteredAndSortedInvoices().length }} of {{ invoices.length }} invoices
+          </caption>
+          <thead spark-table-header>
+            <tr spark-table-row>
+              <th spark-table-head
+                  class="cursor-pointer hover:bg-muted/50 select-none"
+                  (click)="toggleSort('invoice')">
+                <div class="flex items-center gap-2">
+                  <span>Invoice</span>
+                  <span class="text-muted-foreground">{{ getSortIcon('invoice') }}</span>
+                </div>
+              </th>
+              <th spark-table-head
+                  class="cursor-pointer hover:bg-muted/50 select-none"
+                  (click)="toggleSort('status')">
+                <div class="flex items-center gap-2">
+                  <span>Status</span>
+                  <span class="text-muted-foreground">{{ getSortIcon('status') }}</span>
+                </div>
+              </th>
+              <th spark-table-head
+                  class="cursor-pointer hover:bg-muted/50 select-none"
+                  (click)="toggleSort('method')">
+                <div class="flex items-center gap-2">
+                  <span>Method</span>
+                  <span class="text-muted-foreground">{{ getSortIcon('method') }}</span>
+                </div>
+              </th>
+              <th spark-table-head
+                  class="cursor-pointer hover:bg-muted/50 select-none text-right"
+                  (click)="toggleSort('amount')">
+                <div class="flex items-center justify-end gap-2">
+                  <span>Amount</span>
+                  <span class="text-muted-foreground">{{ getSortIcon('amount') }}</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody spark-table-body>
+            @if (filteredAndSortedInvoices().length === 0) {
+              <tr spark-table-row>
+                <td spark-table-cell colspan="4" class="text-center text-muted-foreground py-8">
+                  No results found
+                </td>
+              </tr>
+            } @else {
+              @for (invoice of filteredAndSortedInvoices(); track invoice.invoice) {
+                <tr spark-table-row>
+                  <td spark-table-cell class="font-medium">{{ invoice.invoice }}</td>
+                  <td spark-table-cell [class]="getStatusClass(invoice.status)">
+                    {{ invoice.status }}
+                  </td>
+                  <td spark-table-cell>{{ invoice.method }}</td>
+                  <td spark-table-cell class="text-right">{{ invoice.amount }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 可分页表格示例 -->
+    <section class="demo-section">
+      <div class="demo-section-header">
+        <h2>Paginated Table</h2>
+        <p class="text-sm text-muted-foreground">
+          Navigate through large datasets using pagination controls.
+        </p>
+      </div>
+
+      <div class="demo-example">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <label class="text-sm text-muted-foreground">Rows per page:</label>
+            <select
+              [value]="pageSize()"
+              (change)="pageSize.set($any($event.target).value); currentPage.set(1)"
+              class="h-[var(--input-height)] rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="3">3</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+            </select>
+          </div>
+          <div class="text-sm text-muted-foreground">
+            Page {{ currentPage() }} of {{ totalPages() }}
+          </div>
+        </div>
+
+        <table spark-table>
+          <caption spark-table-caption>
+            Showing {{ paginatedInvoices().length }} of {{ filteredAndSortedInvoices().length }} invoices (page {{ currentPage() }} of {{ totalPages() }})
+          </caption>
+          <thead spark-table-header>
+            <tr spark-table-row>
+              <th spark-table-head
+                  class="cursor-pointer hover:bg-muted/50 select-none"
+                  (click)="toggleSort('invoice')">
+                <div class="flex items-center gap-2">
+                  <span>Invoice</span>
+                  <span class="text-muted-foreground">{{ getSortIcon('invoice') }}</span>
+                </div>
+              </th>
+              <th spark-table-head
+                  class="cursor-pointer hover:bg-muted/50 select-none"
+                  (click)="toggleSort('status')">
+                <div class="flex items-center gap-2">
+                  <span>Status</span>
+                  <span class="text-muted-foreground">{{ getSortIcon('status') }}</span>
+                </div>
+              </th>
+              <th spark-table-head
+                  class="cursor-pointer hover:bg-muted/50 select-none"
+                  (click)="toggleSort('method')">
+                <div class="flex items-center gap-2">
+                  <span>Method</span>
+                  <span class="text-muted-foreground">{{ getSortIcon('method') }}</span>
+                </div>
+              </th>
+              <th spark-table-head
+                  class="cursor-pointer hover:bg-muted/50 select-none text-right"
+                  (click)="toggleSort('amount')">
+                <div class="flex items-center justify-end gap-2">
+                  <span>Amount</span>
+                  <span class="text-muted-foreground">{{ getSortIcon('amount') }}</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody spark-table-body>
+            @if (paginatedInvoices().length === 0) {
+              <tr spark-table-row>
+                <td spark-table-cell colspan="4" class="text-center text-muted-foreground py-8">
+                  No results found
+                </td>
+              </tr>
+            } @else {
+              @for (invoice of paginatedInvoices(); track invoice.invoice) {
+                <tr spark-table-row>
+                  <td spark-table-cell class="font-medium">{{ invoice.invoice }}</td>
+                  <td spark-table-cell [class]="getStatusClass(invoice.status)">
+                    {{ invoice.status }}
+                  </td>
+                  <td spark-table-cell>{{ invoice.method }}</td>
+                  <td spark-table-cell class="text-right">{{ invoice.amount }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+
+        <!-- Pagination Controls -->
+        @if (totalPages() > 1) {
+          <div class="flex items-center justify-between mt-4 pt-4 border-t border-border">
+            <div class="text-sm text-muted-foreground">
+              Showing {{ getStartIndex() }} to {{ getEndIndex() }} of {{ filteredAndSortedInvoices().length }} results
+            </div>
+
+            <div class="flex items-center gap-1">
+              <button
+                (click)="firstPage()"
+                [disabled]="isFirstPage"
+                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-[var(--input-height)] px-3 py-2"
+              >
+                First
+              </button>
+              <button
+                (click)="previousPage()"
+                [disabled]="isFirstPage"
+                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-[var(--input-height)] px-3 py-2"
+              >
+                Previous
+              </button>
+
+              @for (page of getPageNumbers(); track page) {
+                <button
+                  (click)="goToPage(page)"
+                  [class]="page === currentPage() ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
+                  class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none h-[var(--input-height)] min-w-[2.5rem] px-3 py-2"
+                >
+                  {{ page }}
+                </button>
+              }
+
+              <button
+                (click)="nextPage()"
+                [disabled]="isLastPage"
+                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-[var(--input-height)] px-3 py-2"
+              >
+                Next
+              </button>
+              <button
+                (click)="lastPage()"
+                [disabled]="isLastPage"
+                class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:pointer-events-none bg-secondary text-secondary-foreground hover:bg-secondary/80 h-[var(--input-height)] px-3 py-2"
+              >
+                Last
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
   </div>
 </div>
