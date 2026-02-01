@@ -11,12 +11,13 @@
   border-radius: 9999px;
   border: 1px solid var(--border);
   background-color: var(--input);
-  transition: background-color var(--duration-normal) var(--ease-out),
-              border-color var(--duration-normal) var(--ease-out);
+  transition:
+    background-color var(--duration-normal) var(--ease-out),
+    border-color var(--duration-normal) var(--ease-out);
   cursor: pointer;
 }
 
-:host([data-state="checked"]) .switch-track {
+:host([data-state='checked']) .switch-track {
   background-color: var(--primary);
   border-color: var(--primary);
 }
@@ -43,45 +44,45 @@
   background-color: var(--foreground);
 }
 
-:host([data-state="checked"]) .switch-thumb {
+:host([data-state='checked']) .switch-thumb {
   background-color: var(--primary-foreground);
 }
 
 /* Size variants */
-:host([data-size="default"]) .switch-track {
+:host([data-size='default']) .switch-track {
   width: var(--switch-width-md);
   height: var(--switch-height-md);
 }
 
-:host([data-size="default"]) .switch-thumb {
+:host([data-size='default']) .switch-thumb {
   width: var(--switch-thumb-size-md);
   height: var(--switch-thumb-size-md);
 }
 
-:host([data-size="sm"]) .switch-track {
+:host([data-size='sm']) .switch-track {
   width: var(--switch-width-sm);
   height: var(--switch-height-sm);
 }
 
-:host([data-size="sm"]) .switch-thumb {
+:host([data-size='sm']) .switch-thumb {
   width: var(--switch-thumb-size-sm);
   height: var(--switch-thumb-size-sm);
 }
 
 /* State animations */
-:host([data-size="default"][data-state="checked"]) .switch-thumb {
+:host([data-size='default'][data-state='checked']) .switch-thumb {
   transform: translateX(var(--switch-thumb-translate));
 }
 
-:host([data-size="default"][data-state="unchecked"]) .switch-thumb {
+:host([data-size='default'][data-state='unchecked']) .switch-thumb {
   transform: translateX(0);
 }
 
-:host([data-size="sm"][data-state="checked"]) .switch-thumb {
+:host([data-size='sm'][data-state='checked']) .switch-thumb {
   transform: translateX(var(--switch-thumb-translate));
 }
 
-:host([data-size="sm"][data-state="unchecked"]) .switch-thumb {
+:host([data-size='sm'][data-state='unchecked']) .switch-thumb {
   transform: translateX(0);
 }
 

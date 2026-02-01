@@ -1,5 +1,13 @@
-import { Component, input, computed, output, ChangeDetectionStrategy, ElementRef, inject } from '@angular/core';
-import { cn } from '../../utils';
+import {
+  Component,
+  input,
+  computed,
+  output,
+  ChangeDetectionStrategy,
+  ElementRef,
+  inject,
+} from '@angular/core';
+import { cn } from '@app/shared/utils';
 
 export type ButtonVariant = 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
 export type ButtonSize = 'default' | 'sm' | 'lg' | 'icon';
@@ -14,9 +22,7 @@ export type ButtonSize = 'default' | 'sm' | 'lg' | 'icon';
     '[attr.disabled]': 'disabled() ? "" : null',
     '[attr.aria-disabled]': 'disabled()',
   },
-  template: `
-    <ng-content />
-  `,
+  template: ` <ng-content /> `,
 })
 export class ButtonComponent {
   private readonly elementRef = inject(ElementRef);
@@ -108,11 +114,6 @@ export class ButtonComponent {
    * Uses Angular computed() instead of class-variance-authority
    */
   protected computedClass = computed(() => {
-    return cn(
-      this.getBaseClasses(),
-      this.getVariantClasses(),
-      this.getSizeClasses(),
-      this.class()
-    );
+    return cn(this.getBaseClasses(), this.getVariantClasses(), this.getSizeClasses(), this.class());
   });
 }

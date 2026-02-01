@@ -1,6 +1,8 @@
 <div class="min-h-screen flex items-center justify-center bg-background p-4 relative">
   <!-- 组件说明 - 右上角 -->
-  <aside class="fixed top-4 right-4 w-80 p-4 bg-background border rounded-lg shadow-lg text-sm max-h-[90vh] overflow-y-auto">
+  <aside
+    class="fixed top-4 right-4 w-80 p-4 bg-background border rounded-lg shadow-lg text-sm max-h-[90vh] overflow-y-auto"
+  >
     <h2 class="text-base font-medium text-foreground mb-2">Session Tabs + Input</h2>
     <p class="text-muted-foreground mb-3">
       展示如何组合使用 Session Tabs Bar 和 Chat Input 两个独立组件
@@ -38,20 +40,23 @@
 
       <button
         class="w-full text-xs px-2 py-1.5 border rounded hover:bg-accent transition-colors text-left"
-        (click)="togglePanel()">
+        (click)="togglePanel()"
+      >
         {{ isOpen() ? '📖 面板: 已展开' : '📕 面板: 已收起' }}
       </button>
 
       <button
         class="w-full text-xs px-2 py-1.5 border rounded hover:bg-accent transition-colors text-left"
-        (click)="toggleDisabled()">
+        (click)="toggleDisabled()"
+      >
         {{ disabled() ? '🚫 输入框: 已禁用' : '✅ 输入框: 已启用' }}
       </button>
 
       <button
         class="w-full text-xs px-2 py-1.5 border rounded hover:bg-accent transition-colors text-left"
-        (click)="clearLog()">
-          🗑️ 清空日志 ({{ eventLog().length }})
+        (click)="clearLog()"
+      >
+        🗑️ 清空日志 ({{ eventLog().length }})
       </button>
     </div>
 

@@ -1,5 +1,5 @@
 import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
-import { cn } from '../../utils';
+import { cn } from '@app/shared/utils';
 
 @Component({
   selector: 'div[spark-card]',
@@ -14,10 +14,7 @@ export class CardComponent {
   readonly class = input<string>('');
 
   protected computedClass = computed(() => {
-    return cn(
-      'rounded-xl border bg-card text-card-foreground shadow',
-      this.class()
-    );
+    return cn('rounded-xl border bg-card text-card-foreground shadow', this.class());
   });
 }
 
@@ -35,10 +32,7 @@ export class CardHeaderComponent {
   readonly class = input<string>('');
 
   protected computedClass = computed(() => {
-    return cn(
-      'flex flex-col space-y-1.5',
-      this.class()
-    );
+    return cn('flex flex-col space-y-1.5', this.class());
   });
 
   protected headerPadding = computed(() => `padding: var(--card-padding);`);
@@ -57,10 +51,7 @@ export class CardTitleComponent {
   readonly class = input<string>('');
 
   protected computedClass = computed(() => {
-    return cn(
-      'font-semibold leading-none tracking-tight',
-      this.class()
-    );
+    return cn('font-semibold leading-none tracking-tight', this.class());
   });
 }
 
@@ -77,10 +68,7 @@ export class CardDescriptionComponent {
   readonly class = input<string>('');
 
   protected computedClass = computed(() => {
-    return cn(
-      'text-sm text-muted-foreground',
-      this.class()
-    );
+    return cn('text-sm text-muted-foreground', this.class());
   });
 }
 
@@ -98,12 +86,12 @@ export class CardContentComponent {
   readonly class = input<string>('');
 
   protected computedClass = computed(() => {
-    return cn(
-      this.class()
-    );
+    return cn(this.class());
   });
 
-  protected cardPadding = computed(() => `padding: 0 var(--card-padding) var(--card-padding) var(--card-padding);`);
+  protected cardPadding = computed(
+    () => `padding: 0 var(--card-padding) var(--card-padding) var(--card-padding);`,
+  );
 }
 
 @Component({
@@ -120,13 +108,12 @@ export class CardFooterComponent {
   readonly class = input<string>('');
 
   protected computedClass = computed(() => {
-    return cn(
-      'flex items-center',
-      this.class()
-    );
+    return cn('flex items-center', this.class());
   });
 
-  protected cardFooterPadding = computed(() => `padding: 0 var(--card-padding) var(--card-padding) var(--card-padding);`);
+  protected cardFooterPadding = computed(
+    () => `padding: 0 var(--card-padding) var(--card-padding) var(--card-padding);`,
+  );
 }
 
 export const CardComponents = [

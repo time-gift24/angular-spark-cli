@@ -8,7 +8,7 @@ import {
   inject,
   AfterViewInit,
   OnDestroy,
-  ElementRef
+  ElementRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -46,14 +46,12 @@ export interface ContextMenuItem {
   selector: 'ui-context-menu',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <ng-content />
-  `,
+  template: ` <ng-content /> `,
   styles: `
     :host {
       display: contents;
     }
-  `
+  `,
 })
 export class ContextMenuComponent {
   items = input<ContextMenuItem[]>([]);
@@ -71,7 +69,7 @@ export class ContextMenuComponent {
     '[style.display]': '"block"',
     '[style.position]': '"fixed"',
     '[style.minWidth]': 'minWidth()',
-    '[style.maxWidth]': 'maxWidth()'
+    '[style.maxWidth]': 'maxWidth()',
   },
   template: `
     <div class="context-menu-content" [class.submenu]="isSubmenu()">
@@ -82,13 +80,27 @@ export class ContextMenuComponent {
             [class.inset]="item.inset"
             [class.disabled]="item.disabled"
             (mouseenter)="onSubmenuEnter($event, item)"
-            (click)="onItemClick(item, $event)">
+            (click)="onItemClick(item, $event)"
+          >
             @if (item.icon) {
               <span class="menu-icon" [innerHTML]="item.icon"></span>
             }
             <span class="menu-label">{{ item.label }}</span>
-            <svg class="submenu-arrow" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M4.5 3L7.5 6L4.5 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              class="submenu-arrow"
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+            >
+              <path
+                d="M4.5 3L7.5 6L4.5 9"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </div>
         } @else {
@@ -97,7 +109,8 @@ export class ContextMenuComponent {
             [class.inset]="item.inset"
             [class.disabled]="item.disabled"
             [class.destructive]="item.destructive"
-            (click)="onItemClick(item, $event)">
+            (click)="onItemClick(item, $event)"
+          >
             @if (item.icon) {
               <span class="menu-icon" [innerHTML]="item.icon"></span>
             }
@@ -110,109 +123,113 @@ export class ContextMenuComponent {
       }
     </div>
   `,
-  styles: [`
-    :host {
-      z-index: 9999;
-      background: var(--popover);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      padding: var(--spacing-xs) 0;
-      min-width: var(--context-menu-min-width);
-      max-width: var(--context-menu-max-width);
-    }
+  styles: [
+    `
+      :host {
+        z-index: 9999;
+        background: var(--popover);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        box-shadow:
+          0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        padding: var(--spacing-xs) 0;
+        min-width: var(--context-menu-min-width);
+        max-width: var(--context-menu-max-width);
+      }
 
-    :host.submenu {
-      margin-left: 4px;
-    }
+      :host.submenu {
+        margin-left: 4px;
+      }
 
-    .context-menu-content {
-      display: flex;
-      flex-direction: column;
-    }
+      .context-menu-content {
+        display: flex;
+        flex-direction: column;
+      }
 
-    .menu-item {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      height: var(--context-menu-item-height);
-      padding: 0 var(--context-menu-item-padding-x);
-      font-size: var(--font-size-sm, 0.875rem);
-      color: var(--popover-foreground);
-      cursor: pointer;
-      user-select: none;
-      transition: background-color var(--duration-fast, 150ms) var(--ease-out);
-      position: relative;
-    }
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        height: var(--context-menu-item-height);
+        padding: 0 var(--context-menu-item-padding-x);
+        font-size: var(--font-size-sm, 0.875rem);
+        color: var(--popover-foreground);
+        cursor: pointer;
+        user-select: none;
+        transition: background-color var(--duration-fast, 150ms) var(--ease-out);
+        position: relative;
+      }
 
-    .menu-item:hover:not(.disabled) {
-      background: var(--accent);
-      color: var(--accent-foreground);
-    }
+      .menu-item:hover:not(.disabled) {
+        background: var(--accent);
+        color: var(--accent-foreground);
+      }
 
-    .menu-item.inset {
-      padding-left: calc(var(--context-menu-item-padding-x) + var(--context-menu-item-inset));
-    }
+      .menu-item.inset {
+        padding-left: calc(var(--context-menu-item-padding-x) + var(--context-menu-item-inset));
+      }
 
-    .menu-item.disabled {
-      opacity: var(--opacity-disabled, 0.5);
-      cursor: not-allowed;
-      pointer-events: none;
-    }
+      .menu-item.disabled {
+        opacity: var(--opacity-disabled, 0.5);
+        cursor: not-allowed;
+        pointer-events: none;
+      }
 
-    .menu-item.destructive {
-      color: var(--destructive);
-    }
+      .menu-item.destructive {
+        color: var(--destructive);
+      }
 
-    .menu-item.destructive:hover:not(.disabled) {
-      background: var(--destructive);
-      color: var(--destructive-foreground);
-    }
+      .menu-item.destructive:hover:not(.disabled) {
+        background: var(--destructive);
+        color: var(--destructive-foreground);
+      }
 
-    .menu-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: var(--icon-size-md, 1rem);
-      height: var(--icon-size-md, 1rem);
-      flex-shrink: 0;
-    }
+      .menu-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--icon-size-md, 1rem);
+        height: var(--icon-size-md, 1rem);
+        flex-shrink: 0;
+      }
 
-    .menu-icon :deep(svg) {
-      width: 100%;
-      height: 100%;
-    }
+      .menu-icon :deep(svg) {
+        width: 100%;
+        height: 100%;
+      }
 
-    .menu-label {
-      flex: 1;
-      white-space: nowrap;
-    }
+      .menu-label {
+        flex: 1;
+        white-space: nowrap;
+      }
 
-    .menu-shortcut {
-      margin-left: auto;
-      font-size: var(--font-size-xs, 0.75rem);
-      color: var(--muted-foreground);
-    }
+      .menu-shortcut {
+        margin-left: auto;
+        font-size: var(--font-size-xs, 0.75rem);
+        color: var(--muted-foreground);
+      }
 
-    .menu-item:hover .menu-shortcut {
-      color: inherit;
-    }
+      .menu-item:hover .menu-shortcut {
+        color: inherit;
+      }
 
-    .submenu-trigger {
-      cursor: default;
-    }
+      .submenu-trigger {
+        cursor: default;
+      }
 
-    .submenu-arrow {
-      margin-left: auto;
-      width: 12px;
-      height: 12px;
-      color: var(--muted-foreground);
-    }
+      .submenu-arrow {
+        margin-left: auto;
+        width: 12px;
+        height: 12px;
+        color: var(--muted-foreground);
+      }
 
-    .menu-item:hover .submenu-arrow {
-      color: inherit;
-    }
-  `]
+      .menu-item:hover .submenu-arrow {
+        color: inherit;
+      }
+    `,
+  ],
 })
 export class ContextMenuContentComponent {
   items = input<ContextMenuItem[]>([]);
@@ -242,7 +259,7 @@ export class ContextMenuContentComponent {
  */
 @Directive({
   selector: '[uiContextMenuTrigger]',
-  standalone: true
+  standalone: true,
 })
 export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
   @Input('uiContextMenuTrigger') menuItems: ContextMenuItem[] = [];
@@ -314,7 +331,7 @@ export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
       max-width: var(--context-menu-max-width);
     `;
 
-    items.forEach(item => {
+    items.forEach((item) => {
       const itemEl = this.createMenuItem(item);
       container.appendChild(itemEl);
     });

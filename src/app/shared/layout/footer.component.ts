@@ -19,9 +19,7 @@ import { Component } from '@angular/core';
           <p class="text-muted-foreground text-center">
             矿物与时光 (Mineral & Time) - Design System
           </p>
-          <p class="text-muted-foreground text-center">
-            Built with Angular 20+ & Tailwind CSS v4
-          </p>
+          <p class="text-muted-foreground text-center">Built with Angular 20+ & Tailwind CSS v4</p>
           <div class="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
             <span>&copy; 2026 Angular Spark CLI</span>
             <span>&bull;</span>
@@ -30,6 +28,6 @@ import { Component } from '@angular/core';
         </div>
       </div>
     </footer>
-  `
+  `,
 })
 export class FooterComponent {}

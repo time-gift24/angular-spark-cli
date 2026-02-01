@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { SessionTabsBarComponent } from './session-tabs-bar.component';
-import { SessionData } from '../../models';
+import { SessionData } from '@app/shared/models';
 
 // Vitest imports
 import { beforeEach, describe, it, expect, vi } from 'vitest';
@@ -60,7 +60,9 @@ class TestHostComponent {
       lastUpdated,
     });
 
-    (this.sessions as unknown as { set: (value: Map<string, SessionData>) => void }).set(updatedSessions);
+    (this.sessions as unknown as { set: (value: Map<string, SessionData>) => void }).set(
+      updatedSessions,
+    );
   }
 
   /**
@@ -166,7 +168,7 @@ describe('SessionTabsBarComponent', () => {
       expect(sortedSessions).toHaveLength(3);
 
       // All should have the same timestamp
-      expect(sortedSessions.every(s => s.lastUpdated === sameTimestamp)).toBe(true);
+      expect(sortedSessions.every((s) => s.lastUpdated === sameTimestamp)).toBe(true);
     });
 
     it('should reactively update when sessions are added', () => {
@@ -195,7 +197,9 @@ describe('SessionTabsBarComponent', () => {
         ...updatedSessions.get('sess-1')!,
         lastUpdated: 3000,
       });
-      (testHost.sessions as unknown as { set: (value: Map<string, SessionData>) => void }).set(updatedSessions);
+      (testHost.sessions as unknown as { set: (value: Map<string, SessionData>) => void }).set(
+        updatedSessions,
+      );
 
       fixture.detectChanges();
 
@@ -459,7 +463,7 @@ describe('SessionTabsBarComponent', () => {
       expect(sortedSessions).toHaveLength(3);
 
       // All should have the same timestamp
-      expect(sortedSessions.every(s => s.lastUpdated === sameTime)).toBe(true);
+      expect(sortedSessions.every((s) => s.lastUpdated === sameTime)).toBe(true);
 
       // All tabs should be rendered
       const tabButtons = fixture.nativeElement.querySelectorAll('.session-tab');
@@ -533,7 +537,9 @@ describe('SessionTabsBarComponent', () => {
         ...updatedSessions.get('sess-1')!,
         lastUpdated: 3000,
       });
-      (testHost.sessions as unknown as { set: (value: Map<string, SessionData>) => void }).set(updatedSessions);
+      (testHost.sessions as unknown as { set: (value: Map<string, SessionData>) => void }).set(
+        updatedSessions,
+      );
 
       fixture.detectChanges();
 
@@ -604,13 +610,15 @@ describe('SessionTabsBarComponent', () => {
       const sessions = testHost.sessions();
       const updatedSessions = new Map(sessions);
       updatedSessions.delete('sess-2');
-      (testHost.sessions as unknown as { set: (value: Map<string, SessionData>) => void }).set(updatedSessions);
+      (testHost.sessions as unknown as { set: (value: Map<string, SessionData>) => void }).set(
+        updatedSessions,
+      );
 
       fixture.detectChanges();
       expect(component.sortedSessions()).toHaveLength(2);
 
       const sortedSessions = component.sortedSessions();
-      expect(sortedSessions.find(s => s.id === 'sess-2')).toBeUndefined();
+      expect(sortedSessions.find((s) => s.id === 'sess-2')).toBeUndefined();
     });
   });
 

@@ -15,17 +15,12 @@ export const cardContainer = [
 /**
  * Fixed positioning variant (for when parent wants fixed positioning)
  */
-export const cardFixed = [
-  'fixed right-6 top-[90px]',
-  'z-[999]',
-].join(' ');
+export const cardFixed = ['fixed right-6 top-[90px]', 'z-[999]'].join(' ');
 
 /**
  * Relative positioning variant (for when parent wants relative positioning)
  */
-export const cardRelative = [
-  'relative',
-].join(' ');
+export const cardRelative = ['relative'].join(' ');
 
 /**
  * Collapsed state
@@ -75,23 +70,17 @@ export const messagesContainer = [
 /**
  * Message wrapper
  */
-export const messageWrapper = [
-  'flex w-full',
-].join(' ');
+export const messageWrapper = ['flex w-full'].join(' ');
 
 /**
  * User message alignment
  */
-export const messageUser = [
-  'justify-end',
-].join(' ');
+export const messageUser = ['justify-end'].join(' ');
 
 /**
  * Assistant message alignment
  */
-export const messageAssistant = [
-  'justify-start',
-].join(' ');
+export const messageAssistant = ['justify-start'].join(' ');
 
 /**
  * Message bubble base
@@ -107,10 +96,7 @@ export const messageBubble = [
 /**
  * User message bubble
  */
-export const messageBubbleUser = [
-  'bg-[oklch(0.42_0.04_195)]',
-  'text-white',
-].join(' ');
+export const messageBubbleUser = ['bg-[oklch(0.42_0.04_195)]', 'text-white'].join(' ');
 
 /**
  * Assistant message bubble
@@ -124,23 +110,17 @@ export const messageBubbleAssistant = [
 /**
  * AI bubble content
  */
-export const aiBubbleContent = [
-  'flex flex-col gap-2',
-].join(' ');
+export const aiBubbleContent = ['flex flex-col gap-2'].join(' ');
 
 /**
  * AI bubble paragraph
  */
-export const aiBubbleParagraph = [
-  'm-0',
-].join(' ');
+export const aiBubbleParagraph = ['m-0'].join(' ');
 
 /**
  * Action buttons container
  */
-export const actionButtonsContainer = [
-  'flex gap-2 flex-wrap',
-].join(' ');
+export const actionButtonsContainer = ['flex gap-2 flex-wrap'].join(' ');
 
 /**
  * Action button
@@ -164,6 +144,4 @@ export const actionButton = [
 /**
  * Action icon
  */
-export const actionIcon = [
-  'text-xs',
-].join(' ');
+export const actionIcon = ['text-xs'].join(' ');

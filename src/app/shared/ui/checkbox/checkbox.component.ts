@@ -9,11 +9,11 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '../../lib/cn';
+import { cn } from '@app/shared/lib/cn';
 
 const checkboxVariants = cva(
   // Base styles - ultra compact
-  'peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50'
+  'peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50',
 );
 
 export type CheckboxVariant = VariantProps<typeof checkboxVariants>;
@@ -48,7 +48,7 @@ export type CheckboxVariant = VariantProps<typeof checkboxVariants>;
         justify-content: center;
       }
 
-      input[type="checkbox"] {
+      input[type='checkbox'] {
         appearance: none;
         -webkit-appearance: none;
         width: var(--checkbox-size);
@@ -59,14 +59,14 @@ export type CheckboxVariant = VariantProps<typeof checkboxVariants>;
         flex-shrink: 0;
       }
 
-      input[type="checkbox"]:checked {
+      input[type='checkbox']:checked {
         background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
         background-size: var(--checkbox-icon-size);
         background-position: center;
         background-repeat: no-repeat;
       }
 
-      input[type="checkbox"]:disabled {
+      input[type='checkbox']:disabled {
         cursor: not-allowed;
         opacity: 0.5;
       }

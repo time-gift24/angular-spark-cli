@@ -16,7 +16,7 @@ import {
   afterNextRender,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { PanelPosition, MIN_PANEL_SIZE } from '../types/chat.types';
+import { PanelPosition, MIN_PANEL_SIZE } from '@app/shared/ui/ai-chat/types/chat.types';
 
 /**
  * Drag handle directive

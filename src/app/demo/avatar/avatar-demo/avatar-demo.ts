@@ -4,7 +4,7 @@ import {
   AvatarComponent,
   AvatarImageComponent,
   AvatarFallbackComponent,
-  type AvatarSize
+  type AvatarSize,
 } from '../../../shared/ui/avatar';
 
 export interface AvatarExample {
@@ -20,27 +20,22 @@ const examples: AvatarExample[] = [
     src: 'https://github.com/shadcn.png',
     alt: '@shadcn',
     fallback: 'CN',
-    size: 'md'
+    size: 'md',
   },
   {
     src: 'https://github.com/evilrabbit.png',
     alt: '@evilrabbit',
     fallback: 'ER',
-    size: 'md'
-  }
+    size: 'md',
+  },
 ];
 
 @Component({
   selector: 'app-avatar-demo',
   standalone: true,
-  imports: [
-    CommonModule,
-    AvatarComponent,
-    AvatarImageComponent,
-    AvatarFallbackComponent
-  ],
+  imports: [CommonModule, AvatarComponent, AvatarImageComponent, AvatarFallbackComponent],
   templateUrl: './avatar-demo.html',
-  styleUrl: '../../shared/demo-page-styles.css'
+  styleUrl: '../../shared/demo-page-styles.css',
 })
 export class AvatarDemoComponent {
   readonly examples = examples;

@@ -6,7 +6,7 @@
 }
 
 /* Slider Track - 矿物质感的滑槽 */
-input[type="range"] {
+input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
@@ -21,7 +21,7 @@ input[type="range"] {
 }
 
 /* Slider Track - Webkit Progress Fill */
-input[type="range"]::-webkit-slider-runnable-track {
+input[type='range']::-webkit-slider-runnable-track {
   -webkit-appearance: none;
   appearance: none;
   height: var(--slider-height);
@@ -30,7 +30,7 @@ input[type="range"]::-webkit-slider-runnable-track {
 }
 
 /* Slider Track - Moz Progress Fill */
-input[type="range"]::-moz-range-track {
+input[type='range']::-moz-range-track {
   -moz-appearance: none;
   appearance: none;
   height: var(--slider-height);
@@ -39,7 +39,7 @@ input[type="range"]::-moz-range-track {
 }
 
 /* Slider Thumb - 矿物质感滑块 */
-input[type="range"]::-webkit-slider-thumb {
+input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: var(--slider-thumb-size);
@@ -56,7 +56,7 @@ input[type="range"]::-webkit-slider-thumb {
     border-color var(--duration-fast) var(--ease-out);
 }
 
-input[type="range"]::-moz-range-thumb {
+input[type='range']::-moz-range-thumb {
   -moz-appearance: none;
   appearance: none;
   width: var(--slider-thumb-size);
@@ -73,45 +73,45 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* Hover State */
-input[type="range"]:hover::-webkit-slider-thumb {
+input[type='range']:hover::-webkit-slider-thumb {
   transform: scale(var(--slider-thumb-scale));
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-input[type="range"]:hover::-moz-range-thumb {
+input[type='range']:hover::-moz-range-thumb {
   transform: scale(var(--slider-thumb-scale));
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Active/Pressed State */
-input[type="range"]:active::-webkit-slider-thumb {
+input[type='range']:active::-webkit-slider-thumb {
   cursor: grabbing;
   transform: scale(var(--slider-thumb-scale));
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-input[type="range"]:active::-moz-range-thumb {
+input[type='range']:active::-moz-range-thumb {
   cursor: grabbing;
   transform: scale(var(--slider-thumb-scale));
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* Focus State */
-input[type="range"]:focus-visible {
+input[type='range']:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
 /* Disabled State */
-input[type="range"]:disabled {
+input[type='range']:disabled {
   opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
 
-input[type="range"]:disabled::-webkit-slider-thumb {
+input[type='range']:disabled::-webkit-slider-thumb {
   cursor: not-allowed;
 }
 
-input[type="range"]:disabled::-moz-range-thumb {
+input[type='range']:disabled::-moz-range-thumb {
   cursor: not-allowed;
 }

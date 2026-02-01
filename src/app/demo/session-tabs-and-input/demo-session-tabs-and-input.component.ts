@@ -1,7 +1,7 @@
 import { Component, signal, computed, Signal } from '@angular/core';
-import { SessionTabsBarComponent } from '../../shared/ui/session-tabs-bar/session-tabs-bar.component';
-import { ChatInputComponent } from '../../shared/ui/ai-chat/chat-input/chat-input.component';
-import { SessionData, SessionColor, SessionStatus } from '../../shared/models';
+import { SessionTabsBarComponent } from '@app/shared/ui/session-tabs-bar';
+import { ChatInputComponent } from '@app/shared/ui/ai-chat';
+import { SessionData, SessionColor, SessionStatus } from '@app/shared/models';
 
 /**
  * Demo Session Tabs and Input Component
@@ -86,7 +86,7 @@ export class DemoSessionTabsAndInputComponent {
     ];
 
     const map = new Map<string, SessionData>();
-    demoSessions.forEach(session => map.set(session.id, session));
+    demoSessions.forEach((session) => map.set(session.id, session));
     this.sessionsInternal.set(map);
     this.activeSessionId.set('session-1');
   }
@@ -95,7 +95,7 @@ export class DemoSessionTabsAndInputComponent {
    * 处理面板切换
    */
   onSessionToggle(): void {
-    this.isOpen.update(v => !v);
+    this.isOpen.update((v) => !v);
     this.addLog(`Toggle panel: ${this.isOpen() ? 'open' : 'closed'}`);
   }
 
@@ -122,7 +122,7 @@ export class DemoSessionTabsAndInputComponent {
       lastUpdated: Date.now(),
     };
 
-    this.sessionsInternal.update(map => {
+    this.sessionsInternal.update((map) => {
       const newMap = new Map(map);
       newMap.set(newSession.id, newSession);
       return newMap;
@@ -136,7 +136,7 @@ export class DemoSessionTabsAndInputComponent {
    * 处理会话重命名
    */
   onSessionRename(event: { sessionId: string; newName: string }): void {
-    this.sessionsInternal.update(map => {
+    this.sessionsInternal.update((map) => {
       const newMap = new Map(map);
       const session = newMap.get(event.sessionId);
       if (session) {
@@ -152,7 +152,7 @@ export class DemoSessionTabsAndInputComponent {
    * 处理会话颜色变更
    */
   onSessionColorChange(event: { sessionId: string; color: SessionColor }): void {
-    this.sessionsInternal.update(map => {
+    this.sessionsInternal.update((map) => {
       const newMap = new Map(map);
       const session = newMap.get(event.sessionId);
       if (session) {
@@ -175,7 +175,7 @@ export class DemoSessionTabsAndInputComponent {
     }
 
     const session = current.get(sessionId);
-    this.sessionsInternal.update(map => {
+    this.sessionsInternal.update((map) => {
       const newMap = new Map(map);
       newMap.delete(sessionId);
       return newMap;
@@ -200,7 +200,7 @@ export class DemoSessionTabsAndInputComponent {
     // 更新当前会话的输入草稿
     const activeId = this.activeSessionId();
     if (activeId) {
-      this.sessionsInternal.update(map => {
+      this.sessionsInternal.update((map) => {
         const newMap = new Map(map);
         const session = newMap.get(activeId);
         if (session) {
@@ -246,7 +246,7 @@ export class DemoSessionTabsAndInputComponent {
    * 切换禁用状态
    */
   toggleDisabled(): void {
-    this.disabled.update(v => !v);
+    this.disabled.update((v) => !v);
   }
 
   /**
@@ -261,7 +261,7 @@ export class DemoSessionTabsAndInputComponent {
    */
   private addLog(message: string): void {
     const timestamp = new Date().toLocaleTimeString();
-    this.eventLog.update(log => [`[${timestamp}] ${message}`, ...log]);
+    this.eventLog.update((log) => [`[${timestamp}] ${message}`, ...log]);
   }
 
   /**
@@ -271,22 +271,22 @@ export class DemoSessionTabsAndInputComponent {
     {
       icon: '🎯',
       title: '独立组件组合',
-      desc: 'Session Tabs Bar 和 Chat Input 都是独立组件，通过布局组合使用'
+      desc: 'Session Tabs Bar 和 Chat Input 都是独立组件，通过布局组合使用',
     },
     {
       icon: '📐',
       title: '左对齐布局',
-      desc: '使用 Flexbox 实现垂直布局，tabs bar 在上，input 在下，左对齐'
+      desc: '使用 Flexbox 实现垂直布局，tabs bar 在上，input 在下，左对齐',
     },
     {
       icon: '🎨',
       title: '会话管理',
-      desc: '右键菜单：重命名、更改颜色、关闭会话'
+      desc: '右键菜单：重命名、更改颜色、关闭会话',
     },
     {
       icon: '⌨️',
       title: '交互完整',
-      desc: '支持切换会话、新建会话、发送消息等完整功能'
+      desc: '支持切换会话、新建会话、发送消息等完整功能',
     },
   ];
 

@@ -5,11 +5,11 @@ import { Component, input, output, ChangeDetectionStrategy } from '@angular/core
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    'class': 'aspect-square h-full w-full object-cover',
+    class: 'aspect-square h-full w-full object-cover',
     '[attr.src]': 'src()',
     '[attr.alt]': 'alt()',
     '(load)': 'onLoad()',
-    '(error)': 'onError()'
+    '(error)': 'onError()',
   },
   template: '',
 })

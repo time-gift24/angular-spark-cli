@@ -1,5 +1,5 @@
 import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
-import { cn } from '../../utils';
+import { cn } from '@app/shared/utils';
 
 export type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link';
 
@@ -20,9 +20,7 @@ export class BadgeComponent {
   /**
    * Computed style for badge padding using CSS tokens
    */
-  protected badgeStyle = computed(() =>
-    `padding: var(--badge-padding-y) var(--badge-padding-x);`
-  );
+  protected badgeStyle = computed(() => `padding: var(--badge-padding-y) var(--badge-padding-x);`);
 
   /**
    * Base badge styles - Ultra compact with smooth transitions
@@ -40,8 +38,10 @@ export class BadgeComponent {
     const variantMap: Record<BadgeVariant, string> = {
       default: 'bg-primary text-primary-foreground [a&]:hover:bg-primary/90',
       secondary: 'bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90',
-      destructive: 'bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
-      outline: 'border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+      destructive:
+        'bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+      outline:
+        'border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
       ghost: '[a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
       link: 'text-primary underline-offset-4 [a&]:hover:underline',
     };
@@ -53,10 +53,6 @@ export class BadgeComponent {
    * Computed class for the badge element
    */
   protected computedClass = computed(() => {
-    return cn(
-      this.getBaseClasses(),
-      this.getVariantClasses(),
-      this.class()
-    );
+    return cn(this.getBaseClasses(), this.getVariantClasses(), this.class());
   });
 }

@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SwitchComponent } from '../../shared/ui/switch/switch.component';
-import { LabelComponent } from '../../shared/ui/label/label.component';
-import { CardComponents } from '../../shared/ui/card/card.component';
-import { SeparatorComponent } from '../../shared/ui/separator/separator.component';
+import { SwitchComponent } from '@app/shared/ui/switch/switch.component';
+import { LabelComponent } from '@app/shared/ui/label/label.component';
+import { CardComponents } from '@app/shared/ui/card/card.component';
+import { SeparatorComponent } from '@app/shared/ui/separator/separator.component';
 
 @Component({
   selector: 'app-switch-demo',
@@ -12,8 +12,8 @@ import { SeparatorComponent } from '../../shared/ui/separator/separator.componen
   templateUrl: './switch-demo.component.html',
   styleUrls: ['./switch-demo.component.css'],
   host: {
-    'style': 'display: block; width: 100%;'
-  }
+    style: 'display: block; width: 100%;',
+  },
 })
 export class SwitchDemoComponent {
   airplaneMode = signal(false);

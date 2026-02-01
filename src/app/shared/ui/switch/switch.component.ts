@@ -1,5 +1,12 @@
-import { Component, input, computed, output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
-import { cn } from '../../utils';
+import {
+  Component,
+  input,
+  computed,
+  output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import { cn } from '@app/shared/utils';
 
 export type SwitchSize = 'sm' | 'default';
 
@@ -17,9 +24,7 @@ export type SwitchSize = 'sm' | 'default';
     '[style]': 'switchStyle()',
     '(click)': 'handleClick($event)',
   },
-  template: `
-    <span class="switch-thumb" data-slot="switch-thumb"></span>
-  `,
+  template: ` <span class="switch-thumb" data-slot="switch-thumb"></span> `,
   styleUrls: ['./switch.component.css'],
 })
 export class SwitchComponent {
@@ -84,10 +89,6 @@ export class SwitchComponent {
    * Computed class for the switch element
    */
   protected computedClass = computed(() => {
-    return cn(
-      this.getBaseClasses(),
-      this.getSizeAndStateClasses(),
-      this.class()
-    );
+    return cn(this.getBaseClasses(), this.getSizeAndStateClasses(), this.class());
   });
 }

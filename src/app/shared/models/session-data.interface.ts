@@ -178,10 +178,4 @@ export interface SessionData {
 /**
  * 会话颜色选项
  */
-export type SessionColor =
-  | 'default'
-  | 'blue'
-  | 'purple'
-  | 'pink'
-  | 'orange'
-  | 'yellow';
+export type SessionColor = 'default' | 'blue' | 'purple' | 'pink' | 'orange' | 'yellow';

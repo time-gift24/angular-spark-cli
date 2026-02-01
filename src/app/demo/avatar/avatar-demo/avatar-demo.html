@@ -53,7 +53,9 @@
     <p class="text-sm text-muted-foreground">Stacked avatars with negative margin.</p>
 
     <div class="demo-example">
-      <div class="flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background *:data-[slot=avatar]:grayscale">
+      <div
+        class="flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background *:data-[slot=avatar]:grayscale"
+      >
         <ui-avatar>
           <img ui-avatar-image [src]="examples[0].src" [alt]="examples[0].alt" />
           <ui-avatar-fallback>{{ examples[0].fallback }}</ui-avatar-fallback>

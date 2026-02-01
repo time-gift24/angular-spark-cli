@@ -7,7 +7,10 @@
  * Part of Phase 2: Theme Integration Layer
  */
 
-import { LiquidGlassColorConfig, LiquidGlassPosition } from '../types/liquid-glass.types';
+import {
+  LiquidGlassColorConfig,
+  LiquidGlassPosition,
+} from '@app/shared/ui/liquid-glass/types/liquid-glass.types';
 
 /**
  * Resolve CSS variable to actual color value
@@ -26,10 +29,7 @@ import { LiquidGlassColorConfig, LiquidGlassPosition } from '../types/liquid-gla
  * // Returns: 'oklch(0.75 0.14 75)' or similar
  * ```
  */
-export function resolveColorValue(
-  color: string,
-  element: HTMLElement
-): string {
+export function resolveColorValue(color: string, element: HTMLElement): string {
   if (color.startsWith('var(')) {
     // Extract variable name: var(--name) -> --name
     const varName = color.match(/var\(([^)]+)\)/)?.[1];
@@ -86,7 +86,7 @@ export function isOKLCHColor(color: string): boolean {
  */
 export function buildGlassGradient(
   position: LiquidGlassPosition,
-  colors: LiquidGlassColorConfig
+  colors: LiquidGlassColorConfig,
 ): string {
   // Convert normalized position to percentages
   const xPct = (position.x * 100).toFixed(2);
@@ -94,10 +94,7 @@ export function buildGlassGradient(
 
   // Extract hotspot base color for gradient stops
   const hotspotColor = colors.hotspot;
-  const hotspotFade = hotspotColor.replace(
-    /[\d.]+\)$/,
-    '0.08)'
-  );
+  const hotspotFade = hotspotColor.replace(/[\d.]+\)$/, '0.08)');
 
   return `
     radial-gradient(
@@ -109,7 +106,7 @@ export function buildGlassGradient(
     linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 65%),
     ${colors.tint}
   `
-    .replace(/\s+/g, ' ')  // Collapse multiple spaces
+    .replace(/\s+/g, ' ') // Collapse multiple spaces
     .trim();
 }
 

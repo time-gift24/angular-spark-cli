@@ -155,10 +155,7 @@ export class IdGenerator {
    *
    * @private
    */
-  private static checkCollision(
-    id: string,
-    existingIds?: Set<string>
-  ): boolean {
+  private static checkCollision(id: string, existingIds?: Set<string>): boolean {
     if (!existingIds) {
       return false;
     }

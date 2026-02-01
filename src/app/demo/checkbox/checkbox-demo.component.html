@@ -35,10 +35,7 @@
       </div>
 
       <div class="flex items-start gap-3">
-        <ui-checkbox
-          id="toggle"
-          [disabled]="true"
-        ></ui-checkbox>
+        <ui-checkbox id="toggle" [disabled]="true"></ui-checkbox>
         <label spark-label for="toggle">Enable notifications</label>
       </div>
     </div>
@@ -56,9 +53,7 @@
           (checkedChange)="onNotificationsChange($event)"
         ></ui-checkbox>
         <div class="grid gap-1.5 font-normal">
-          <p class="text-sm leading-none font-medium">
-            Enable notifications
-          </p>
+          <p class="text-sm leading-none font-medium">Enable notifications</p>
           <p class="text-muted-foreground text-sm">
             You can enable or disable notifications at any time.
           </p>
@@ -71,25 +66,13 @@
       <h2 class="text-lg font-medium">Disabled States</h2>
 
       <div class="flex items-center gap-3">
-        <ui-checkbox
-          id="disabled-1"
-          [disabled]="true"
-          [checked]="true"
-        ></ui-checkbox>
-        <label spark-label for="disabled-1" class="opacity-50">
-          Disabled checked checkbox
-        </label>
+        <ui-checkbox id="disabled-1" [disabled]="true" [checked]="true"></ui-checkbox>
+        <label spark-label for="disabled-1" class="opacity-50"> Disabled checked checkbox </label>
       </div>
 
       <div class="flex items-center gap-3">
-        <ui-checkbox
-          id="disabled-2"
-          [disabled]="true"
-          [checked]="false"
-        ></ui-checkbox>
-        <label spark-label for="disabled-2" class="opacity-50">
-          Disabled unchecked checkbox
-        </label>
+        <ui-checkbox id="disabled-2" [disabled]="true" [checked]="false"></ui-checkbox>
+        <label spark-label for="disabled-2" class="opacity-50"> Disabled unchecked checkbox </label>
       </div>
     </div>
 

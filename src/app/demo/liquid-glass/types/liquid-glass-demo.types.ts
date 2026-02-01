@@ -1,4 +1,4 @@
-import { LiquidGlassTheme, LiquidGlassRefractionMode } from '../../../shared/ui/liquid-glass';
+import { LiquidGlassTheme, LiquidGlassRefractionMode } from '@app/shared/ui/liquid-glass';
 
 /**
  * Liquid Glass 示例配置

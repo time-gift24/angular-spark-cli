@@ -116,7 +116,7 @@ export const AI_CHAT_STORAGE_KEY = 'ai-chat-panel-preferences';
  */
 export const DEFAULT_PANEL_POSITION: PanelPosition = {
   x: window.innerWidth / 2 - 300, // Center horizontally
-  y: window.innerHeight - 500,    // 500px from bottom
+  y: window.innerHeight - 500, // 500px from bottom
 };
 
 /**

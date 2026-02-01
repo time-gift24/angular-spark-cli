@@ -5,7 +5,7 @@
  */
 
 import { Component, input, output, computed } from '@angular/core';
-import { BadgeType } from '../types/chat.types';
+import { BadgeType } from '@app/shared/ui/ai-chat/types/chat.types';
 import {
   statusBadgesContainer,
   badgeBase,
@@ -19,7 +19,7 @@ import {
   badgeIcon,
   badgeText,
 } from './css';
-import { cn } from '../../../utils';
+import { cn } from '@app/shared/utils';
 
 /**
  * Status badge component
@@ -78,24 +78,15 @@ export class StatusBadgesComponent {
   readonly textBase = badgeText;
 
   // Computed classes
-  protected containerClasses = computed(() =>
-    cn(this.containerBase, 'status-badges-container')
-  );
+  protected containerClasses = computed(() => cn(this.containerBase, 'status-badges-container'));
 
   protected badgeClasses = (type: BadgeType) =>
-    cn(
-      this.badgeBaseStyles,
-      'badge',
-      'badge-' + type,
-      this.getBadgeVariantStyles(type)
-    );
+    cn(this.badgeBaseStyles, 'badge', 'badge-' + type, this.getBadgeVariantStyles(type));
 
-  protected pulsingDotClasses = computed(() =>
-    cn(this.pulsingDotBase, 'pulsing-dot')
-  );
+  protected pulsingDotClasses = computed(() => cn(this.pulsingDotBase, 'pulsing-dot'));
 
   protected typingIndicatorClasses = computed(() =>
-    cn(this.typingIndicatorBase, 'typing-indicator')
+    cn(this.typingIndicatorBase, 'typing-indicator'),
   );
 
   protected typingDotClasses = computed(() => cn(this.typingDotBase, 'typing-dot'));

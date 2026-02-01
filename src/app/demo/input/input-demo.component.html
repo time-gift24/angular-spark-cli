@@ -3,9 +3,7 @@
     <!-- Page Header -->
     <div class="mb-6">
       <h1>Input Component</h1>
-      <p class="text-muted-foreground">
-        灵活且可访问的输入框组件，采用矿物与时光主题设计
-      </p>
+      <p class="text-muted-foreground">灵活且可访问的输入框组件，采用矿物与时光主题设计</p>
     </div>
 
     <!-- Basic Inputs Section -->
@@ -77,12 +75,7 @@
       <h2>交互式演示</h2>
       <p class="text-muted-foreground">在输入框中输入内容，查看事件处理效果：</p>
       <div class="input-wrapper">
-        <input
-          spark-input
-          type="text"
-          placeholder="在这里输入..."
-          (input)="handleInput($event)"
-        />
+        <input spark-input type="text" placeholder="在这里输入..." (input)="handleInput($event)" />
       </div>
       <div class="stats-panel">
         <div class="stat-item">
@@ -96,7 +89,7 @@
         @if (lastUpdateTime()) {
           <div class="stat-item">
             <span class="stat-label">最后更新：</span>
-            <span class="stat-value">{{ lastUpdateTime() | date:'medium' }}</span>
+            <span class="stat-value">{{ lastUpdateTime() | date: 'medium' }}</span>
           </div>
         }
       </div>

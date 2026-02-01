@@ -1,7 +1,13 @@
 import { Component, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ButtonComponent } from '@app/shared/ui/button';
-import { buttonVariants, buttonSizes, buttonStates, buttonWithIcons, iconPaths } from './examples/button-examples';
+import {
+  buttonVariants,
+  buttonSizes,
+  buttonStates,
+  buttonWithIcons,
+  iconPaths,
+} from './examples/button-examples';
 import type { ButtonClickStats } from './types/button-demo.types';
 
 /**
@@ -16,8 +22,8 @@ import type { ButtonClickStats } from './types/button-demo.types';
   templateUrl: './demo-button-page.component.html',
   styleUrl: './demo-button-page.component.css',
   host: {
-    'style': 'display: block; width: 100%;'
-  }
+    style: 'display: block; width: 100%;',
+  },
 })
 export class DemoButtonPageComponent {
   // 示例配置 - 从 examples 文件导入
@@ -30,7 +36,7 @@ export class DemoButtonPageComponent {
   // 点击统计
   private readonly stats = signal<ButtonClickStats>({
     count: 0,
-    lastClickTime: null
+    lastClickTime: null,
   });
 
   /**
@@ -47,9 +53,9 @@ export class DemoButtonPageComponent {
    * 处理按钮点击事件
    */
   handleClick(): void {
-    this.stats.update(current => ({
+    this.stats.update((current) => ({
       count: current.count + 1,
-      lastClickTime: new Date()
+      lastClickTime: new Date(),
     }));
     console.log(`Button clicked! Total clicks: ${this.stats().count}`);
   }

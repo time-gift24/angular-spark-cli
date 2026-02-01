@@ -58,18 +58,14 @@
     <div spark-card class="w-full max-w-sm">
       <div spark-card-header>
         <h3 spark-card-title>Settings</h3>
-        <p spark-card-description>
-          Manage your application preferences
-        </p>
+        <p spark-card-description>Manage your application preferences</p>
       </div>
 
       <div spark-card-content class="space-y-4">
         <div class="flex items-center justify-between">
           <div class="space-y-0.5">
             <label spark-label for="auto-updates">Auto Updates</label>
-            <p class="text-xs text-muted-foreground">
-              Automatically download and install updates
-            </p>
+            <p class="text-xs text-muted-foreground">Automatically download and install updates</p>
           </div>
           <button
             spark-switch
@@ -84,9 +80,7 @@
         <div class="flex items-center justify-between">
           <div class="space-y-0.5">
             <label spark-label for="2fa">Two-Factor Authentication</label>
-            <p class="text-xs text-muted-foreground">
-              Add an extra layer of security
-            </p>
+            <p class="text-xs text-muted-foreground">Add an extra layer of security</p>
           </div>
           <button
             spark-switch
@@ -101,15 +95,9 @@
         <div class="flex items-center justify-between">
           <div class="space-y-0.5">
             <label spark-label for="marketing">Marketing Emails</label>
-            <p class="text-xs text-muted-foreground">
-              Receive emails about new features
-            </p>
+            <p class="text-xs text-muted-foreground">Receive emails about new features</p>
           </div>
-          <button
-            spark-switch
-            id="marketing"
-            [checked]="true"
-          ></button>
+          <button spark-switch id="marketing" [checked]="true"></button>
         </div>
       </div>
     </div>

@@ -29,19 +29,19 @@ export const buttonStates: ComponentTemplate[] = [
     label: 'Disabled',
     variant: 'default' as const,
     disabled: true,
-    description: '禁用状态'
+    description: '禁用状态',
   },
   {
     label: 'Disabled Outline',
     variant: 'outline' as const,
     disabled: true,
-    description: '禁用轮廓按钮'
+    description: '禁用轮廓按钮',
   },
   {
     label: 'Disabled Secondary',
     variant: 'secondary' as const,
     disabled: true,
-    description: '禁用次要按钮'
+    description: '禁用次要按钮',
   },
 ];
 
@@ -53,19 +53,19 @@ export const buttonWithIcons: ComponentTemplate[] = [
     label: 'Sign Up',
     variant: 'default' as const,
     icon: 'user',
-    description: '用户注册按钮'
+    description: '用户注册按钮',
   },
   {
     label: 'Theme',
     variant: 'outline' as const,
     icon: 'theme',
-    description: '主题切换按钮'
+    description: '主题切换按钮',
   },
   {
     label: 'Clock',
     variant: 'secondary' as const,
     icon: 'clock',
-    description: '时钟按钮'
+    description: '时钟按钮',
   },
 ];
 
@@ -75,19 +75,19 @@ export const buttonWithIcons: ComponentTemplate[] = [
 export const iconPaths: Record<string, { path: string; viewBox: string }> = {
   user: {
     path: 'M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
-    viewBox: '0 0 24 24'
+    viewBox: '0 0 24 24',
   },
   theme: {
     path: 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z',
-    viewBox: '0 0 24 24'
+    viewBox: '0 0 24 24',
   },
   clock: {
     path: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm1-8h3v2h-5V7h2v5z',
-    viewBox: '0 0 24 24'
+    viewBox: '0 0 24 24',
   },
   arrow: {
     path: 'M5 12h14M12 5l7 7-7 7',
-    viewBox: '0 0 24 24'
+    viewBox: '0 0 24 24',
   },
 };
 

@@ -8,16 +8,22 @@ const localStorageMock = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: (key: string) => store[key] ?? null,
-    setItem: (key: string, value: string) => { store[key] = value; },
-    removeItem: (key: string) => { delete store[key]; },
-    clear: () => { store = {}; },
+    setItem: (key: string, value: string) => {
+      store[key] = value;
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+    clear: () => {
+      store = {};
+    },
   };
 })();
 
 // Define globally before tests run
 Object.defineProperty(globalThis, 'localStorage', {
   value: localStorageMock,
-  writable: true
+  writable: true,
 });
 
 // Mock localStorage wrapper for cleaner test code
@@ -34,7 +40,7 @@ const mockLocalStorage = {
   },
   clear(): void {
     this.store = {};
-  }
+  },
 };
 
 // Create spy references
@@ -49,10 +55,18 @@ let service: SessionStorageService;
 beforeEach(() => {
   // Setup localStorage mocks first
   mockLocalStorage.clear();
-  getItemSpy = vi.spyOn(localStorage, 'getItem').mockImplementation(mockLocalStorage.getItem.bind(mockLocalStorage));
-  setItemSpy = vi.spyOn(localStorage, 'setItem').mockImplementation(mockLocalStorage.setItem.bind(mockLocalStorage));
-  removeItemSpy = vi.spyOn(localStorage, 'removeItem').mockImplementation(mockLocalStorage.removeItem.bind(mockLocalStorage));
-  clearSpy = vi.spyOn(localStorage, 'clear').mockImplementation(mockLocalStorage.clear.bind(mockLocalStorage));
+  getItemSpy = vi
+    .spyOn(localStorage, 'getItem')
+    .mockImplementation(mockLocalStorage.getItem.bind(mockLocalStorage));
+  setItemSpy = vi
+    .spyOn(localStorage, 'setItem')
+    .mockImplementation(mockLocalStorage.setItem.bind(mockLocalStorage));
+  removeItemSpy = vi
+    .spyOn(localStorage, 'removeItem')
+    .mockImplementation(mockLocalStorage.removeItem.bind(mockLocalStorage));
+  clearSpy = vi
+    .spyOn(localStorage, 'clear')
+    .mockImplementation(mockLocalStorage.clear.bind(mockLocalStorage));
 
   // Then create the service
   TestBed.configureTestingModule({});
@@ -64,7 +78,6 @@ afterEach(() => {
 });
 
 describe('SessionStorageService', () => {
-
   describe('Service Creation', () => {
     it('should be created', () => {
       expect(service).toBeTruthy();
@@ -83,24 +96,30 @@ describe('SessionStorageService', () => {
 
     it('should load and deserialize sessions from localStorage', () => {
       const sessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: 'Session 1',
-          messages: [],
-          inputValue: '',
-          position: { x: 0, y: 0 },
-          size: { width: 600, height: 400 },
-          lastUpdated: Date.now()
-        }],
-        ['sess-2', {
-          id: 'sess-2',
-          name: 'Session 2',
-          messages: [],
-          inputValue: '',
-          position: { x: 100, y: 50 },
-          size: { width: 800, height: 600 },
-          lastUpdated: Date.now()
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: 'Session 1',
+            messages: [],
+            inputValue: '',
+            position: { x: 0, y: 0 },
+            size: { width: 600, height: 400 },
+            lastUpdated: Date.now(),
+          },
+        ],
+        [
+          'sess-2',
+          {
+            id: 'sess-2',
+            name: 'Session 2',
+            messages: [],
+            inputValue: '',
+            position: { x: 100, y: 50 },
+            size: { width: 800, height: 600 },
+            lastUpdated: Date.now(),
+          },
+        ],
       ]);
 
       // Manually store sessions
@@ -117,28 +136,31 @@ describe('SessionStorageService', () => {
 
     it('should load sessions with messages', () => {
       const sessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: 'Session 1',
-          messages: [
-            {
-              id: 'msg-1',
-              role: 'user',
-              content: 'Hello',
-              timestamp: Date.now()
-            },
-            {
-              id: 'msg-2',
-              role: 'assistant',
-              content: 'Hi there!',
-              timestamp: Date.now()
-            }
-          ],
-          inputValue: 'Draft message',
-          position: { x: 0, y: 0 },
-          size: { width: 600, height: 400 },
-          lastUpdated: Date.now()
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: 'Session 1',
+            messages: [
+              {
+                id: 'msg-1',
+                role: 'user',
+                content: 'Hello',
+                timestamp: Date.now(),
+              },
+              {
+                id: 'msg-2',
+                role: 'assistant',
+                content: 'Hi there!',
+                timestamp: Date.now(),
+              },
+            ],
+            inputValue: 'Draft message',
+            position: { x: 0, y: 0 },
+            size: { width: 600, height: 400 },
+            lastUpdated: Date.now(),
+          },
+        ],
       ]);
 
       const serialized = JSON.stringify(Array.from(sessions.entries()));
@@ -170,15 +192,18 @@ describe('SessionStorageService', () => {
   describe('saveSessions', () => {
     it('should save sessions to localStorage', () => {
       const sessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: 'Session 1',
-          messages: [],
-          inputValue: '',
-          position: { x: 0, y: 0 },
-          size: { width: 600, height: 400 },
-          lastUpdated: Date.now()
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: 'Session 1',
+            messages: [],
+            inputValue: '',
+            position: { x: 0, y: 0 },
+            size: { width: 600, height: 400 },
+            lastUpdated: Date.now(),
+          },
+        ],
       ]);
 
       service.saveSessions(sessions);
@@ -192,33 +217,42 @@ describe('SessionStorageService', () => {
 
     it('should save multiple sessions', () => {
       const sessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: 'Session 1',
-          messages: [],
-          inputValue: '',
-          position: { x: 0, y: 0 },
-          size: { width: 600, height: 400 },
-          lastUpdated: Date.now()
-        }],
-        ['sess-2', {
-          id: 'sess-2',
-          name: 'Session 2',
-          messages: [],
-          inputValue: '',
-          position: { x: 100, y: 50 },
-          size: { width: 800, height: 600 },
-          lastUpdated: Date.now()
-        }],
-        ['sess-3', {
-          id: 'sess-3',
-          name: 'Session 3',
-          messages: [],
-          inputValue: '',
-          position: { x: 200, y: 100 },
-          size: { width: 700, height: 500 },
-          lastUpdated: Date.now()
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: 'Session 1',
+            messages: [],
+            inputValue: '',
+            position: { x: 0, y: 0 },
+            size: { width: 600, height: 400 },
+            lastUpdated: Date.now(),
+          },
+        ],
+        [
+          'sess-2',
+          {
+            id: 'sess-2',
+            name: 'Session 2',
+            messages: [],
+            inputValue: '',
+            position: { x: 100, y: 50 },
+            size: { width: 800, height: 600 },
+            lastUpdated: Date.now(),
+          },
+        ],
+        [
+          'sess-3',
+          {
+            id: 'sess-3',
+            name: 'Session 3',
+            messages: [],
+            inputValue: '',
+            position: { x: 200, y: 100 },
+            size: { width: 700, height: 500 },
+            lastUpdated: Date.now(),
+          },
+        ],
       ]);
 
       service.saveSessions(sessions);
@@ -242,28 +276,31 @@ describe('SessionStorageService', () => {
 
     it('should serialize all session properties', () => {
       const sessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: 'Test Session',
-          messages: [
-            {
-              id: 'msg-1',
-              role: 'user',
-              content: 'User message',
-              timestamp: 1234567890
-            },
-            {
-              id: 'msg-2',
-              role: 'assistant',
-              content: 'Assistant response',
-              timestamp: 1234567891
-            }
-          ],
-          inputValue: 'Draft',
-          position: { x: 150, y: 75 },
-          size: { width: 650, height: 450 },
-          lastUpdated: 1234567892
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: 'Test Session',
+            messages: [
+              {
+                id: 'msg-1',
+                role: 'user',
+                content: 'User message',
+                timestamp: 1234567890,
+              },
+              {
+                id: 'msg-2',
+                role: 'assistant',
+                content: 'Assistant response',
+                timestamp: 1234567891,
+              },
+            ],
+            inputValue: 'Draft',
+            position: { x: 150, y: 75 },
+            size: { width: 650, height: 450 },
+            lastUpdated: 1234567892,
+          },
+        ],
       ]);
 
       service.saveSessions(sessions);
@@ -278,12 +315,12 @@ describe('SessionStorageService', () => {
         name: 'Test Session',
         messages: [
           { id: 'msg-1', role: 'user', content: 'User message', timestamp: 1234567890 },
-          { id: 'msg-2', role: 'assistant', content: 'Assistant response', timestamp: 1234567891 }
+          { id: 'msg-2', role: 'assistant', content: 'Assistant response', timestamp: 1234567891 },
         ],
         inputValue: 'Draft',
         position: { x: 150, y: 75 },
         size: { width: 650, height: 450 },
-        lastUpdated: 1234567892
+        lastUpdated: 1234567892,
       });
     });
   });
@@ -486,22 +523,25 @@ describe('SessionStorageService', () => {
   describe('Integration Scenarios', () => {
     it('should support save and load roundtrip for sessions', () => {
       const originalSessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: 'Session 1',
-          messages: [
-            {
-              id: 'msg-1',
-              role: 'user',
-              content: 'Hello',
-              timestamp: Date.now()
-            }
-          ],
-          inputValue: 'Draft',
-          position: { x: 10, y: 20 },
-          size: { width: 600, height: 400 },
-          lastUpdated: Date.now()
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: 'Session 1',
+            messages: [
+              {
+                id: 'msg-1',
+                role: 'user',
+                content: 'Hello',
+                timestamp: Date.now(),
+              },
+            ],
+            inputValue: 'Draft',
+            position: { x: 10, y: 20 },
+            size: { width: 600, height: 400 },
+            lastUpdated: Date.now(),
+          },
+        ],
       ]);
 
       // Save
@@ -525,15 +565,18 @@ describe('SessionStorageService', () => {
 
     it('should support complete state persistence workflow', () => {
       const sessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: 'Main Session',
-          messages: [],
-          inputValue: '',
-          position: { x: 0, y: 0 },
-          size: { width: 600, height: 400 },
-          lastUpdated: Date.now()
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: 'Main Session',
+            messages: [],
+            inputValue: '',
+            position: { x: 0, y: 0 },
+            size: { width: 600, height: 400 },
+            lastUpdated: Date.now(),
+          },
+        ],
       ]);
 
       // Save all state
@@ -554,15 +597,18 @@ describe('SessionStorageService', () => {
     it('should support clearing and restarting state', () => {
       // Set up initial state
       const sessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: 'Session',
-          messages: [],
-          inputValue: '',
-          position: { x: 0, y: 0 },
-          size: { width: 600, height: 400 },
-          lastUpdated: Date.now()
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: 'Session',
+            messages: [],
+            inputValue: '',
+            position: { x: 0, y: 0 },
+            size: { width: 600, height: 400 },
+            lastUpdated: Date.now(),
+          },
+        ],
       ]);
 
       service.saveSessions(sessions);
@@ -587,15 +633,18 @@ describe('SessionStorageService', () => {
   describe('Edge Cases', () => {
     it('should handle session with special characters in name', () => {
       const sessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: 'Session with "quotes" and \'apostrophes\'',
-          messages: [],
-          inputValue: '',
-          position: { x: 0, y: 0 },
-          size: { width: 600, height: 400 },
-          lastUpdated: Date.now()
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: 'Session with "quotes" and \'apostrophes\'',
+            messages: [],
+            inputValue: '',
+            position: { x: 0, y: 0 },
+            size: { width: 600, height: 400 },
+            lastUpdated: Date.now(),
+          },
+        ],
       ]);
 
       service.saveSessions(sessions);
@@ -606,20 +655,25 @@ describe('SessionStorageService', () => {
 
     it('should handle session with unicode characters', () => {
       const sessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: '中文 🎨 Ñoño',
-          messages: [{
-            id: 'msg-1',
-            role: 'user',
-            content: 'Hello 世界',
-            timestamp: Date.now()
-          }],
-          inputValue: '',
-          position: { x: 0, y: 0 },
-          size: { width: 600, height: 400 },
-          lastUpdated: Date.now()
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: '中文 🎨 Ñoño',
+            messages: [
+              {
+                id: 'msg-1',
+                role: 'user',
+                content: 'Hello 世界',
+                timestamp: Date.now(),
+              },
+            ],
+            inputValue: '',
+            position: { x: 0, y: 0 },
+            size: { width: 600, height: 400 },
+            lastUpdated: Date.now(),
+          },
+        ],
       ]);
 
       service.saveSessions(sessions);
@@ -632,15 +686,18 @@ describe('SessionStorageService', () => {
     it('should handle very long session name', () => {
       const longName = 'A'.repeat(1000);
       const sessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: longName,
-          messages: [],
-          inputValue: '',
-          position: { x: 0, y: 0 },
-          size: { width: 600, height: 400 },
-          lastUpdated: Date.now()
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: longName,
+            messages: [],
+            inputValue: '',
+            position: { x: 0, y: 0 },
+            size: { width: 600, height: 400 },
+            lastUpdated: Date.now(),
+          },
+        ],
       ]);
 
       service.saveSessions(sessions);
@@ -654,19 +711,22 @@ describe('SessionStorageService', () => {
         id: `msg-${i}`,
         role: 'user' as const,
         content: `Message ${i}`,
-        timestamp: Date.now() + i
+        timestamp: Date.now() + i,
       }));
 
       const sessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: 'Session with many messages',
-          messages,
-          inputValue: '',
-          position: { x: 0, y: 0 },
-          size: { width: 600, height: 400 },
-          lastUpdated: Date.now()
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: 'Session with many messages',
+            messages,
+            inputValue: '',
+            position: { x: 0, y: 0 },
+            size: { width: 600, height: 400 },
+            lastUpdated: Date.now(),
+          },
+        ],
       ]);
 
       service.saveSessions(sessions);
@@ -677,15 +737,18 @@ describe('SessionStorageService', () => {
 
     it('should handle zero timestamp', () => {
       const sessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: 'Session',
-          messages: [],
-          inputValue: '',
-          position: { x: 0, y: 0 },
-          size: { width: 600, height: 400 },
-          lastUpdated: 0
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: 'Session',
+            messages: [],
+            inputValue: '',
+            position: { x: 0, y: 0 },
+            size: { width: 600, height: 400 },
+            lastUpdated: 0,
+          },
+        ],
       ]);
 
       service.saveSessions(sessions);
@@ -696,15 +759,18 @@ describe('SessionStorageService', () => {
 
     it('should handle negative position values', () => {
       const sessions: Map<string, SessionData> = new Map([
-        ['sess-1', {
-          id: 'sess-1',
-          name: 'Session',
-          messages: [],
-          inputValue: '',
-          position: { x: -100, y: -50 },
-          size: { width: 600, height: 400 },
-          lastUpdated: Date.now()
-        }]
+        [
+          'sess-1',
+          {
+            id: 'sess-1',
+            name: 'Session',
+            messages: [],
+            inputValue: '',
+            position: { x: -100, y: -50 },
+            size: { width: 600, height: 400 },
+            lastUpdated: Date.now(),
+          },
+        ],
       ]);
 
       service.saveSessions(sessions);

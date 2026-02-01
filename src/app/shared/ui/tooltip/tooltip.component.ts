@@ -7,14 +7,12 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
-import { cn } from '../../lib/cn';
+import { cn } from '@app/shared/lib/cn';
 
 @Component({
   selector: '[ui-tooltip-trigger]',
   standalone: true,
-  template: `
-    <ng-content />
-  `,
+  template: ` <ng-content /> `,
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -27,7 +25,8 @@ export class TooltipTriggerComponent {}
     <div
       [class]="computedClass()"
       [attr.data-state]="isVisible() ? 'open' : 'closed'"
-      role="tooltip">
+      role="tooltip"
+    >
       <ng-content />
     </div>
   `,
@@ -50,7 +49,7 @@ export class TooltipContentComponent {
       'z-50 overflow-hidden rounded-md bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md',
       'whitespace-nowrap',
       'transition-all duration-200',
-      this.class()
+      this.class(),
     );
   });
 
@@ -65,7 +64,7 @@ export class TooltipContentComponent {
     return cn(
       'absolute z-50',
       sideClasses[this.side()],
-      this.isVisible() ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+      this.isVisible() ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
     );
   });
 }
@@ -77,7 +76,8 @@ export class TooltipContentComponent {
     <div
       [class]="'relative inline-flex ' + computedClass()"
       (mouseenter)="onMouseEnter()"
-      (mouseleave)="onMouseLeave()">
+      (mouseleave)="onMouseLeave()"
+    >
       <ng-content />
     </div>
   `,

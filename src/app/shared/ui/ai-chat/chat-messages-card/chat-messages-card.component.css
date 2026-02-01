@@ -130,7 +130,7 @@
 }
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.80 0.015 85);
+  background: oklch(0.8 0.015 85);
 }
 
 /* Responsive sizing for fixed positioning */

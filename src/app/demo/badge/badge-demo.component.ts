@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BadgeComponent } from '../../shared/ui/badge/badge.component';
+import { BadgeComponent } from '@app/shared/ui/badge/badge.component';
 
 @Component({
   selector: 'app-badge-demo',
@@ -9,7 +9,7 @@ import { BadgeComponent } from '../../shared/ui/badge/badge.component';
   templateUrl: './badge-demo.component.html',
   styleUrls: ['./badge-demo.component.css'],
   host: {
-    'style': 'display: block; width: 100%;'
-  }
+    style: 'display: block; width: 100%;',
+  },
 })
 export class BadgeDemoComponent {}

@@ -25,13 +25,11 @@ describe('SessionStateService', () => {
       loadActiveSessionId: vi.fn(),
       loadMessagesVisibility: vi.fn(),
       clearAll: vi.fn(),
-      isAvailable: vi.fn()
+      isAvailable: vi.fn(),
     };
 
     TestBed.configureTestingModule({
-      providers: [
-        { provide: SessionStorageService, useValue: storageService }
-      ]
+      providers: [{ provide: SessionStorageService, useValue: storageService }],
     });
 
     service = TestBed.inject(SessionStateService);
@@ -81,7 +79,9 @@ describe('SessionStateService', () => {
   describe('Computed Signals', () => {
     it('should return active session when activeSessionId is set', () => {
       const sessionId = service.createSession('Test Session');
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       const activeSession = service.activeSession();
       expect(activeSession).toBeDefined();
@@ -90,7 +90,9 @@ describe('SessionStateService', () => {
     });
 
     it('should return undefined for active session when ID does not exist', () => {
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set('non-existent-id');
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set('non-existent-id');
 
       const activeSession = service.activeSession();
       expect(activeSession).toBeUndefined();
@@ -98,13 +100,15 @@ describe('SessionStateService', () => {
 
     it('should return active messages from active session', () => {
       const sessionId = service.createSession('Test Session');
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       const message: ChatMessage = {
         id: 'msg-1',
         role: 'user',
         content: 'Hello',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       service.addMessage(sessionId, message);
@@ -121,7 +125,9 @@ describe('SessionStateService', () => {
 
     it('should return active input value from active session', () => {
       const sessionId = service.createSession('Test Session');
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       service.updateInputValue('Test draft');
 
@@ -136,7 +142,9 @@ describe('SessionStateService', () => {
 
     it('should return true for canSendMessage when input has content', () => {
       const sessionId = service.createSession('Test Session');
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       service.updateInputValue('Hello');
 
@@ -146,7 +154,9 @@ describe('SessionStateService', () => {
 
     it('should return false for canSendMessage when input is empty', () => {
       const sessionId = service.createSession('Test Session');
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       const canSend = service.canSendMessage();
       expect(canSend).toBe(false);
@@ -154,7 +164,9 @@ describe('SessionStateService', () => {
 
     it('should return false for canSendMessage when input is only whitespace', () => {
       const sessionId = service.createSession('Test Session');
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       service.updateInputValue('   ');
 
@@ -263,7 +275,7 @@ describe('SessionStateService', () => {
         id: 'msg-1',
         role: 'user',
         content: 'Hello, world!',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       service.addMessage(sessionId, message);
@@ -282,14 +294,14 @@ describe('SessionStateService', () => {
         id: 'msg-1',
         role: 'user',
         content: 'First message',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       const message2: ChatMessage = {
         id: 'msg-2',
         role: 'assistant',
         content: 'Second message',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       service.addMessage(sessionId, message1);
@@ -311,7 +323,7 @@ describe('SessionStateService', () => {
         id: 'msg-1',
         role: 'user',
         content: 'Test message',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       service.addMessage(sessionId, message);
@@ -329,7 +341,7 @@ describe('SessionStateService', () => {
         id: 'msg-1',
         role: 'user',
         content: 'Test',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       service.addMessage('non-existent-id', message);
@@ -341,7 +353,9 @@ describe('SessionStateService', () => {
   describe('updateInputValue', () => {
     it('should update input value for active session', () => {
       const sessionId = service.createSession();
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       service.updateInputValue('New draft value');
 
@@ -353,7 +367,9 @@ describe('SessionStateService', () => {
 
     it('should update lastUpdated timestamp when input is updated', () => {
       const sessionId = service.createSession();
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       const beforeUpdate = Date.now();
       service.updateInputValue('Test');
@@ -366,7 +382,9 @@ describe('SessionStateService', () => {
 
     it('should preserve input value when updated', () => {
       const sessionId = service.createSession();
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       service.updateInputValue('First draft');
       service.updateInputValue('Second draft');
@@ -385,7 +403,9 @@ describe('SessionStateService', () => {
 
     it('should handle empty string input value', () => {
       const sessionId = service.createSession();
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       service.updateInputValue('Some text');
       service.updateInputValue('');
@@ -402,7 +422,9 @@ describe('SessionStateService', () => {
       const sessionId1 = service.createSession('Session 1');
       const sessionId2 = service.createSession('Session 2');
 
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId1);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId1);
       expect(service.activeSession()?.id).toBe(sessionId1);
 
       service.switchSession(sessionId2);
@@ -413,7 +435,9 @@ describe('SessionStateService', () => {
       const sessionId1 = service.createSession('Session 1');
       const sessionId2 = service.createSession('Session 2');
 
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId1);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId1);
       service.updateInputValue('Draft from session 1');
 
       service.switchSession(sessionId2);
@@ -429,10 +453,14 @@ describe('SessionStateService', () => {
       const sessionId2 = service.createSession('Session 2');
 
       // Set up drafts for both sessions
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId1);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId1);
       service.updateInputValue('Draft 1');
 
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId2);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId2);
       service.updateInputValue('Draft 2');
 
       // Switch back to session 1
@@ -443,7 +471,9 @@ describe('SessionStateService', () => {
 
     it('should do nothing if target session does not exist', () => {
       const sessionId1 = service.createSession('Session 1');
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId1);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId1);
 
       const beforeActiveId = service.activeSessionId();
 
@@ -468,13 +498,19 @@ describe('SessionStateService', () => {
       const sessionId3 = service.createSession('Session 3');
 
       // Set up drafts
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId1);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId1);
       service.updateInputValue('Draft 1');
 
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId2);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId2);
       service.updateInputValue('Draft 2');
 
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId3);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId3);
       service.updateInputValue('Draft 3');
 
       // Switch between sessions and verify drafts are preserved
@@ -492,7 +528,9 @@ describe('SessionStateService', () => {
       const sessionId1 = service.createSession('Session 1');
       const sessionId2 = service.createSession('Session 2');
 
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId1);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId1);
       service.updateInputValue('Important draft');
 
       service.switchSession(sessionId2);
@@ -513,7 +551,9 @@ describe('SessionStateService', () => {
     });
 
     it('should toggle from false to true', () => {
-      (service['isMessagesVisible'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(false);
+      (
+        service['isMessagesVisible'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(false);
 
       service.toggleMessagesVisibility();
 
@@ -548,7 +588,9 @@ describe('SessionStateService', () => {
       const sessionId1 = service.createSession('Session 1');
       const sessionId2 = service.createSession('Session 2');
 
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId1);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId1);
       expect(service.activeSessionId()).toBe(sessionId1);
 
       service.deleteSession(sessionId1);
@@ -560,24 +602,26 @@ describe('SessionStateService', () => {
     it('should switch to most recent session when deleting active session', async () => {
       const sessionId1 = service.createSession('Session 1');
       // Add delay to ensure different timestamps
-      await new Promise(resolve => setTimeout(resolve, 2));
+      await new Promise((resolve) => setTimeout(resolve, 2));
       const sessionId2 = service.createSession('Session 2');
       // Add delay to ensure different timestamps
-      await new Promise(resolve => setTimeout(resolve, 2));
+      await new Promise((resolve) => setTimeout(resolve, 2));
       const sessionId3 = service.createSession('Session 3');
 
       // Update session 2 to be most recent
-      await new Promise(resolve => setTimeout(resolve, 2));
+      await new Promise((resolve) => setTimeout(resolve, 2));
       const message2: ChatMessage = {
         id: 'msg-2',
         role: 'user',
         content: 'Message 2',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       service.addMessage(sessionId2, message2);
 
       // Set session 3 as active
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId3);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId3);
 
       // Delete session 3
       service.deleteSession(sessionId3);
@@ -588,7 +632,9 @@ describe('SessionStateService', () => {
 
     it('should clear active session ID when deleting last session', () => {
       const sessionId = service.createSession('Session 1');
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       service.deleteSession(sessionId);
 
@@ -608,7 +654,9 @@ describe('SessionStateService', () => {
       const sessionId1 = service.createSession('Session 1');
       const sessionId2 = service.createSession('Session 2');
 
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId1);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId1);
 
       service.deleteSession(sessionId2);
 
@@ -647,12 +695,14 @@ describe('SessionStateService', () => {
         id: 'msg-1',
         role: 'user',
         content: 'Test',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       service.addMessage(sessionId, message);
 
       // Set active session first before updating input value
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
       service.updateInputValue('Draft');
 
       service.renameSession(sessionId, 'New Name');
@@ -679,13 +729,15 @@ describe('SessionStateService', () => {
   describe('Signal Reactivity', () => {
     it('should update computed signals when sessions change', () => {
       const sessionId = service.createSession('Test');
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       const message: ChatMessage = {
         id: 'msg-1',
         role: 'user',
         content: 'Test message',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       service.addMessage(sessionId, message);
@@ -697,16 +749,22 @@ describe('SessionStateService', () => {
       const sessionId1 = service.createSession('Session 1');
       const sessionId2 = service.createSession('Session 2');
 
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId1);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId1);
       expect(service.activeSession()?.id).toBe(sessionId1);
 
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId2);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId2);
       expect(service.activeSession()?.id).toBe(sessionId2);
     });
 
     it('should update computed signals when input value changes', () => {
       const sessionId = service.createSession('Test');
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       expect(service.canSendMessage()).toBe(false);
 
@@ -719,14 +777,16 @@ describe('SessionStateService', () => {
   describe('Edge Cases', () => {
     it('should handle multiple operations on the same session', () => {
       const sessionId = service.createSession('Test');
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       // Add messages
       service.addMessage(sessionId, {
         id: 'msg-1',
         role: 'user',
         content: 'Message 1',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       // Update input
@@ -754,7 +814,7 @@ describe('SessionStateService', () => {
       expect(service.sessions().size).toBe(10);
 
       // Delete all sessions
-      ids.forEach(id => service.deleteSession(id));
+      ids.forEach((id) => service.deleteSession(id));
 
       expect(service.sessions().size).toBe(0);
       expect(service.activeSessionId()).toBe('');
@@ -762,7 +822,9 @@ describe('SessionStateService', () => {
 
     it('should handle updating input value with empty string', () => {
       const sessionId = service.createSession('Test');
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       service.updateInputValue('Some text');
       expect(service.canSendMessage()).toBe(true);
@@ -779,24 +841,26 @@ describe('SessionStateService', () => {
         id: 'msg-1',
         role: 'user',
         content: 'Message 1',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       service.addMessage(sessionId2, {
         id: 'msg-2',
         role: 'user',
         content: 'Message 2',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       service.addMessage(sessionId2, {
         id: 'msg-3',
         role: 'assistant',
         content: 'Message 3',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId1);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId1);
       expect(service.activeMessages()).toHaveLength(1);
 
       service.switchSession(sessionId2);
@@ -808,7 +872,9 @@ describe('SessionStateService', () => {
     it('should support typical chat workflow', () => {
       // Create a new session
       const sessionId = service.createSession('Project Discussion');
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(sessionId);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(sessionId);
 
       // User types a message
       service.updateInputValue('Help me plan my project');
@@ -818,7 +884,7 @@ describe('SessionStateService', () => {
         id: 'msg-1',
         role: 'user',
         content: service.activeInputValue(),
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
       service.addMessage(sessionId, userMessage);
 
@@ -838,7 +904,9 @@ describe('SessionStateService', () => {
       const session2 = service.createSession('Project B');
 
       // Work on session 1
-      (service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>).set(session1);
+      (
+        service['activeSessionId'] as unknown as ReturnType<typeof import('@angular/core').signal>
+      ).set(session1);
       service.updateInputValue('Draft for Project A');
 
       // Switch to session 2

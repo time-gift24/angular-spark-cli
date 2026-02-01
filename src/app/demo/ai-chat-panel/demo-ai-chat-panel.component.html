@@ -58,8 +58,12 @@
         <tbody>
           @for (item of apiInfo; track item.property) {
             <tr>
-              <td><code>{{ item.property }}</code></td>
-              <td><code>{{ item.type }}</code></td>
+              <td>
+                <code>{{ item.property }}</code>
+              </td>
+              <td>
+                <code>{{ item.type }}</code>
+              </td>
               <td>{{ item.description }}</td>
             </tr>
           }
@@ -72,18 +76,10 @@
   <section class="notes-section">
     <h2>注意事项</h2>
     <ul class="notes-list">
-      <li>
-        <strong>数据持久化：</strong>所有会话数据自动保存到 localStorage，刷新页面不会丢失
-      </li>
-      <li>
-        <strong>模拟 AI 响应：</strong>当前演示使用模拟响应，实际使用需接入真实 AI API
-      </li>
-      <li>
-        <strong>待实现功能：</strong>文件上传、图片上传、语音输入等功能需要后端支持
-      </li>
-      <li>
-        <strong>主题适配：</strong>自动适配浅色/深色主题，使用全局 CSS 变量
-      </li>
+      <li><strong>数据持久化：</strong>所有会话数据自动保存到 localStorage，刷新页面不会丢失</li>
+      <li><strong>模拟 AI 响应：</strong>当前演示使用模拟响应，实际使用需接入真实 AI API</li>
+      <li><strong>待实现功能：</strong>文件上传、图片上传、语音输入等功能需要后端支持</li>
+      <li><strong>主题适配：</strong>自动适配浅色/深色主题，使用全局 CSS 变量</li>
     </ul>
   </section>
 </main>

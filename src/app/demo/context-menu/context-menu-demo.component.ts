@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ContextMenuTriggerDirective } from '../../shared/ui/context-menu/index';
+import { ContextMenuTriggerDirective } from '@app/shared/ui/context-menu/index';
 import * as examples from './examples/context-menu-examples';
 
 /**
@@ -40,11 +40,20 @@ import * as examples from './examples/context-menu-examples';
             </p>
           </div>
           <div class="card-content">
-            <div
-              class="context-trigger-area"
-              [uiContextMenuTrigger]="basicMenuItems">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+            <div class="context-trigger-area" [uiContextMenuTrigger]="basicMenuItems">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
               </svg>
               <span>Right click here</span>
             </div>
@@ -60,11 +69,21 @@ import * as examples from './examples/context-menu-examples';
             </p>
           </div>
           <div class="card-content">
-            <div
-              class="context-trigger-area"
-              [uiContextMenuTrigger]="destructiveMenuItems">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            <div class="context-trigger-area" [uiContextMenuTrigger]="destructiveMenuItems">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
               </svg>
               <span>Right click here</span>
             </div>
@@ -80,11 +99,21 @@ import * as examples from './examples/context-menu-examples';
             </p>
           </div>
           <div class="card-content">
-            <div
-              class="context-trigger-area"
-              [uiContextMenuTrigger]="iconsMenuItems">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
+            <div class="context-trigger-area" [uiContextMenuTrigger]="iconsMenuItems">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect width="18" height="18" x="3" y="3" rx="2" />
+                <path d="M3 9h18" />
+                <path d="M9 21V9" />
               </svg>
               <span>Right click here</span>
             </div>
@@ -100,11 +129,21 @@ import * as examples from './examples/context-menu-examples';
             </p>
           </div>
           <div class="card-content">
-            <div
-              class="context-trigger-area"
-              [uiContextMenuTrigger]="disabledMenuItems">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+            <div class="context-trigger-area" [uiContextMenuTrigger]="disabledMenuItems">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" x2="12" y1="8" y2="12" />
+                <line x1="12" x2="12.01" y1="16" y2="16" />
               </svg>
               <span>Right click here</span>
             </div>
@@ -190,7 +229,7 @@ import * as examples from './examples/context-menu-examples';
       font-size: var(--font-size-sm, 0.875rem);
       color: var(--muted-foreground);
     }
-  `
+  `,
 })
 export class ContextMenuDemoComponent {
   readonly basicMenuItems = examples.basicMenuItems;

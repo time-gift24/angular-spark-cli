@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
-import { ChatMessagesCardComponent } from '../../shared/ui/ai-chat/chat-messages-card/chat-messages-card.component';
-import { ChatMessage } from '../../shared/ui/ai-chat/types/chat.types';
+import { ChatMessagesCardComponent } from '@app/shared/ui/ai-chat/chat-messages-card/chat-messages-card.component';
+import { ChatMessage } from '@app/shared/ui/ai-chat/types/chat.types';
 
 /**
  * AI Chat Messages Card Demo Component
@@ -22,16 +22,19 @@ export class DemoAiChatMessagesCardComponent {
       role: count % 2 === 0 ? 'user' : 'assistant',
       content: count % 2 === 0 ? '这是新的用户消息' : '这是 AI 的回复',
       timestamp: Date.now(),
-      actions: count % 2 === 0 ? [] : [
-        {
-          id: `action-${count}`,
-          label: '复制',
-          icon: '📋',
-          action: () => console.log('Copy clicked'),
-        },
-      ],
+      actions:
+        count % 2 === 0
+          ? []
+          : [
+              {
+                id: `action-${count}`,
+                label: '复制',
+                icon: '📋',
+                action: () => console.log('Copy clicked'),
+              },
+            ],
     };
-    this.messages.update(msgs => [...msgs, newMessage]);
+    this.messages.update((msgs) => [...msgs, newMessage]);
   }
 
   resetMessages(): void {
@@ -54,7 +57,8 @@ export class DemoAiChatMessagesCardComponent {
       {
         id: '2',
         role: 'assistant',
-        content: 'Angular Signals 是一个响应式系统，用于管理应用状态。它提供了简单而强大的方式来处理数据流和组件更新。',
+        content:
+          'Angular Signals 是一个响应式系统，用于管理应用状态。它提供了简单而强大的方式来处理数据流和组件更新。',
         timestamp: now - 8000,
         actions: [
           {
@@ -80,7 +84,8 @@ export class DemoAiChatMessagesCardComponent {
       {
         id: '4',
         role: 'assistant',
-        content: '```typescript\nconst count = signal(0);\nconst doubleCount = computed(() => count() * 2);\n```',
+        content:
+          '```typescript\nconst count = signal(0);\nconst doubleCount = computed(() => count() * 2);\n```',
         timestamp: now - 2000,
         actions: [
           {

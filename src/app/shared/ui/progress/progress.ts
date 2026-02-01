@@ -7,14 +7,14 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   host: {
-    'class': 'relative h-4 w-full overflow-hidden rounded-full bg-secondary',
+    class: 'relative h-4 w-full overflow-hidden rounded-full bg-secondary',
     '[attr.aria-valuenow]': 'value()',
     '[attr.aria-valuemin]': '0',
     '[attr.aria-valuemax]': 'max()',
-    'role': 'progressbar',
+    role: 'progressbar',
   },
   templateUrl: './progress.html',
-  styleUrl: './progress.css'
+  styleUrl: './progress.css',
 })
 export class ProgressComponent {
   readonly value = input<number>(0);

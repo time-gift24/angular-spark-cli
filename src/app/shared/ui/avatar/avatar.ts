@@ -8,7 +8,7 @@ const avatarVariants = {
     md: 'h-10 w-10 text-sm',
     lg: 'h-12 w-12 text-base',
     xl: 'h-14 w-14 text-lg',
-  }
+  },
 };
 
 export type AvatarSize = keyof typeof avatarVariants.sizes;
@@ -22,7 +22,7 @@ export type AvatarSize = keyof typeof avatarVariants.sizes;
     '[class]': 'computedClass()',
   },
   templateUrl: './avatar.html',
-  styleUrl: './avatar.css'
+  styleUrl: './avatar.css',
 })
 export class AvatarComponent {
   readonly size = input<AvatarSize>('md');

@@ -8,7 +8,7 @@ import { Component, input, computed, ChangeDetectionStrategy } from '@angular/co
     '[class]': 'computedClass()',
   },
   templateUrl: './skeleton.html',
-  styleUrl: './skeleton.css'
+  styleUrl: './skeleton.css',
 })
 export class SkeletonComponent {
   readonly class = input<string>('');

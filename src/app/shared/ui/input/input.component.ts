@@ -1,5 +1,5 @@
 import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
-import { cn } from '../../utils';
+import { cn } from '@app/shared/utils';
 
 @Component({
   selector: 'input[spark-input]',
@@ -10,7 +10,7 @@ import { cn } from '../../utils';
     '[attr.disabled]': 'disabled() ? "" : null',
   },
   template: '',
-  styleUrl: './input.component.css'
+  styleUrl: './input.component.css',
 })
 export class InputComponent {
   readonly type = input<string>('text');
@@ -42,10 +42,6 @@ export class InputComponent {
    * Computed class for the input element
    */
   protected computedClass = computed(() => {
-    return cn(
-      this.getBaseClasses(),
-      this.getInteractiveClasses(),
-      this.class()
-    );
+    return cn(this.getBaseClasses(), this.getInteractiveClasses(), this.class());
   });
 }

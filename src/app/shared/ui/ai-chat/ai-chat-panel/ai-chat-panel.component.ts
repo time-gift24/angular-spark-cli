@@ -19,30 +19,23 @@ import {
   afterNextRender,
   inject,
   DestroyRef,
-} from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { SessionTabsBarComponent } from "../../session-tabs-bar/session-tabs-bar.component";
-import { ChatInputComponent } from "../chat-input/chat-input.component";
-import { ChatMessagesCardComponent } from "../chat-messages-card/chat-messages-card.component";
-import { StatusBadgesComponent } from "../status-badges/status-badges.component";
-import { SessionToggleComponent } from "../session-toggle-button/session-toggle-button.component";
-import {
-  StatusBadge,
-  BadgeType,
-  DEFAULT_PANEL_POSITION,
-  DEFAULT_PANEL_SIZE,
-  ChatMessage as AiChatChatMessage,
-} from "../types/chat.types";
-import { SessionData, SessionStatus, SessionColor, ChatMessage } from "../../../models";
-import { cn } from "../../../utils";
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { SessionTabsBarComponent } from '@app/shared/ui/session-tabs-bar/session-tabs-bar.component';
+import { ChatInputComponent } from '../chat-input/chat-input.component';
+import { ChatMessagesCardComponent } from '../chat-messages-card/chat-messages-card.component';
+import { StatusBadgesComponent } from '../status-badges/status-badges.component';
+import { SessionToggleComponent } from '../session-toggle-button/session-toggle-button.component';
+import { StatusBadge, BadgeType, ChatMessage as AiChatChatMessage } from '../types/chat.types';
+import { SessionData, SessionStatus, SessionColor, ChatMessage } from '@app/shared/models';
+import { cn } from '@app/shared/utils';
 
 /**
  * Storage key for sessions data
  */
-const SESSIONS_STORAGE_KEY = "ai-chat-sessions";
-const ACTIVE_SESSION_KEY = "ai-chat-active-session";
-const PANEL_STATE_KEY = "ai-chat-panel-state";
+const SESSIONS_STORAGE_KEY = 'ai-chat-sessions';
+const ACTIVE_SESSION_KEY = 'ai-chat-active-session';
+const PANEL_STATE_KEY = 'ai-chat-panel-state';
 
 /**
  * Stored sessions data structure
@@ -64,7 +57,7 @@ interface StoredSessionsData {
  * - Status indicators
  */
 @Component({
-  selector: "ai-chat-panel",
+  selector: 'ai-chat-panel',
   standalone: true,
   imports: [
     CommonModule,
@@ -74,8 +67,8 @@ interface StoredSessionsData {
     StatusBadgesComponent,
     SessionToggleComponent,
   ],
-  templateUrl: "./ai-chat-panel.component.html",
-  styleUrls: ["./ai-chat-panel.component.css"],
+  templateUrl: './ai-chat-panel.component.html',
+  styleUrls: ['./ai-chat-panel.component.css'],
 })
 export class AiChatPanelComponent {
   private readonly destroyRef = inject(DestroyRef);
@@ -95,22 +88,18 @@ export class AiChatPanelComponent {
   /**
    * All sessions map
    */
-  private readonly sessionsInternal = signal<Map<string, SessionData>>(
-    new Map()
-  );
-  readonly sessions: Signal<Map<string, SessionData>> = computed(
-    () => this.sessionsInternal()
-  );
+  private readonly sessionsInternal = signal<Map<string, SessionData>>(new Map());
+  readonly sessions: Signal<Map<string, SessionData>> = computed(() => this.sessionsInternal());
 
   /**
    * Active session ID
    */
-  readonly activeSessionId = signal<string>("");
+  readonly activeSessionId = signal<string>('');
 
   /**
    * Current input value
    */
-  readonly inputValue = signal<string>("");
+  readonly inputValue = signal<string>('');
 
   /**
    * Current AI status badge
@@ -120,19 +109,15 @@ export class AiChatPanelComponent {
   // ===== Component Classes =====
 
   protected readonly hostClasses = computed(() =>
-    cn("ai-chat-panel-host", this.isOpen() ? "open" : "closed")
+    cn('ai-chat-panel-host', this.isOpen() ? 'open' : 'closed'),
   );
 
   protected readonly panelContainerClasses = computed(() =>
-    cn(
-      "ai-chat-panel-container",
-      "liquid-glass",
-      "liquid-glass-mineral-light"
-    )
+    cn('ai-chat-panel-container', 'liquid-glass', 'liquid-glass-mineral-light'),
   );
 
   protected readonly messagesCardClasses = computed(() =>
-    cn("chat-messages-card-wrapper", !this.isMessagesVisible() ? "collapsed" : "")
+    cn('chat-messages-card-wrapper', !this.isMessagesVisible() ? 'collapsed' : ''),
   );
 
   // ===== Constructor =====
@@ -164,11 +149,9 @@ export class AiChatPanelComponent {
 
       if (sessionsData) {
         const parsed = JSON.parse(sessionsData) as StoredSessionsData;
-        const sessionsMap = new Map<string, SessionData>(
-          Object.entries(parsed.sessions)
-        );
+        const sessionsMap = new Map<string, SessionData>(Object.entries(parsed.sessions));
         this.sessionsInternal.set(sessionsMap);
-        this.activeSessionId.set(activeSession || parsed.activeSessionId || "");
+        this.activeSessionId.set(activeSession || parsed.activeSessionId || '');
       }
 
       if (panelState) {
@@ -177,7 +160,7 @@ export class AiChatPanelComponent {
         this.isMessagesVisible.set(state.panelMessagesVisible !== false);
       }
     } catch (error) {
-      console.error("[AiChatPanel] Failed to load from storage:", error);
+      console.error('[AiChatPanel] Failed to load from storage:', error);
     }
   }
 
@@ -201,10 +184,10 @@ export class AiChatPanelComponent {
         JSON.stringify({
           panelOpen: this.isOpen(),
           panelMessagesVisible: this.isMessagesVisible(),
-        })
+        }),
       );
     } catch (error) {
-      console.error("[AiChatPanel] Failed to save to storage:", error);
+      console.error('[AiChatPanel] Failed to save to storage:', error);
     }
   }
 
@@ -213,7 +196,7 @@ export class AiChatPanelComponent {
    */
   private initializeDefaultSession(): void {
     if (this.sessionsInternal().size === 0) {
-      this.createNewSession("New Chat");
+      this.createNewSession('New Chat');
     }
   }
 
@@ -225,12 +208,12 @@ export class AiChatPanelComponent {
       id: `session-${Date.now()}`,
       name,
       messages: [],
-      inputValue: "",
+      inputValue: '',
       position: { x: 100, y: 100 },
       size: { width: 400, height: 500 },
       lastUpdated: Date.now(),
       status: SessionStatus.IDLE,
-      color: "default",
+      color: 'default',
     };
 
     this.sessionsInternal.update((map) => {
@@ -256,7 +239,7 @@ export class AiChatPanelComponent {
     const session = this.sessionsInternal().get(sessionId);
 
     if (session) {
-      this.inputValue.set(session.inputValue || "");
+      this.inputValue.set(session.inputValue || '');
       this.isMessagesVisible.set(true);
     }
 
@@ -361,7 +344,7 @@ export class AiChatPanelComponent {
 
     const userMessage: ChatMessage = {
       id: `msg-${Date.now()}-user`,
-      role: "user",
+      role: 'user',
       content: message,
       timestamp: Date.now(),
     };
@@ -370,7 +353,7 @@ export class AiChatPanelComponent {
     this.addMessage(userMessage);
 
     // Clear input
-    this.inputValue.set("");
+    this.inputValue.set('');
     this.saveCurrentInput();
 
     // Simulate AI response
@@ -409,8 +392,8 @@ export class AiChatPanelComponent {
     // Show thinking badge
     this.currentBadge.set({
       id: `badge-${Date.now()}-thinking`,
-      type: ("thinking" as BadgeType),
-      text: "Thinking...",
+      type: 'thinking' as BadgeType,
+      text: 'Thinking...',
     });
 
     // Simulate processing delay
@@ -418,22 +401,22 @@ export class AiChatPanelComponent {
       // Show typing badge
       this.currentBadge.set({
         id: `badge-${Date.now()}-typing`,
-        type: ("typing" as BadgeType),
-        text: "Typing...",
+        type: 'typing' as BadgeType,
+        text: 'Typing...',
       });
 
       // Simulate typing delay
       setTimeout(() => {
         const aiMessage: ChatMessage = {
           id: `msg-${Date.now()}-ai`,
-          role: "assistant",
+          role: 'assistant',
           content: `I received your message: "${userMessage}". This is a demo response from the AI chat panel.`,
           timestamp: Date.now(),
           actions: [
             {
-              id: "copy",
-              label: "Copy",
-              icon: "📋",
+              id: 'copy',
+              label: 'Copy',
+              icon: '📋',
               callback: () => {
                 navigator.clipboard.writeText(aiMessage.content);
               },
@@ -446,8 +429,8 @@ export class AiChatPanelComponent {
         // Show done badge briefly
         this.currentBadge.set({
           id: `badge-${Date.now()}-done`,
-          type: ("done" as BadgeType),
-          text: "Done",
+          type: 'done' as BadgeType,
+          text: 'Done',
         });
 
         setTimeout(() => {
@@ -461,7 +444,7 @@ export class AiChatPanelComponent {
    * Handle file button click
    */
   onFileClick(): void {
-    console.log("File button clicked");
+    console.log('File button clicked');
     // TODO: Implement file upload
   }
 
@@ -469,7 +452,7 @@ export class AiChatPanelComponent {
    * Handle image button click
    */
   onImageClick(): void {
-    console.log("Image button clicked");
+    console.log('Image button clicked');
     // TODO: Implement image upload
   }
 
@@ -477,7 +460,7 @@ export class AiChatPanelComponent {
    * Handle voice button click
    */
   onVoiceClick(): void {
-    console.log("Voice button clicked");
+    console.log('Voice button clicked');
     // TODO: Implement voice input
   }
 
@@ -552,9 +535,9 @@ export class AiChatPanelComponent {
    */
   readonly placeholder = computed(() => {
     if (!this.activeSessionId()) {
-      return "Select or create a session to start chatting...";
+      return 'Select or create a session to start chatting...';
     }
-    return "Ask AI anything...";
+    return 'Ask AI anything...';
   });
 
   /**

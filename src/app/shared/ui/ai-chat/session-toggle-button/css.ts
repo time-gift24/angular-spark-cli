@@ -6,16 +6,12 @@
 /**
  * Fixed positioning (default)
  */
-export const fixedPosition = [
-  'fixed top-6 right-6',
-].join(' ');
+export const fixedPosition = ['fixed top-6 right-6'].join(' ');
 
 /**
  * Relative positioning (for wrapper component)
  */
-export const relativePosition = [
-  'relative',
-].join(' ');
+export const relativePosition = ['relative'].join(' ');
 
 /**
  * Session toggle button base
@@ -42,9 +38,7 @@ export const sessionToggleBase = [
 /**
  * Has badge pulse animation
  */
-export const hasBadgePulse = [
-  'animate-pulse',
-].join(' ');
+export const hasBadgePulse = ['animate-pulse'].join(' ');
 
 /**
  * Notification badge
@@ -69,11 +63,6 @@ export const toggleIcon = [
 /**
  * Responsive mobile styles
  */
-export const mobileToggle = [
-  'top-4 right-4',
-  'w-13 h-13',
-].join(' ');
+export const mobileToggle = ['top-4 right-4', 'w-13 h-13'].join(' ');
 
-export const mobileIcon = [
-  'w-6.5 h-6.5',
-].join(' ');
+export const mobileIcon = ['w-6.5 h-6.5'].join(' ');

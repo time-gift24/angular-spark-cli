@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CheckboxComponent } from '../../shared/ui/checkbox/checkbox.component';
-import { LabelComponent } from '../../shared/ui/label/label.component';
+import { CheckboxComponent } from '@app/shared/ui/checkbox/checkbox.component';
+import { LabelComponent } from '@app/shared/ui/label/label.component';
 
 @Component({
   selector: 'app-checkbox-demo',
@@ -10,8 +10,8 @@ import { LabelComponent } from '../../shared/ui/label/label.component';
   templateUrl: './checkbox-demo.component.html',
   styleUrls: ['./checkbox-demo.component.css'],
   host: {
-    'style': 'display: block; width: 100%;'
-  }
+    style: 'display: block; width: 100%;',
+  },
 })
 export class CheckboxDemoComponent {
   acceptTerms = false;

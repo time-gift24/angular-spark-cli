@@ -12,10 +12,10 @@ import {
 import {
   LiquidGlassTheme,
   LiquidGlassRefractionMode,
-} from '../types/liquid-glass.types';
-import { LiquidGlassThemeResolver } from '../services/theme-resolver.service';
-import { SvgFilterBuilderService } from '../services/svg-filter-builder.service';
-import { REFRACTION_MODE_TURBULENCE } from '../types/theme.constants';
+} from '@app/shared/ui/liquid-glass/types/liquid-glass.types';
+import { LiquidGlassThemeResolver } from '@app/shared/ui/liquid-glass/services/theme-resolver.service';
+import { SvgFilterBuilderService } from '@app/shared/ui/liquid-glass/services/svg-filter-builder.service';
+import { REFRACTION_MODE_TURBULENCE } from '@app/shared/ui/liquid-glass/types/theme.constants';
 
 /**
  * Liquid Glass Directive - Phase 5: Core Implementation
@@ -416,25 +416,21 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     this.r.setStyle(
       this.overlay,
       'backdrop-filter',
-      `blur(${blurPx}px) saturate(${this.lgSaturation}%)`
+      `blur(${blurPx}px) saturate(${this.lgSaturation}%)`,
     );
     this.r.setStyle(
       this.overlay,
       '-webkit-backdrop-filter',
-      `blur(${blurPx}px) saturate(${this.lgSaturation}%)`
+      `blur(${blurPx}px) saturate(${this.lgSaturation}%)`,
     );
 
     // ----- Border and Shadow -----
     const borderColor = this.lgBorder || 'var(--accent)';
-    this.r.setStyle(
-      this.overlay,
-      'border',
-      `${this.lgBorderWidth}px solid ${borderColor}`
-    );
+    this.r.setStyle(this.overlay, 'border', `${this.lgBorderWidth}px solid ${borderColor}`);
     this.r.setStyle(
       this.overlay,
       'box-shadow',
-      '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)'
+      '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)',
     );
 
     // ----- Initial Background -----
@@ -486,15 +482,14 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
       blurAmount: this.lgBlurAmount,
       saturation: this.lgSaturation,
       aberrationIntensity: this.lgAberrationIntensity,
-      turbulenceBaseFrequency:
-        REFRACTION_MODE_TURBULENCE[this.lgMode],
+      turbulenceBaseFrequency: REFRACTION_MODE_TURBULENCE[this.lgMode],
     };
 
     this.svgFilter = this.filterBuilder.createFilterElement(
       this.r,
       config,
       this.lgMode,
-      this.filterId
+      this.filterId,
     );
 
     this.r.appendChild(this.host, this.svgFilter);
@@ -505,7 +500,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
       this.overlay,
       'filter',
       `url(#${this.filterId}) drop-shadow(${aberration}px 0 rgba(255,40,120,0.18)) ` +
-        `drop-shadow(${-aberration}px 0 rgba(40,160,255,0.16))`
+        `drop-shadow(${-aberration}px 0 rgba(40,160,255,0.16))`,
     );
   }
 
@@ -568,14 +563,8 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
       this.curY += (this.targetY - this.curY) * k;
 
       // Update CSS custom properties for potential external use
-      this.host.style.setProperty(
-        '--lg-x',
-        `${(this.curX * 100).toFixed(2)}%`
-      );
-      this.host.style.setProperty(
-        '--lg-y',
-        `${(this.curY * 100).toFixed(2)}%`
-      );
+      this.host.style.setProperty('--lg-x', `${(this.curX * 100).toFixed(2)}%`);
+      this.host.style.setProperty('--lg-y', `${(this.curY * 100).toFixed(2)}%`);
 
       // Update background gradient hotspot
       this.updateOverlayBackground(this.curX, this.curY);
@@ -587,7 +576,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
         this.overlay,
         'transform',
         `translate3d(${(-dx * this.lgParallaxIntensity).toFixed(2)}px, ` +
-          `${(-dy * this.lgParallaxIntensity).toFixed(2)}px, 0)`
+          `${(-dy * this.lgParallaxIntensity).toFixed(2)}px, 0)`,
       );
 
       // Schedule next frame

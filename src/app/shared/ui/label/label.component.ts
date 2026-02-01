@@ -1,5 +1,5 @@
 import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
-import { cn } from '../../utils';
+import { cn } from '@app/shared/utils';
 
 @Component({
   selector: 'label[spark-label]',
@@ -26,9 +26,6 @@ export class LabelComponent {
    * Computed class for the label element
    */
   protected computedClass = computed(() => {
-    return cn(
-      this.getBaseClasses(),
-      this.class()
-    );
+    return cn(this.getBaseClasses(), this.class());
   });
 }

@@ -15,7 +15,7 @@ import {
   DestroyRef,
   afterNextRender,
 } from '@angular/core';
-import { PanelSize, MIN_PANEL_SIZE } from '../types/chat.types';
+import { PanelSize, MIN_PANEL_SIZE } from '@app/shared/ui/ai-chat/types/chat.types';
 
 /**
  * Resize handle directive

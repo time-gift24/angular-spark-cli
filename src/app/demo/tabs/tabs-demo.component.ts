@@ -5,11 +5,11 @@ import {
   TabsListComponent,
   TabsTriggerComponent,
   TabsContentComponent,
-} from '../../shared/ui/tabs/tabs.component';
-import { ButtonComponent } from '../../shared/ui/button/button.component';
-import { CardComponents } from '../../shared/ui/card/card.component';
-import { InputComponent } from '../../shared/ui/input/input.component';
-import { LabelComponent } from '../../shared/ui/label/label.component';
+} from '@app/shared/ui/tabs/tabs.component';
+import { ButtonComponent } from '@app/shared/ui/button/button.component';
+import { CardComponents } from '@app/shared/ui/card/card.component';
+import { InputComponent } from '@app/shared/ui/input/input.component';
+import { LabelComponent } from '@app/shared/ui/label/label.component';
 
 @Component({
   selector: 'app-tabs-demo',
@@ -28,8 +28,8 @@ import { LabelComponent } from '../../shared/ui/label/label.component';
   templateUrl: './tabs-demo.component.html',
   styleUrls: ['./tabs-demo.component.css'],
   host: {
-    'style': 'display: block; width: 100%;'
-  }
+    style: 'display: block; width: 100%;',
+  },
 })
 export class TabsDemoComponent {
   activeTab = 'account';

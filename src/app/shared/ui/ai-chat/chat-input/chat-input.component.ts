@@ -16,7 +16,7 @@ import {
   afterNextRender,
 } from '@angular/core';
 import { EventEmitter } from '@angular/core';
-import { LiquidGlassDirective } from '../../liquid-glass';
+import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
 import {
   inputContainer,
   inputWrapper,
@@ -39,7 +39,7 @@ import {
   darkSendButton,
   darkSendButtonActive,
 } from './css';
-import { cn } from '../../../utils';
+import { cn } from '@app/shared/utils';
 
 /**
  * Chat input component with modern pill design
@@ -92,8 +92,18 @@ import { cn } from '../../../utils';
               (click)="onFileClick()"
               [attr.aria-label]="'Add file'"
             >
-              <svg [class]="iconClasses()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+              <svg
+                [class]="iconClasses()"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+                />
               </svg>
             </button>
 
@@ -104,7 +114,15 @@ import { cn } from '../../../utils';
               (click)="onImageClick()"
               [attr.aria-label]="'Add image'"
             >
-              <svg [class]="iconClasses()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                [class]="iconClasses()"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
                 <circle cx="9" cy="9" r="2" />
                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
@@ -121,7 +139,15 @@ import { cn } from '../../../utils';
               (click)="onVoiceClick()"
               [attr.aria-label]="'Voice input'"
             >
-              <svg [class]="iconClasses()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                [class]="iconClasses()"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                 <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                 <line x1="12" x2="12" y1="19" y2="22" />
@@ -136,7 +162,15 @@ import { cn } from '../../../utils';
               (click)="onSend()"
               [attr.aria-label]="'Send message'"
             >
-              <svg [class]="sendIconClasses()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                [class]="sendIconClasses()"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M22 2L11 13" />
                 <path d="M22 2l-7 20-4-9-9-4 20-7z" />
               </svg>
@@ -216,16 +250,14 @@ export class ChatInputComponent {
   readonly sendIconBase = sendIcon;
 
   // Computed classes
-  protected hostClasses = computed(() =>
-    cn('block', this.isFocused() ? 'focused' : '')
-  );
+  protected hostClasses = computed(() => cn('block', this.isFocused() ? 'focused' : ''));
 
   protected inputWrapperClasses = computed(() =>
-    cn(this.inputWrapper, this.isFocused() ? 'focus-within' : '')
+    cn(this.inputWrapper, this.isFocused() ? 'focus-within' : ''),
   );
 
   protected inputFieldClasses = computed(() =>
-    cn(this.inputFieldBase, darkInputField, darkPlaceholder)
+    cn(this.inputFieldBase, darkInputField, darkPlaceholder),
   );
 
   protected inputAreaClasses = computed(() => this.inputArea);
@@ -237,15 +269,15 @@ export class ChatInputComponent {
   protected actionButtonsRightClasses = computed(() => this.actionButtonsRight);
 
   protected fileButtonClasses = computed(() =>
-    cn(this.iconButtonBase, iconButtonDefault, darkIconButton)
+    cn(this.iconButtonBase, iconButtonDefault, darkIconButton),
   );
 
   protected imageButtonClasses = computed(() =>
-    cn(this.iconButtonBase, iconButtonDefault, darkIconButton)
+    cn(this.iconButtonBase, iconButtonDefault, darkIconButton),
   );
 
   protected voiceButtonClasses = computed(() =>
-    cn(this.iconButtonBase, iconButtonDefault, voiceButtonHover, darkIconButton)
+    cn(this.iconButtonBase, iconButtonDefault, voiceButtonHover, darkIconButton),
   );
 
   protected sendButtonClasses = computed(() =>
@@ -254,8 +286,8 @@ export class ChatInputComponent {
       darkSendButton,
       sendButtonFocus,
       this.canSend() ? sendButtonActive : '',
-      this.canSend() ? darkSendButtonActive : ''
-    )
+      this.canSend() ? darkSendButtonActive : '',
+    ),
   );
 
   protected iconClasses = computed(() => this.iconBase);

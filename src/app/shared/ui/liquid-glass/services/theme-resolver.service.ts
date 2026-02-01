@@ -11,11 +11,11 @@ import { inject, Injectable } from '@angular/core';
 import {
   LiquidGlassTheme,
   LiquidGlassColorConfig,
-} from '../types/liquid-glass.types';
+} from '@app/shared/ui/liquid-glass/types/liquid-glass.types';
 import {
   MINERAL_LIGHT_THEME,
   MINERAL_DARK_THEME,
-} from '../types/theme.constants';
+} from '@app/shared/ui/liquid-glass/types/theme.constants';
 
 /**
  * Theme resolver service for liquid glass directive
@@ -84,9 +84,7 @@ export class LiquidGlassThemeResolver {
    * ```
    */
   detectCurrentTheme(): 'light' | 'dark' {
-    return document.documentElement.classList.contains('dark')
-      ? 'dark'
-      : 'light';
+    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
   }
 
   /**
@@ -104,9 +102,7 @@ export class LiquidGlassThemeResolver {
    * ```
    */
   autoSelectTheme(): LiquidGlassTheme {
-    return this.detectCurrentTheme() === 'dark'
-      ? 'mineral-dark'
-      : 'mineral-light';
+    return this.detectCurrentTheme() === 'dark' ? 'mineral-dark' : 'mineral-light';
   }
 
   /**

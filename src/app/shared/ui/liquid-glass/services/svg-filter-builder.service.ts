@@ -2,8 +2,8 @@ import { Injectable, Renderer2 } from '@angular/core';
 import {
   LiquidGlassFilterConfig,
   LiquidGlassRefractionMode,
-} from '../types/liquid-glass.types';
-import { REFRACTION_MODE_TURBULENCE } from '../types/theme.constants';
+} from '@app/shared/ui/liquid-glass/types/liquid-glass.types';
+import { REFRACTION_MODE_TURBULENCE } from '@app/shared/ui/liquid-glass/types/theme.constants';
 
 /**
  * Service for building SVG filters that create refractive distortion effects
@@ -57,17 +57,13 @@ export class SvgFilterBuilderService {
     renderer: Renderer2,
     config: LiquidGlassFilterConfig,
     mode: LiquidGlassRefractionMode,
-    filterId: string
+    filterId: string,
   ): SVGSVGElement {
     // Create SVG container (hidden, zero-size)
     const svg = renderer.createElement('svg', 'svg') as SVGSVGElement;
     renderer.setAttribute(svg, 'width', '0');
     renderer.setAttribute(svg, 'height', '0');
-    renderer.setAttribute(
-      svg,
-      'style',
-      'position:absolute; width:0; height:0; overflow:hidden;'
-    );
+    renderer.setAttribute(svg, 'style', 'position:absolute; width:0; height:0; overflow:hidden;');
 
     // Create defs container for filter definition
     const defs = renderer.createElement('defs', 'svg');
@@ -82,7 +78,7 @@ export class SvgFilterBuilderService {
     renderer.setAttribute(filter, 'y', '-20%');
     renderer.setAttribute(filter, 'width', '140%');
     renderer.setAttribute(filter, 'height', '140%');
-    
+
     // Use sRGB color space for consistent color interpolation
     renderer.setAttribute(filter, 'color-interpolation-filters', 'sRGB');
 
@@ -120,36 +116,28 @@ export class SvgFilterBuilderService {
   private createTurbulence(
     renderer: Renderer2,
     config: LiquidGlassFilterConfig,
-    mode: LiquidGlassRefractionMode
+    mode: LiquidGlassRefractionMode,
   ): SVGFETurbulenceElement {
-    const turbulence = renderer.createElement(
-      'feTurbulence',
-      'svg'
-    ) as SVGFETurbulenceElement;
+    const turbulence = renderer.createElement('feTurbulence', 'svg') as SVGFETurbulenceElement;
 
     // Use fractal noise for more organic, cloud-like patterns
     renderer.setAttribute(turbulence, 'type', 'fractalNoise');
 
     // More octaves = more detail, but higher performance cost
     // Prominent mode gets extra detail for stronger effect
-    renderer.setAttribute(
-      turbulence,
-      'numOctaves',
-      mode === 'prominent' ? '3' : '2'
-    );
+    renderer.setAttribute(turbulence, 'numOctaves', mode === 'prominent' ? '3' : '2');
 
     // Different seeds create different noise patterns
     // This allows each mode to have a distinct visual character
     renderer.setAttribute(
       turbulence,
       'seed',
-      mode === 'polar' ? '9' : mode === 'prominent' ? '4' : '2'
+      mode === 'polar' ? '9' : mode === 'prominent' ? '4' : '2',
     );
 
     // Base frequency determines noise scale (higher = finer details)
     // Use config value if provided, otherwise fall back to mode preset
-    const freq =
-      config.turbulenceBaseFrequency || REFRACTION_MODE_TURBULENCE[mode];
+    const freq = config.turbulenceBaseFrequency || REFRACTION_MODE_TURBULENCE[mode];
     renderer.setAttribute(turbulence, 'baseFrequency', freq.join(' '));
     renderer.setAttribute(turbulence, 'result', 'noise');
 
@@ -169,12 +157,9 @@ export class SvgFilterBuilderService {
    */
   private createDisplacementMap(
     renderer: Renderer2,
-    config: LiquidGlassFilterConfig
+    config: LiquidGlassFilterConfig,
   ): SVGFEDisplacementMapElement {
-    const disp = renderer.createElement(
-      'feDisplacementMap',
-      'svg'
-    ) as SVGFEDisplacementMapElement;
+    const disp = renderer.createElement('feDisplacementMap', 'svg') as SVGFEDisplacementMapElement;
 
     // SourceGraphic = the element being filtered
     renderer.setAttribute(disp, 'in', 'SourceGraphic');
@@ -208,12 +193,9 @@ export class SvgFilterBuilderService {
    */
   private createGaussianBlur(
     renderer: Renderer2,
-    config: LiquidGlassFilterConfig
+    config: LiquidGlassFilterConfig,
   ): SVGFEGaussianBlurElement {
-    const blur = renderer.createElement(
-      'feGaussianBlur',
-      'svg'
-    ) as SVGFEGaussianBlurElement;
+    const blur = renderer.createElement('feGaussianBlur', 'svg') as SVGFEGaussianBlurElement;
 
     // Blur the displaced result, not the original
     renderer.setAttribute(blur, 'in', 'displaced');

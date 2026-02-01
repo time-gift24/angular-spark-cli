@@ -19,7 +19,9 @@ import { NavComponent } from './nav.component';
   template: `
     <div class="min-h-screen bg-background flex flex-col md:flex-row">
       @if (showHeader()) {
-        <aside class="w-full md:w-64 md:h-screen md:sticky md:top-0 border-b md:border-b-0 md:border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <aside
+          class="w-full md:w-64 md:h-screen md:sticky md:top-0 border-b md:border-b-0 md:border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        >
           <!-- Sidebar Navigation -->
           <app-nav />
         </aside>
@@ -28,9 +30,8 @@ import { NavComponent } from './nav.component';
       <main class="flex-1 overflow-auto p-6">
         <router-outlet />
       </main>
-
     </div>
-  `
+  `,
 })
 export class MainLayoutComponent {
   /**

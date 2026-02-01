@@ -6,23 +6,17 @@
 /**
  * Base container styles
  */
-export const inputContainer = [
-  'relative w-full max-w-[768px] mx-auto mb-4',
-].join(' ');
+export const inputContainer = ['relative w-full max-w-[768px] mx-auto mb-4'].join(' ');
 
 /**
  * Input wrapper styles
  */
-export const inputWrapper = [
-  'relative',
-].join(' ');
+export const inputWrapper = ['relative'].join(' ');
 
 /**
  * Input area padding
  */
-export const inputArea = [
-  'px-4 py-3 pb-2',
-].join(' ');
+export const inputArea = ['px-4 py-3 pb-2'].join(' ');
 
 /**
  * Textarea field styles
@@ -37,25 +31,19 @@ export const inputField = [
 /**
  * Toolbar container
  */
-export const toolbar = [
-  'flex justify-between items-center',
-  'px-3 py-1.5 pb-2.5',
-  'gap-2',
-].join(' ');
+export const toolbar = ['flex justify-between items-center', 'px-3 py-1.5 pb-2.5', 'gap-2'].join(
+  ' ',
+);
 
 /**
  * Left tool buttons container
  */
-export const toolButtonsLeft = [
-  'flex gap-0.5 items-center',
-].join(' ');
+export const toolButtonsLeft = ['flex gap-0.5 items-center'].join(' ');
 
 /**
  * Right action buttons container
  */
-export const actionButtonsRight = [
-  'flex gap-1 items-center',
-].join(' ');
+export const actionButtonsRight = ['flex gap-1 items-center'].join(' ');
 
 /**
  * Icon button base styles
@@ -123,9 +111,7 @@ export const sendButtonFocus = [
 /**
  * SVG icon for toolbar buttons
  */
-export const toolbarIcon = [
-  'w-4 h-4 stroke-[1.75]',
-].join(' ');
+export const toolbarIcon = ['w-4 h-4 stroke-[1.75]'].join(' ');
 
 /**
  * Send button SVG
@@ -139,31 +125,21 @@ export const sendIcon = [
 /**
  * Focus state wrapper
  */
-export const focusWithin = [
-  'focus-within:scale-[1.01]',
-].join(' ');
+export const focusWithin = ['focus-within:scale-[1.01]'].join(' ');
 
 /**
  * Responsive styles for mobile
  */
-export const mobileInputArea = [
-  'sm:px-4 sm:pb-2',
-].join(' ');
+export const mobileInputArea = ['sm:px-4 sm:pb-2'].join(' ');
 
-export const mobileToolbar = [
-  'sm:px-3 sm:pb-2.5',
-].join(' ');
+export const mobileToolbar = ['sm:px-3 sm:pb-2.5'].join(' ');
 
 /**
  * Dark mode overrides
  */
-export const darkInputField = [
-  'dark:text-[oklch(0.94_0.015_85)]',
-].join(' ');
+export const darkInputField = ['dark:text-[oklch(0.94_0.015_85)]'].join(' ');
 
-export const darkPlaceholder = [
-  'dark:placeholder:text-[oklch(0.65_0.035_195)]',
-].join(' ');
+export const darkPlaceholder = ['dark:placeholder:text-[oklch(0.65_0.035_195)]'].join(' ');
 
 export const darkIconButton = [
   'dark:text-[oklch(0.65_0.035_195)]',

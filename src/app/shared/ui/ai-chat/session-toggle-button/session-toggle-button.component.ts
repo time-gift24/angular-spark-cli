@@ -13,7 +13,7 @@ import {
   notificationBadge,
   toggleIcon,
 } from './css';
-import { cn } from '../../../utils';
+import { cn } from '@app/shared/utils';
 
 /**
  * Session toggle button component
@@ -98,15 +98,13 @@ export class SessionToggleComponent {
       this.sessionToggleBaseStyles,
       'session-toggle',
       this.useFixedPosition() ? fixedPosition : relativePosition,
-      this.hasBadge() ? 'has-badge' : ''
-    )
+      this.hasBadge() ? 'has-badge' : '',
+    ),
   );
 
   protected iconClasses = computed(() => this.toggleIconBase);
 
-  protected badgeClasses = computed(() =>
-    cn(this.notificationBadgeBase, 'notification-badge')
-  );
+  protected badgeClasses = computed(() => cn(this.notificationBadgeBase, 'notification-badge'));
 
   /**
    * Handle button click

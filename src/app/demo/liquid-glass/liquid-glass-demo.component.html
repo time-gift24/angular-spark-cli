@@ -1,12 +1,8 @@
 <div class="container mx-auto max-w-6xl px-4 py-8">
   <!-- Header -->
   <header class="mb-12">
-    <h1 class="text-xl font-semibold mb-3 text-foreground">
-      Liquid Glass Directive
-    </h1>
-    <p class="text-sm text-muted-foreground mb-4">
-      液态玻璃效果 - 矿物与时光主题集成
-    </p>
+    <h1 class="text-xl font-semibold mb-3 text-foreground">Liquid Glass Directive</h1>
+    <p class="text-sm text-muted-foreground mb-4">液态玻璃效果 - 矿物与时光主题集成</p>
     <div class="text-xs text-muted-foreground space-y-1">
       <p>✨ 交互式鼠标追踪效果 | 🎨 矿物主题配色 | 🌈 SVG 折射滤镜</p>
       <p>⚡ 60fps 动画 | ♿ 无障碍支持 | 🎯 紧凑设计</p>
@@ -17,18 +13,20 @@
   <section class="mb-12">
     <div class="mb-6">
       <h2 class="text-lg font-medium mb-2 text-foreground">基础效果</h2>
-      <p class="text-sm text-muted-foreground">
-        三种折射模式，从标准到突出，满足不同场景需求
-      </p>
+      <p class="text-sm text-muted-foreground">三种折射模式，从标准到突出，满足不同场景需求</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       @for (example of basicExamples; track example.title; let i = $index) {
-        <div class="relative overflow-hidden rounded-xl border border-border p-6"
-             [style.background]="getCardBackground(i)">
+        <div
+          class="relative overflow-hidden rounded-xl border border-border p-6"
+          [style.background]="getCardBackground(i)"
+        >
           <!-- Background Glow -->
-          <div class="absolute inset-0 opacity-40 blur-3xl"
-               [style.background]="getCardGlow(i)"></div>
+          <div
+            class="absolute inset-0 opacity-40 blur-3xl"
+            [style.background]="getCardGlow(i)"
+          ></div>
 
           <!-- Liquid Glass Card -->
           <div class="relative z-10">
@@ -41,9 +39,12 @@
               [lgSaturation]="example.saturation"
               [lgElasticity]="example.elasticity"
               [lgAberrationIntensity]="example.aberrationIntensity"
-              class="p-5">
+              class="p-5"
+            >
               <h3 class="text-base font-semibold mb-2 text-foreground">{{ example.title }}</h3>
-              <p class="text-xs text-muted-foreground mb-4 leading-relaxed">{{ example.description }}</p>
+              <p class="text-xs text-muted-foreground mb-4 leading-relaxed">
+                {{ example.description }}
+              </p>
 
               <!-- Configuration -->
               <div class="space-y-1.5 text-xs font-mono text-muted-foreground">
@@ -78,11 +79,15 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       @for (example of themeExamples; track example.title; let i = $index) {
-        <div class="relative overflow-hidden rounded-xl border border-border p-6"
-             [style.background]="getThemeCardBackground(i)">
+        <div
+          class="relative overflow-hidden rounded-xl border border-border p-6"
+          [style.background]="getThemeCardBackground(i)"
+        >
           <!-- Background Glow -->
-          <div class="absolute inset-0 opacity-40 blur-3xl"
-               [style.background]="getThemeCardGlow(i)"></div>
+          <div
+            class="absolute inset-0 opacity-40 blur-3xl"
+            [style.background]="getThemeCardGlow(i)"
+          ></div>
 
           <!-- Liquid Glass Card -->
           <div class="relative z-10">
@@ -95,12 +100,17 @@
               [lgSaturation]="example.saturation"
               [lgElasticity]="example.elasticity"
               [lgAberrationIntensity]="example.aberrationIntensity"
-              class="p-5">
+              class="p-5"
+            >
               <h3 class="text-base font-semibold mb-2 text-foreground">{{ example.title }}</h3>
-              <p class="text-xs text-muted-foreground mb-4 leading-relaxed">{{ example.description }}</p>
+              <p class="text-xs text-muted-foreground mb-4 leading-relaxed">
+                {{ example.description }}
+              </p>
               <div class="flex items-center gap-2 text-xs font-mono text-muted-foreground">
                 <span>Theme:</span>
-                <span class="px-2 py-0.5 rounded bg-primary/20 text-foreground">{{ example.theme }}</span>
+                <span class="px-2 py-0.5 rounded bg-primary/20 text-foreground">{{
+                  example.theme
+                }}</span>
               </div>
             </div>
           </div>
@@ -113,18 +123,20 @@
   <section class="mb-12">
     <div class="mb-6">
       <h2 class="text-lg font-medium mb-2 text-foreground">动画配置</h2>
-      <p class="text-sm text-muted-foreground">
-        不同的弹性系数控制动画响应速度，从柔和到快速响应
-      </p>
+      <p class="text-sm text-muted-foreground">不同的弹性系数控制动画响应速度，从柔和到快速响应</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       @for (example of animationExamples; track example.title; let i = $index) {
-        <div class="relative overflow-hidden rounded-xl border border-border p-6"
-             [style.background]="getAnimationCardBackground(i)">
+        <div
+          class="relative overflow-hidden rounded-xl border border-border p-6"
+          [style.background]="getAnimationCardBackground(i)"
+        >
           <!-- Background Glow -->
-          <div class="absolute inset-0 opacity-40 blur-3xl"
-               [style.background]="getAnimationCardGlow(i)"></div>
+          <div
+            class="absolute inset-0 opacity-40 blur-3xl"
+            [style.background]="getAnimationCardGlow(i)"
+          ></div>
 
           <!-- Liquid Glass Card -->
           <div class="relative z-10">
@@ -137,9 +149,12 @@
               [lgSaturation]="example.saturation"
               [lgElasticity]="example.elasticity"
               [lgAberrationIntensity]="example.aberrationIntensity"
-              class="p-5">
+              class="p-5"
+            >
               <h3 class="text-base font-semibold mb-2 text-foreground">{{ example.title }}</h3>
-              <p class="text-xs text-muted-foreground mb-4 leading-relaxed">{{ example.description }}</p>
+              <p class="text-xs text-muted-foreground mb-4 leading-relaxed">
+                {{ example.description }}
+              </p>
               <div class="flex justify-between text-xs font-mono text-muted-foreground">
                 <span>Elasticity:</span>
                 <span class="text-foreground">{{ example.elasticity }}</span>
@@ -156,14 +171,21 @@
     <div class="mb-6">
       <h2 class="text-lg font-medium mb-2 text-foreground">快速使用</h2>
       <p class="text-sm text-muted-foreground mb-4">
-        导入指令后，只需在元素上添加 <code class="px-1.5 py-0.5 rounded bg-muted text-xs">liquidGlass</code> 属性
+        导入指令后，只需在元素上添加
+        <code class="px-1.5 py-0.5 rounded bg-muted text-xs">liquidGlass</code> 属性
       </p>
     </div>
 
     <div class="rounded-lg border border-border bg-muted/30 p-4 space-y-2 text-sm">
       <p class="text-muted-foreground"><strong class="text-foreground">步骤 1:</strong> 导入指令</p>
-      <p class="text-muted-foreground"><strong class="text-foreground">步骤 2:</strong> 在组件的 imports 数组中添加 <code class="text-primary">LiquidGlassDirective</code></p>
-      <p class="text-muted-foreground"><strong class="text-foreground">步骤 3:</strong> 在 HTML 元素上添加 <code class="text-primary">liquidGlass</code> 属性</p>
+      <p class="text-muted-foreground">
+        <strong class="text-foreground">步骤 2:</strong> 在组件的 imports 数组中添加
+        <code class="text-primary">LiquidGlassDirective</code>
+      </p>
+      <p class="text-muted-foreground">
+        <strong class="text-foreground">步骤 3:</strong> 在 HTML 元素上添加
+        <code class="text-primary">liquidGlass</code> 属性
+      </p>
     </div>
   </section>
 
@@ -171,9 +193,7 @@
   <section>
     <div class="mb-6">
       <h2 class="text-lg font-medium mb-2 text-foreground">输入属性</h2>
-      <p class="text-sm text-muted-foreground">
-        19 个可配置属性，满足各种定制需求
-      </p>
+      <p class="text-sm text-muted-foreground">19 个可配置属性，满足各种定制需求</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">

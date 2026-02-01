@@ -14,8 +14,8 @@ import { SessionData, SessionStatus, SessionColor } from '@app/shared/models';
   templateUrl: './demo-session-tabs-bar.component.html',
   styleUrl: './demo-session-tabs-bar.component.css',
   host: {
-    'style': 'display: block; width: 100%;'
-  }
+    style: 'display: block; width: 100%;',
+  },
 })
 export class DemoSessionTabsBarComponent {
   /** 所有会话数据 */
@@ -76,7 +76,7 @@ export class DemoSessionTabsBarComponent {
     ];
 
     const map = new Map<string, SessionData>();
-    demoSessions.forEach(session => map.set(session.id, session));
+    demoSessions.forEach((session) => map.set(session.id, session));
     this.sessionsInternal.set(map);
     this.activeSessionId.set('session-1');
   }
@@ -124,7 +124,7 @@ export class DemoSessionTabsBarComponent {
       lastUpdated: Date.now(),
     };
 
-    this.sessionsInternal.update(map => {
+    this.sessionsInternal.update((map) => {
       const newMap = new Map(map);
       newMap.set(newSession.id, newSession);
       return newMap;
@@ -137,7 +137,7 @@ export class DemoSessionTabsBarComponent {
    * 处理会话重命名事件
    */
   onSessionRename(event: { sessionId: string; newName: string }): void {
-    this.sessionsInternal.update(map => {
+    this.sessionsInternal.update((map) => {
       const newMap = new Map(map);
       const session = newMap.get(event.sessionId);
       if (session) {
@@ -152,7 +152,7 @@ export class DemoSessionTabsBarComponent {
    * 处理会话颜色变更事件
    */
   onSessionColorChange(event: { sessionId: string; color: SessionColor }): void {
-    this.sessionsInternal.update(map => {
+    this.sessionsInternal.update((map) => {
       const newMap = new Map(map);
       const session = newMap.get(event.sessionId);
       if (session) {
@@ -170,7 +170,7 @@ export class DemoSessionTabsBarComponent {
     const current = this.sessionsInternal();
     if (current.size <= 1) return;
 
-    this.sessionsInternal.update(map => {
+    this.sessionsInternal.update((map) => {
       const newMap = new Map(map);
       newMap.delete(sessionId);
       return newMap;

@@ -12,9 +12,9 @@ import {
  * to maintain readability on bright backgrounds.
  */
 export const MINERAL_LIGHT_THEME: LiquidGlassColorConfig = {
-  border: 'var(--accent)',              // 亮泥金
+  border: 'var(--accent)', // 亮泥金
   hotspot: 'rgba(255, 255, 255, 0.18)',
-  tint: 'rgba(0, 0, 0, 0.12)',          // Lighter for light mode
+  tint: 'rgba(0, 0, 0, 0.12)', // Lighter for light mode
   aberration1: 'rgba(200, 80, 120, 0.15)',
   aberration2: 'rgba(80, 140, 200, 0.12)',
 };
@@ -26,9 +26,9 @@ export const MINERAL_LIGHT_THEME: LiquidGlassColorConfig = {
  * for better visibility on dark backgrounds.
  */
 export const MINERAL_DARK_THEME: LiquidGlassColorConfig = {
-  border: 'var(--accent)',              // 亮泥金
+  border: 'var(--accent)', // 亮泥金
   hotspot: 'rgba(255, 255, 255, 0.22)',
-  tint: 'rgba(0, 0, 0, 0.32)',          // Darker for dark mode
+  tint: 'rgba(0, 0, 0, 0.32)', // Darker for dark mode
   aberration1: 'rgba(255, 40, 120, 0.18)',
   aberration2: 'rgba(40, 160, 255, 0.16)',
 };
@@ -40,9 +40,9 @@ export const MINERAL_DARK_THEME: LiquidGlassColorConfig = {
  * and small corner radius for a modern, efficient look.
  */
 export const COMPACT_SPACING: LiquidGlassSpacingConfig = {
-  cornerRadius: 'var(--radius-xl)',     // 6px - matches design system
+  cornerRadius: 'var(--radius-xl)', // 6px - matches design system
   borderWidth: 1,
-  padding: 12,                           // var(--spacing-lg) * 1.5
+  padding: 12, // var(--spacing-lg) * 1.5
 };
 
 /**
@@ -52,10 +52,10 @@ export const COMPACT_SPACING: LiquidGlassSpacingConfig = {
  * distract from content while still providing visual interest.
  */
 export const SUBTLE_FILTER: LiquidGlassFilterConfig = {
-  displacementScale: 60,                 // Reduced from 90 for subtlety
-  blurAmount: 0.35,                      // Slightly less blur
-  saturation: 105,                       // Lower saturation (was 140)
-  aberrationIntensity: 1.5,              // Reduced chromatic effect
+  displacementScale: 60, // Reduced from 90 for subtlety
+  blurAmount: 0.35, // Slightly less blur
+  saturation: 105, // Lower saturation (was 140)
+  aberrationIntensity: 1.5, // Reduced chromatic effect
   turbulenceBaseFrequency: [0.014, 0.035],
 };
 
@@ -67,11 +67,8 @@ export const SUBTLE_FILTER: LiquidGlassFilterConfig = {
  * - `polar`: Higher Y frequency for directional distortion
  * - `prominent`: Higher X/Y frequencies for more visible effect
  */
-export const REFRACTION_MODE_TURBULENCE: Record<
-  LiquidGlassRefractionMode,
-  [number, number]
-> = {
+export const REFRACTION_MODE_TURBULENCE: Record<LiquidGlassRefractionMode, [number, number]> = {
   standard: [0.014, 0.035],
-  polar: [0.010, 0.060],
-  prominent: [0.020, 0.020],
+  polar: [0.01, 0.06],
+  prominent: [0.02, 0.02],
 };

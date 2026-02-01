@@ -7,10 +7,10 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   host: {
-    'class': 'relative flex w-full touch-none select-none items-center',
+    class: 'relative flex w-full touch-none select-none items-center',
   },
   templateUrl: './slider.html',
-  styleUrl: './slider.css'
+  styleUrl: './slider.css',
 })
 export class SliderComponent {
   readonly value = model<number[]>([50]);

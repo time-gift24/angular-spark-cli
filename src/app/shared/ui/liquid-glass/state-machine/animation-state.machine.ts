@@ -14,7 +14,7 @@ import { inject, Injectable } from '@angular/core';
 import {
   LiquidGlassPosition,
   LiquidGlassAnimationState,
-} from '../types/liquid-glass.types';
+} from '@app/shared/ui/liquid-glass/types/liquid-glass.types';
 
 /**
  * Animation state machine for liquid glass cursor tracking

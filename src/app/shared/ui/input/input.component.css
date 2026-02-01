@@ -14,12 +14,12 @@
   color: var(--foreground) !important;
 
   /* 浅石绿边框 - 矿物主题 */
-  border: 1px solid oklch(0.70 0.045 195) !important;
+  border: 1px solid oklch(0.7 0.045 195) !important;
 }
 
 /* Hover State - 矿物质感悬停效果 */
 :host(:hover:not(:disabled):not(:focus)) {
-  border-color: oklch(0.60 0.06 195) !important;
+  border-color: oklch(0.6 0.06 195) !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
@@ -49,11 +49,11 @@
 }
 
 /* Invalid State */
-:host([aria-invalid="true"]) {
+:host([aria-invalid='true']) {
   border-color: var(--destructive) !important;
 }
 
-:host([aria-invalid="true"]:focus-visible) {
+:host([aria-invalid='true']:focus-visible) {
   border-color: var(--destructive) !important;
   box-shadow: 0 0 0 3px oklch(from var(--destructive) calc(l + 0.15) c h / 0.25) !important;
 }

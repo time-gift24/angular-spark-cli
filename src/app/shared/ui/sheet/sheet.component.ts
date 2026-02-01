@@ -1,5 +1,5 @@
 import { Component, input, output, computed, signal, ChangeDetectionStrategy } from '@angular/core';
-import { cn } from '../../utils';
+import { cn } from '@app/shared/utils';
 
 export type SheetSide = 'top' | 'right' | 'bottom' | 'left';
 
@@ -60,7 +60,7 @@ export class SheetContentComponent {
 
     return cn(
       'fixed gap-4 bg-background shadow-lg overflow-y-auto',
-      sideClasses[side] || sideClasses.right
+      sideClasses[side] || sideClasses.right,
     );
   });
 

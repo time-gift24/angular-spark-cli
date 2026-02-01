@@ -40,19 +40,11 @@
             <div spark-card-content class="grid gap-6">
               <div class="grid gap-3">
                 <label spark-label for="tabs-demo-name">Name</label>
-                <input
-                  spark-input
-                  id="tabs-demo-name"
-                  value="Pedro Duarte"
-                />
+                <input spark-input id="tabs-demo-name" value="Pedro Duarte" />
               </div>
               <div class="grid gap-3">
                 <label spark-label for="tabs-demo-username">Username</label>
-                <input
-                  spark-input
-                  id="tabs-demo-username"
-                  value="@peduarte"
-                />
+                <input spark-input id="tabs-demo-username" value="@peduarte" />
               </div>
             </div>
             <div spark-card-footer>
@@ -72,19 +64,11 @@
             <div spark-card-content class="grid gap-6">
               <div class="grid gap-3">
                 <label spark-label for="tabs-demo-current">Current password</label>
-                <input
-                  spark-input
-                  id="tabs-demo-current"
-                  type="password"
-                />
+                <input spark-input id="tabs-demo-current" type="password" />
               </div>
               <div class="grid gap-3">
                 <label spark-label for="tabs-demo-new">New password</label>
-                <input
-                  spark-input
-                  id="tabs-demo-new"
-                  type="password"
-                />
+                <input spark-input id="tabs-demo-new" type="password" />
               </div>
             </div>
             <div spark-card-footer>
@@ -136,18 +120,14 @@
         <ui-tabs-content [value]="'line-password'" [active]="activeTab === 'line-password'">
           <div class="rounded-lg border bg-card p-6">
             <h3 class="text-base font-medium mb-2">Password Settings</h3>
-            <p class="text-sm text-muted-foreground">
-              Change your password and security settings.
-            </p>
+            <p class="text-sm text-muted-foreground">Change your password and security settings.</p>
           </div>
         </ui-tabs-content>
 
         <ui-tabs-content [value]="'line-settings'" [active]="activeTab === 'line-settings'">
           <div class="rounded-lg border bg-card p-6">
             <h3 class="text-base font-medium mb-2">General Settings</h3>
-            <p class="text-sm text-muted-foreground">
-              Configure your application preferences.
-            </p>
+            <p class="text-sm text-muted-foreground">Configure your application preferences.</p>
           </div>
         </ui-tabs-content>
       </ui-tabs>

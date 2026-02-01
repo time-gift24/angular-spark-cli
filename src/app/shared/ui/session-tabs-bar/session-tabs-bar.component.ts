@@ -1,5 +1,14 @@
-import { Component, Input, Output, EventEmitter, Signal, computed, ChangeDetectionStrategy, signal } from '@angular/core';
-import { SessionData, SessionColor } from '../../models';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  Signal,
+  computed,
+  ChangeDetectionStrategy,
+  signal,
+} from '@angular/core';
+import { SessionData, SessionColor } from '@app/shared/models';
 
 /**
  * Session Tabs Bar Component
@@ -288,7 +297,7 @@ export class SessionTabsBarComponent {
    * Toggles the color submenu visibility.
    */
   toggleColorSubmenu(): void {
-    this.showColorSubmenu.update(v => !v);
+    this.showColorSubmenu.update((v) => !v);
   }
 
   /**

@@ -7,11 +7,11 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   host: {
-    'class': 'flex h-full w-full items-center justify-center rounded-full bg-muted',
-    '[class.delayed]': 'delayed()'
+    class: 'flex h-full w-full items-center justify-center rounded-full bg-muted',
+    '[class.delayed]': 'delayed()',
   },
   templateUrl: './avatar-fallback.html',
-  styleUrl: './avatar-fallback.css'
+  styleUrl: './avatar-fallback.css',
 })
 export class AvatarFallbackComponent {
   readonly class = input<string>('');

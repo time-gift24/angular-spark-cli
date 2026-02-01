@@ -17,19 +17,19 @@
 }
 
 /* Size variants using CSS variables */
-:host([data-size="sm"]) {
+:host([data-size='sm']) {
   width: var(--avatar-size-sm);
   height: var(--avatar-size-sm);
   font-size: var(--avatar-font-size-sm);
 }
 
-:host([data-size="md"]) {
+:host([data-size='md']) {
   width: var(--avatar-size-md);
   height: var(--avatar-size-md);
   font-size: var(--avatar-font-size-md);
 }
 
-:host([data-size="lg"]) {
+:host([data-size='lg']) {
   width: var(--avatar-size-lg);
   height: var(--avatar-size-lg);
   font-size: var(--avatar-font-size-lg);
@@ -43,22 +43,22 @@
 }
 
 /* Hover effect for interactive avatars */
-:host([data-interactive="true"]) {
+:host([data-interactive='true']) {
   cursor: pointer;
 }
 
-:host([data-interactive="true"]:hover) {
+:host([data-interactive='true']:hover) {
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Avatar border variant */
-:host([data-bordered="true"]) {
+:host([data-bordered='true']) {
   border: 2px solid var(--border);
 }
 
 /* Online status indicator */
-:host([data-status="online"])::after {
+:host([data-status='online'])::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -68,11 +68,11 @@
   min-width: 8px;
   min-height: 8px;
   border-radius: 50%;
-  background-color: oklch(0.60 0.15 145); /* Green - online */
+  background-color: oklch(0.6 0.15 145); /* Green - online */
   border: 2px solid var(--background);
 }
 
-:host([data-status="offline"])::after {
+:host([data-status='offline'])::after {
   content: '';
   position: absolute;
   bottom: 0;

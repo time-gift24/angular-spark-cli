@@ -63,7 +63,7 @@ describe('IdGenerator', () => {
       const id1 = IdGenerator.generateSessionId();
 
       // Small delay to ensure timestamp increment
-      await new Promise(resolve => setTimeout(resolve, 2));
+      await new Promise((resolve) => setTimeout(resolve, 2));
 
       const id2 = IdGenerator.generateSessionId();
 
@@ -136,7 +136,7 @@ describe('IdGenerator', () => {
       const id1 = IdGenerator.generateMessageId();
 
       // Small delay to ensure timestamp increment
-      await new Promise(resolve => setTimeout(resolve, 2));
+      await new Promise((resolve) => setTimeout(resolve, 2));
 
       const id2 = IdGenerator.generateMessageId();
 
@@ -198,7 +198,7 @@ describe('IdGenerator', () => {
       }
 
       // All IDs should have exactly 9 characters in the random part
-      ids.forEach(id => {
+      ids.forEach((id) => {
         const parts = id.split('-');
         expect(parts[2]).toHaveLength(9);
         expect(parts[2]).toMatch(/^[a-z0-9]{9}$/);
@@ -215,7 +215,7 @@ describe('IdGenerator', () => {
       }
 
       // All should be valid format
-      ids.forEach(id => {
+      ids.forEach((id) => {
         if (id.startsWith('sess-')) {
           expect(id).toMatch(/^sess-\d{13}-[a-z0-9]{9}$/);
         } else if (id.startsWith('msg-')) {
@@ -266,13 +266,13 @@ describe('IdGenerator', () => {
       const existingIds = new Set<string>([
         'sess-1738300800000-abc123xyz',
         'sess-1738300801000-def456uvw',
-        'msg-1738300802000-ghi789rst'
+        'msg-1738300802000-ghi789rst',
       ]);
 
       // Access the private method using bracket notation for testing
       const checkCollision = IdGenerator['checkCollision'] as (
         id: string,
-        existingIds?: Set<string>
+        existingIds?: Set<string>,
       ) => boolean;
 
       // Test existing ID - should detect collision
@@ -309,7 +309,7 @@ describe('IdGenerator', () => {
       expect(uniqueSessionIds.size).toBe(5);
 
       // Verify all message IDs across all sessions are unique
-      const allMessages = sessionIds.flatMap(id => sessions.get(id)!);
+      const allMessages = sessionIds.flatMap((id) => sessions.get(id)!);
       const uniqueMessageIds = new Set(allMessages);
       expect(uniqueMessageIds.size).toBe(15); // 5 sessions * 3 messages
 

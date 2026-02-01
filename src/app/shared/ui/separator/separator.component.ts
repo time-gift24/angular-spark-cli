@@ -1,5 +1,5 @@
 import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
-import { cn } from '../../utils';
+import { cn } from '@app/shared/utils';
 
 export type SeparatorOrientation = 'horizontal' | 'vertical';
 
@@ -9,7 +9,7 @@ export type SeparatorOrientation = 'horizontal' | 'vertical';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
-    'role': 'separator',
+    role: 'separator',
     '[attr.aria-orientation]': 'orientation()',
     '[attr.aria-hidden]': 'decorative()',
   },
@@ -45,10 +45,6 @@ export class SeparatorComponent {
    * Computed class for the separator element
    */
   protected computedClass = computed(() => {
-    return cn(
-      this.getBaseClasses(),
-      this.getOrientationClasses(),
-      this.class()
-    );
+    return cn(this.getBaseClasses(), this.getOrientationClasses(), this.class());
   });
 }

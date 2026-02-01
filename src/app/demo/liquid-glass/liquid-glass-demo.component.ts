@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { LiquidGlassDirective } from '../../shared/ui/liquid-glass';
+import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
 import { basicExamples } from './examples/basic-examples';
 import { themeExamples } from './examples/theme-examples';
 import { animationExamples } from './examples/animation-examples';
@@ -13,7 +13,7 @@ import { animationExamples } from './examples/animation-examples';
   selector: 'app-liquid-glass-demo',
   standalone: true,
   imports: [LiquidGlassDirective],
-  templateUrl: './liquid-glass-demo.component.html'
+  templateUrl: './liquid-glass-demo.component.html',
 })
 export class LiquidGlassDemoComponent {
   readonly basicExamples = basicExamples;
@@ -43,7 +43,7 @@ export class LiquidGlassDemoComponent {
   getThemeCardBackground(index: number): string {
     const gradients = [
       'linear-gradient(135deg, oklch(0.20 0.04 230), oklch(0.28 0.05 200))', // 深石青到石绿（深色主题）
-      'linear-gradient(135deg, oklch(0.88 0.02 85), oklch(0.92 0.025 95))',  // 绢黄到浅绢黄（浅色主题）
+      'linear-gradient(135deg, oklch(0.88 0.02 85), oklch(0.92 0.025 95))', // 绢黄到浅绢黄（浅色主题）
     ];
     return gradients[index % gradients.length];
   }

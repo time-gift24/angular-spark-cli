@@ -15,8 +15,8 @@ import {
   signal,
   HostListener,
 } from '@angular/core';
-import { LiquidGlassDirective } from '../../liquid-glass';
-import { ChatMessage } from '../types/chat.types';
+import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
+import { ChatMessage } from '@app/shared/ui/ai-chat/types/chat.types';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import {
   cardContainer,
@@ -35,7 +35,7 @@ import {
   actionButton,
   actionIcon,
 } from './css';
-import { cn } from '../../../utils';
+import { cn } from '@app/shared/utils';
 
 /**
  * Chat messages card component
@@ -65,7 +65,15 @@ import { cn } from '../../../utils';
     >
       <!-- Drag Handle -->
       <div class="drag-handle" cdkDragHandle>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <line x1="3" y1="6" x2="21" y2="6"></line>
           <line x1="3" y1="12" x2="21" y2="12"></line>
           <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -73,13 +81,20 @@ import { cn } from '../../../utils';
       </div>
 
       <!-- Resize Handle (Top-Right only) -->
-      <div
-        class="resize-handle resize-handle-ne"
-        (mousedown)="startResize($event)"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 3L21 9"/>
-          <path d="M8 3L21 16"/>
+      <div class="resize-handle resize-handle-ne" (mousedown)="startResize($event)">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M15 3L21 9" />
+          <path d="M8 3L21 16" />
         </svg>
       </div>
 
@@ -141,7 +156,9 @@ export class ChatMessagesCardComponent {
    * Drag boundary selector for constraining drag area
    * Default: undefined (no boundary constraint)
    */
-  readonly cdkDragBoundary = input<string | HTMLElement | ElementRef<HTMLElement> | undefined>(undefined);
+  readonly cdkDragBoundary = input<string | HTMLElement | ElementRef<HTMLElement> | undefined>(
+    undefined,
+  );
 
   // Resize state
   readonly isResizing = signal(false);
@@ -170,33 +187,27 @@ export class ChatMessagesCardComponent {
       this.cardContainerBase,
       'chat-messages-card',
       this.position() === 'fixed' ? this.cardFixedStyles : this.cardRelativeStyles,
-      this.position() === 'fixed' ? 'fixed' : ''
-    )
+      this.position() === 'fixed' ? 'fixed' : '',
+    ),
   );
 
   protected messagesContainerClasses = computed(() =>
-    cn(this.messagesContainerBase, 'chat-messages')
+    cn(this.messagesContainerBase, 'chat-messages'),
   );
 
   protected messageWrapperClasses = (role: string) =>
-    cn(
-      this.messageWrapperBase,
-      'message',
-      role === 'user' ? messageUser : messageAssistant
-    );
+    cn(this.messageWrapperBase, 'message', role === 'user' ? messageUser : messageAssistant);
 
   protected messageBubbleClasses = (role: string) =>
     cn(
       this.messageBubbleBase,
       'message-bubble',
-      role === 'user' ? messageBubbleUser : messageBubbleAssistant
+      role === 'user' ? messageBubbleUser : messageBubbleAssistant,
     );
 
   protected aiBubbleContentClasses = computed(() => this.aiBubbleContentBase);
 
-  protected actionButtonsContainerClasses = computed(() =>
-    this.actionButtonsContainerBase
-  );
+  protected actionButtonsContainerClasses = computed(() => this.actionButtonsContainerBase);
 
   protected actionButtonClasses = computed(() => this.actionButtonBase);
 

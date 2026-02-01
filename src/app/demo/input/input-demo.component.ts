@@ -16,8 +16,8 @@ import type { InputStats } from './types/input-demo.types';
   templateUrl: './input-demo.component.html',
   styleUrl: './input-demo.component.css',
   host: {
-    'style': 'display: block; width: 100%;'
-  }
+    style: 'display: block; width: 100%;',
+  },
 })
 export class InputDemoComponent {
   // 示例配置
@@ -30,7 +30,7 @@ export class InputDemoComponent {
   private readonly stats = signal<InputStats>({
     inputCount: 0,
     lastValue: '',
-    lastUpdateTime: null
+    lastUpdateTime: null,
   });
 
   // 表单数据模型
@@ -56,10 +56,10 @@ export class InputDemoComponent {
    */
   handleInput(event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.stats.update(current => ({
+    this.stats.update((current) => ({
       inputCount: current.inputCount + 1,
       lastValue: target.value,
-      lastUpdateTime: new Date()
+      lastUpdateTime: new Date(),
     }));
   }
 
@@ -68,9 +68,9 @@ export class InputDemoComponent {
    */
   handleFormFieldInput(fieldName: string, event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.formData.update(current => ({
+    this.formData.update((current) => ({
       ...current,
-      [fieldName]: target.value
+      [fieldName]: target.value,
     }));
   }
 
@@ -88,7 +88,7 @@ export class InputDemoComponent {
     this.stats.set({
       inputCount: 0,
       lastValue: '',
-      lastUpdateTime: null
+      lastUpdateTime: null,
     });
     console.log('Stats reset!');
   }

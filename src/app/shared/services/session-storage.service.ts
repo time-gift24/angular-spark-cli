@@ -12,7 +12,7 @@ import { SessionData } from '../models';
 const STORAGE_KEYS = {
   SESSIONS: 'ai-chat-panel-preferences',
   ACTIVE_SESSION_ID: 'ai-chat-panel-active-session-id',
-  MESSAGES_VISIBILITY: 'ai-chat-panel-messages-visibility'
+  MESSAGES_VISIBILITY: 'ai-chat-panel-messages-visibility',
 } as const;
 
 /**

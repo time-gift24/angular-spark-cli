@@ -263,7 +263,7 @@ export class SessionStateService {
   private saveToStorage(
     sessions: Map<string, SessionData>,
     activeSessionId: string,
-    isMessagesVisible: boolean
+    isMessagesVisible: boolean,
   ): void {
     // Check if sessions map has changed (size or content)
     const sessionsChanged =
@@ -336,11 +336,13 @@ export class SessionStateService {
         updatedSessions.set(currentActiveId, {
           ...currentSession,
           inputValue: this.activeInputValue(),
-          lastUpdated: Date.now()
+          lastUpdated: Date.now(),
         });
 
         // Update the sessions signal with the new Map
-        (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(updatedSessions);
+        (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(
+          updatedSessions,
+        );
       }
     }
 
@@ -362,7 +364,9 @@ export class SessionStateService {
    */
   toggleMessagesVisibility(): void {
     const currentVisibility = this.isMessagesVisible();
-    (this.isMessagesVisible as unknown as ReturnType<typeof signal<boolean>>).set(!currentVisibility);
+    (this.isMessagesVisible as unknown as ReturnType<typeof signal<boolean>>).set(
+      !currentVisibility,
+    );
   }
 
   /**
@@ -401,11 +405,13 @@ export class SessionStateService {
     updatedSessions.set(sessionId, {
       ...session,
       inputValue: value,
-      lastUpdated: Date.now()
+      lastUpdated: Date.now(),
     });
 
     // Update the sessions signal with the new Map
-    (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(updatedSessions);
+    (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(
+      updatedSessions,
+    );
   }
 
   /**
@@ -449,11 +455,13 @@ export class SessionStateService {
     updatedSessions.set(sessionId, {
       ...session,
       messages: [...session.messages, message],
-      lastUpdated: Date.now()
+      lastUpdated: Date.now(),
     });
 
     // Update the sessions signal with the new Map
-    (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(updatedSessions);
+    (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(
+      updatedSessions,
+    );
   }
 
   /**
@@ -492,7 +500,7 @@ export class SessionStateService {
       inputValue: '',
       position: { ...DEFAULT_POSITION },
       size: { ...DEFAULT_SIZE },
-      lastUpdated: now
+      lastUpdated: now,
     };
 
     // Create an updated sessions map with the new session
@@ -501,7 +509,9 @@ export class SessionStateService {
     updatedSessions.set(sessionId, newSession);
 
     // Update the sessions signal with the new Map
-    (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(updatedSessions);
+    (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(
+      updatedSessions,
+    );
 
     return sessionId;
   }
@@ -537,7 +547,9 @@ export class SessionStateService {
     updatedSessions.delete(sessionId);
 
     // Update the sessions signal with the new Map
-    (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(updatedSessions);
+    (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(
+      updatedSessions,
+    );
 
     // If we deleted the active session, handle active session state
     if (this.activeSessionId() === sessionId) {
@@ -545,7 +557,7 @@ export class SessionStateService {
         // Find the most recently updated session to switch to
         const sessionsArray = Array.from(updatedSessions.values());
         const mostRecent = sessionsArray.reduce((latest, current) =>
-          current.lastUpdated > latest.lastUpdated ? current : latest
+          current.lastUpdated > latest.lastUpdated ? current : latest,
         );
 
         (this.activeSessionId as unknown as ReturnType<typeof signal<string>>).set(mostRecent.id);
@@ -584,10 +596,12 @@ export class SessionStateService {
     updatedSessions.set(sessionId, {
       ...session,
       name: newName,
-      lastUpdated: Date.now()
+      lastUpdated: Date.now(),
     });
 
     // Update the sessions signal with the new Map
-    (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(updatedSessions);
+    (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(
+      updatedSessions,
+    );
   }
 }

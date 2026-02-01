@@ -72,30 +72,19 @@ export const pulsingDot = [
 /**
  * Typing indicator container
  */
-export const typingIndicator = [
-  'flex gap-0.5 items-center',
-  'w-4 h-2.5',
-].join(' ');
+export const typingIndicator = ['flex gap-0.5 items-center', 'w-4 h-2.5'].join(' ');
 
 /**
  * Typing dot
  */
-export const typingDot = [
-  'w-[3px] h-[3px] rounded-full',
-  'bg-[oklch(0.60_0.08_210)]',
-].join(' ');
+export const typingDot = ['w-[3px] h-[3px] rounded-full', 'bg-[oklch(0.60_0.08_210)]'].join(' ');
 
 /**
  * Icon (Done/Error)
  */
-export const badgeIcon = [
-  'flex items-center justify-center',
-  'text-xs font-semibold',
-].join(' ');
+export const badgeIcon = ['flex items-center justify-center', 'text-xs font-semibold'].join(' ');
 
 /**
  * Badge text
  */
-export const badgeText = [
-  'text-xs',
-].join(' ');
+export const badgeText = ['text-xs'].join(' ');

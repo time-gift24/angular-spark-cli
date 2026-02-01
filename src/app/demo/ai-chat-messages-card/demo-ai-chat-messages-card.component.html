@@ -1,9 +1,7 @@
 <div class="demo-container">
   <header class="demo-header">
     <h1>AI Chat Messages Card</h1>
-    <p class="description">
-      聊天消息卡片组件 - 展示用户和 AI 助手的对话消息，支持操作按钮
-    </p>
+    <p class="description">聊天消息卡片组件 - 展示用户和 AI 助手的对话消息，支持操作按钮</p>
   </header>
 
   <!-- 控制面板 -->
@@ -11,15 +9,9 @@
     <div class="control-group">
       <h3>消息操作</h3>
       <div class="button-group">
-        <button (click)="addMessage()" class="btn btn-primary">
-          添加消息
-        </button>
-        <button (click)="resetMessages()" class="btn btn-secondary">
-          重置
-        </button>
-        <button (click)="clearMessages()" class="btn btn-destructive">
-          清空
-        </button>
+        <button (click)="addMessage()" class="btn btn-primary">添加消息</button>
+        <button (click)="resetMessages()" class="btn btn-secondary">重置</button>
+        <button (click)="clearMessages()" class="btn btn-destructive">清空</button>
       </div>
     </div>
 
@@ -43,10 +35,7 @@
     <p class="preview-desc">卡片在页面中居中展示</p>
 
     <div class="card-wrapper">
-      <ai-chat-messages-card
-        position="relative"
-        [messages]="messages()"
-      />
+      <ai-chat-messages-card position="relative" [messages]="messages()" />
     </div>
   </section>
 </div>
