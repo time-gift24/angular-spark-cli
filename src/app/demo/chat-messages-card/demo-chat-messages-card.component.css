@@ -116,6 +116,9 @@
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: all 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .control-button:hover {
@@ -142,6 +145,11 @@
 .control-button.destructive:hover {
   background: var(--destructive);
   color: white;
+}
+
+.button-icon {
+  width: 14px;
+  height: 14px;
 }
 
 /* Control Stats */

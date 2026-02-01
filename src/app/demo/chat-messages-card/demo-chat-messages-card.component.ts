@@ -33,6 +33,9 @@ export class DemoChatMessagesCardComponent {
   readonly selectedSize = signal<PanelSize>(sizeExamples['medium']);
   readonly isVisible = signal<boolean>(true);
 
+  // 性能配置
+  readonly enableLiquidGlass = signal<boolean>(true);
+
   // 控制面板状态
   readonly showControls = signal<boolean>(true);
 
@@ -67,6 +70,11 @@ export class DemoChatMessagesCardComponent {
   // 切换控制面板
   toggleControls(): void {
     this.showControls.update(v => !v);
+  }
+
+  // 切换 liquid glass 效果
+  toggleLiquidGlass(): void {
+    this.enableLiquidGlass.update(v => !v);
   }
 
   // 重置位置

@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, EventEmitter, Input, Output, Signal, viewChild, ElementRef, computed, effect, inject, DestroyRef, signal, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, EventEmitter, Input, Output, Signal, viewChild, ElementRef, computed, effect, inject, DestroyRef, signal, ChangeDetectionStrategy, ChangeDetectorRef, booleanAttribute } from '@angular/core';
 import { DragHandleDirective } from '../../directives/drag-handle.directive';
 import { ResizeHandleDirective } from '../../directives/resize-handle.directive';
 import { LiquidGlassDirective } from '../liquid-glass';
@@ -11,7 +11,7 @@ import { ChatMessage, PanelPosition, PanelSize } from '../../models';
  * 可自由拖拽、缩放的 AI 消息面板，使用 liquid-glass 效果。
  *
  * 特性：
- * - Liquid glass 视觉效果（与输入框风格一致）
+ * - Liquid glass 视觉效果（可选，与输入框风格一致）
  * - 自由拖拽定位
  * - 自由缩放大小
  * - 消息气泡样式
@@ -21,7 +21,19 @@ import { ChatMessage, PanelPosition, PanelSize } from '../../models';
  *
  * @example
  * ```html
+ * <!-- 默认启用 liquid glass 效果 -->
  * <app-chat-messages-card
+ *   [messages]="messagesSignal"
+ *   [isVisible]="isVisibleSignal"
+ *   [position]="positionSignal"
+ *   [size]="sizeSignal"
+ *   (positionChange)="onPositionChange($event)"
+ *   (sizeChange)="onSizeChange($event)"
+ * />
+ *
+ * <!-- 禁用 liquid glass 效果以提升性能 -->
+ * <app-chat-messages-card
+ *   [enableLiquidGlass]="false"
  *   [messages]="messagesSignal"
  *   [isVisible]="isVisibleSignal"
  *   [position]="positionSignal"
@@ -44,6 +56,16 @@ export class ChatMessagesCardComponent {
   @Input() isVisible: Signal<boolean>;
   @Input() position: Signal<PanelPosition>;
   @Input() size: Signal<PanelSize>;
+
+  /**
+   * 启用或禁用 liquid glass 视觉效果
+   *
+   * 默认启用。设置为 false 可以提升性能，特别是在拖拽/resize 期间。
+   * 建议在需要最佳性能时禁用此效果。
+   *
+   * @default true
+   */
+  @Input({ transform: booleanAttribute }) enableLiquidGlass = true;
 
   @Output() positionChange = new EventEmitter<PanelPosition>();
   @Output() sizeChange = new EventEmitter<PanelSize>();

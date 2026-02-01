@@ -10,6 +10,7 @@
     <div class="text-xs text-muted-foreground space-y-1">
       <p>✨ Liquid glass 效果 | 🎯 自由拖拽定位 | 📐 可调整大小</p>
       <p>💬 消息气泡样式 | 📜 自动滚动底部 | 🎨 矿物与时光主题</p>
+      <p class="mt-2 font-medium text-foreground">⚡ 性能对比：点击右侧控制面板的 "Liquid Glass" 按钮来开关特效</p>
     </div>
   </header>
 
@@ -23,6 +24,31 @@
             <path d="m18 15-6-6m0 6-6-6"/>
           </svg>
         </button>
+      </div>
+
+      <!-- 性能配置 -->
+      <div class="control-section">
+        <h3 class="control-section-title">性能与效果</h3>
+        <div class="control-row">
+          <button
+            class="control-button"
+            [class.primary]="enableLiquidGlass()"
+            (click)="toggleLiquidGlass()">
+            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              @if (enableLiquidGlass()) {
+                <path d="M12 3v18m0-18l-4 4m4-4l4 4"/>
+              } @else {
+                <path d="M12 21V3m0 18l-4-4m4 4l4-4"/>
+              }
+            </svg>
+            <span>{{ enableLiquidGlass() ? 'Liquid Glass: ON' : 'Liquid Glass: OFF' }}</span>
+          </button>
+        </div>
+        <p class="text-xs text-muted-foreground mt-2">
+          {{ enableLiquidGlass()
+            ? '✨ Liquid glass 效果已启用 - 更美观，但可能影响性能'
+            : '⚡ 性能模式 - 禁用特效以获得最佳性能' }}
+        </p>
       </div>
 
       <!-- 可见性控制 -->
@@ -134,6 +160,7 @@
     [isVisible]="isVisible"
     [position]="selectedPosition"
     [size]="selectedSize"
+    [enableLiquidGlass]="enableLiquidGlass()"
     (positionChange)="onPositionChange($event)"
     (sizeChange)="onSizeChange($event)"
   />

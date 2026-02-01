@@ -1,20 +1,40 @@
-<div
-  liquidGlass
-  lgTheme="mineral-light"
-  lgCornerRadius="16px"
-  [lgBlurAmount]="0.5"
-  [lgDisplacementScale]="0"
-  [lgDisableAnimation]="liquidGlassDisabled()"
-  lgTint="oklch(0 0 0 / 2%)"
-  lgHotspot="oklch(1 0 0 / 3%)"
-  lgAriaLabel="AI chat messages card"
-  [class.visible]="safeIsVisible()"
-  [style.left.px]="safePosition().x"
-  [style.top.px]="safePosition().y"
-  [style.width.px]="safeSize().width"
-  [style.height.px]="safeSize().height"
-  class="messages-card"
->
+@if (enableLiquidGlass) {
+  <!-- 带 Liquid Glass 效果的容器 -->
+  <div
+    liquidGlass
+    lgTheme="mineral-light"
+    lgCornerRadius="16px"
+    [lgBlurAmount]="0.5"
+    [lgDisplacementScale]="0"
+    [lgDisableAnimation]="liquidGlassDisabled()"
+    lgTint="oklch(0 0 0 / 2%)"
+    lgHotspot="oklch(1 0 0 / 3%)"
+    lgAriaLabel="AI chat messages card"
+    [class.visible]="safeIsVisible()"
+    [style.left.px]="safePosition().x"
+    [style.top.px]="safePosition().y"
+    [style.width.px]="safeSize().width"
+    [style.height.px]="safeSize().height"
+    class="messages-card"
+  >
+    <ng-container ngTemplateOutlet="cardContent" />
+  </div>
+} @else {
+  <!-- 基础容器（无 liquid glass 效果，性能更好） -->
+  <div
+    [class.visible]="safeIsVisible()"
+    [style.left.px]="safePosition().x"
+    [style.top.px]="safePosition().y"
+    [style.width.px]="safeSize().width"
+    [style.height.px]="safeSize().height"
+    class="messages-card messages-card-plain"
+  >
+    <ng-container ngTemplateOutlet="cardContent" />
+  </div>
+}
+
+<!-- 卡片内容模板 -->
+<ng-template #cardContent>
   <!-- 拖拽手柄 -->
   <div
     class="drag-handle"
@@ -89,4 +109,4 @@
       <path d="M3 15L15 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
     </svg>
   </div>
-</div>
+</ng-template>
