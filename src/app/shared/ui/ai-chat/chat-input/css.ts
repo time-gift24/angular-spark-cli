@@ -10,7 +10,7 @@
  * Base container styles
  * Note: max-width should be controlled by parent container
  */
-export const inputContainer = ['relative w-full mx-auto mb-4'].join(' ');
+export const inputContainer = ['relative w-full mb-4'].join(' ');
 
 /**
  * Input wrapper styles
