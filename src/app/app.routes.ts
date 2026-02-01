@@ -119,6 +119,11 @@ export const routes: Routes = [
           .then(m => m.DemoSessionTabsBarComponent)
       },
       {
+        path: 'ai-chat-messages-card',
+        loadComponent: () => import('./demo/ai-chat-messages-card/demo-ai-chat-messages-card.component')
+          .then(m => m.DemoAiChatMessagesCardComponent)
+      },
+      {
         path: 'session-tabs-and-input',
         loadComponent: () => import('./demo/session-tabs-and-input/demo-session-tabs-and-input.component')
           .then(m => m.DemoSessionTabsAndInputComponent)

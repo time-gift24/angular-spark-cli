@@ -4,13 +4,27 @@
  */
 
 /**
- * Card container styles
+ * Card container styles (no positioning - parent controls position)
  */
 export const cardContainer = [
-  'fixed right-6 top-[90px] w-[380px] max-h-[60vh]',
+  'w-[380px] max-h-[60vh]',
   'overflow-visible',
-  'transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)',
+  'transition-opacity duration-300 cubic-bezier(0.4, 0, 0.2, 1)',
+].join(' ');
+
+/**
+ * Fixed positioning variant (for when parent wants fixed positioning)
+ */
+export const cardFixed = [
+  'fixed right-6 top-[90px]',
   'z-[999]',
+].join(' ');
+
+/**
+ * Relative positioning variant (for when parent wants relative positioning)
+ */
+export const cardRelative = [
+  'relative',
 ].join(' ');
 
 /**
@@ -152,12 +166,4 @@ export const actionButton = [
  */
 export const actionIcon = [
   'text-xs',
-].join(' ');
-
-/**
- * Responsive mobile styles
- */
-export const mobileCard = [
-  'sm:right-6 sm:top-[90px] sm:w-[380px]',
-  'right-4 top-[75px] w-[calc(100vw-32px)] max-h-[50vh]',
 ].join(' ');

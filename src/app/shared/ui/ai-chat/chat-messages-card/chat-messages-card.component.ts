@@ -15,11 +15,11 @@ import {
 } from '@angular/core';
 import { LiquidGlassDirective } from '../../liquid-glass';
 import { ChatMessage } from '../types/chat.types';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import {
   cardContainer,
-  cardCollapsed,
-  collapseToggle,
-  collapseToggleIcon,
+  cardFixed,
+  cardRelative,
   messagesContainer,
   messageWrapper,
   messageUser,
@@ -42,7 +42,8 @@ import { cn } from '../../../utils';
 @Component({
   selector: 'ai-chat-messages-card',
   standalone: true,
-  imports: [LiquidGlassDirective],
+  imports: [LiquidGlassDirective, DragDropModule],
+  styleUrls: ['./chat-messages-card.component.css'],
   template: `
     <div
       #card
@@ -55,43 +56,18 @@ import { cn } from '../../../utils';
       lgHotspot="oklch(1 0 0 / 3%)"
       lgAriaLabel="Chat messages card"
       [class]="cardClasses()"
+      cdkDrag
+      [cdkDragBoundary]="cdkDragBoundary() || '.cdk-drop-list'"
+      [cdkDragStartDelay]="0"
     >
-      <!-- Collapse/Expand Button -->
-      <button
-        type="button"
-        [class]="collapseToggleClasses()"
-        [attr.aria-label]="isCollapsed() ? 'Expand chat' : 'Collapse chat'"
-        [attr.aria-expanded]="!isCollapsed()"
-        (click)="toggleCollapse()"
-      >
-        @if (isCollapsed()) {
-          <!-- Expand icon (down arrow) -->
-          <svg
-            [class]="iconClasses()"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        } @else {
-          <!-- Collapse icon (up arrow) -->
-          <svg
-            [class]="iconClasses()"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="18 15 12 9 6 15" />
-          </svg>
-        }
-      </button>
+      <!-- Drag Handle -->
+      <div class="drag-handle" cdkDragHandle>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </div>
 
       <!-- Messages Container -->
       <div [class]="messagesContainerClasses()" #messagesContainer>
@@ -139,19 +115,22 @@ export class ChatMessagesCardComponent {
   readonly messages = input<ChatMessage[]>([]);
 
   /**
-   * Collapsed state
+   * Position mode: 'fixed' or 'relative' (default: 'relative')
+   * When 'fixed', the card uses fixed positioning
+   * When 'relative', the parent component controls positioning
    */
-  readonly isCollapsed = input(false);
+  readonly position = input<'fixed' | 'relative'>('relative');
 
   /**
-   * Emit when collapse toggle is clicked
+   * Drag boundary selector for constraining drag area
+   * Default: undefined (no boundary constraint)
    */
-  readonly collapseToggle = output<void>();
+  readonly cdkDragBoundary = input<string | HTMLElement | ElementRef<HTMLElement> | undefined>(undefined);
 
   // Base styles
   readonly cardContainerBase = cardContainer;
-  readonly collapseToggleBase = collapseToggle;
-  readonly collapseToggleIconBase = collapseToggleIcon;
+  readonly cardFixedStyles = cardFixed;
+  readonly cardRelativeStyles = cardRelative;
   readonly messagesContainerBase = messagesContainer;
   readonly messageWrapperBase = messageWrapper;
   readonly messageBubbleBase = messageBubble;
@@ -166,13 +145,10 @@ export class ChatMessagesCardComponent {
     cn(
       this.cardContainerBase,
       'chat-messages-card',
-      this.isCollapsed() ? cardCollapsed : ''
+      this.position() === 'fixed' ? this.cardFixedStyles : this.cardRelativeStyles,
+      this.position() === 'fixed' ? 'fixed' : ''
     )
   );
-
-  protected collapseToggleClasses = computed(() => this.collapseToggleBase);
-
-  protected iconClasses = computed(() => this.collapseToggleIconBase);
 
   protected messagesContainerClasses = computed(() =>
     cn(this.messagesContainerBase, 'chat-messages')
@@ -216,12 +192,5 @@ export class ChatMessagesCardComponent {
       const container = this.messagesContainerRef.nativeElement;
       container.scrollTop = container.scrollHeight;
     }
-  }
-
-  /**
-   * Toggle collapse state
-   */
-  toggleCollapse(): void {
-    this.collapseToggle.emit();
   }
 }
