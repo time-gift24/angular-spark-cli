@@ -186,10 +186,31 @@ export class ChatInputComponent {
   textareaRef!: ElementRef<HTMLTextAreaElement>;
 
   /**
+   * Internal value state (for canSend computation)
+   * Must be declared before value setter to avoid initialization issues
+   */
+  private internalValue = signal('');
+
+  /**
    * Input value (two-way binding)
    */
+  private _value!: string;
+
   @Input()
-  value!: string;
+  get value(): string {
+    return this._value;
+  }
+
+  set value(newValue: string) {
+    this._value = newValue;
+    this.internalValue.set(newValue);
+  }
+
+  /**
+   * Emit when value changes (for two-way binding)
+   */
+  @Output()
+  readonly valueChange = new EventEmitter<string>();
 
   /**
    * Input placeholder text
@@ -235,7 +256,7 @@ export class ChatInputComponent {
   /**
    * Can send (has input)
    */
-  readonly canSend = computed(() => this.value?.trim().length > 0);
+  readonly canSend = computed(() => this.internalValue().trim().length > 0);
 
   // Base styles (constants)
   readonly inputContainer = inputContainer;
@@ -281,7 +302,9 @@ export class ChatInputComponent {
    */
   onInput(event: Event): void {
     const textarea = event.target as HTMLTextAreaElement;
-    this.value = textarea.value;
+    const newValue = textarea.value;
+    this.internalValue.set(newValue);
+    this.valueChange.emit(newValue);
     this.adjustTextareaHeight();
   }
 
@@ -304,13 +327,14 @@ export class ChatInputComponent {
   onSend(): void {
     if (!this.canSend()) return;
 
-    const message = this.value?.trim();
+    const message = this.internalValue().trim();
     if (!message) return;
 
     this.send.emit(message);
 
-    // Clear input
-    this.value = '';
+    // Clear internal state
+    this.internalValue.set('');
+    this.valueChange.emit('');
 
     // Reset textarea height
     if (this.textareaRef) {

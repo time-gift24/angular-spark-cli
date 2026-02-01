@@ -6,10 +6,9 @@ import { SessionData, SessionColor, SessionStatus } from '@app/shared/models';
 /**
  * Demo Session Tabs and Input Component
  *
- * 展示如何组合使用 SessionTabsBar 和 ChatInput 两个独立组件
- * - Session tabs bar 固定在 input 正上方
- * - 两个组件左对齐
- * - 通过 CSS Flexbox 布局实现
+ * 展示 Session Tabs + Chat Input 组合
+ * - 宽度为屏幕的 2/5
+ * - 发送消息后右下角显示 Toast 通知
  */
 @Component({
   selector: 'app-demo-session-tabs-and-input',
@@ -33,6 +32,11 @@ export class DemoSessionTabsAndInputComponent {
   // 输入框配置
   readonly placeholder = signal<string>('Ask AI anything...');
   readonly disabled = signal<boolean>(false);
+
+  // Toast 通知状态
+  readonly toastVisible = signal<boolean>(false);
+  readonly toastMessage = signal<string>('');
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   // 事件日志
   readonly eventLog = signal<string[]>([]);
@@ -192,12 +196,15 @@ export class DemoSessionTabsAndInputComponent {
   }
 
   /**
-   * 处理发送消息
+   * 处理发送消息 - 显示 Toast 通知
    */
   onSend(message: string): void {
     this.addLog(`Send message: "${message}"`);
 
-    // 更新当前会话的输入草稿
+    // 清空输入 - 必须在这里清空，因为 ChatInput 组件的 value 是单向绑定的
+    this.inputValue.set('');
+
+    // 清空会话输入草稿
     const activeId = this.activeSessionId();
     if (activeId) {
       this.sessionsInternal.update((map) => {
@@ -211,7 +218,29 @@ export class DemoSessionTabsAndInputComponent {
       });
     }
 
-    this.inputValue.set('');
+    // 显示 Toast 通知
+    this.showToast(`✓ 已发送: ${message.length > 20 ? message.substring(0, 20) + '...' : message}`);
+  }
+
+  /**
+   * 显示 Toast 通知
+   */
+  private showToast(message: string): void {
+    // 清除之前的定时器
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+      this.toastTimer = null;
+    }
+
+    // 显示新的 Toast
+    this.toastMessage.set(message);
+    this.toastVisible.set(true);
+
+    // 3秒后自动隐藏
+    this.toastTimer = setTimeout(() => {
+      this.toastVisible.set(false);
+      this.toastTimer = null;
+    }, 3000);
   }
 
   /**
@@ -269,19 +298,19 @@ export class DemoSessionTabsAndInputComponent {
    */
   readonly features = [
     {
+      icon: '📐',
+      title: '2/5 屏幕宽度',
+      desc: 'Chat Input 组件容器宽度为屏幕的 40%',
+    },
+    {
+      icon: '🔔',
+      title: '发送通知',
+      desc: '回车发送消息后，右下角显示 Toast 通知',
+    },
+    {
       icon: '🎯',
       title: '独立组件组合',
-      desc: 'Session Tabs Bar 和 Chat Input 都是独立组件，通过布局组合使用',
-    },
-    {
-      icon: '📐',
-      title: '左对齐布局',
-      desc: '使用 Flexbox 实现垂直布局，tabs bar 在上，input 在下，左对齐',
-    },
-    {
-      icon: '🎨',
-      title: '会话管理',
-      desc: '右键菜单：重命名、更改颜色、关闭会话',
+      desc: 'Session Tabs Bar 和 Chat Input 都是独立组件',
     },
     {
       icon: '⌨️',
