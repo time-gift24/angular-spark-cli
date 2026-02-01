@@ -4,6 +4,4 @@ export * from './tabs';
 export * from './input';
 export * from './tooltip/tooltip.component';
 export * from './session-tabs-bar';
-export * from './chat-input';
-export * from './chat-messages-card';
-export * from './ai-chat-panel';
+export * from './ai-chat';

@@ -117,6 +117,11 @@ export const routes: Routes = [
         path: 'session-tabs-bar',
         loadComponent: () => import('./demo/session-tabs-bar/demo-session-tabs-bar.component')
           .then(m => m.DemoSessionTabsBarComponent)
+      },
+      {
+        path: 'session-tabs-and-input',
+        loadComponent: () => import('./demo/session-tabs-and-input/demo-session-tabs-and-input.component')
+          .then(m => m.DemoSessionTabsAndInputComponent)
       }
     ]
   }

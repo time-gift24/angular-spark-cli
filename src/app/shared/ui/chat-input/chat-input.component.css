@@ -1,7 +1,6 @@
 .input-container {
   position: relative;
   width: 100%;
-  max-width: 768px;
   /* 移除布局相关的 margin，由父组件控制 */
 }
 

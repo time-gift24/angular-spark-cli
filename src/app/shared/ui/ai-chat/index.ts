@@ -1,9 +1,8 @@
 /**
- * AI Chat Panel - Public API
+ * AI Chat Components - Public API
  * Mineral & Time Theme - Angular 20+
  */
 
-export { AiChatPanelComponent } from './ai-chat-panel/ai-chat-panel.component';
 export { ChatMessagesCardComponent } from './chat-messages-card/chat-messages-card.component';
 export { StatusBadgesComponent } from './status-badges/status-badges.component';
 export type { StatusBadge } from './status-badges/status-badges.component';

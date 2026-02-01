@@ -49,4 +49,11 @@ export class DemoAiChatInputComponent {
   clearInput(): void {
     this.inputValue.set('');
   }
+
+  // 快捷键说明
+  readonly shortcuts = [
+    { key: 'Enter', value: '发送消息' },
+    { key: 'Shift + Enter', value: '换行' },
+    { key: '自动调整高度', value: '1-5 行' },
+  ];
 }

@@ -1,7 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, Output, Signal, viewChild, ElementRef, computed, effect, inject, DestroyRef, signal, ChangeDetectionStrategy, ChangeDetectorRef, booleanAttribute } from '@angular/core';
-import { DragHandleDirective } from '../../directives/drag-handle.directive';
-import { ResizeHandleDirective } from '../../directives/resize-handle.directive';
 import { LiquidGlassDirective } from '../liquid-glass';
 import { ChatMessage, PanelPosition, PanelSize } from '../../models';
 
@@ -46,7 +44,7 @@ import { ChatMessage, PanelPosition, PanelSize } from '../../models';
 @Component({
   selector: 'app-chat-messages-card',
   standalone: true,
-  imports: [CommonModule, DragHandleDirective, ResizeHandleDirective, LiquidGlassDirective, DatePipe],
+  imports: [CommonModule, LiquidGlassDirective, DatePipe],
   templateUrl: './chat-messages-card.component.html',
   styleUrls: ['./chat-messages-card.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,

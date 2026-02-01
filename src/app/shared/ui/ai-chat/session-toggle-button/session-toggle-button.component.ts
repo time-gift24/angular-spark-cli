@@ -17,6 +17,8 @@ import { Component, input, output, computed } from '@angular/core';
     <button
       type="button"
       class="session-toggle"
+      [class.fixed-position]="useFixedPosition()"
+      [class.relative-position]="!useFixedPosition()"
       [class.has-badge]="hasBadge()"
       [attr.aria-label]="isOpen() ? 'Close AI chat' : 'Open AI chat'"
       [attr.aria-expanded]="isOpen()"
@@ -62,10 +64,19 @@ import { Component, input, output, computed } from '@angular/core';
   `,
   styles: [
     `
-      .session-toggle {
+      /* Fixed positioning (default) */
+      .session-toggle.fixed-position {
         position: fixed;
         top: 24px;
         right: 24px;
+      }
+
+      /* Relative positioning (for wrapper component) */
+      .session-toggle.relative-position {
+        position: relative;
+      }
+
+      .session-toggle {
         width: 56px;
         height: 56px;
         border-radius: 28px;
@@ -189,6 +200,12 @@ export class SessionToggleComponent {
    * Show notification badge
    */
   readonly hasBadge = input(false);
+
+  /**
+   * Use fixed positioning (default: true)
+   * Set to false when used in wrapper component
+   */
+  readonly useFixedPosition = input(true);
 
   /**
    * Emit when button clicked
