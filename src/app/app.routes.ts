@@ -99,21 +99,6 @@ export const routes: Routes = [
           .then(m => m.ContextMenuDemoComponent)
       },
       {
-        path: 'ai-chat-panel',
-        loadComponent: () => import('./demo/ai-chat-panel/demo-ai-chat-panel.component')
-          .then(m => m.DemoAiChatPanelComponent)
-      },
-      {
-        path: 'ai-chat-input',
-        loadComponent: () => import('./demo/ai-chat-input/demo-ai-chat-input.component')
-          .then(m => m.DemoAiChatInputComponent)
-      },
-      {
-        path: 'chat-messages-card',
-        loadComponent: () => import('./demo/chat-messages-card/demo-chat-messages-card.component')
-          .then(m => m.DemoChatMessagesCardComponent)
-      },
-      {
         path: 'session-tabs-bar',
         loadComponent: () => import('./demo/session-tabs-bar/demo-session-tabs-bar.component')
           .then(m => m.DemoSessionTabsBarComponent)
