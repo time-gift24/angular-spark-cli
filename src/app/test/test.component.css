@@ -1,0 +1,341 @@
+/**
+ * Test Component Styles
+ *
+ * Follows the "矿物与时光" (Mineral & Time) design system:
+ * - Low saturation colors (oklch color space)
+ * - Ultra compact sizing
+ * - CSS variable driven theming
+ * - Figtree font family
+ */
+
+/* === Component-specific CSS Variables === */
+:host {
+  /* Primary color variants */
+  --primary-hover: oklch(0.52 0.07 195);
+  --primary-subtle: oklch(0.48 0.07 195 / 0.1);
+  --primary-subtle-border: oklch(0.48 0.07 195 / 0.3);
+
+  /* Secondary hover */
+  --secondary-hover: oklch(0.94 0.015 85);
+
+  /* Dark mode adjustments */
+  --dark-card: oklch(0.22 0.045 230);
+  --dark-border: oklch(0.35 0.04 230 / 50%);
+  --dark-info-bg: oklch(0.28 0.04 230);
+}
+
+/* === Container === */
+.test-container {
+  padding: var(--spacing-xl);
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: var(--font-sans);
+}
+
+/* === Header Section === */
+.test-header {
+  margin-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--spacing-lg);
+}
+
+.test-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.4;
+}
+
+.test-description {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--muted-foreground);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* === Status Indicator === */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--muted);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--border);
+  transition: all var(--duration-fast) ease-out;
+}
+
+.status-indicator.active {
+  background: var(--primary-subtle);
+  border-color: var(--primary-subtle-border);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted-foreground);
+  transition: background var(--duration-fast) ease-out;
+}
+
+.status-indicator.active .status-dot {
+  background: var(--primary);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.status-text {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.status-indicator.active .status-text {
+  color: var(--primary);
+}
+
+/* === Section Styling === */
+.controls-section,
+.output-section,
+.raw-section,
+.info-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.controls-header,
+.output-header,
+.raw-header,
+.info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.controls-header h2,
+.output-header h2,
+.info-header h2 {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.output-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--spacing-sm);
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+  font-size: 0.625rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* === Control Buttons === */
+.controls-buttons {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.control-button {
+  height: var(--button-height-md);
+  padding: 0 var(--button-padding-x-md);
+  font-size: 0.75rem;
+  font-weight: 400;
+  font-family: var(--font-sans);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease-out;
+  outline: none;
+}
+
+.control-button:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--accent);
+}
+
+.control-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.control-button.primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
+
+.control-button.primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.control-button.secondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border-color: var(--secondary);
+}
+
+.control-button.secondary:hover:not(:disabled) {
+  background: var(--secondary-hover);
+}
+
+.control-button.outline {
+  background: transparent;
+  border-color: var(--border);
+}
+
+.control-button.outline:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--accent);
+}
+
+/* === Output Container === */
+.output-container {
+  padding: var(--spacing-lg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  min-height: 200px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.output-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.output-container::-webkit-scrollbar-track {
+  background: var(--muted);
+  border-radius: var(--radius-md);
+}
+
+.output-container::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: var(--radius-md);
+  opacity: 0.5;
+}
+
+.output-container::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
+  opacity: 0.7;
+}
+
+/* === Raw Content Section === */
+.raw-content {
+  padding: var(--spacing-lg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--foreground);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.raw-content code {
+  font-family: inherit;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+/* Button size variant */
+.control-button.sm {
+  height: var(--button-height-sm);
+  padding: 0 var(--button-padding-x-sm);
+  font-size: 0.6875rem;
+}
+
+/* === Info List === */
+.info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.info-list li {
+  padding: var(--spacing-md);
+  background: var(--muted);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  color: var(--foreground);
+  line-height: 1.5;
+  border-left: 3px solid var(--primary);
+}
+
+.info-list li::before {
+  content: '✓';
+  display: inline-block;
+  margin-right: var(--spacing-sm);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* === Dark Mode Adjustments === */
+.dark .output-container {
+  background: var(--dark-card);
+  border-color: var(--dark-border);
+}
+
+.dark .info-list li {
+  background: var(--dark-info-bg);
+  border-left-color: var(--primary);
+}
+
+.dark .info-list li::before {
+  color: var(--primary);
+}
+
+/* === Responsive === */
+@media (max-width: 640px) {
+  .test-container {
+    padding: var(--spacing-lg);
+  }
+
+  .controls-buttons {
+    flex-direction: column;
+  }
+
+  .control-button {
+    width: 100%;
+  }
+
+  .info-list {
+    grid-template-columns: 1fr;
+  }
+}

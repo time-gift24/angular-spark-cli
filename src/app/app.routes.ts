@@ -54,70 +54,21 @@ export const routes: Routes = [
           .then(m => m.CheckboxDemoComponent)
       },
       {
+        path: 'alert',
+        loadComponent: () => import('./demo/alert/alert-demo.component')
+          .then(m => m.AlertDemoComponent)
+      },
+      {
         path: 'tabs',
         loadComponent: () => import('./demo/tabs/tabs-demo.component')
           .then(m => m.TabsDemoComponent)
-      },
-      {
-        path: 'tooltip',
-        loadComponent: () => import('./demo/tooltip/tooltip-demo.component')
-          .then(m => m.TooltipDemoComponent)
-      },
-      {
-        path: 'avatar',
-        loadComponent: () => import('./demo/avatar/avatar-demo/avatar-demo')
-          .then(m => m.AvatarDemoComponent)
-      },
-      {
-        path: 'progress',
-        loadComponent: () => import('./demo/progress/progress-demo/progress-demo')
-          .then(m => m.ProgressDemoComponent)
-      },
-      {
-        path: 'skeleton',
-        loadComponent: () => import('./demo/skeleton/skeleton-demo/skeleton-demo')
-          .then(m => m.SkeletonDemoComponent)
-      },
-      {
-        path: 'table',
-        loadComponent: () => import('./demo/table/table-demo/table-demo')
-          .then(m => m.TableDemoComponent)
-      },
-      {
-        path: 'slider',
-        loadComponent: () => import('./demo/slider/slider-demo/slider-demo')
-          .then(m => m.SliderDemoComponent)
-      },
-      {
-        path: 'liquid-glass',
-        loadComponent: () => import('./demo/liquid-glass/liquid-glass-demo.component')
-          .then(m => m.LiquidGlassDemoComponent)
-      },
-      {
-        path: 'context-menu',
-        loadComponent: () => import('./demo/context-menu/context-menu-demo.component')
-          .then(m => m.ContextMenuDemoComponent)
-      },
-      {
-        path: 'session-tabs-bar',
-        loadComponent: () => import('./demo/session-tabs-bar/demo-session-tabs-bar.component')
-          .then(m => m.DemoSessionTabsBarComponent)
-      },
-      {
-        path: 'ai-chat-messages-card',
-        loadComponent: () => import('./demo/ai-chat-messages-card/demo-ai-chat-messages-card.component')
-          .then(m => m.DemoAiChatMessagesCardComponent)
-      },
-      {
-        path: 'session-tabs-and-input',
-        loadComponent: () => import('./demo/session-tabs-and-input/demo-session-tabs-and-input.component')
-          .then(m => m.DemoSessionTabsAndInputComponent)
-      },
-      {
-        path: 'ai-chat-panel',
-        loadComponent: () => import('./demo/ai-chat-panel/demo-ai-chat-panel.component')
-          .then(m => m.DemoAiChatPanelComponent)
       }
     ]
+  },
+  // Test routes for streaming markdown
+  {
+    path: 'test',
+    loadComponent: () => import('./test/test.component')
+      .then(m => m.TestComponent)
   }
 ];

@@ -1,80 +1,30 @@
-/* Switch Component - 矿物与时光主题 */
-
-:host {
-  display: inline-block;
-  position: relative;
-}
-
-/* Switch Track */
-.switch-track {
-  display: inline-block;
-  border-radius: 9999px;
-  border: 1px solid var(--border);
-  background-color: var(--input);
-  transition: background-color var(--duration-normal) var(--ease-out),
-              border-color var(--duration-normal) var(--ease-out);
-  cursor: pointer;
-}
-
-:host([data-state="checked"]) .switch-track {
-  background-color: var(--primary);
-  border-color: var(--primary);
-}
-
-:host([data-disabled]) .switch-track {
-  opacity: var(--opacity-disabled);
-  cursor: not-allowed;
-}
-
-/* Switch Thumb - 矿物质感的圆形滑块 */
-.switch-thumb {
-  pointer-events: none;
+/* Switch thumb animation */
+:host .switch-thumb {
+  pointer-events-none: none;
   display: block;
   border-radius: 9999px;
-  background-color: var(--background);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition:
-    transform var(--duration-normal) var(--ease-out),
-    background-color var(--duration-normal) var(--ease-out);
-}
-
-/* Dark mode thumb color adjustment */
-.dark .switch-thumb {
-  background-color: var(--foreground);
-}
-
-:host([data-state="checked"]) .switch-thumb {
-  background-color: var(--primary-foreground);
-}
-
-/* Size variants */
-:host([data-size="default"]) .switch-track {
-  width: var(--switch-width-md);
-  height: var(--switch-height-md);
+  ring-width: 0;
+  transition: transform 0.2s;
 }
 
 :host([data-size="default"]) .switch-thumb {
   width: var(--switch-thumb-size-md);
   height: var(--switch-thumb-size-md);
+  background-color: var(--background);
 }
 
-:host([data-size="sm"]) .switch-track {
-  width: var(--switch-width-sm);
-  height: var(--switch-height-sm);
-}
-
-:host([data-size="sm"]) .switch-thumb {
-  width: var(--switch-thumb-size-sm);
-  height: var(--switch-thumb-size-sm);
-}
-
-/* State animations */
 :host([data-size="default"][data-state="checked"]) .switch-thumb {
   transform: translateX(var(--switch-thumb-translate));
 }
 
 :host([data-size="default"][data-state="unchecked"]) .switch-thumb {
   transform: translateX(0);
+}
+
+:host([data-size="sm"]) .switch-thumb {
+  width: var(--switch-thumb-size-sm);
+  height: var(--switch-thumb-size-sm);
+  background-color: var(--background);
 }
 
 :host([data-size="sm"][data-state="checked"]) .switch-thumb {
@@ -85,8 +35,19 @@
   transform: translateX(0);
 }
 
-/* Focus visible ring */
-.switch-track:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+/* Dark mode styles */
+:host([data-size="default"][data-state="unchecked"]) .switch-thumb {
+  background-color: var(--foreground);
+}
+
+:host([data-size="default"][data-state="checked"]) .switch-thumb {
+  background-color: var(--primary-foreground);
+}
+
+:host([data-size="sm"][data-state="unchecked"]) .switch-thumb {
+  background-color: var(--foreground);
+}
+
+:host([data-size="sm"][data-state="checked"]) .switch-thumb {
+  background-color: var(--primary-foreground);
 }

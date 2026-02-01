@@ -1,0 +1,4 @@
+/* Add custom styles for alert demo if needed */
+:host {
+  display: block;
+}

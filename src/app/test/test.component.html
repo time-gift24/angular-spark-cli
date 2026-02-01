@@ -1,0 +1,84 @@
+<div class="test-container">
+  <!-- Page Header -->
+  <header class="test-header">
+    <h1 class="test-title">Streaming Markdown Demo</h1>
+    <p class="test-description">
+      Test harness for real-time markdown streaming with Angular Signals and RxJS
+    </p>
+  </header>
+
+  <!-- Status Indicator -->
+  <div class="status-indicator" [class.active]="isStreaming">
+    <span class="status-dot"></span>
+    <span class="status-text">
+      {{ isStreaming ? 'Streaming Active' : 'Ready to Stream' }}
+    </span>
+  </div>
+
+  <!-- Controls Section -->
+  <section class="controls-section">
+    <div class="controls-header">
+      <h2>Controls</h2>
+    </div>
+    <div class="controls-buttons">
+      <button
+        class="control-button primary"
+        (click)="startStreaming()"
+        [disabled]="isStreaming">
+        Start Streaming
+      </button>
+      <button
+        class="control-button secondary"
+        (click)="stopStreaming()"
+        [disabled]="!isStreaming">
+        Stop
+      </button>
+      <button
+        class="control-button outline"
+        (click)="reset()">
+        Reset
+      </button>
+    </div>
+  </section>
+
+  <!-- Streaming Output Section -->
+  <section class="output-section">
+    <div class="output-header">
+      <h2>Markdown Output</h2>
+      <span class="output-badge" *ngIf="isStreaming">Live</span>
+    </div>
+    <div class="output-container">
+      <app-streaming-markdown
+        [stream$]="aiStream$"
+        (rawContentChange)="onRawContentChange($event)">
+      </app-streaming-markdown>
+    </div>
+  </section>
+
+  <!-- Raw Markdown Section -->
+  <section class="raw-section">
+    <div class="raw-header">
+      <h2>Raw Markdown Content</h2>
+      <button
+        class="control-button outline sm"
+        (click)="rawMarkdown = ''">
+        Clear
+      </button>
+    </div>
+    <pre class="raw-content"><code>{{ rawMarkdown }}</code></pre>
+  </section>
+
+  <!-- Info Section -->
+  <section class="info-section">
+    <div class="info-header">
+      <h2>Features</h2>
+    </div>
+    <ul class="info-list">
+      <li>Real-time markdown parsing and rendering</li>
+      <li>Angular Signals for reactive state management</li>
+      <li>RxJS Observable pipeline for streaming</li>
+      <li>OnPush change detection strategy</li>
+      <li>Block-level granularity for optimal performance</li>
+    </ul>
+  </section>
+</div>

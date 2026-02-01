@@ -4,7 +4,6 @@
   "compileOnSave": false,
   "compilerOptions": {
     "strict": true,
-    "strictPropertyInitialization": false,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
