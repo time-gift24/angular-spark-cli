@@ -438,20 +438,64 @@ imports: [LiquidGlassDirective, ButtonComponent]
 
 ---
 
-## Open Questions
+## Design Decisions (Open Questions - Resolved)
 
-1. **CSS Alpha 变量**
-   - 是否需要在 `styles.css` 中预定义 `--primary/8%` 等变量？
-   - 还是在组件中使用 `rgba(var(--primary), 0.08)` ？
+### 1. CSS Alpha 变量处理
 
-2. **自定义样式方式**
-   - 通过 `class` input 传入自定义类？
-   - 还是通过 `@HostStyles` 在组件级别定义？
+**决策：在组件中使用 OKLCH alpha 语法**
 
-3. **按钮尺寸一致性**
-   - Toolbar 图标按钮是否应该使用标准的 `--button-height-md`？
-   - 还是可以保持自定义的 `30px`？
+```css
+/* ❌ 不在 styles.css 中预定义 */
+--primary-alpha-8: oklch(0.48 0.07 195 / 8%);
 
+/* ✅ 在组件中直接使用 */
+hover:bg-[oklch(var(--primary)/8%)]
+```
+
+**理由：**
+- OKLCH 原生支持 alpha 通道
+- 减少全局变量数量
+- 更灵活，易于调整
+
+---
+
+### 2. 自定义样式方式
+
+**决策：通过 `class` input 传入自定义类**
+
+```typescript
+// ✅ 推荐方式
+<button
+  spark-button
+  variant="ghost"
+  size="icon"
+  class="chat-toolbar-btn"
+>
+```
+
+**理由：**
+- 符合 Angular 最佳实践
+- 灵活性高，易于覆盖
+- 与 shadcn 组件设计一致
+
+---
+
+### 3. 按钮尺寸一致性
+
+**决策：使用标准 `--button-height-md`**
+
+```css
+/* ❌ 旧方式：自定义 30px */
+w-[30px] h-[30px]
+
+/* ✅ 新方式：使用 CSS 变量 */
+style="height: var(--button-height-md); width: var(--button-height-md);"
+```
+
+**理由：**
+- 符合设计系统规范
+- 统一的按钮尺寸语言
+- 便于全局调整
 ---
 
 ## Success Criteria
