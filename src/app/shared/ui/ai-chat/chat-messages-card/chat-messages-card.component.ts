@@ -12,6 +12,8 @@ import {
   ElementRef,
   afterNextRender,
   computed,
+  signal,
+  HostListener,
 } from '@angular/core';
 import { LiquidGlassDirective } from '../../liquid-glass';
 import { ChatMessage } from '../types/chat.types';
@@ -59,6 +61,7 @@ import { cn } from '../../../utils';
       cdkDrag
       [cdkDragBoundary]="cdkDragBoundary() || '.cdk-drop-list'"
       [cdkDragStartDelay]="0"
+      [cdkDragDisabled]="isResizing()"
     >
       <!-- Drag Handle -->
       <div class="drag-handle" cdkDragHandle>
@@ -68,6 +71,12 @@ import { cn } from '../../../utils';
           <line x1="3" y1="18" x2="21" y2="18"></line>
         </svg>
       </div>
+
+      <!-- Resize Handle (Top-Right only) -->
+      <div
+        class="resize-handle resize-handle-ne"
+        (mousedown)="startResize($event)"
+      ></div>
 
       <!-- Messages Container -->
       <div [class]="messagesContainerClasses()" #messagesContainer>
@@ -108,6 +117,8 @@ import { cn } from '../../../utils';
 export class ChatMessagesCardComponent {
   @ViewChild('messagesContainer')
   messagesContainerRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('card')
+  cardRef!: ElementRef<HTMLDivElement>;
 
   /**
    * Messages to display
@@ -126,6 +137,14 @@ export class ChatMessagesCardComponent {
    * Default: undefined (no boundary constraint)
    */
   readonly cdkDragBoundary = input<string | HTMLElement | ElementRef<HTMLElement> | undefined>(undefined);
+
+  // Resize state
+  readonly isResizing = signal(false);
+  private startX = 0;
+  private startY = 0;
+  private startWidth = 0;
+  private startHeight = 0;
+  private startBottom = 0;
 
   // Base styles
   readonly cardContainerBase = cardContainer;
@@ -191,6 +210,76 @@ export class ChatMessagesCardComponent {
     if (this.messagesContainerRef) {
       const container = this.messagesContainerRef.nativeElement;
       container.scrollTop = container.scrollHeight;
+    }
+  }
+
+  /**
+   * Start resizing the card (from top-right corner, keeping bottom-left fixed)
+   */
+  startResize(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const card = this.cardRef.nativeElement;
+    const rect = card.getBoundingClientRect();
+    const computedStyle = window.getComputedStyle(card);
+
+    this.isResizing.set(true);
+    this.startX = event.clientX;
+    this.startY = event.clientY;
+    this.startWidth = rect.width;
+    this.startHeight = rect.height;
+
+    // Store the bottom position to keep it fixed during resize
+    const bottomValue = computedStyle.bottom;
+    if (bottomValue && bottomValue !== 'auto') {
+      this.startBottom = parseFloat(bottomValue);
+    } else {
+      // If bottom is not set, calculate it from top and height
+      const topValue = computedStyle.top;
+      const top = topValue && topValue !== 'auto' ? parseFloat(topValue) : 0;
+      const windowHeight = window.innerHeight;
+      this.startBottom = windowHeight - (top + rect.height);
+    }
+  }
+
+  /**
+   * Handle resize during mouse move (top-right corner, bottom-left fixed)
+   */
+  @HostListener('window:mousemove', ['$event'])
+  onResize(event: MouseEvent): void {
+    if (!this.isResizing() || !this.cardRef) return;
+
+    const card = this.cardRef.nativeElement;
+    const deltaX = event.clientX - this.startX;
+    const deltaY = event.clientY - this.startY;
+
+    // Minimum and maximum dimensions
+    const minWidth = 280;
+    const minHeight = 200;
+    const maxHeight = window.innerHeight;
+
+    // Calculate new dimensions with constraints
+    const newWidth = Math.max(minWidth, this.startWidth + deltaX);
+    const newHeight = Math.max(minHeight, Math.min(maxHeight, this.startHeight - deltaY));
+
+    // Apply new size
+    card.style.width = `${newWidth}px`;
+    card.style.height = `${newHeight}px`;
+
+    // Keep bottom position fixed to maintain bottom-left corner
+    card.style.bottom = `${this.startBottom}px`;
+    // Clear top to let bottom control the vertical position
+    card.style.top = 'auto';
+  }
+
+  /**
+   * Stop resizing when mouse is released
+   */
+  @HostListener('window:mouseup')
+  stopResize(): void {
+    if (this.isResizing()) {
+      this.isResizing.set(false);
     }
   }
 }
