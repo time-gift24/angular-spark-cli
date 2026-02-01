@@ -197,29 +197,58 @@
 
 .resize-handle {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: nwse-resize;
-  opacity: 0.4;
-  transition: opacity 0.2s ease;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  border-radius: 4px;
 }
 
 .resize-handle svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   color: oklch(0.55 0.02 185);
 }
 
-.resize-handle:hover {
-  opacity: 0.8;
+/* 右上角手柄 - 更醒目 */
+.resize-handle-top-right {
+  top: 4px;
+  right: 4px;
+  cursor: nesw-resize;
+  background: oklch(0.48 0.07 195 / 8%);
+  border: 1px solid oklch(0.48 0.07 195 / 20%);
+  box-shadow: 0 1px 3px oklch(0 0 0 / 8%);
 }
 
-.resize-handle:active {
+.resize-handle-top-right:hover {
+  opacity: 1;
+  background: oklch(0.48 0.07 195 / 15%);
+  border-color: oklch(0.48 0.07 195 / 35%);
+  box-shadow: 0 2px 6px oklch(0 0 0 / 12%);
+  transform: scale(1.1);
+}
+
+.resize-handle-top-right:active {
+  opacity: 1;
+  background: oklch(0.48 0.07 195 / 20%);
+  transform: scale(1.15);
+}
+
+/* 右下角手柄 */
+.resize-handle-bottom-right {
+  bottom: 0;
+  right: 0;
+  cursor: nwse-resize;
+}
+
+.resize-handle-bottom-right:hover {
+  opacity: 1;
+}
+
+.resize-handle-bottom-right:active {
   opacity: 1;
 }
 
@@ -287,6 +316,22 @@
 
 .dark .resize-handle svg {
   color: oklch(0.65 0.035 195);
+}
+
+.dark .resize-handle-top-right {
+  background: oklch(0.62 0.08 195 / 12%);
+  border-color: oklch(0.62 0.08 195 / 25%);
+  box-shadow: 0 1px 3px oklch(0 0 0 / 20%);
+}
+
+.dark .resize-handle-top-right:hover {
+  background: oklch(0.62 0.08 195 / 20%);
+  border-color: oklch(0.62 0.08 195 / 40%);
+  box-shadow: 0 2px 6px oklch(0 0 0 / 30%);
+}
+
+.dark .resize-handle-top-right:active {
+  background: oklch(0.62 0.08 195 / 25%);
 }
 
 /* ========================================
