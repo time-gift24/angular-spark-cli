@@ -4,14 +4,15 @@
   lgCornerRadius="16px"
   [lgBlurAmount]="0.5"
   [lgDisplacementScale]="0"
+  [lgDisableAnimation]="liquidGlassDisabled()"
   lgTint="oklch(0 0 0 / 2%)"
   lgHotspot="oklch(1 0 0 / 3%)"
   lgAriaLabel="AI chat messages card"
-  [class.visible]="safeIsVisible"
-  [style.left.px]="safePosition.x"
-  [style.top.px]="safePosition.y"
-  [style.width.px]="safeSize.width"
-  [style.height.px]="safeSize.height"
+  [class.visible]="safeIsVisible()"
+  [style.left.px]="safePosition().x"
+  [style.top.px]="safePosition().y"
+  [style.width.px]="safeSize().width"
+  [style.height.px]="safeSize().height"
   class="messages-card"
 >
   <!-- 拖拽手柄 -->
@@ -20,6 +21,8 @@
     [appDragHandle]="position"
     [dragHandleSize]="size"
     (positionChange)="positionChange.emit($event)"
+    (dragStart)="onDragStart()"
+    (dragEnd)="onDragEnd()"
     title="拖拽移动面板"
   >
     <svg class="drag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -34,7 +37,7 @@
 
   <!-- 消息列表 -->
   <div #messageList class="message-list">
-    @for (message of safeMessages; track message.id) {
+    @for (message of safeMessages(); track message.id) {
       <div [class.role-user]="message.role === 'user'"
            [class.role-assistant]="message.role === 'assistant'"
            [class.role-system]="message.role === 'system'"
@@ -60,6 +63,8 @@
     [position]="position"
     (sizeChange)="sizeChange.emit($event)"
     (positionChange)="positionChange.emit($event)"
+    (resizeStart)="onResizeStart()"
+    (resizeEnd)="onResizeEnd()"
     title="拖拽调整大小（固定底部）"
   >
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="resize-icon">
@@ -74,6 +79,8 @@
     class="resize-handle resize-handle-bottom-right"
     [appResizeHandle]="size"
     (sizeChange)="sizeChange.emit($event)"
+    (resizeStart)="onResizeStart()"
+    (resizeEnd)="onResizeEnd()"
     title="拖拽调整大小"
   >
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="resize-icon">

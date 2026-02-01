@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, EventEmitter, Input, Output, Signal, viewChild, ElementRef, computed, effect, inject, DestroyRef, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, Signal, viewChild, ElementRef, computed, effect, inject, DestroyRef, signal, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { DragHandleDirective } from '../../directives/drag-handle.directive';
 import { ResizeHandleDirective } from '../../directives/resize-handle.directive';
 import { LiquidGlassDirective } from '../liquid-glass';
@@ -17,6 +17,7 @@ import { ChatMessage, PanelPosition, PanelSize } from '../../models';
  * - 消息气泡样式
  * - 自动滚动到底部
  * - 平滑动画过渡
+ * - 性能优化（OnPush + 拖拽期间暂停动画）
  *
  * @example
  * ```html
@@ -36,6 +37,7 @@ import { ChatMessage, PanelPosition, PanelSize } from '../../models';
   imports: [CommonModule, DragHandleDirective, ResizeHandleDirective, LiquidGlassDirective, DatePipe],
   templateUrl: './chat-messages-card.component.html',
   styleUrls: ['./chat-messages-card.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatMessagesCardComponent {
   @Input() messages: Signal<ChatMessage[]>;
@@ -54,7 +56,10 @@ export class ChatMessagesCardComponent {
   private readonly destroyRef = inject(DestroyRef);
   private previousMessageCount = signal(0);
 
-  // 计算属性 - 安全获取器
+  // 性能优化：跟踪拖拽/resize 状态
+  readonly isDraggingOrResizing = signal(false);
+
+  // 计算属性 - 使用 computed signal 替代 getter
   readonly isUserNearBottom = computed(() => {
     const element = this.messageListRef()?.nativeElement;
     if (!element) return true;
@@ -63,26 +68,31 @@ export class ChatMessagesCardComponent {
     return distanceFromBottom < this.NEAR_BOTTOM_THRESHOLD;
   });
 
-  // 安全获取器
-  get safePosition(): PanelPosition {
+  readonly safePosition = computed(() => {
     const pos = this.position?.();
+    const size = this.safeSize();
     if (!pos || (pos.x === 0 && pos.y === 0)) {
-      return this.calculateCenteredPosition();
+      return this.calculateCenteredPosition(size.width, size.height);
     }
     return pos;
-  }
+  });
 
-  get safeSize(): PanelSize {
+  readonly safeSize = computed(() => {
     return this.size?.() ?? { width: 500, height: 400 };
-  }
+  });
 
-  get safeIsVisible(): boolean {
+  readonly safeIsVisible = computed(() => {
     return this.isVisible?.() ?? false;
-  }
+  });
 
-  get safeMessages(): ChatMessage[] {
+  readonly safeMessages = computed(() => {
     return this.messages?.() ?? [];
-  }
+  });
+
+  // 性能优化：根据拖拽/resize 状态决定是否启用 liquid glass 动画
+  readonly liquidGlassDisabled = computed(() => {
+    return this.isDraggingOrResizing();
+  });
 
   // 自动滚动效果
   private readonly autoScrollEffect = effect(() => {
@@ -105,10 +115,7 @@ export class ChatMessagesCardComponent {
   /**
    * 计算居中位置（初始位置）
    */
-  private calculateCenteredPosition(): PanelPosition {
-    const panelWidth = this.safeSize.width;
-    const panelHeight = this.safeSize.height;
-
+  private calculateCenteredPosition(panelWidth: number, panelHeight: number): PanelPosition {
     // 屏幕中央位置
     const centerX = (window.innerWidth - panelWidth) / 2;
     const centerY = (window.innerHeight - panelHeight) / 2;
@@ -129,5 +136,33 @@ export class ChatMessagesCardComponent {
       top: messageListEl.scrollHeight,
       behavior: behavior,
     });
+  }
+
+  /**
+   * 性能优化：拖拽开始时暂停 liquid glass 动画
+   */
+  onDragStart(): void {
+    this.isDraggingOrResizing.set(true);
+  }
+
+  /**
+   * 性能优化：拖拽结束时恢复 liquid glass 动画
+   */
+  onDragEnd(): void {
+    this.isDraggingOrResizing.set(false);
+  }
+
+  /**
+   * 性能优化：resize 开始时暂停 liquid glass 动画
+   */
+  onResizeStart(): void {
+    this.isDraggingOrResizing.set(true);
+  }
+
+  /**
+   * 性能优化：resize 结束时恢复 liquid glass 动画
+   */
+  onResizeEnd(): void {
+    this.isDraggingOrResizing.set(false);
   }
 }
