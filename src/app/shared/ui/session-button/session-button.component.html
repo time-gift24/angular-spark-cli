@@ -1,0 +1,67 @@
+@if (enableLiquidGlass()) {
+  <!-- 带 Liquid Glass 效果的按钮 -->
+  <button
+    type="button"
+    class="session-toggle session-toggle-liquid"
+    [class.has-badge]="hasBadge()"
+    [class.is-hovered]="isHovered()"
+    [attr.aria-label]="isOpen() ? '收起 AI 聊天' : '展开 AI 聊天'"
+    [attr.aria-expanded]="isOpen()"
+    (click)="onClick()"
+    (mouseenter)="onMouseEnter()"
+    (mouseleave)="onMouseLeave()"
+  >
+    @if (isOpen()) {
+      <!-- 收起图标 -->
+      <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 15l-6-6m0 0l-6 6"/>
+        <path d="M6 9l6-6m0 0l6 6"/>
+      </svg>
+    } @else {
+      <!-- 聊天图标 -->
+      <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        <path d="M8 10h.01"/>
+        <path d="M12 10h.01"/>
+        <path d="M16 10h.01"/>
+      </svg>
+    }
+
+    @if (hasBadge()) {
+      <span class="notification-badge" aria-hidden="true"></span>
+    }
+  </button>
+} @else {
+  <!-- 基础按钮（无 liquid glass 效果） -->
+  <button
+    type="button"
+    class="session-toggle session-toggle-plain"
+    [class.has-badge]="hasBadge()"
+    [class.is-hovered]="isHovered()"
+    [attr.aria-label]="isOpen() ? '收起 AI 聊天' : '展开 AI 聊天'"
+    [attr.aria-expanded]="isOpen()"
+    (click)="onClick()"
+    (mouseenter)="onMouseEnter()"
+    (mouseleave)="onMouseLeave()"
+  >
+    @if (isOpen()) {
+      <!-- 收起图标 -->
+      <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 15l-6-6m0 0l-6 6"/>
+        <path d="M6 9l6-6m0 0l6 6"/>
+      </svg>
+    } @else {
+      <!-- 聊天图标 -->
+      <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        <path d="M8 10h.01"/>
+        <path d="M12 10h.01"/>
+        <path d="M16 10h.01"/>
+      </svg>
+    }
+
+    @if (hasBadge()) {
+      <span class="notification-badge" aria-hidden="true"></span>
+    }
+  </button>
+}

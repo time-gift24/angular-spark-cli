@@ -112,6 +112,16 @@ export const routes: Routes = [
         path: 'chat-messages-card',
         loadComponent: () => import('./demo/chat-messages-card/demo-chat-messages-card.component')
           .then(m => m.DemoChatMessagesCardComponent)
+      },
+      {
+        path: 'session-button',
+        loadComponent: () => import('./demo/session-button/demo-session-button.component')
+          .then(m => m.DemoSessionButtonComponent)
+      },
+      {
+        path: 'session-tabs-bar',
+        loadComponent: () => import('./demo/session-tabs-bar/demo-session-tabs-bar.component')
+          .then(m => m.DemoSessionTabsBarComponent)
       }
     ]
   }

@@ -1,5 +1,5 @@
-import { Component, Input, Output, EventEmitter, Signal, computed, ChangeDetectionStrategy } from '@angular/core';
-import { SessionData } from '../../models';
+import { Component, Input, Output, EventEmitter, Signal, computed, ChangeDetectionStrategy, signal } from '@angular/core';
+import { SessionData, SessionColor } from '../../models';
 
 /**
  * Session Tabs Bar Component
@@ -132,6 +132,63 @@ export class SessionTabsBarComponent {
   readonly newChat = new EventEmitter<void>();
 
   /**
+   * Event emitted when user right-clicks on a session tab.
+   *
+   * Emits an object with the session ID for showing context menu.
+   *
+   * @example
+   * ```typescript
+   * (sessionContextMenu)="showContextMenu($event)"
+   *
+   * showContextMenu(sessionId: string): void {
+   *   this.contextMenuSessionId = sessionId;
+   *   this.contextMenuVisible = true;
+   * }
+   * ```
+   */
+  @Output()
+  readonly sessionContextMenu = new EventEmitter<string>();
+
+  /**
+   * Event emitted when user wants to rename a session.
+   *
+   * Emits an object with sessionId and newName.
+   */
+  @Output()
+  readonly sessionRename = new EventEmitter<{ sessionId: string; newName: string }>();
+
+  /**
+   * Event emitted when user wants to change session color.
+   *
+   * Emits an object with sessionId and color.
+   */
+  @Output()
+  readonly sessionColorChange = new EventEmitter<{ sessionId: string; color: SessionColor }>();
+
+  /**
+   * Event emitted when user wants to close a session.
+   *
+   * Emits the session ID to close.
+   */
+  @Output()
+  readonly sessionClose = new EventEmitter<string>();
+
+  /**
+   * Currently shown context menu for session ID
+   */
+  contextMenuSessionId = signal<string | null>(null);
+
+  /**
+   * Context menu position
+   */
+  contextMenuPosition = signal<{ x: number; y: number } | null>(null);
+
+  /**
+   * Color submenu visibility
+   */
+  showColorSubmenu = signal<boolean>(false);
+
+  /**
    * Computed signal that returns sessions sorted by last updated timestamp.
    *
    * Sorting Logic:
@@ -184,5 +241,99 @@ export class SessionTabsBarComponent {
   handleNewChat(event: MouseEvent): void {
     event.preventDefault();
     this.newChat.emit();
+  }
+
+  /**
+   * Handles right-click (context menu) on session tabs.
+   *
+   * @param event - The mouse event
+   * @param sessionId - The ID of the session
+   */
+  handleSessionContextMenu(event: MouseEvent, sessionId: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.contextMenuSessionId.set(sessionId);
+    this.contextMenuPosition.set({ x: event.clientX, y: event.clientY });
+    this.sessionContextMenu.emit(sessionId);
+  }
+
+  /**
+   * Closes the context menu.
+   */
+  closeContextMenu(): void {
+    this.contextMenuSessionId.set(null);
+    this.contextMenuPosition.set(null);
+    this.showColorSubmenu.set(false);
+  }
+
+  /**
+   * Initiates renaming a session.
+   *
+   * @param sessionId - The ID of the session to rename
+   */
+  renameSession(sessionId: string): void {
+    const session = this.sessions().get(sessionId);
+    if (!session) return;
+
+    const newName = prompt('输入新的会话名称:', session.name);
+    if (newName && newName.trim()) {
+      this.sessionRename.emit({ sessionId, newName: newName.trim() });
+    }
+
+    this.closeContextMenu();
+  }
+
+  /**
+   * Toggles the color submenu visibility.
+   */
+  toggleColorSubmenu(): void {
+    this.showColorSubmenu.update(v => !v);
+  }
+
+  /**
+   * Gets all available colors for the color submenu.
+   */
+  getAvailableColors(): Array<{ value: SessionColor; label: string; color: string }> {
+    return [
+      { value: 'default', label: '默认绿', color: 'oklch(0.48 0.07 195)' },
+      { value: 'blue', label: '蓝色', color: 'oklch(0.55 0.12 225)' },
+      { value: 'purple', label: '紫色', color: 'oklch(0.55 0.14 285)' },
+      { value: 'pink', label: '粉色', color: 'oklch(0.60 0.18 350)' },
+      { value: 'orange', label: '橙色', color: 'oklch(0.65 0.15 50)' },
+      { value: 'yellow', label: '黄色', color: 'oklch(0.75 0.12 85)' },
+    ];
+  }
+
+  /**
+   * Changes session color to specific color.
+   *
+   * @param sessionId - The ID of the session
+   * @param color - The color to apply
+   */
+  changeSessionColor(sessionId: string, color: SessionColor): void {
+    this.sessionColorChange.emit({ sessionId, color });
+    this.closeContextMenu();
+  }
+
+  /**
+   * Closes a session.
+   *
+   * @param sessionId - The ID of the session to close
+   */
+  closeSession(sessionId: string): void {
+    this.sessionClose.emit(sessionId);
+    this.closeContextMenu();
+  }
+
+  /**
+   * Gets the color class for a session.
+   *
+   * @param session - The session data
+   * @returns The color class name
+   */
+  getSessionColorClass(session: SessionData): string {
+    const color = session.color || 'default';
+    return `session-color-${color}`;
   }
 }

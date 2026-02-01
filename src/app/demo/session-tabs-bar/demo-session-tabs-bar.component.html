@@ -1,0 +1,151 @@
+<div class="demo-container">
+  <!-- 页面标题 -->
+  <header class="demo-header">
+    <h1>Session Tabs Bar</h1>
+    <p class="demo-description">
+      会话标签栏，用于在多个 AI 聊天会话之间快速切换。支持会话管理、状态保持和时间排序。
+    </p>
+  </header>
+
+  <!-- 控制面板 -->
+  @if (showControls()) {
+    <aside class="controls-panel">
+      <div class="control-section">
+        <h3>当前状态</h3>
+
+        <!-- 状态显示 -->
+        <div class="status-group">
+          <div class="status-item">
+            <span class="status-label">会话总数:</span>
+            <span class="status-value">{{ sessionCount() }}</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">当前会话:</span>
+            <span class="status-value">{{ activeSessionName() || '无' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-section">
+        <h3>操作控制</h3>
+
+        <!-- 会话操作 -->
+        <div class="control-group">
+          <label>会话管理</label>
+          <div class="button-group">
+            <button (click)="addRandomSession()">
+              + 新建会话
+            </button>
+            <button (click)="removeActiveSession()">
+              - 删除当前
+            </button>
+          </div>
+        </div>
+
+        <!-- 状态切换 -->
+        <div class="control-group">
+          <label>会话状态</label>
+          <div class="button-group-vertical">
+            <button class="status-btn status-idle" (click)="setActiveSessionIdle()">
+              ● 空闲 (完成)
+            </button>
+            <button class="status-btn status-processing" (click)="setActiveSessionProcessing()">
+              ● 处理中
+            </button>
+            <button class="status-btn status-disconnected" (click)="setActiveSessionDisconnected()">
+              ● 断开连接
+            </button>
+          </div>
+        </div>
+
+        <!-- 更新名称 -->
+        <div class="control-group">
+          <label>会话名称</label>
+          <button (click)="updateActiveSessionName()">
+            修改当前名称
+          </button>
+        </div>
+
+        <!-- 重置按钮 -->
+        <div class="control-group">
+          <button class="btn-reset" (click)="initializeDemoSessions()">
+            重置演示数据
+          </button>
+        </div>
+      </div>
+
+      <div class="control-section">
+        <h3>功能说明</h3>
+        <div class="feature-info">
+          <p><strong>标签切换</strong></p>
+          <ul>
+            <li>点击非激活标签 → 切换到该会话</li>
+            <li>点击激活标签 → 切换面板展开/收起</li>
+            <li>自动按最近更新时间排序</li>
+          </ul>
+        </div>
+
+        <div class="feature-info">
+          <p><strong>会话状态</strong></p>
+          <ul>
+            <li>每个会话独立保存消息历史</li>
+            <li>输入草稿自动保存</li>
+            <li>面板位置和尺寸记忆</li>
+          </ul>
+        </div>
+
+        <div class="feature-info">
+          <p><strong>视觉反馈</strong></p>
+          <ul>
+            <li>激活标签：主色背景 + 前景色</li>
+            <li>悬停效果：背景色变化 + 微位移</li>
+            <li>焦点环：键盘导航支持</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="control-section">
+        <h3>使用示例</h3>
+        <pre class="code-block"><code>&lt;spark-session-tabs-bar
+  [sessions]="sessionsSignal"
+  [activeSessionId]="activeIdSignal"
+  (sessionSelect)="onSessionSelect($event)"
+  (sessionToggle)="onSessionToggle()"
+  (newChat)="onNewChat()"
+/&gt;</code></pre>
+      </div>
+    </aside>
+  }
+
+  <!-- 主展示区域 -->
+  <main class="demo-main">
+    <div class="demo-canvas">
+      <!-- 占位内容 -->
+      <div class="placeholder-content">
+        <h2>会话标签栏演示</h2>
+        <p>页面底部的标签栏可以用来切换不同的聊天会话。</p>
+        <p>当前状态：</p>
+        <ul>
+          <li>会话总数: <strong>{{ sessionCount() }}</strong></li>
+          <li>当前激活: <strong>{{ activeSessionName() || '无' }}</strong></li>
+          <li>标签自动按最近更新时间排序</li>
+        </ul>
+        <p class="hint">
+          💡 提示：点击 "New Chat" 按钮创建新会话，点击其他标签切换会话
+        </p>
+      </div>
+
+      <!-- Session Tabs Bar 组件 -->
+      <spark-session-tabs-bar
+        [sessions]="sessions"
+        [activeSessionId]="activeSessionId"
+        (sessionSelect)="onSessionSelect($event)"
+        (sessionToggle)="onSessionToggle()"
+        (newChat)="onNewChat()"
+        (sessionRename)="onSessionRename($event)"
+        (sessionColorChange)="onSessionColorChange($event)"
+        (sessionClose)="onSessionClose($event)"
+      />
+    </div>
+  </main>
+</div>

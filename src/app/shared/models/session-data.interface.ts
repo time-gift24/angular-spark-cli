@@ -1,6 +1,18 @@
 import { ChatMessage } from './chat-message.interface';
 
 /**
+ * AI 会话状态
+ */
+export enum SessionStatus {
+  /** 空闲 - AI 回复完成或尚未开始 */
+  IDLE = 'idle',
+  /** 处理中 - AI 正在生成回复 */
+  PROCESSING = 'processing',
+  /** 断开连接 - AI 连接中断或错误 */
+  DISCONNECTED = 'disconnected',
+}
+
+/**
  * Represents the position of a draggable panel on the screen.
  *
  * Coordinates are relative to the viewport or parent container.
@@ -138,4 +150,38 @@ export interface SessionData {
    * - Cleanup of stale sessions
    */
   lastUpdated: number;
+
+  /**
+   * 会话状态
+   *
+   * 表示 AI 在该会话中的当前状态：
+   * - IDLE: 空闲，AI 回复完成或尚未开始
+   * - PROCESSING: 处理中，AI 正在生成回复
+   * - DISCONNECTED: 断开连接，AI 连接中断或错误
+   *
+   * @default SessionStatus.IDLE
+   */
+  status?: SessionStatus;
+
+  /**
+   * 会话颜色
+   *
+   * 用于在 tabs bar 中区分不同会话的视觉标识。
+   * 可选颜色：default（石绿）、blue（蓝色）、purple（紫色）、
+   *          pink（粉色）、orange（橙色）、yellow（黄色）
+   *
+   * @default 'default'
+   */
+  color?: SessionColor;
 }
+
+/**
+ * 会话颜色选项
+ */
+export type SessionColor =
+  | 'default'
+  | 'blue'
+  | 'purple'
+  | 'pink'
+  | 'orange'
+  | 'yellow';

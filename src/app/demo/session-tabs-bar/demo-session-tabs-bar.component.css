@@ -1,0 +1,476 @@
+/**
+ * Demo Session Tabs Bar Component - 矿物与时光主题
+ */
+
+/* ========================================
+   布局容器
+   ======================================== */
+
+.demo-container {
+  display: flex;
+  min-height: 100vh;
+  background: oklch(0.98 0.01 85);
+}
+
+/* ========================================
+   页面标题
+   ======================================== */
+
+.demo-header {
+  padding: var(--spacing-xl);
+  background: oklch(1 0 0);
+  border-bottom: 1px solid oklch(0.85 0.015 85);
+}
+
+.demo-header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: oklch(0.28 0.03 185);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.2;
+}
+
+.demo-description {
+  font-size: 14px;
+  color: oklch(0.55 0.04 185);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ========================================
+   控制面板
+   ======================================== */
+
+.controls-panel {
+  width: 280px;
+  padding: var(--spacing-lg);
+  background: oklch(0.96 0.01 85);
+  border-left: 1px solid oklch(0.85 0.015 85);
+  overflow-y: auto;
+}
+
+.control-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.control-section:last-child {
+  margin-bottom: 0;
+}
+
+.control-section h3 {
+  font-size: 12px;
+  font-weight: 500;
+  color: oklch(0.28 0.03 185);
+  margin: 0 0 var(--spacing-md) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ========================================
+   状态显示
+   ======================================== */
+
+.status-group {
+  padding: var(--spacing-md);
+  background: oklch(1 0 0);
+  border: 1px solid oklch(0.85 0.015 85);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+  font-size: 12px;
+}
+
+.status-item:not(:last-child) {
+  border-bottom: 1px solid oklch(0.90 0.01 85);
+}
+
+.status-label {
+  color: oklch(0.55 0.04 185);
+}
+
+.status-value {
+  font-weight: 500;
+  color: oklch(0.28 0.03 185);
+}
+
+/* ========================================
+   控制组
+   ======================================== */
+
+.control-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.control-group:last-child {
+  margin-bottom: 0;
+}
+
+.control-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: oklch(0.55 0.04 185);
+  margin-bottom: var(--spacing-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.control-group button {
+  width: 100%;
+  height: 30px;
+  padding: 0 var(--spacing-md);
+  font-size: 12px;
+  font-weight: 400;
+  color: oklch(0.28 0.03 185);
+  background: oklch(1 0 0);
+  border: 1px solid oklch(0.85 0.015 85);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: var(--spacing-sm);
+}
+
+.control-group button:hover {
+  background: oklch(0.48 0.07 195);
+  color: oklch(1 0 0);
+  border-color: oklch(0.48 0.07 195);
+}
+
+.control-group button:last-child {
+  margin-bottom: 0;
+}
+
+.button-group {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.button-group button {
+  flex: 1;
+}
+
+.button-group-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* ========================================
+   状态按钮
+   ======================================== */
+
+.status-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 11px;
+  font-weight: 400;
+  border-radius: var(--radius-md);
+  border: 1px solid oklch(0.85 0.015 85);
+  background: oklch(1 0 0);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.status-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px oklch(0 0 0 / 10%);
+}
+
+.status-idle {
+  color: oklch(0.48 0.07 195);
+  border-color: oklch(0.48 0.07 195 / 0.3);
+}
+
+.status-idle:hover {
+  background: oklch(0.48 0.07 195);
+  color: oklch(1 0 0);
+}
+
+.status-processing {
+  color: oklch(0.55 0.12 195);
+  border-color: oklch(0.55 0.12 195 / 0.3);
+}
+
+.status-processing:hover {
+  background: oklch(0.55 0.12 195);
+  color: oklch(1 0 0);
+}
+
+.status-disconnected {
+  color: oklch(0.55 0.20 25);
+  border-color: oklch(0.55 0.20 25 / 0.3);
+}
+
+.status-disconnected:hover {
+  background: oklch(0.55 0.20 25);
+  color: oklch(1 0 0);
+}
+
+.btn-reset {
+  color: oklch(0.50 0.20 25) !important;
+  border-color: oklch(0.85 0.015 85) !important;
+}
+
+.btn-reset:hover {
+  background: oklch(0.50 0.20 25) !important;
+  color: oklch(1 0 0) !important;
+  border-color: oklch(0.50 0.20 25) !important;
+}
+
+/* ========================================
+   功能说明
+   ======================================== */
+
+.feature-info {
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  background: oklch(1 0 0);
+  border: 1px solid oklch(0.85 0.015 85);
+  border-radius: var(--radius-md);
+}
+
+.feature-info:last-child {
+  margin-bottom: 0;
+}
+
+.feature-info p {
+  font-size: 11px;
+  font-weight: 500;
+  color: oklch(0.28 0.03 185);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.feature-info ul {
+  margin: 0;
+  padding-left: 14px;
+  list-style: disc;
+}
+
+.feature-info li {
+  font-size: 11px;
+  color: oklch(0.55 0.04 185);
+  margin-bottom: 2px;
+  line-height: 1.4;
+}
+
+/* ========================================
+   代码块
+   ======================================== */
+
+.code-block {
+  display: block;
+  padding: var(--spacing-md);
+  font-size: 11px;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+  color: oklch(0.28 0.03 185);
+  background: oklch(0.98 0.01 85);
+  border: 1px solid oklch(0.85 0.015 85);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+.code-block code {
+  font-family: inherit;
+}
+
+/* ========================================
+   主展示区域
+   ======================================== */
+
+.demo-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.demo-canvas {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  overflow: auto;
+  min-height: 100vh;
+}
+
+.placeholder-content {
+  max-width: 600px;
+  text-align: center;
+}
+
+.placeholder-content h2 {
+  font-size: 18px;
+  font-weight: 500;
+  color: oklch(0.28 0.03 185);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.placeholder-content p {
+  font-size: 14px;
+  color: oklch(0.55 0.04 185);
+  margin: 0 0 var(--spacing-lg) 0;
+  line-height: 1.6;
+}
+
+.placeholder-content ul {
+  display: inline-block;
+  text-align: left;
+  margin: 0 0 var(--spacing-lg) 0;
+  padding: var(--spacing-md);
+  background: oklch(1 0 0);
+  border: 1px solid oklch(0.85 0.015 85);
+  border-radius: var(--radius-md);
+  list-style: none;
+}
+
+.placeholder-content li {
+  font-size: 14px;
+  color: oklch(0.55 0.04 185);
+  padding: var(--spacing-sm) 0;
+  line-height: 1.6;
+}
+
+.placeholder-content li strong {
+  color: oklch(0.28 0.03 185);
+  font-weight: 500;
+}
+
+.placeholder-content .hint {
+  font-size: 13px;
+  color: oklch(0.48 0.07 195);
+  background: oklch(0.96 0.01 85);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border-left: 3px solid oklch(0.48 0.07 195);
+}
+
+/* ========================================
+   深色模式
+   ======================================== */
+
+.dark .demo-container {
+  background: oklch(0.20 0.04 230);
+}
+
+.dark .demo-header {
+  background: oklch(0.20 0.04 230);
+  border-bottom-color: oklch(0.35 0.04 230 / 50%);
+}
+
+.dark .demo-header h1 {
+  color: oklch(0.94 0.015 85);
+}
+
+.dark .demo-description {
+  color: oklch(0.70 0.05 85);
+}
+
+.dark .controls-panel {
+  background: oklch(0.25 0.035 85);
+  border-right-color: oklch(0.35 0.04 230 / 50%);
+}
+
+.dark .control-section h3 {
+  color: oklch(0.94 0.015 85);
+}
+
+.dark .status-group {
+  background: oklch(0.30 0.035 85);
+  border-color: oklch(0.35 0.04 230 / 50%);
+}
+
+.dark .status-item:not(:last-child) {
+  border-bottom-color: oklch(0.35 0.04 230 / 30%);
+}
+
+.dark .status-label {
+  color: oklch(0.70 0.05 85);
+}
+
+.dark .status-value {
+  color: oklch(0.94 0.015 85);
+}
+
+.dark .control-group label {
+  color: oklch(0.70 0.05 85);
+}
+
+.dark .control-group button {
+  color: oklch(0.94 0.015 85);
+  background: oklch(0.30 0.035 85);
+  border-color: oklch(0.35 0.04 230 / 50%);
+}
+
+.dark .control-group button:hover,
+.dark .button-group button:hover {
+  background: oklch(0.62 0.08 195);
+  color: oklch(1 0 0);
+  border-color: oklch(0.62 0.08 195);
+}
+
+.dark .feature-info {
+  background: oklch(0.30 0.035 85);
+  border-color: oklch(0.35 0.04 230 / 50%);
+}
+
+.dark .feature-info p {
+  color: oklch(0.94 0.015 85);
+}
+
+.dark .feature-info li {
+  color: oklch(0.70 0.05 85);
+}
+
+.dark .code-block {
+  color: oklch(0.94 0.015 85);
+  background: oklch(0.25 0.035 85);
+  border-color: oklch(0.35 0.04 230 / 50%);
+}
+
+.dark .placeholder-content h2 {
+  color: oklch(0.94 0.015 85);
+}
+
+.dark .placeholder-content p {
+  color: oklch(0.70 0.05 85);
+}
+
+.dark .placeholder-content ul {
+  background: oklch(0.30 0.035 85);
+  border-color: oklch(0.35 0.04 230 / 50%);
+}
+
+.dark .placeholder-content li {
+  color: oklch(0.70 0.05 85);
+}
+
+.dark .placeholder-content li strong {
+  color: oklch(0.94 0.015 85);
+}
+
+.dark .placeholder-content .hint {
+  color: oklch(0.62 0.08 195);
+  background: oklch(0.25 0.035 85);
+  border-left-color: oklch(0.62 0.08 195);
+}
+
+/* ========================================
+   响应式设计
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .controls-panel {
+    display: none; /* 移动端隐藏控制面板 */
+  }
+}

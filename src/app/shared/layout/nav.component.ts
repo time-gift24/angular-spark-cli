@@ -16,6 +16,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   selector: 'app-nav',
   standalone: true,
   imports: [RouterLink, RouterLinkActive],
+  styleUrls: ['./nav.component.css'],
   template: `
     <nav class="flex flex-col h-full">
       <!-- Logo/Header Section -->
@@ -31,146 +32,181 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       <!-- Navigation Links -->
       <div class="flex-1 overflow-y-auto py-4 px-3">
         <nav class="space-y-1">
-          <a
-            routerLink="/demo/button"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Button
-          </a>
-          <a
-            routerLink="/demo/input"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Input
-          </a>
-          <a
-            routerLink="/demo/card"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Card
-          </a>
-          <a
-            routerLink="/demo/badge"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Badge
-          </a>
-          <a
-            routerLink="/demo/separator"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Separator
-          </a>
-          <a
-            routerLink="/demo/switch"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Switch
-          </a>
-          <a
-            routerLink="/demo/sheet"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Sheet
-          </a>
-          <a
-            routerLink="/demo/checkbox"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Checkbox
-          </a>
-          <a
-            routerLink="/demo/context-menu"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Context Menu
-          </a>
-          <a
-            routerLink="/demo/alert"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Alert
-          </a>
-          <a
-            routerLink="/demo/tabs"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Tabs
-          </a>
-          <a
-            routerLink="/demo/tooltip"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Tooltip
-          </a>
-          <a
-            routerLink="/demo/avatar"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Avatar
-          </a>
-          <a
-            routerLink="/demo/progress"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Progress
-          </a>
-          <a
-            routerLink="/demo/skeleton"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Skeleton
-          </a>
-          <a
-            routerLink="/demo/table"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Table
-          </a>
-          <a
-            routerLink="/demo/slider"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Slider
-          </a>
-          <a
-            routerLink="/demo/liquid-glass"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Liquid Glass
-          </a>
-          <a
-            routerLink="/demo/ai-chat-input"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            AI Chat Input
-          </a>
-          <a
-            routerLink="/demo/chat-messages-card"
-            routerLinkActive="bg-accent text-accent-foreground"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
-            Chat Messages Card
-          </a>
+          <!-- Basic Components Section -->
+          <div class="nav-section">
+            <div class="nav-section-title">基础组件</div>
+            <a
+              routerLink="/demo/button"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Button
+            </a>
+            <a
+              routerLink="/demo/input"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Input
+            </a>
+            <a
+              routerLink="/demo/card"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Card
+            </a>
+            <a
+              routerLink="/demo/badge"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Badge
+            </a>
+            <a
+              routerLink="/demo/separator"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Separator
+            </a>
+            <a
+              routerLink="/demo/switch"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Switch
+            </a>
+            <a
+              routerLink="/demo/sheet"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Sheet
+            </a>
+            <a
+              routerLink="/demo/checkbox"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Checkbox
+            </a>
+            <a
+              routerLink="/demo/context-menu"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Context Menu
+            </a>
+            <a
+              routerLink="/demo/alert"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Alert
+            </a>
+            <a
+              routerLink="/demo/tabs"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Tabs
+            </a>
+            <a
+              routerLink="/demo/tooltip"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Tooltip
+            </a>
+            <a
+              routerLink="/demo/avatar"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Avatar
+            </a>
+            <a
+              routerLink="/demo/progress"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Progress
+            </a>
+            <a
+              routerLink="/demo/skeleton"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Skeleton
+            </a>
+            <a
+              routerLink="/demo/table"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Table
+            </a>
+            <a
+              routerLink="/demo/slider"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Slider
+            </a>
+          </div>
+
+          <!-- Effects Section -->
+          <div class="nav-section">
+            <div class="nav-section-title">特效</div>
+            <a
+              routerLink="/demo/liquid-glass"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Liquid Glass
+            </a>
+          </div>
+
+          <!-- AI Components Section -->
+          <div class="nav-section">
+            <div class="nav-section-title">AI 组件</div>
+            <a
+              routerLink="/demo/ai-chat-panel"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 pl-6 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              AI Chat Panel
+            </a>
+            <a
+              routerLink="/demo/ai-chat-input"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 pl-6 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              AI Chat Input
+            </a>
+            <a
+              routerLink="/demo/chat-messages-card"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 pl-6 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Chat Messages Card
+            </a>
+            <a
+              routerLink="/demo/session-button"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 pl-6 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Session Button
+            </a>
+            <a
+              routerLink="/demo/session-tabs-bar"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 pl-6 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+              Session Tabs Bar
+            </a>
+          </div>
         </nav>
       </div>
     </nav>

@@ -1,228 +1,42 @@
-/**
- * Session Tabs Bar Component Styles
- *
- * Phase 4 - Task 4.2: Full styling implementation
- *
- * Design System: "矿物与时光" (Mineral & Time) 岩彩主题
- * - Low saturation mineral colors
- * - Ultra compact sizing
- * - CSS variables for all values
- */
-
-/**
- * Container for all session tabs
- *
- * Fixed positioning at bottom center, aligned with input area
- * Provides always-visible session switching UI
- */
-.session-tabs-container {
-  position: fixed;
-  /* Position above input area with small gap */
-  /* Input area: ~60-80px height, add 8px gap */
-  bottom: 120px;  /* Position tabs above input without overlap */
-  left: 0;
-  right: 0;
-
-  /* Center container with max-width to match input */
-  max-width: 768px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-md);  /* Match input padding */
-
-  display: flex;
-  gap: var(--spacing-sm);  /* 4px - spacing between tabs */
-  justify-content: flex-start;  /* Left align */
-  z-index: 1000;
-
-  /* Smooth fade-in animation */
-  animation: fadeIn var(--duration-normal) ease-in;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 8px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-}
-
-/**
- * Individual session tab button
- *
- * Default state: subtle background with primary color
- * Compact sizing with rounded corners
- */
-.session-tab {
-  background: oklch(from var(--primary) l c h / 0.15);  /* 15% opacity */
-  color: var(--primary);
-  padding: 2px var(--spacing-sm);  /* 2px 4px - ultra compact */
-  border-radius: var(--radius-md);  /* 4px - smaller radius */
-  border: 1px solid transparent;
-
-  /* Typography - compact and light */
-  font-family: var(--font-sans);
-  font-size: 0.75rem;  /* 12px - text-xs */
-  font-weight: 400;  /* font-normal - lighter weight */
-  line-height: 1.4;
-  letter-spacing: 0.01em;
-
-  /* Reset button defaults */
-  cursor: pointer;
-  outline: none;
-  user-select: none;
-
-  /* Smooth transitions */
-  transition: all var(--duration-normal) ease;
-
-  /* Subtle shadow for depth */
-  box-shadow: 0 1px 2px oklch(0 0 0 / 5%);
-}
-
-/**
- * Active session tab
- *
- * Full primary background with white foreground
- * Clear visual indicator of current session
- */
-.session-tab.active {
-  background: var(--primary);
-  color: var(--primary-foreground);
-  border-color: var(--primary);
-
-  /* More prominent shadow for active state */
-  box-shadow: 0 2px 4px oklch(from var(--primary) l c h / 0.25);
-
-  /* Scale up slightly for emphasis */
-  transform: translateY(-1px);
-}
-
-/**
- * Hover state for session tabs
- *
- * Darker background for visual feedback
- */
-.session-tab:hover {
-  background: oklch(from var(--primary) l c h / 0.25);  /* 25% opacity */
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px oklch(from var(--primary) l c h / 0.2);
-}
-
-/**
- * Active tab hover state
- *
- * Slightly brighter primary background
- */
-.session-tab.active:hover {
-  background: oklch(from var(--primary) calc(l + 0.03) c h);
-  box-shadow: 0 3px 6px oklch(from var(--primary) l c h / 0.3);
-}
-
-/**
- * Focus state for accessibility
- *
- * Visible focus ring for keyboard navigation
- */
-.session-tab:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
-
-/**
- * Active focus state
- *
- * Darker ring for better visibility on primary background
- */
-.session-tab.active:focus-visible {
-  outline-color: var(--primary-foreground);
-}
-
-/**
- * Session name text
- *
- * Inherits typography from parent button
- * Prevents text wrapping for consistent tab sizing
- */
-.session-name {
-  display: inline-block;
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/**
- * New Chat tab styling
- *
- * Special styling for the "New Chat" button to distinguish it from session tabs.
- * Includes icon + text layout and subtle visual differences.
- */
-.new-chat-tab {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);  /* 2px - tight gap between icon and text */
-  background: oklch(from var(--primary) l c h / 0.1);  /* 10% opacity - lighter than regular tabs */
-  border-color: transparent;
-}
-
-.new-chat-tab .new-chat-icon {
-  width: 14px;
-  height: 14px;
-  stroke-width: 2;
-}
-
-.new-chat-tab:hover {
-  background: oklch(from var(--primary) l c h / 0.2);  /* 20% opacity */
-  border-color: transparent;
-}
-
-/**
- * Dark mode adjustments
- *
- * Enhanced contrast and subtle color shifts for dark backgrounds
- */
-.dark .session-tab {
-  background: oklch(from var(--primary) l c h / 0.2);  /* 20% opacity - more visible on dark */
-  box-shadow: 0 1px 2px oklch(0 0 0 / 20%);
-}
-
-.dark .session-tab:hover {
-  background: oklch(from var(--primary) l c h / 0.3);  /* 30% opacity */
-}
-
-.dark .session-tab.active {
-  box-shadow: 0 2px 4px oklch(0 0 0 / 30%);
-}
-
-.dark .session-tab.active:hover {
-  background: oklch(from var(--primary) calc(l + 0.02) c h);
-  box-shadow: 0 3px 6px oklch(0 0 0 / 40%);
-}
-
-/**
- * Responsive adjustments
- *
- * Reduce padding on smaller screens
- */
-@media (max-width: 640px) {
-  .session-tabs-container {
-    bottom: 75px;  /* Adjusted for mobile input height */
-    padding: 0 var(--spacing-sm);  /* Less padding on mobile */
-    gap: var(--spacing-sm);  /* Keep 4px gap between tabs on mobile */
-  }
-
-  .session-tab {
-    padding: 2px 3px;  /* Ultra compact */
-    font-size: 0.6875rem;  /* 11px - slightly smaller */
-  }
-
-  .session-name {
-    max-width: 80px;  /* Shorter max width on mobile */
-  }
-
-  .new-chat-tab .new-chat-icon {
-    width: 12px;
-    height: 12px;
-  }
-}
+.session-tabs-container{position:fixed;bottom:120px;left:0;right:0;max-width:768px;margin:0 auto;padding:0 var(--spacing-md);display:flex;gap:var(--spacing-sm);justify-content:flex-start;z-index:1000}
+.session-tab{background:oklch(from var(--primary) l c h /0.15);color:var(--primary);padding:2px var(--spacing-sm);border-radius:var(--radius-md);border:1px solid transparent;font-family:var(--font-sans);font-size:0.75rem;font-weight:400;line-height:1.4;cursor:pointer;outline:none;user-select:none;transition:all var(--duration-normal) ease;box-shadow:0 1px 2px oklch(0 0 0 /5%);display:flex;align-items:center;gap:2px;width:60px;flex-shrink:0}
+.session-tab:hover{transform:translateY(-1px);box-shadow:0 2px 4px oklch(0 0 0 /0.15)}
+.session-tab.active{border-color:oklch(0.48 0.07 195);transform:translateY(-1px);box-shadow:0 2px 4px oklch(0 0 0 /0.2)}
+.session-tab.active:hover{box-shadow:0 3px 6px oklch(0 0 0 /0.25)}
+.session-tab:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+.session-tab.active:focus-visible{outline-color:oklch(0.48 0.07 195)}
+.session-tab.session-color-default{background:oklch(0.48 0.07 195 /0.2);color:oklch(0.48 0.07 195)}
+.session-tab.session-color-blue{background:oklch(0.55 0.12 225 /0.2);color:oklch(0.55 0.12 225)}
+.session-tab.session-color-purple{background:oklch(0.55 0.14 285 /0.2);color:oklch(0.55 0.14 285)}
+.session-tab.session-color-pink{background:oklch(0.60 0.18 350 /0.2);color:oklch(0.60 0.18 350)}
+.session-tab.session-color-orange{background:oklch(0.65 0.15 50 /0.2);color:oklch(0.65 0.15 50)}
+.session-tab.session-color-yellow{background:oklch(0.75 0.12 85 /0.2);color:oklch(0.75 0.12 85)}
+.session-tab:not(.new-chat-tab)[class*="session-color-"]:hover{filter:brightness(1.15)}
+.status-icon{width:12px;height:12px;flex-shrink:0}
+.processing-icon{animation:rotate 1s linear infinite;color:var(--primary)}
+@keyframes rotate{to{transform:rotate(360deg)}}
+.disconnected-icon{color:oklch(0.65 0.20 25)}
+.idle-icon{color:oklch(0.55 0.12 225)}
+.session-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;position:relative}
+.session-name:hover::after{content:attr(title);position:absolute;left:0;top:100%;padding:1px 3px;background:#000;color:#fff}
+.new-chat-tab{background:oklch(from var(--primary) l c h /0.08);width:auto}
+.new-chat-tab:hover{filter:brightness(0.9)}
+.new-chat-icon{width:14px;height:14px;stroke-width:2}
+.dark .session-tab{box-shadow:0 1px 2px oklch(0 0 0 /20%)}
+.dark .session-tab:hover{box-shadow:0 2px 4px oklch(0 0 0 /30%)}
+.dark .session-tab.active{border-color:oklch(0.62 0.08 195);box-shadow:0 2px 4px oklch(0 0 0 /35%)}
+@media (max-width:640px){.session-tabs-container{bottom:75px;padding:0 var(--spacing-sm)}.session-tab{padding:2px 3px;font-size:0.6875rem;width:56px}.new-chat-icon{width:12px;height:12px}}
+.context-menu{position:fixed;min-width:160px;background:oklch(1 0 0);border:1px solid oklch(0.85 0.015 85);border-radius:var(--radius-md);box-shadow:0 4px 12px oklch(0 0 0 /15%);z-index:9999;padding:var(--spacing-xs)}
+.context-menu-item{display:flex;align-items:center;gap:var(--spacing-sm);padding:var(--spacing-sm) var(--spacing-md);cursor:pointer;border-radius:var(--radius-sm);color:var(--foreground);font-size:0.75rem}
+.context-menu-item:hover{background:oklch(from var(--primary) l c h /0.1)}
+.context-menu-has-submenu{position:relative}
+.context-menu-icon,.submenu-arrow{width:14px;height:14px;flex-shrink:0}
+.submenu-arrow{margin-left:auto}
+.context-submenu{position:absolute;left:100%;top:0;margin-left:4px;min-width:140px;background:oklch(1 0 0);border:1px solid oklch(0.85 0.015 85);border-radius:var(--radius-md);box-shadow:0 4px 12px oklch(0 0 0 /15%);padding:var(--spacing-xs)}
+.color-option{display:flex;align-items:center;gap:var(--spacing-sm);padding:var(--spacing-sm) var(--spacing-md);cursor:pointer;border-radius:var(--radius-sm)}
+.color-option:hover{background:oklch(from var(--primary) l c h /0.1)}
+.color-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:1px solid oklch(0 0 0 /10%)}
+.color-label{font-size:0.75rem;color:var(--foreground)}
+.context-menu-divider{height:1px;background:oklch(0 0 0 /10%);margin:var(--spacing-xs) 0}
+.context-menu-danger{color:oklch(0.50 0.20 25)}
+.context-menu-danger:hover{background:oklch(0.50 0.20 25 /0.1)}
