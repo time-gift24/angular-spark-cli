@@ -54,11 +54,6 @@ export const routes: Routes = [
           .then(m => m.CheckboxDemoComponent)
       },
       {
-        path: 'alert',
-        loadComponent: () => import('./demo/alert/alert-demo.component')
-          .then(m => m.AlertDemoComponent)
-      },
-      {
         path: 'tabs',
         loadComponent: () => import('./demo/tabs/tabs-demo.component')
           .then(m => m.TabsDemoComponent)
