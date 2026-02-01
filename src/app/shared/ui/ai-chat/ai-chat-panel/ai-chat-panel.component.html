@@ -1,0 +1,74 @@
+<!-- Host Container -->
+<div [class]="hostClasses()">
+  <!-- Floating Toggle Button (Always Visible) -->
+  <ai-session-toggle
+    [isOpen]="isOpen()"
+    [hasBadge]="currentBadge() !== null"
+    [useFixedPosition]="true"
+    (toggle)="onTogglePanel()"
+  />
+
+  <!-- Main Panel (Visible when open) -->
+  @if (isOpen()) {
+    <div [class]="panelContainerClasses()">
+      <!-- Panel Header with Status -->
+      <div class="ai-chat-panel-header">
+        <div class="header-left">
+          <h2 class="panel-title">AI Assistant</h2>
+          <ai-status-badges [badge]="currentBadge()" />
+        </div>
+        <div class="header-right">
+          <button
+            type="button"
+            class="header-action-btn"
+            (click)="onTogglePanel()"
+            aria-label="Close panel"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" x2="6" y1="6" y2="18" />
+              <line x1="6" x2="18" y1="6" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Session Tabs Bar -->
+      <div class="ai-chat-panel-tabs">
+        <spark-session-tabs-bar
+          [sessions]="sessions"
+          [activeSessionId]="activeSessionId"
+          (sessionSelect)="onSessionSelect($event)"
+          (sessionToggle)="onSessionToggle()"
+          (newChat)="onNewChat()"
+          (sessionRename)="onSessionRename($event)"
+          (sessionColorChange)="onSessionColorChange($event)"
+          (sessionClose)="onSessionClose($event)"
+        />
+      </div>
+
+      <!-- Content Area (Collapsible) -->
+      @if (isMessagesVisible()) {
+        <div [class]="messagesCardClasses()">
+          <!-- Chat Messages Display -->
+          <ai-chat-messages-card
+            [messages]="activeMessages()"
+            [position]="'relative'"
+          />
+        </div>
+      }
+
+      <!-- Input Area (Always Visible) -->
+      <div class="ai-chat-panel-input">
+        <ai-chat-input
+          [value]="inputValue()"
+          [placeholder]="placeholder()"
+          [disabled]="isInputDisabled()"
+          (send)="onSend($event)"
+          (fileClick)="onFileClick()"
+          (imageClick)="onImageClick()"
+          (voiceClick)="onVoiceClick()"
+        />
+      </div>
+    </div>
+  }
+</div>

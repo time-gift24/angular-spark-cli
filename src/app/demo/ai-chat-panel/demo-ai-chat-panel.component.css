@@ -1,0 +1,237 @@
+/**
+ * Demo AI Chat Panel Component Styles
+ * Mineral & Time Theme - Angular 20+
+ */
+
+/* ===== Page Layout ===== */
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  padding: var(--spacing-xl);
+  box-sizing: border-box;
+}
+
+/* ===== Page Header ===== */
+.page-header {
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+.header-content h1 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+
+/* ===== Demo Content ===== */
+.demo-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ===== Sections ===== */
+.features-section,
+.shortcuts-section,
+.usage-section,
+.api-section,
+.notes-section {
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.features-section h2,
+.shortcuts-section h2,
+.usage-section h2,
+.api-section h2,
+.notes-section h2 {
+  margin: 0 0 var(--spacing-lg) 0;
+  font-size: var(--text-lg);
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+/* ===== Features Grid ===== */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.feature-card {
+  padding: var(--spacing-lg);
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.feature-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px oklch(0 0 0 / 0.05);
+}
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.feature-card h3 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+  line-height: var(--line-height-snug);
+}
+
+/* ===== Shortcuts Grid ===== */
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--muted);
+  border-radius: var(--radius-md);
+}
+
+.shortcut-key {
+  flex-shrink: 0;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--text-xs);
+  font-family: ui-monospace, monospace;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.shortcut-value {
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+
+/* ===== Code Block ===== */
+.code-block {
+  overflow: auto;
+  padding: var(--spacing-lg);
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.code-block pre {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-family: ui-monospace, monospace;
+  line-height: var(--line-height-relaxed);
+  color: var(--foreground);
+}
+
+.code-block code {
+  font-family: inherit;
+}
+
+/* ===== API Table ===== */
+.api-table-wrapper {
+  overflow-x: auto;
+}
+
+.api-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.api-table th,
+.api-table td {
+  padding: var(--spacing-md);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.api-table th {
+  font-weight: 500;
+  color: var(--foreground);
+  background: var(--muted);
+}
+
+.api-table td {
+  color: var(--muted-foreground);
+}
+
+.api-table code {
+  padding: 2px 6px;
+  font-size: var(--text-xs);
+  font-family: ui-monospace, monospace;
+  background: var(--muted);
+  border-radius: var(--radius-sm);
+}
+
+.api-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===== Notes List ===== */
+.notes-list {
+  margin: 0;
+  padding-left: var(--spacing-xl);
+}
+
+.notes-list li {
+  margin-bottom: var(--spacing-md);
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+  line-height: var(--line-height-snug);
+}
+
+.notes-list li::marker {
+  color: var(--primary);
+}
+
+.notes-list strong {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+  :host {
+    padding: var(--spacing-md);
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .shortcuts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header-content h1 {
+    font-size: var(--text-lg);
+  }
+}

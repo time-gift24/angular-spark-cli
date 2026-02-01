@@ -112,6 +112,11 @@ export const routes: Routes = [
         path: 'session-tabs-and-input',
         loadComponent: () => import('./demo/session-tabs-and-input/demo-session-tabs-and-input.component')
           .then(m => m.DemoSessionTabsAndInputComponent)
+      },
+      {
+        path: 'ai-chat-panel',
+        loadComponent: () => import('./demo/ai-chat-panel/demo-ai-chat-panel.component')
+          .then(m => m.DemoAiChatPanelComponent)
       }
     ]
   }
