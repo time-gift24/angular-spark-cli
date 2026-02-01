@@ -164,6 +164,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
             AI Chat Panel
           </a>
+          <a
+            routerLink="/demo/chat-messages-card"
+            routerLinkActive="bg-accent text-accent-foreground"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+            Chat Messages Card
+          </a>
         </nav>
       </div>
     </nav>
