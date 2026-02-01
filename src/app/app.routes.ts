@@ -104,6 +104,11 @@ export const routes: Routes = [
           .then(m => m.DemoAiChatPanelComponent)
       },
       {
+        path: 'ai-chat-input',
+        loadComponent: () => import('./demo/ai-chat-input/demo-ai-chat-input.component')
+          .then(m => m.DemoAiChatInputComponent)
+      },
+      {
         path: 'chat-messages-card',
         loadComponent: () => import('./demo/chat-messages-card/demo-chat-messages-card.component')
           .then(m => m.DemoChatMessagesCardComponent)

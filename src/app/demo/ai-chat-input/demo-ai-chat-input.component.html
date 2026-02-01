@@ -1,0 +1,111 @@
+<div class="demo-container">
+  <!-- Header -->
+  <header class="demo-header">
+    <h1 class="text-xl font-semibold mb-2 text-foreground">
+      AI Chat Input Demo
+    </h1>
+    <p class="text-sm text-muted-foreground mb-3">
+      AI 聊天输入框 - 自适应高度、工具栏、快捷键
+    </p>
+    <div class="text-xs text-muted-foreground space-y-1">
+      <p>✨ Liquid glass 效果 | 📝 自适应高度（1-5行） | ⌨️ 快捷键支持</p>
+      <p>🔧 工具栏按钮 | 📤 发送按钮 | 🎨 矿物与时光主题</p>
+      <p class="mt-2 font-medium text-foreground">⚡ 性能对比：点击右侧控制面板的 "Liquid Glass" 按钮来开关特效</p>
+    </div>
+  </header>
+
+  <!-- 控制面板 -->
+  @if (showControls()) {
+    <aside class="controls-panel">
+      <div class="controls-header">
+        <h2 class="text-sm font-medium text-foreground">控制面板</h2>
+        <button class="icon-button" (click)="toggleControls()" title="隐藏控制面板">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m18 15-6-6m0 6-6-6"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 性能配置 -->
+      <div class="control-section">
+        <h3 class="control-section-title">性能与效果</h3>
+        <div class="control-row">
+          <button
+            class="control-button"
+            [class.primary]="enableLiquidGlass()"
+            (click)="toggleLiquidGlass()">
+            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              @if (enableLiquidGlass()) {
+                <path d="M12 3v18m0-18l-4 4m4-4l4 4"/>
+              } @else {
+                <path d="M12 21V3m0 18l-4-4m4 4l4-4"/>
+              }
+            </svg>
+            <span>{{ enableLiquidGlass() ? 'Liquid Glass: ON' : 'Liquid Glass: OFF' }}</span>
+          </button>
+        </div>
+        <p class="text-xs text-muted-foreground mt-2">
+          {{ enableLiquidGlass()
+            ? '✨ Liquid glass 效果已启用 - 更美观，但可能影响性能'
+            : '⚡ 性能模式 - 禁用特效以获得最佳性能' }}
+        </p>
+      </div>
+
+      <!-- 输入控制 -->
+      <div class="control-section">
+        <h3 class="control-section-title">输入控制</h3>
+        <div class="control-row">
+          <button class="control-button" (click)="clearInput()">清空输入</button>
+        </div>
+        <p class="text-xs text-muted-foreground mt-2">
+          当前输入长度: {{ inputValue().length }} 字符
+        </p>
+      </div>
+
+      <!-- 使用说明 -->
+      <div class="control-section">
+        <h3 class="control-section-title">使用说明</h3>
+        <div class="info-list">
+          <div class="info-item">
+            <span class="info-key">Enter</span>
+            <span class="info-value">发送消息</span>
+          </div>
+          <div class="info-item">
+            <span class="info-key">Shift + Enter</span>
+            <span class="info-value">换行</span>
+          </div>
+          <div class="info-item">
+            <span class="info-key">自动调整高度</span>
+            <span class="info-value">1-5 行</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  }
+
+  <!-- 重新显示控制面板按钮 -->
+  @if (!showControls()) {
+    <button class="show-controls-button" (click)="toggleControls()" title="显示控制面板">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 1v6m0 6v6"/>
+        <path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24M1 12h6m6 0h6"/>
+        <path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"/>
+      </svg>
+    </button>
+  }
+
+  <!-- 主内容区域 -->
+  <main class="demo-main">
+    <!-- Chat Input 放在底部 -->
+    <div class="input-area-bottom">
+      <app-chat-input
+        [inputValue]="inputValue"
+        [canSend]="canSend"
+        [enableLiquidGlass]="enableLiquidGlass()"
+        (inputChange)="onInputChange($event)"
+        (messageSend)="sendMessage()"
+      />
+    </div>
+  </main>
+</div>

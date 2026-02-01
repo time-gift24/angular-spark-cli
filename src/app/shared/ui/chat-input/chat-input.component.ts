@@ -1,7 +1,39 @@
-import { Component, EventEmitter, Input, Output, signal, Signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal, Signal, booleanAttribute, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LiquidGlassDirective } from '../liquid-glass';
 
+/**
+ * AI Chat Input Component - 矿物与时光主题
+ *
+ * 可自适应高度的 AI 聊天输入框，支持 liquid-glass 效果。
+ *
+ * 特性：
+ * - Liquid glass 视觉效果（可选）
+ * - 自适应高度（1-5行）
+ * - 工具栏按钮（文件、图片、语音）
+ * - 发送按钮（启用时高亮）
+ * - 键盘快捷键（Enter 发送，Shift+Enter 换行）
+ *
+ * @example
+ * ```html
+ * <!-- 默认启用 liquid glass 效果 -->
+ * <app-chat-input
+ *   [inputValue]="inputSignal"
+ *   [canSend]="canSendSignal"
+ *   (inputChange)="onInputChange($event)"
+ *   (messageSend)="sendMessage()"
+ * />
+ *
+ * <!-- 禁用 liquid glass 效果以提升性能 -->
+ * <app-chat-input
+ *   [enableLiquidGlass]="false"
+ *   [inputValue]="inputSignal"
+ *   [canSend]="canSendSignal"
+ *   (inputChange)="onInputChange($event)"
+ *   (messageSend)="sendMessage()"
+ * />
+ * ```
+ */
 @Component({
   selector: 'app-chat-input',
   standalone: true,
@@ -12,6 +44,16 @@ import { LiquidGlassDirective } from '../liquid-glass';
 export class ChatInputComponent {
   @Input() inputValue: Signal<string> = signal('');
   @Input() canSend: Signal<boolean> = signal(false);
+
+  /**
+   * 启用或禁用 liquid glass 视觉效果
+   *
+   * 默认启用。设置为 false 可以提升性能。
+   *
+   * @default true
+   */
+  @Input({ transform: booleanAttribute }) enableLiquidGlass = true;
+
   @Output() inputChange = new EventEmitter<string>();
   @Output() messageSend = new EventEmitter<void>();
 

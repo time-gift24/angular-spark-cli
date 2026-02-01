@@ -158,6 +158,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             Liquid Glass
           </a>
           <a
+            routerLink="/demo/ai-chat-input"
+            routerLinkActive="bg-accent text-accent-foreground"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground">
+            AI Chat Input
+          </a>
+          <a
             routerLink="/demo/chat-messages-card"
             routerLinkActive="bg-accent text-accent-foreground"
             [routerLinkActiveOptions]="{ exact: true }"
