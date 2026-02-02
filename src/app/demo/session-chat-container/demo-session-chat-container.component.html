@@ -1,0 +1,47 @@
+<div class="demo-page">
+  <!-- Info Panel -->
+  <aside class="info-panel">
+    <h2 class="info-title">Session Chat Container</h2>
+    <p class="info-desc">
+      纯展示组合组件 - 整合 SessionTabsBar 和 ChatInput
+    </p>
+
+    <!-- Controls -->
+    <div class="controls-section">
+      <h3 class="section-title">控制面板</h3>
+      <button class="control-btn" (click)="togglePanel()">
+        {{ isOpen() ? '📖 面板: 已展开' : '📕 面板: 已收起' }}
+      </button>
+      <button class="control-btn" (click)="clearLog()">
+        🗑️ 清空日志 ({{ eventLog().length }})
+      </button>
+    </div>
+
+    <!-- Event Log -->
+    @if (eventLog().length > 0) {
+      <div class="log-section">
+        <h3 class="section-title">事件日志</h3>
+        <div class="log-list">
+          @for (log of eventLog(); track log) {
+            <div class="log-item">{{ log }}</div>
+          }
+        </div>
+      </div>
+    }
+  </aside>
+
+  <!-- Component Demo -->
+  <main class="component-container">
+    <app-session-chat-container
+      [sessions]="sessionsSignal"
+      [activeSessionId]="activeSessionIdSignal"
+      [isOpen]="isOpenSignal"
+      [inputValue]="inputValueSignal"
+      (newChat)="onNewChat()"
+      (sessionSelect)="onSessionSelect($event)"
+      (sessionToggle)="onSessionToggle()"
+      (send)="onSend($event)"
+      (inputValueChange)="onInputChange($event)"
+    />
+  </main>
+</div>
