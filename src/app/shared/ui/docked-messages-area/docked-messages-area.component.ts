@@ -12,7 +12,7 @@ import { ChatMessagesCardComponent } from '@app/shared/ui/ai-chat/chat-messages-
  *
  * Features:
  * - Fixed positioning with drag support (initially on right side)
- * - Default size: 380px width, 60vh height
+ * - Default size: 380px width, full screen height
  * - Receives messages as @Input
  * - Delegates rendering to ChatMessagesCardComponent
  * - User can freely drag the card anywhere
@@ -32,6 +32,7 @@ import { ChatMessagesCardComponent } from '@app/shared/ui/ai-chat/chat-messages-
     <ai-chat-messages-card
       [messages]="messages"
       [position]="'fixed'"
+      class="!right-6 !top-0 !h-[calc(100vh-120px)]"
     />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
