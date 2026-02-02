@@ -9,7 +9,7 @@
  * - Task 8.3: Define StreamControl interface for lifecycle management
  */
 
-import { Component, Injectable, OnDestroy, Inject, signal } from '@angular/core';
+import { Component, Injectable, OnDestroy, Inject, signal, inject } from '@angular/core';
 import { Observable, Subject, EMPTY, Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { StreamingMarkdownComponent } from '@app/shared/components/streaming-markdown/streaming-markdown.component';
@@ -169,7 +169,7 @@ export class DefaultStreamControl implements StreamControl, OnDestroy {
     'style': 'display: block; width: 100%;'
   }
 })
-export class DemoStreamingMarkdownComponent {
+export class DemoStreamingMarkdownComponent implements OnDestroy {
   /**
    * Observable stream of markdown text chunks.
    * Bound to StreamingMarkdownComponent input.
@@ -193,6 +193,12 @@ export class DemoStreamingMarkdownComponent {
    * Used for UI feedback (icon change after copy).
    */
   protected copied = signal<boolean>(false);
+
+  /**
+   * Timeout ID for copy state reset.
+   * Tracked for cleanup to prevent memory leaks.
+   */
+  private copyResetTimeout: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Constructor with dependency injection.
@@ -357,9 +363,15 @@ export class DemoStreamingMarkdownComponent {
       // Update UI state to show success
       this.copied.set(true);
 
+      // Clear any existing timeout to prevent memory leaks
+      if (this.copyResetTimeout) {
+        clearTimeout(this.copyResetTimeout);
+      }
+
       // Reset UI state after 1.5 seconds
-      setTimeout(() => {
+      this.copyResetTimeout = setTimeout(() => {
         this.copied.set(false);
+        this.copyResetTimeout = null;
       }, 1500);
 
     } catch (error) {
@@ -392,6 +404,18 @@ export class DemoStreamingMarkdownComponent {
 
     if (!successful) {
       throw new Error('execCommand("copy") failed');
+    }
+  }
+
+  /**
+   * Cleanup hook for component destruction.
+   * Clears any pending timeouts to prevent memory leaks.
+   */
+  ngOnDestroy(): void {
+    // Clear copy reset timeout
+    if (this.copyResetTimeout) {
+      clearTimeout(this.copyResetTimeout);
+      this.copyResetTimeout = null;
     }
   }
 }

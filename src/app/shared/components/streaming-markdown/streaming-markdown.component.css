@@ -75,13 +75,13 @@
   width: 28px;
   height: 28px;
 
-  /* Mineral & Time color scheme - low saturation */
-  background: oklch(0.91 0.015 85); /* 绢黄 Aged Silk */
-  border: 1px solid oklch(0.85 0.015 85); /* 深绢黄 Dark Aged Silk */
+  /* Mineral & Time color scheme - using CSS variables */
+  background: var(--muted);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
 
   /* Icon styling */
-  color: oklch(0.28 0.03 185); /* 深灰 Dark Gray */
+  color: var(--foreground);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -101,9 +101,9 @@
 
 /* Hover state - primary color (石绿 Malachite) */
 .copy-button:hover {
-  background: oklch(0.48 0.07 195); /* 石绿 Malachite */
-  color: white;
-  border-color: oklch(0.48 0.07 195);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
   opacity: 1;
   transform: translateY(-1px);
 }
@@ -115,14 +115,14 @@
 
 /* Copied state - primary color background */
 .copy-button[aria-label*="Copied"] {
-  background: oklch(0.48 0.07 195); /* 石绿 Malachite */
-  color: white;
-  border-color: oklch(0.48 0.07 195);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
 }
 
 /* Focus state for accessibility */
 .copy-button:focus-visible {
-  outline: 2px solid oklch(0.48 0.07 195); /* 石绿 Malachite */
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 

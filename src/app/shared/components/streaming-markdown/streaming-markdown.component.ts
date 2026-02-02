@@ -34,7 +34,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subject, Subscription, of } from 'rxjs';
-import { tap, takeUntil, catchError, switchMap, first } from 'rxjs/operators';
+import { takeUntil, catchError, switchMap } from 'rxjs/operators';
 import {
   MarkdownBlock,
   StreamingState,
@@ -266,6 +266,12 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
   private streamSubscription: Subscription | null = null;
 
   /**
+   * Timeout ID for copy state reset.
+   * Tracked for cleanup to prevent memory leaks.
+   */
+  private copyResetTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  /**
    * Pipeline configuration for stream processing.
    * Default values optimize for typical streaming scenarios.
    */
@@ -495,9 +501,15 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
       // Update UI state to show success
       this.copied.set(true);
 
+      // Clear any existing timeout to prevent memory leaks
+      if (this.copyResetTimeout) {
+        clearTimeout(this.copyResetTimeout);
+      }
+
       // Reset UI state after 1.5 seconds
-      setTimeout(() => {
+      this.copyResetTimeout = setTimeout(() => {
         this.copied.set(false);
+        this.copyResetTimeout = null;
       }, 1500);
 
     } catch (error) {
@@ -546,6 +558,12 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     if (this.streamSubscription) {
       this.streamSubscription.unsubscribe();
       this.streamSubscription = null;
+    }
+
+    // Clear copy reset timeout
+    if (this.copyResetTimeout) {
+      clearTimeout(this.copyResetTimeout);
+      this.copyResetTimeout = null;
     }
 
     console.log('[StreamingMarkdownComponent] Cleanup complete');
