@@ -150,4 +150,76 @@ export class SessionChatContainerComponent {
    */
   @Output()
   readonly inputValueChange = new EventEmitter<string>();
+
+  /**
+   * Default Tailwind classes for main container
+   */
+  protected readonly defaultContainerClass = 'flex flex-col w-full gap-2';
+
+  /**
+   * Default Tailwind classes for tabs wrapper
+   */
+  protected readonly defaultTabsWrapperClass = 'w-full';
+
+  /**
+   * Default Tailwind classes for input wrapper
+   */
+  protected readonly defaultInputWrapperClass =
+    'w-full transition-all duration-200 ease-out';
+
+  /**
+   * Computed container class (custom or default)
+   */
+  protected getContainerClass(): string {
+    return this.containerClass || this.defaultContainerClass;
+  }
+
+  /**
+   * Computed tabs wrapper class (custom or default)
+   */
+  protected getTabsWrapperClass(): string {
+    return this.tabsWrapperClass || this.defaultTabsWrapperClass;
+  }
+
+  /**
+   * Computed input wrapper class (custom or default)
+   */
+  protected getInputWrapperClass(): string {
+    return this.inputWrapperClass || this.defaultInputWrapperClass;
+  }
+
+  /**
+   * Forward session select event
+   */
+  protected onSessionSelect(sessionId: string): void {
+    this.sessionSelect.emit(sessionId);
+  }
+
+  /**
+   * Forward session toggle event
+   */
+  protected onSessionToggle(): void {
+    this.sessionToggle.emit();
+  }
+
+  /**
+   * Forward new chat event
+   */
+  protected onNewChat(): void {
+    this.newChat.emit();
+  }
+
+  /**
+   * Forward send event
+   */
+  protected onSend(message: string): void {
+    this.send.emit(message);
+  }
+
+  /**
+   * Forward input value change event
+   */
+  protected onInputChange(value: string): void {
+    this.inputValueChange.emit(value);
+  }
 }

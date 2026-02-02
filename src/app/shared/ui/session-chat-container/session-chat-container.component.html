@@ -1,4 +1,26 @@
-<!-- Template will be completed in Task 3 -->
-<div class="session-chat-container">
-  <p>Template placeholder</p>
+<!-- Main container - flex column with gap, fully overridable -->
+<div [class]="'session-chat-container ' + getContainerClass()">
+  <!-- Session Tabs Bar -->
+  <div [class]="getTabsWrapperClass()">
+    <spark-session-tabs-bar
+      [sessions]="sessions"
+      [activeSessionId]="activeSessionId"
+      (sessionSelect)="onSessionSelect($event)"
+      (sessionToggle)="onSessionToggle()"
+      (newChat)="onNewChat()"
+    />
+  </div>
+
+  <!-- Chat Input - conditional rendering based on isOpen -->
+  @if (isOpen()) {
+    <div [class]="getInputWrapperClass()">
+      <ai-chat-input
+        [value]="inputValue()"
+        (valueChange)="onInputChange($event)"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        (send)="onSend($event)"
+      />
+    </div>
+  }
 </div>
