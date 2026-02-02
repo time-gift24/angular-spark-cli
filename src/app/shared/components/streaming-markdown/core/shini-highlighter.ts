@@ -192,8 +192,9 @@ export class ShiniHighlighter implements IShiniHighlighter {
         const lineContent = isEmpty ? '&nbsp;' : highlightedLine;
 
         // Important: No newlines or spaces in template string to avoid text nodes
-        return `<div class="line"><span class="line-number">${lineNum}</span>${lineContent}</div>`;
-      }).join('\n');
+        // Use 'code-line' instead of 'line' to avoid conflict with Shiki's internal class names
+        return `<div class="code-line"><span class="line-number">${lineNum}</span>${lineContent}</div>`;
+      }).join('');  // CRITICAL: Use empty string, not '\n', to avoid creating text nodes between divs
 
       return linesHtml;
     } catch (error) {

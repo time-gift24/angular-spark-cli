@@ -72,6 +72,12 @@
   margin: 0;
   border: none;
   box-shadow: none;
+  line-height: 1.2 !important; /* 设置为 1.2 以提供适当的行间距 */
+}
+
+/* Ensure pre tag also has line-height: 1.2 */
+.markdown-code pre {
+  line-height: 1.2 !important;
 }
 
 /* 覆盖 Shini 的默认样式以匹配主题 */
@@ -83,24 +89,25 @@
 }
 
 /* Line wrapper - use ::ng-deep to penetrate ViewEncapsulation for innerHTML content */
-.markdown-code ::ng-deep .line {
+.markdown-code ::ng-deep .code-line {
   display: flex !important;
-  line-height: 1 !important;
+  line-height: 1.2 !important; /* ultra compact 行间距 */
   padding-right: var(--spacing-lg);
   align-items: flex-start !important;
-  margin: 0 !important;
+  margin: 0 !important; /* 移除所有 margin，仅使用 line-height 控制间距 */
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   gap: var(--spacing-md); /* 行号和代码之间的间隔 */
+  min-height: 1.2em; /* 确保最小高度 */
 }
 
 /* Force line-height on all Shiki-generated elements */
-.markdown-code ::ng-deep .line * {
-  line-height: 1 !important;
+.markdown-code ::ng-deep .code-line * {
+  line-height: 1.2 !important;
 }
 
 /* 行号样式 - use ::ng-deep to penetrate ViewEncapsulation */
-.markdown-code ::ng-deep .line-number {
+.markdown-code ::ng-deep .code-line .line-number {
   color: oklch(0.60 0.02 230);
   min-width: 2.5em;
   padding-left: var(--spacing-md);
@@ -110,7 +117,7 @@
   opacity: 0.6;
   font-size: 0.8em;
   flex-shrink: 0;
-  line-height: 1 !important;
+  line-height: 1.2 !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
