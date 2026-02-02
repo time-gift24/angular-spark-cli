@@ -3,7 +3,6 @@
   @if (shouldShowDocked()) {
     <app-docked-messages-area
       [messages]="activeSession()?.messages || []"
-      [sessionId]="activeSessionId()"
     />
   }
 
@@ -18,10 +17,10 @@
   <!-- Session Chat Container (Bottom Center) -->
   <div class="container-wrapper">
     <app-session-chat-container
-      [sessions]="sessions()"
-      [activeSessionId]="activeSessionId()"
-      [isOpen]="isOpen()"
-      [inputValue]="inputValue()"
+      [sessions]="sessions"
+      [activeSessionId]="activeSessionId"
+      [isOpen]="isOpen"
+      [inputValue]="inputValue"
       placeholder="Ask AI anything..."
       (newChat)="onNewChat()"
       (sessionSelect)="onSessionSelect($event)"

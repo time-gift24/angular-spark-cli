@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy } from '@angular/core';
-import { ChatMessage } from '@app/shared/models';
+import { ChatMessage } from '@app/shared/ui/ai-chat/types/chat.types';
 import { ChatMessagesCardComponent } from '@app/shared/ui/ai-chat/chat-messages-card/chat-messages-card.component';
 
 /**

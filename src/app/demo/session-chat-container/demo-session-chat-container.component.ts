@@ -1,6 +1,6 @@
 import { Component, signal, computed } from '@angular/core';
 import { SessionChatContainerComponent } from '@app/shared/ui/session-chat-container';
-import type { SessionData } from '@app/shared/models';
+import { SessionStatus, type SessionData } from '@app/shared/models';
 import { initialState } from './examples';
 
 @Component({
@@ -70,6 +70,9 @@ export class DemoSessionChatContainerComponent {
       position: { x: 100, y: 100 },
       size: { width: 400, height: 500 },
       lastUpdated: Date.now(),
+      status: SessionStatus.IDLE,
+      color: 'default',
+      mode: 'docked',
     };
 
     this.sessionsInternal.update((map) => {

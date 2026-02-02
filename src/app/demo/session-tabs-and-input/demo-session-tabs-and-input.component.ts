@@ -64,6 +64,7 @@ export class DemoSessionTabsAndInputComponent {
         lastUpdated: now - 1000 * 60 * 5,
         status: SessionStatus.PROCESSING,
         color: 'default',
+        mode: 'docked',
       },
       {
         id: 'session-2',
@@ -75,6 +76,7 @@ export class DemoSessionTabsAndInputComponent {
         lastUpdated: now - 1000 * 60 * 15,
         status: SessionStatus.IDLE,
         color: 'blue',
+        mode: 'docked',
       },
       {
         id: 'session-3',
@@ -86,6 +88,7 @@ export class DemoSessionTabsAndInputComponent {
         lastUpdated: now - 1000 * 60 * 30,
         status: SessionStatus.DISCONNECTED,
         color: 'purple',
+        mode: 'docked',
       },
     ];
 
