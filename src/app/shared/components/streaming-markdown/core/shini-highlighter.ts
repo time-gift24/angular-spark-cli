@@ -140,7 +140,11 @@ export class ShiniHighlighter implements IShiniHighlighter {
    * Uses Shiki's codeToHtml for actual syntax highlighting.
    * Falls back to original code if Shiki is not ready or highlighting fails.
    */
-  async highlight(code: string, language: string, theme: 'light' | 'dark'): Promise<string> {
+  async highlight(
+    code: string,
+    language: string,
+    theme: 'light' | 'dark'
+  ): Promise<string> {
     console.log(`[ShiniHighlighter] highlight() called with:`, {
       language,
       theme,
@@ -150,35 +154,50 @@ export class ShiniHighlighter implements IShiniHighlighter {
     });
 
     if (!this.isReady()) {
-      console.warn('[ShiniHighlighter] Not ready, returning plain code')
-      return code
+      console.warn('[ShiniHighlighter] Not ready, returning plain code');
+      return code;
     }
 
     try {
-      console.log(`[ShiniHighlighter] About to call codeToHtml for ${language}`)
+      console.log(`[ShiniHighlighter] About to call codeToHtml for ${language}`);
 
       // Map theme names to Shiki theme identifiers
       const themeMap = {
         'light': 'github-light',
         'dark': 'dark-plus'
-      }
+      };
 
-      // Use Shiki's codeToHtml for syntax highlighting (returns Promise)
-      const html = await codeToHtml(code, {
-        lang: language,
-        theme: themeMap[theme]
-      })
+      // Split code into lines
+      const lines = code.split('\n');
 
-      console.log(`[ShiniHighlighter] codeToHtml returned:`, {
-        htmlLength: html.length,
-        hasStyle: html.includes('style='),
-        preview: html.substring(0, 300)
-      });
+      // Highlight each line individually
+      const highlightedLines = await Promise.all(
+        lines.map(async (line) => {
+          const html = await codeToHtml(line || ' ', { // Use space for empty lines
+            lang: language,
+            theme: themeMap[theme]
+          });
+          // Remove <pre> wrapper from each line
+          return html.replace(/^<pre[^>]*><code>(.*)<\/code><\/pre>$/, '$1');
+        })
+      );
 
-      return html
+      // Build final HTML with line numbers
+      const linesHtml = highlightedLines.map((line, index) => {
+        const lineNum = index + 1;
+        // Check if line is empty
+        const isEmpty = !lines[index].trim();
+        const lineContent = isEmpty ? '&nbsp;' : line;
+
+        return `<span class="line">
+          <span class="line-number">${lineNum}</span>${lineContent}
+        </span>`;
+      }).join('\n');
+
+      return linesHtml;
     } catch (error) {
-      console.error('[ShiniHighlighter] Highlighting failed:', error)
-      return code
+      console.error('[ShiniHighlighter] Highlighting failed:', error);
+      return code;
     }
   }
 

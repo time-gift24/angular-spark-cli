@@ -2,6 +2,7 @@
  * Markdown Code Component
  *
  * Renders code blocks with syntax highlighting using Shiki.
+ * Includes language label, copy button, and line numbers.
  * Falls back to plain text if highlighting fails.
  * Skips highlighting during streaming for performance.
  *
@@ -14,6 +15,7 @@ import { Observable, of, timeout, catchError, from, switchMap } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ShiniHighlighter } from '../../core/shini-highlighter';
 import { IErrorHandler, ComponentErrorType } from '../../core/error-handling';
+import { LANGUAGE_DISPLAY_NAMES } from '../../core/shini-types';
 
 @Component({
   selector: 'app-markdown-code',
@@ -21,15 +23,41 @@ import { IErrorHandler, ComponentErrorType } from '../../core/error-handling';
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <pre [class]="codeWrapperClasses()" class="markdown-code">
-      @if (streaming) {
-        <code class="code-streaming">{{ code }}</code>
-      } @else if (highlightResult(); as safeHtml) {
-        <code [innerHTML]="safeHtml"></code>
-      } @else {
-        <code>{{ code }}</code>
+    <div class="code-block-wrapper">
+      @if (!streaming) {
+        <!-- Header bar with language label and copy button -->
+        <div class="code-header">
+          <span class="code-language">{{ displayLanguage }}</span>
+          <button
+            class="copy-button"
+            (click)="copyToClipboard()"
+            [title]="copied() ? 'Copied!' : 'Copy code'"
+            [class.copied]="copied()">
+            @if (!copied()) {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            } @else {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            }
+          </button>
+        </div>
       }
-    </pre>
+
+      <!-- Code block with line numbers -->
+      <pre [class]="codeWrapperClasses()" class="markdown-code">
+        @if (streaming) {
+          <code class="code-streaming">{{ code }}</code>
+        } @else if (highlightResult(); as safeHtml) {
+          <code [innerHTML]="safeHtml"></code>
+        } @else {
+          <code>{{ code }}</code>
+        }
+      </pre>
+    </div>
   `,
   styleUrls: ['./code.component.css']
 })
@@ -40,6 +68,14 @@ export class MarkdownCodeComponent implements OnChanges {
 
   highlightResult = signal<SafeHtml | null>(null);
   codeWrapperClasses = signal<string>('markdown-code block-code');
+  copied = signal<boolean>(false);
+
+  get displayLanguage(): string {
+    // Capitalize first letter of language
+    const lang = this.language || 'text';
+    const displayName = (LANGUAGE_DISPLAY_NAMES as Record<string, string>)[lang];
+    return displayName || lang.charAt(0).toUpperCase() + lang.slice(1);
+  }
 
   private shiniHighlighter = inject(ShiniHighlighter);
   private domSanitizer = inject(DomSanitizer);
@@ -85,6 +121,23 @@ export class MarkdownCodeComponent implements OnChanges {
         const safeHtml = this.domSanitizer.bypassSecurityTrustHtml(html);
         this.highlightResult.set(safeHtml);
       });
+  }
+
+  /**
+   * Copy code to clipboard
+   */
+  async copyToClipboard(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.code);
+      this.copied.set(true);
+
+      // Reset copied state after 2 seconds
+      setTimeout(() => {
+        this.copied.set(false);
+      }, 2000);
+    } catch (error) {
+      console.error('[MarkdownCodeComponent] Failed to copy:', error);
+    }
   }
 
   /**

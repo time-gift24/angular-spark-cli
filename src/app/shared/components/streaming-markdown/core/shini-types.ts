@@ -21,13 +21,13 @@ export interface IShiniHighlighter {
   initialize(): Promise<void>;
 
   /**
-   * Highlight code with syntax highlighting
+   * Highlight code with syntax highlighting and line numbers
    * Async operation using Shiki's codeToHtml
    *
    * @param code - Raw code string to highlight
    * @param language - Programming language identifier (e.g., 'typescript', 'python')
    * @param theme - Theme name ('light' or 'dark')
-   * @returns HTML string with syntax highlighting, or escaped plain text as fallback
+   * @returns HTML string with syntax highlighting and line numbers, or escaped plain text as fallback
    */
   highlight(code: string, language: string, theme: 'light' | 'dark'): Promise<string>;
 
