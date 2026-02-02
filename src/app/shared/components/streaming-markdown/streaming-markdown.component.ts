@@ -32,13 +32,13 @@ import {
 import { CommonModule } from '@angular/common';
 import { Observable, Subject, Subscription, of } from 'rxjs';
 import { tap, takeUntil, catchError, switchMap, first } from 'rxjs/operators';
-import { BlockRendererComponent } from './renderers/block-renderer.component';
 import {
   MarkdownBlock,
   StreamingState,
   ParserResult,
   createEmptyState
 } from './core/models';
+import { MarkdownBlockRouterComponent } from './blocks/block-router/block-router.component';
 import {
   IMarkdownPreprocessor,
   MarkdownPreprocessor
@@ -131,114 +131,24 @@ export interface IChangeDetector {
 @Component({
   selector: 'app-streaming-markdown',
   standalone: true,
-  imports: [BlockRendererComponent, CommonModule],
+  imports: [MarkdownBlockRouterComponent, CommonModule],
   providers: [
     MarkdownPreprocessor,
     BlockParser
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: [`
-    /* Markdown Block Styles */
-    .markdown-block {
-      margin-bottom: var(--spacing-sm);
-      padding: var(--spacing-md);
-      border-radius: var(--radius-md);
-      line-height: 1.6;
-    }
-
-    /* Paragraph spacing - use ::ng-deep to penetrate ViewEncapsulation */
-    .markdown-block ::ng-deep p {
-      margin-top: 0;
-      margin-bottom: var(--spacing-sm);
-    }
-
-    .markdown-block.block-paragraph {
-      color: var(--foreground);
-    }
-
-    .markdown-block.block-heading {
-      font-weight: 600;
-      margin-top: var(--spacing-md);
-      margin-bottom: 0;
-    }
-
-    .markdown-block.block-code {
-      background: var(--muted);
-      padding: var(--spacing-md);
-      border-radius: var(--radius-md);
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 0.875rem;
-      overflow-x: auto;
-    }
-
-    /* List styles - restore bullets and indentation */
-    .markdown-block.block-list {
-      padding-left: var(--spacing-xl);
-    }
-
-    /* Use ::ng-deep for list elements inside innerHTML content */
-    .markdown-block ::ng-deep ul,
-    .markdown-block ::ng-deep ol {
-      margin-left: var(--spacing-md);
-      margin-bottom: var(--spacing-md);
-    }
-
-    .markdown-block ::ng-deep ul {
-      list-style-type: disc;
-    }
-
-    .markdown-block ::ng-deep ol {
-      list-style-type: decimal;
-    }
-
-    .markdown-block ::ng-deep li {
-      margin-left: var(--spacing-md);
-      padding-left: var(--spacing-sm);
-    }
-
-    .markdown-block ::ng-deep li::marker {
-      color: var(--muted-foreground);
-    }
-
-    .markdown-block.block-blockquote {
-      border-left: 3px solid var(--primary);
-      padding-left: var(--spacing-md);
-      color: var(--muted-foreground);
-    }
-
-    .markdown-block.streaming {
-      opacity: 0.7;
-      border-left: 2px solid var(--accent);
-    }
-
-    .streaming-indicator {
-      position: relative;
-    }
-
-    .streaming-indicator::after {
-      content: '▌';
-      animation: blink 1s infinite;
-      margin-left: var(--spacing-sm);
-      color: var(--accent);
-    }
-
-    @keyframes blink {
-      0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0; }
-    }
-  `],
   template: `
     <div class="streaming-markdown-container">
       <!-- Render all completed blocks -->
       @for (block of blocks(); track trackById(block)) {
-        <app-block-renderer
+        <app-markdown-block-router
           [block]="block"
           [isComplete]="true" />
       }
 
       <!-- Render currently streaming block (if any) -->
       @if (currentBlock()) {
-        <app-block-renderer
+        <app-markdown-block-router
           [block]="currentBlock()!"
           [isComplete]="false" />
       }

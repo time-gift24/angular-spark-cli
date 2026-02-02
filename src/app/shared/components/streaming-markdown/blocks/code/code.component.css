@@ -1,65 +1,18 @@
-/**
- * Markdown Code Component Styles
- *
- * Follows "矿物与时光" (Mineral & Time) design system:
- * - Uses CSS variables for colors and spacing
- * - Monospace font for code
- * - Overflow handling for long lines
- */
-
-:host {
-  display: block;
-}
-
 .markdown-code {
   background: var(--muted);
   padding: var(--spacing-md);
   border-radius: var(--radius-md);
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 0.875rem; /* 14px */
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.875rem;
   overflow-x: auto;
-  margin-bottom: var(--spacing-lg);
-  line-height: 1.6;
+  margin-bottom: var(--spacing-sm);
 }
 
-/* Fallback styling when highlighting fails */
 .code-fallback {
-  color: var(--muted-foreground);
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-/* Streaming state */
 .code-streaming {
-  opacity: 0.8;
-}
-
-code {
-  display: block;
-  white-space: pre;
-  tab-size: 2;
-}
-
-/* Syntax highlighting overrides */
-.markdown-code code :deep(*) {
-  font-family: inherit;
-}
-
-/* Scrollbar styling for code blocks */
-.markdown-code::-webkit-scrollbar {
-  height: 8px;
-}
-
-.markdown-code::-webkit-scrollbar-track {
-  background: var(--background);
-  border-radius: var(--radius-sm);
-}
-
-.markdown-code::-webkit-scrollbar-thumb {
-  background: var(--muted-foreground);
-  border-radius: var(--radius-sm);
-  opacity: 0.5;
-}
-
-.markdown-code::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground);
   opacity: 0.7;
 }

@@ -10,20 +10,10 @@
 
 import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, of, timeout, catchError, from } from 'rxjs';
+import { Observable, of, timeout, catchError, from, switchMap } from 'rxjs';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ShiniHighlighter } from '../../core/shini-highlighter';
 import { IErrorHandler, ComponentErrorType } from '../../core/error-handling';
-
-/**
- * Result of syntax highlighting operation
- */
-export interface HighlightResult {
-  /** Highlighted HTML or escaped plain text */
-  html: string;
-
-  /** Whether this is a fallback (no highlighting) */
-  fallback: boolean;
-}
 
 @Component({
   selector: 'app-markdown-code',
@@ -32,14 +22,10 @@ export interface HighlightResult {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <pre [class]="codeWrapperClasses()" class="markdown-code">
-      @if (highlightResult(); as result) {
-        @if (result.fallback) {
-          <code class="code-fallback">{{ code }}</code>
-        } @else {
-          <code [innerHTML]="result.html"></code>
-        }
-      } @else if (streaming) {
+      @if (streaming) {
         <code class="code-streaming">{{ code }}</code>
+      } @else if (highlightResult(); as safeHtml) {
+        <code [innerHTML]="safeHtml"></code>
       } @else {
         <code>{{ code }}</code>
       }
@@ -52,14 +38,15 @@ export class MarkdownCodeComponent implements OnChanges {
   @Input() language: string = 'text';
   @Input() streaming: boolean = false;
 
-  highlightResult = signal<HighlightResult | null>(null);
+  highlightResult = signal<SafeHtml | null>(null);
   codeWrapperClasses = signal<string>('markdown-code block-code');
 
   private shiniHighlighter = inject(ShiniHighlighter);
+  private domSanitizer = inject(DomSanitizer);
   private errorHandler?: IErrorHandler;
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['code'] || changes['language']) {
+    if (changes['code'] || changes['language'] || changes['streaming']) {
       this.highlightCode();
     }
   }
@@ -69,9 +56,13 @@ export class MarkdownCodeComponent implements OnChanges {
       return; // 流式状态下不高亮
     }
 
-    // Convert Promise to Observable for RxJS operators
-    from(this.shiniHighlighter.highlight(this.code, this.language, 'light'))
+    // Wait for Shini to be ready, then highlight
+    from(this.shiniHighlighter.whenReady())
       .pipe(
+        switchMap(() => {
+          // Shini is ready, now highlight the code
+          return from(this.shiniHighlighter.highlight(this.code, this.language, 'light'));
+        }),
         timeout(5000),
         catchError((error) => {
           // Log error if error handler is available
@@ -85,18 +76,14 @@ export class MarkdownCodeComponent implements OnChanges {
             console.error('[MarkdownCodeComponent] Highlight failed:', error);
           }
 
-          // Return fallback result
-          const fallback: HighlightResult = { html: this.escapeHtml(this.code), fallback: true };
-          return of(fallback);
+          // Return fallback HTML (escaped)
+          return of(this.escapeHtml(this.code));
         })
       )
-      .subscribe((html: string | { html: string; fallback: boolean }) => {
-        // Handle both string (from Shini) and HighlightResult (from fallback)
-        if (typeof html === 'string') {
-          this.highlightResult.set({ html, fallback: false });
-        } else {
-          this.highlightResult.set(html as HighlightResult);
-        }
+      .subscribe((html: string) => {
+        // Bypass Angular's HTML sanitization to allow inline styles from Shiki
+        const safeHtml = this.domSanitizer.bypassSecurityTrustHtml(html);
+        this.highlightResult.set(safeHtml);
       });
   }
 

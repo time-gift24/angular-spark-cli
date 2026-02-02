@@ -1,26 +1,14 @@
-/**
- * Markdown Paragraph Component Styles
- *
- * Follows "矿物与时光" (Mineral & Time) design system:
- * - Uses CSS variables for colors and spacing
- * - Ultra compact sizing
- * - Light font weights (400-600)
- */
-
-:host {
-  display: block;
-}
-
 .markdown-paragraph {
-  margin-top: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  margin-top: 0;
+  margin-bottom: var(--spacing-sm);
   color: var(--foreground);
   line-height: 1.6;
-  font-size: 0.875rem; /* 14px - 紧凑设计 */
-  font-weight: 400;
 }
 
-/* Inline element styles */
+.markdown-paragraph.streaming {
+  opacity: 0.7;
+}
+
 .inline-bold {
   font-weight: 600;
 }
@@ -30,15 +18,9 @@
 }
 
 .inline-code {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-family: 'Monaco', 'Menlo', monospace;
   background: var(--muted);
   padding: 2px 4px;
-  border-radius: var(--radius-sm);
-  font-size: 0.8125em; /* 稍小的字体 */
-  color: var(--foreground);
-}
-
-/* Streaming state */
-.markdown-paragraph.streaming {
-  opacity: 0.7;
+  border-radius: 3px;
+  font-size: 0.9em;
 }

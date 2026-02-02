@@ -1,0 +1,27 @@
+.markdown-list {
+  padding-left: var(--spacing-xl);
+  margin-bottom: var(--spacing-sm);
+}
+
+.markdown-list li {
+  margin-left: var(--spacing-md);
+  padding-left: var(--spacing-sm);
+  color: var(--foreground);
+}
+
+.markdown-list li::marker {
+  color: var(--muted-foreground);
+}
+
+.markdown-list.depth-1 {
+  padding-left: calc(var(--spacing-xl) * 2);
+}
+
+.markdown-list.depth-2 {
+  padding-left: calc(var(--spacing-xl) * 3);
+}
+
+/* Nested list indentation */
+.markdown-list app-markdown-list {
+  margin-top: var(--spacing-xs);
+}

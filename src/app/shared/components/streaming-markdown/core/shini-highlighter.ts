@@ -28,6 +28,11 @@ export class ShiniHighlighter implements IShiniHighlighter {
     themesLoaded: []
   })
 
+  /**
+   * Promise that resolves when initialization completes
+   */
+  private initPromise: Promise<void> | null = null
+
   constructor() {
     this.state = this._state.asReadonly()
   }
@@ -42,37 +47,42 @@ export class ShiniHighlighter implements IShiniHighlighter {
    * Preloads common languages and themes for optimal performance.
    */
   async initialize(): Promise<void> {
-    try {
-      // Load Shini WASM
-      const shiki = await this.loadShikiWasm()
+    // Store the promise for whenReady()
+    this.initPromise = (async () => {
+      try {
+        // Load Shini WASM
+        const shiki = await this.loadShikiWasm()
 
-      // Preload common languages
-      for (const lang of PRELOAD_LANGUAGES) {
-        await shiki.loadLanguage(lang)
+        // Preload common languages
+        for (const lang of PRELOAD_LANGUAGES) {
+          await shiki.loadLanguage(lang)
+        }
+
+        // Load themes
+        await shiki.loadTheme(SHINI_THEME_MAP.light)
+        await shiki.loadTheme(SHINI_THEME_MAP.dark)
+
+        // Update state
+        this._state.set({
+          initialized: true,
+          success: true,
+          languagesLoaded: PRELOAD_LANGUAGES.length,
+          themesLoaded: [SHINI_THEME_MAP.light, SHINI_THEME_MAP.dark]
+        })
+
+      } catch (error) {
+        // Handle initialization failure
+        this._state.set({
+          initialized: true,
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+          languagesLoaded: 0,
+          themesLoaded: []
+        })
       }
+    })()
 
-      // Load themes
-      await shiki.loadTheme(SHINI_THEME_MAP.light)
-      await shiki.loadTheme(SHINI_THEME_MAP.dark)
-
-      // Update state
-      this._state.set({
-        initialized: true,
-        success: true,
-        languagesLoaded: PRELOAD_LANGUAGES.length,
-        themesLoaded: [SHINI_THEME_MAP.light, SHINI_THEME_MAP.dark]
-      })
-
-    } catch (error) {
-      // Handle initialization failure
-      this._state.set({
-        initialized: true,
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-        languagesLoaded: 0,
-        themesLoaded: []
-      })
-    }
+    return this.initPromise
   }
 
   /**
@@ -179,5 +189,33 @@ export class ShiniHighlighter implements IShiniHighlighter {
    */
   isReady(): boolean {
     return this.state().initialized && this.state().success
+  }
+
+  /**
+   * Wait for Shini to be ready
+   * Returns a promise that resolves when Shini is initialized successfully
+   * If already ready, resolves immediately
+   *
+   * @returns Promise that resolves when Shini is ready
+   */
+  async whenReady(): Promise<void> {
+    // If already ready, return immediately
+    if (this.isReady()) {
+      return
+    }
+
+    // If initialization was never called, call it
+    if (!this.initPromise) {
+      await this.initialize()
+      return
+    }
+
+    // Wait for existing initialization to complete
+    await this.initPromise
+
+    // If initialization failed, throw error
+    if (!this.isReady()) {
+      throw new Error('Shini initialization failed')
+    }
   }
 }

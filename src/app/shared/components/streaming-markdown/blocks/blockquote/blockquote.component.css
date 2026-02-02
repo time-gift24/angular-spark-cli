@@ -1,0 +1,23 @@
+.markdown-blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.markdown-blockquote.streaming {
+  opacity: 0.8;
+}
+
+.streaming-indicator::after {
+  content: '▌';
+  animation: blink 1s infinite;
+  margin-left: var(--spacing-sm);
+  color: var(--accent);
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}

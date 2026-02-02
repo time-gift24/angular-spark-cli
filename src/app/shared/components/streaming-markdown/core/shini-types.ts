@@ -37,6 +37,15 @@ export interface IShiniHighlighter {
    * @returns true if initialization completed successfully
    */
   isReady(): boolean;
+
+  /**
+   * Wait for Shini to be ready
+   * Returns a promise that resolves when Shini is initialized successfully
+   * If already ready, resolves immediately
+   *
+   * @returns Promise that resolves when Shini is ready
+   */
+  whenReady(): Promise<void>;
 }
 
 /**
