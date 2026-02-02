@@ -1,6 +1,11 @@
 import { ChatMessage } from './chat-message.interface';
 
 /**
+ * Session display mode
+ */
+export type SessionMode = 'docked' | 'floating';
+
+/**
  * AI 会话状态
  */
 export enum SessionStatus {
@@ -135,6 +140,17 @@ export interface SessionData {
    * experience per conversation.
    */
   size: PanelSize;
+
+  /**
+   * Session display mode.
+   *
+   * Determines how messages are displayed:
+   * - 'docked': Messages appear in a shared right-side dock area
+   * - 'floating': Messages appear at independent absolute positions
+   *
+   * @default 'docked'
+   */
+  mode: SessionMode;
 
   /**
    * Unix timestamp (milliseconds) when this session was last updated.

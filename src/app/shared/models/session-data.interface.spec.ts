@@ -1,4 +1,4 @@
-import { SessionData, PanelPosition, PanelSize } from './session-data.interface';
+import { SessionData, PanelPosition, PanelSize, SessionMode } from './session-data.interface';
 import { ChatMessage } from './chat-message.interface';
 
 describe('SessionDataInterface', () => {
@@ -301,6 +301,57 @@ describe('SessionDataInterface', () => {
       };
 
       expect(session.name).toBe('Session with 特殊字符 & émojis 🎨');
+    });
+  });
+
+  describe('SessionMode', () => {
+    it('should have mode property with docked option', () => {
+      const dockedSession: SessionData = {
+        id: 'test-1',
+        name: 'Test',
+        messages: [],
+        inputValue: '',
+        position: { x: 100, y: 100 },
+        size: { width: 400, height: 500 },
+        lastUpdated: Date.now(),
+        status: 'idle',
+        color: 'default',
+        mode: 'docked'  // NEW property
+      };
+
+      expect(dockedSession.mode).toBe('docked');
+    });
+
+    it('should support floating mode', () => {
+      const floatingSession: SessionData = {
+        id: 'test-2',
+        name: 'Test',
+        messages: [],
+        inputValue: '',
+        position: { x: 200, y: 200 },
+        size: { width: 500, height: 600 },
+        lastUpdated: Date.now(),
+        status: 'idle',
+        color: 'default',
+        mode: 'floating'  // NEW property
+      };
+
+      expect(floatingSession.mode).toBe('floating');
+    });
+
+    it('should default to docked mode if not specified', () => {
+      const session: SessionData = {
+        id: 'test-3',
+        name: 'Test',
+        messages: [],
+        inputValue: '',
+        position: { x: 100, y: 100 },
+        size: { width: 400, height: 500 },
+        lastUpdated: Date.now(),
+        mode: 'docked'  // Explicit for type checking
+      };
+
+      expect(session.mode).toBe('docked');
     });
   });
 });
