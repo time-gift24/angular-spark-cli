@@ -177,7 +177,7 @@ export class DemoSessionChatContainerComponent {
   onSessionColorChange(event: { sessionId: string; color: string }): void {
     const { sessionId, color } = event;
 
-    // Update session color
+    // Update session color (don't update lastUpdated to preserve sorting)
     this.sessionsInternal.update((map) => {
       const newMap = new Map(map);
       const session = newMap.get(sessionId);
@@ -185,7 +185,6 @@ export class DemoSessionChatContainerComponent {
         const updated = {
           ...session,
           color: color as any,
-          lastUpdated: Date.now(),
         };
         newMap.set(sessionId, updated);
       }
