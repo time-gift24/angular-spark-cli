@@ -152,6 +152,13 @@ export class SessionChatContainerComponent {
   readonly inputValueChange = new EventEmitter<string>();
 
   /**
+   * Event emitted when user changes session color
+   * Emits sessionId and color
+   */
+  @Output()
+  readonly sessionColorChange = new EventEmitter<{ sessionId: string; color: string }>();
+
+  /**
    * Default Tailwind classes for main container
    */
   protected readonly defaultContainerClass = 'flex flex-col w-full gap-2';
@@ -221,5 +228,12 @@ export class SessionChatContainerComponent {
    */
   protected onInputChange(value: string): void {
     this.inputValueChange.emit(value);
+  }
+
+  /**
+   * Forward session color change event
+   */
+  protected onSessionColorChange(event: { sessionId: string; color: string }): void {
+    this.sessionColorChange.emit(event);
   }
 }

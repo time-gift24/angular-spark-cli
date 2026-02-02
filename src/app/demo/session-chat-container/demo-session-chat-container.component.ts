@@ -172,6 +172,31 @@ export class DemoSessionChatContainerComponent {
   }
 
   /**
+   * Handle session color change
+   */
+  onSessionColorChange(event: { sessionId: string; color: string }): void {
+    const { sessionId, color } = event;
+
+    // Update session color
+    this.sessionsInternal.update((map) => {
+      const newMap = new Map(map);
+      const session = newMap.get(sessionId);
+      if (session) {
+        const updated = {
+          ...session,
+          color: color as any,
+          lastUpdated: Date.now(),
+        };
+        newMap.set(sessionId, updated);
+      }
+      return newMap;
+    });
+
+    const session = this.sessionsInternal().get(sessionId);
+    this.addLog(`更改颜色: "${session?.name}" → ${color}`);
+  }
+
+  /**
    * Add log entry
    */
   private addLog(message: string): void {
