@@ -7,6 +7,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./landing/landing-page.component').then((m) => m.LandingPageComponent),
   },
+  // Multi-Session Chat Page
+  {
+    path: 'multi-session-chat',
+    loadComponent: () =>
+      import('./features/multi-session-chat/multi-session-chat-page.component').then(
+        (m) => m.MultiSessionChatPageComponent
+      ),
+  },
   // Demo routes with MainLayout as parent
   {
     path: 'demo',
