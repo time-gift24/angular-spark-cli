@@ -1,11 +1,32 @@
 .markdown-code {
-  background: var(--muted);
-  padding: var(--spacing-md);
+  /* 符合"矿物与时光"主题的柔和背景 */
+  background: oklch(0.96 0.01 85); /* 非常浅的绢黄 */
+  padding: var(--spacing-lg);
   border-radius: var(--radius-md);
-  font-family: 'Monaco', 'Menlo', monospace;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
   font-size: 0.875rem;
   overflow-x: auto;
   margin-bottom: var(--spacing-sm);
+
+  /* Secondary 颜色边框 - 低饱和度绢黄色调 */
+  border: 1px solid oklch(0.85 0.015 85);
+
+  /* 轻微阴影增强层次感 */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* 覆盖 Shini 的默认背景色以匹配主题 */
+.markdown-code pre.shiki {
+  background: transparent !important;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+}
+
+.markdown-code code {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1.6;
 }
 
 .code-fallback {
