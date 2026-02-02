@@ -6,9 +6,9 @@ import {
   Signal,
   computed,
   ChangeDetectionStrategy,
-  signal,
 } from '@angular/core';
 import { SessionData, SessionColor } from '@app/shared/models';
+import { ContextMenuTriggerDirective, ContextMenuItem } from '@app/shared/ui/context-menu';
 
 /**
  * Session Tabs Bar Component
@@ -57,7 +57,7 @@ import { SessionData, SessionColor } from '@app/shared/models';
 @Component({
   selector: 'spark-session-tabs-bar',
   standalone: true,
-  imports: [],
+  imports: [ContextMenuTriggerDirective],
   templateUrl: './session-tabs-bar.component.html',
   styleUrl: './session-tabs-bar.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -141,24 +141,6 @@ export class SessionTabsBarComponent {
   readonly newChat = new EventEmitter<void>();
 
   /**
-   * Event emitted when user right-clicks on a session tab.
-   *
-   * Emits an object with the session ID for showing context menu.
-   *
-   * @example
-   * ```typescript
-   * (sessionContextMenu)="showContextMenu($event)"
-   *
-   * showContextMenu(sessionId: string): void {
-   *   this.contextMenuSessionId = sessionId;
-   *   this.contextMenuVisible = true;
-   * }
-   * ```
-   */
-  @Output()
-  readonly sessionContextMenu = new EventEmitter<string>();
-
-  /**
    * Event emitted when user wants to rename a session.
    *
    * Emits an object with sessionId and newName.
@@ -183,19 +165,64 @@ export class SessionTabsBarComponent {
   readonly sessionClose = new EventEmitter<string>();
 
   /**
-   * Currently shown context menu for session ID
+   * Available colors for sessions (cached for performance)
    */
-  contextMenuSessionId = signal<string | null>(null);
+  private readonly AVAILABLE_COLORS: ReadonlyArray<{
+    value: SessionColor;
+    label: string;
+    color: string;
+  }> = [
+    { value: 'default', label: '默认绿', color: 'oklch(0.48 0.07 195)' },
+    { value: 'blue', label: '蓝色', color: 'oklch(0.55 0.12 225)' },
+    { value: 'purple', label: '紫色', color: 'oklch(0.55 0.14 285)' },
+    { value: 'pink', label: '粉色', color: 'oklch(0.60 0.18 350)' },
+    { value: 'orange', label: '橙色', color: 'oklch(0.65 0.15 50)' },
+    { value: 'yellow', label: '黄色', color: 'oklch(0.75 0.12 85)' },
+  ] as const;
 
   /**
-   * Context menu position
+   * Cache for menu items to avoid recreating on every change detection
    */
-  contextMenuPosition = signal<{ x: number; y: number } | null>(null);
+  private menuItemsCache = new Map<string, ContextMenuItem[]>();
 
   /**
-   * Color submenu visibility
+   * Gets menu items for a session tab
    */
-  showColorSubmenu = signal<boolean>(false);
+  getSessionMenuItems(sessionId: string): ContextMenuItem[] {
+    // Check cache first
+    if (this.menuItemsCache.has(sessionId)) {
+      return this.menuItemsCache.get(sessionId)!;
+    }
+
+    const session = this.sessions().get(sessionId);
+    if (!session) return [];
+
+    // Build color menu items (flattened, not nested)
+    const colorMenuItems: ContextMenuItem[] = this.AVAILABLE_COLORS.map((color) => ({
+      label: color.label,
+      icon: `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${color.color}"></span>`,
+      action: () => this.changeSessionColor(sessionId, color.value),
+    }));
+
+    const menuItems: ContextMenuItem[] = [
+      {
+        label: '重命名',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>`,
+        action: () => this.renameSession(sessionId),
+      },
+      ...colorMenuItems,
+      {
+        label: '关闭会话',
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+        destructive: true,
+        action: () => this.closeSession(sessionId),
+      },
+    ];
+
+    // Cache the menu items
+    this.menuItemsCache.set(sessionId, menuItems);
+    return menuItems;
+  }
 
   /**
    * Computed signal that returns sessions sorted by last updated timestamp.
@@ -219,6 +246,7 @@ export class SessionTabsBarComponent {
    * Handles click events on session tabs.
    *
    * Click Behavior:
+   * - Only responds to left-click (button === 0)
    * - If clicking the active session → Emit sessionToggle event
    * - If clicking a different session → Emit sessionSelect event with session ID
    *
@@ -227,6 +255,12 @@ export class SessionTabsBarComponent {
    */
   handleSessionClick(event: MouseEvent, sessionId: string): void {
     event.preventDefault();
+
+    // Only respond to left-click (button === 0)
+    // Prevents right-click from triggering session switching
+    if (event.button !== 0) {
+      return;
+    }
 
     const activeId = this.activeSessionId();
 
@@ -253,30 +287,6 @@ export class SessionTabsBarComponent {
   }
 
   /**
-   * Handles right-click (context menu) on session tabs.
-   *
-   * @param event - The mouse event
-   * @param sessionId - The ID of the session
-   */
-  handleSessionContextMenu(event: MouseEvent, sessionId: string): void {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.contextMenuSessionId.set(sessionId);
-    this.contextMenuPosition.set({ x: event.clientX, y: event.clientY });
-    this.sessionContextMenu.emit(sessionId);
-  }
-
-  /**
-   * Closes the context menu.
-   */
-  closeContextMenu(): void {
-    this.contextMenuSessionId.set(null);
-    this.contextMenuPosition.set(null);
-    this.showColorSubmenu.set(false);
-  }
-
-  /**
    * Initiates renaming a session.
    *
    * @param sessionId - The ID of the session to rename
@@ -289,29 +299,6 @@ export class SessionTabsBarComponent {
     if (newName && newName.trim()) {
       this.sessionRename.emit({ sessionId, newName: newName.trim() });
     }
-
-    this.closeContextMenu();
-  }
-
-  /**
-   * Toggles the color submenu visibility.
-   */
-  toggleColorSubmenu(): void {
-    this.showColorSubmenu.update((v) => !v);
-  }
-
-  /**
-   * Gets all available colors for the color submenu.
-   */
-  getAvailableColors(): Array<{ value: SessionColor; label: string; color: string }> {
-    return [
-      { value: 'default', label: '默认绿', color: 'oklch(0.48 0.07 195)' },
-      { value: 'blue', label: '蓝色', color: 'oklch(0.55 0.12 225)' },
-      { value: 'purple', label: '紫色', color: 'oklch(0.55 0.14 285)' },
-      { value: 'pink', label: '粉色', color: 'oklch(0.60 0.18 350)' },
-      { value: 'orange', label: '橙色', color: 'oklch(0.65 0.15 50)' },
-      { value: 'yellow', label: '黄色', color: 'oklch(0.75 0.12 85)' },
-    ];
   }
 
   /**
@@ -322,7 +309,6 @@ export class SessionTabsBarComponent {
    */
   changeSessionColor(sessionId: string, color: SessionColor): void {
     this.sessionColorChange.emit({ sessionId, color });
-    this.closeContextMenu();
   }
 
   /**
@@ -332,7 +318,6 @@ export class SessionTabsBarComponent {
    */
   closeSession(sessionId: string): void {
     this.sessionClose.emit(sessionId);
-    this.closeContextMenu();
   }
 
   /**
