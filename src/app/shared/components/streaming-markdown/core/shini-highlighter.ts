@@ -183,11 +183,13 @@ export class ShiniHighlighter implements IShiniHighlighter {
       );
 
       // Build final HTML with line numbers
-      const linesHtml = highlightedLines.map((line, index) => {
+      const linesHtml = highlightedLines.map((highlightedLine, index) => {
         const lineNum = index + 1;
-        // Check if line is empty
-        const isEmpty = !lines[index].trim();
-        const lineContent = isEmpty ? '&nbsp;' : line;
+        const originalLine = lines[index];
+        const isEmpty = !originalLine.trim();
+
+        // For empty lines, use just &nbsp; without any highlighted HTML
+        const lineContent = isEmpty ? '&nbsp;' : highlightedLine;
 
         return `<div class="line">
           <span class="line-number">${lineNum}</span>${lineContent}
