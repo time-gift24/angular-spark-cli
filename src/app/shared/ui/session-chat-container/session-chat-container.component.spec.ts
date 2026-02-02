@@ -85,4 +85,112 @@ describe('SessionChatContainerComponent', () => {
     expect(component.inputValueChange).toBeDefined();
     expect(component.inputValueChange).toBeInstanceOf(EventEmitter);
   });
+
+  describe('Event Forwarding', () => {
+    beforeEach(() => {
+      component.sessions = signal(new Map());
+      component.activeSessionId = signal('session-1');
+      component.isOpen = signal(true);
+      component.inputValue = signal('');
+      fixture.detectChanges();
+    });
+
+    it('should forward newChat event', () => {
+      spyOn(component.newChat, 'emit');
+
+      component.onNewChat();
+
+      expect(component.newChat.emit).toHaveBeenCalledWith();
+    });
+
+    it('should forward sessionSelect event with sessionId', () => {
+      spyOn(component.sessionSelect, 'emit');
+      const testSessionId = 'session-42';
+
+      component.onSessionSelect(testSessionId);
+
+      expect(component.sessionSelect.emit).toHaveBeenCalledWith(testSessionId);
+    });
+
+    it('should forward sessionToggle event', () => {
+      spyOn(component.sessionToggle, 'emit');
+
+      component.onSessionToggle();
+
+      expect(component.sessionToggle.emit).toHaveBeenCalledWith();
+    });
+
+    it('should forward send event with message', () => {
+      spyOn(component.send, 'emit');
+      const testMessage = 'Hello, AI!';
+
+      component.onSend(testMessage);
+
+      expect(component.send.emit).toHaveBeenCalledWith(testMessage);
+    });
+
+    it('should forward inputValueChange event with value', () => {
+      spyOn(component.inputValueChange, 'emit');
+      const testValue = 'test input';
+
+      component.onInputChange(testValue);
+
+      expect(component.inputValueChange.emit).toHaveBeenCalledWith(testValue);
+    });
+  });
+
+  describe('Integration', () => {
+    it('should complete full event flow for new chat', () => {
+      component.sessions = signal(new Map());
+      component.activeSessionId = signal('session-1');
+      component.isOpen = signal(true);
+      component.inputValue = signal('');
+
+      const newChatSpy = jasmine.createSpyObj('emit', ['emit']);
+      component.newChat = newChatSpy as any;
+
+      fixture.detectChanges();
+
+      // Simulate child component emitting event
+      component.onNewChat();
+
+      expect(newChatSpy.emit).toHaveBeenCalled();
+    });
+
+    it('should complete full event flow for sending message', () => {
+      const testMessage = 'Test message';
+      component.sessions = signal(new Map());
+      component.activeSessionId = signal('session-1');
+      component.isOpen = signal(true);
+      component.inputValue = signal(testMessage);
+
+      const sendSpy = jasmine.createSpyObj('emit', ['emit']);
+      component.send = sendSpy as any;
+
+      fixture.detectChanges();
+
+      component.onSend(testMessage);
+
+      expect(sendSpy.emit).toHaveBeenCalledWith(testMessage);
+    });
+
+    it('should support two-way binding for inputValue', () => {
+      const initialValue = '';
+      const newValue = 'new value';
+
+      component.sessions = signal(new Map());
+      component.activeSessionId = signal('session-1');
+      component.isOpen = signal(true);
+      component.inputValue = signal(initialValue);
+
+      const valueChangeSpy = jasmine.createSpyObj('emit', ['emit']);
+      component.inputValueChange = valueChangeSpy as any;
+
+      fixture.detectChanges();
+
+      component.onInputChange(newValue);
+
+      expect(component.inputValueChange.emit).toHaveBeenCalledWith(newValue);
+    });
+  });
 });
