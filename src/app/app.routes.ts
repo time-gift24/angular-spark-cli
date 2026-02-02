@@ -156,6 +156,13 @@ export const routes: Routes = [
             (m) => m.DemoStreamingMarkdownComponent,
           ),
       },
+      {
+        path: 'multi-session-chat',
+        loadComponent: () =>
+          import('./demo/multi-session-chat/demo-multi-session-chat.component').then(
+            (m) => m.DemoMultiSessionChatComponent,
+          ),
+      },
     ],
   },
 ];
