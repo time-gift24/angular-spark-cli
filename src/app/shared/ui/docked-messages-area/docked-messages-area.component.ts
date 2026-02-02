@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { ChatMessage } from '@app/shared/ui/ai-chat/types/chat.types';
 import { ChatMessagesCardComponent } from '@app/shared/ui/ai-chat/chat-messages-card/chat-messages-card.component';
+import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 
 /**
  * DockedMessagesAreaComponent
@@ -29,11 +30,25 @@ import { ChatMessagesCardComponent } from '@app/shared/ui/ai-chat/chat-messages-
   standalone: true,
   imports: [CommonModule, ChatMessagesCardComponent],
   template: `
-    <ai-chat-messages-card
-      [messages]="messages"
-      [position]="'fixed'"
-      class="!right-6 !top-0 !h-[calc(100vh-120px)]"
-    />
+    <div class="docked-messages-wrapper" [style.style]="wrapperStyle()">
+      <ai-chat-messages-card
+        [messages]="messages"
+        [position]="'fixed'"
+      />
+    </div>
+  `,
+  styles: `
+    .docked-messages-wrapper {
+      position: fixed !important;
+      right: 24px !important;
+      top: 0 !important;
+      height: calc(100vh - 120px) !important;
+      z-index: 999 !important;
+      pointer-events: none;
+    }
+    .docked-messages-wrapper ai-chat-messages-card {
+      pointer-events: auto;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -44,4 +59,8 @@ export class DockedMessagesAreaComponent {
    */
   @Input({ required: true })
   messages!: ChatMessage[];
+
+  protected wrapperStyle(): SafeStyle {
+    return '';
+  }
 }
