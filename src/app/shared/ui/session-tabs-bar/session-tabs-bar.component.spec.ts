@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { SessionTabsBarComponent } from './session-tabs-bar.component';
-import { SessionData } from '@app/shared/models';
+import type { SessionData } from '@app/shared/models/session-data.interface';
 
 // Vitest imports
 import { beforeEach, describe, it, expect, vi } from 'vitest';

@@ -9,7 +9,7 @@
  * - Task 8.3: Define StreamControl interface for lifecycle management
  */
 
-import { Component, Injectable, OnDestroy, Inject } from '@angular/core';
+import { Component, Injectable, OnDestroy, Inject, signal, inject } from '@angular/core';
 import { Observable, Subject, EMPTY, Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { StreamingMarkdownComponent } from '@app/shared/components/streaming-markdown/streaming-markdown.component';
@@ -169,7 +169,7 @@ export class DefaultStreamControl implements StreamControl, OnDestroy {
     'style': 'display: block; width: 100%;'
   }
 })
-export class DemoStreamingMarkdownComponent {
+export class DemoStreamingMarkdownComponent implements OnDestroy {
   /**
    * Observable stream of markdown text chunks.
    * Bound to StreamingMarkdownComponent input.
@@ -187,6 +187,18 @@ export class DemoStreamingMarkdownComponent {
    * Updated by StreamingMarkdownComponent via rawContentChange event.
    */
   rawMarkdown = '';
+
+  /**
+   * Signal tracking the copy to clipboard state.
+   * Used for UI feedback (icon change after copy).
+   */
+  protected copied = signal<boolean>(false);
+
+  /**
+   * Timeout ID for copy state reset.
+   * Tracked for cleanup to prevent memory leaks.
+   */
+  private copyResetTimeout: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Constructor with dependency injection.
@@ -320,5 +332,90 @@ export class DemoStreamingMarkdownComponent {
    */
   onRawContentChange(content: string): void {
     this.rawMarkdown = content;
+  }
+
+  /**
+   * Copies the raw markdown content to clipboard.
+   * Provides visual feedback by changing the copy button icon.
+   *
+   * Uses modern Clipboard API with fallback to legacy method.
+   */
+  async copyToClipboard(): Promise<void> {
+    const content = this.rawMarkdown;
+
+    // Guard against empty content
+    if (!content) {
+      console.warn('[DemoStreamingMarkdownComponent] No content to copy');
+      return;
+    }
+
+    try {
+      // Prefer modern Clipboard API (requires secure context)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(content);
+        console.log('[DemoStreamingMarkdownComponent] Copied to clipboard via Clipboard API');
+      } else {
+        // Fallback to legacy execCommand method
+        this.fallbackCopy(content);
+        console.log('[DemoStreamingMarkdownComponent] Copied to clipboard via fallback method');
+      }
+
+      // Update UI state to show success
+      this.copied.set(true);
+
+      // Clear any existing timeout to prevent memory leaks
+      if (this.copyResetTimeout) {
+        clearTimeout(this.copyResetTimeout);
+      }
+
+      // Reset UI state after 1.5 seconds
+      this.copyResetTimeout = setTimeout(() => {
+        this.copied.set(false);
+        this.copyResetTimeout = null;
+      }, 1500);
+
+    } catch (error) {
+      console.error('[DemoStreamingMarkdownComponent] Copy to clipboard failed:', error);
+    }
+  }
+
+  /**
+   * Fallback method for copying to clipboard in older browsers.
+   * Creates a temporary textarea element to copy text.
+   *
+   * @param content - Text content to copy
+   */
+  private fallbackCopy(content: string): void {
+    const textArea = document.createElement('textarea');
+    textArea.value = content;
+
+    // Position off-screen to avoid visual flicker
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    textArea.style.top = '0';
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    // Execute copy command
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
+
+    if (!successful) {
+      throw new Error('execCommand("copy") failed');
+    }
+  }
+
+  /**
+   * Cleanup hook for component destruction.
+   * Clears any pending timeouts to prevent memory leaks.
+   */
+  ngOnDestroy(): void {
+    // Clear copy reset timeout
+    if (this.copyResetTimeout) {
+      clearTimeout(this.copyResetTimeout);
+      this.copyResetTimeout = null;
+    }
   }
 }

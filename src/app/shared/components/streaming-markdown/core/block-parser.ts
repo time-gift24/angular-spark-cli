@@ -285,6 +285,7 @@ export class BlockParser implements IBlockParser {
           ...baseBlock,
           type: BlockType.CODE_BLOCK,
           content: (token as any).text || '',
+          rawContent: (token as any).text || '',
           language: (token as any).lang || undefined
         };
 
@@ -328,15 +329,22 @@ export class BlockParser implements IBlockParser {
 
   /**
    * Extracts text content from a token.
-   * Returns the original markdown to preserve formatting.
+   * Returns the original markdown to preserve formatting for most types,
+   * but uses text content for headings to avoid displaying # symbols.
    * @param token - The token to extract text from
    * @returns Original markdown text representation of the token
    */
   private extractText(token: any): string {
     if (!token) return '';
 
-    // Prefer raw property (original markdown with formatting)
-    // This preserves # for headings, * for lists, etc.
+    // For headings, use text property (without # symbols)
+    // This prevents "# Heading" from displaying with the hash symbols
+    if (token.type === 'heading') {
+      return token.text || '';
+    }
+
+    // Prefer raw property for other types (preserves formatting)
+    // This preserves * for emphasis, > for blockquotes, etc.
     if (token.raw) return token.raw;
 
     // Fallback to text property for code blocks

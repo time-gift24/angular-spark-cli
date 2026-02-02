@@ -27,18 +27,21 @@ import {
   ChangeDetectorRef,
   computed,
   signal,
-  Signal
+  Signal,
+  ViewChild,
+  ElementRef,
+  AfterViewChecked
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subject, Subscription, of } from 'rxjs';
-import { tap, takeUntil, catchError, switchMap } from 'rxjs/operators';
-import { BlockRendererComponent } from './renderers/block-renderer.component';
+import { takeUntil, catchError, switchMap } from 'rxjs/operators';
 import {
   MarkdownBlock,
   StreamingState,
   ParserResult,
   createEmptyState
 } from './core/models';
+import { MarkdownBlockRouterComponent } from './blocks/block-router/block-router.component';
 import {
   IMarkdownPreprocessor,
   MarkdownPreprocessor
@@ -47,6 +50,7 @@ import {
   IBlockParser,
   BlockParser
 } from './core/block-parser';
+import { ShiniHighlighter } from './core/shini-highlighter';
 
 /**
  * Configuration for the RxJS streaming pipeline.
@@ -130,121 +134,56 @@ export interface IChangeDetector {
 @Component({
   selector: 'app-streaming-markdown',
   standalone: true,
-  imports: [BlockRendererComponent, CommonModule],
+  imports: [MarkdownBlockRouterComponent, CommonModule],
   providers: [
     MarkdownPreprocessor,
     BlockParser
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: [`
-    /* Markdown Block Styles */
-    .markdown-block {
-      margin-bottom: var(--spacing-lg);
-      padding: var(--spacing-md);
-      border-radius: var(--radius-md);
-      line-height: 1.6;
-    }
-
-    /* Paragraph spacing - use ::ng-deep to penetrate ViewEncapsulation */
-    .markdown-block ::ng-deep p {
-      margin-top: var(--spacing-md);
-      margin-bottom: var(--spacing-md);
-    }
-
-    .markdown-block.block-paragraph {
-      color: var(--foreground);
-    }
-
-    .markdown-block.block-heading {
-      font-weight: 600;
-      margin-top: var(--spacing-xl);
-      margin-bottom: var(--spacing-md);
-    }
-
-    .markdown-block.block-code {
-      background: var(--muted);
-      padding: var(--spacing-md);
-      border-radius: var(--radius-md);
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 0.875rem;
-      overflow-x: auto;
-    }
-
-    /* List styles - restore bullets and indentation */
-    .markdown-block.block-list {
-      padding-left: var(--spacing-xl);
-    }
-
-    /* Use ::ng-deep for list elements inside innerHTML content */
-    .markdown-block ::ng-deep ul,
-    .markdown-block ::ng-deep ol {
-      margin-left: var(--spacing-md);
-      margin-bottom: var(--spacing-md);
-    }
-
-    .markdown-block ::ng-deep ul {
-      list-style-type: disc;
-    }
-
-    .markdown-block ::ng-deep ol {
-      list-style-type: decimal;
-    }
-
-    .markdown-block ::ng-deep li {
-      margin-left: var(--spacing-md);
-      padding-left: var(--spacing-sm);
-    }
-
-    .markdown-block ::ng-deep li::marker {
-      color: var(--muted-foreground);
-    }
-
-    .markdown-block.block-blockquote {
-      border-left: 3px solid var(--primary);
-      padding-left: var(--spacing-md);
-      color: var(--muted-foreground);
-    }
-
-    .markdown-block.streaming {
-      opacity: 0.7;
-      border-left: 2px solid var(--accent);
-    }
-
-    .streaming-indicator {
-      position: relative;
-    }
-
-    .streaming-indicator::after {
-      content: '▌';
-      animation: blink 1s infinite;
-      margin-left: var(--spacing-sm);
-      color: var(--accent);
-    }
-
-    @keyframes blink {
-      0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0; }
-    }
-  `],
   template: `
-    <div class="streaming-markdown-container">
+    <div
+      #container
+      class="streaming-markdown-container"
+      [style.max-height]="maxHeight"
+      [style.overflow-y]="maxHeight ? 'auto' : 'visible'">
+      <!-- Copy button - top-right corner -->
+      @if (rawContent().length > 0) {
+        <button
+          class="copy-button"
+          (click)="copyToClipboard()"
+          [title]="copied() ? 'Copied!' : 'Copy markdown'"
+          [attr.aria-label]="copied() ? 'Copied to clipboard' : 'Copy markdown to clipboard'">
+          @if (copied()) {
+            <!-- Check icon (✓) -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          } @else {
+            <!-- Copy clipboard icon (📋) -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+            </svg>
+          }
+        </button>
+      }
+
       <!-- Render all completed blocks -->
       @for (block of blocks(); track trackById(block)) {
-        <app-block-renderer
+        <app-markdown-block-router
           [block]="block"
           [isComplete]="true" />
       }
 
       <!-- Render currently streaming block (if any) -->
       @if (currentBlock()) {
-        <app-block-renderer
+        <app-markdown-block-router
           [block]="currentBlock()!"
           [isComplete]="false" />
       }
     </div>
   `
 })
-export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy {
+export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy, AfterViewChecked {
   /**
    * Input stream of markdown text chunks.
    * Each emission represents a new chunk of markdown content.
@@ -254,10 +193,29 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy 
   @Input() stream$!: Observable<string>;
 
   /**
+   * Maximum height for the container (for auto-scroll functionality).
+   * Set to a CSS value like '500px', '60vh', etc. to enable scrolling.
+   * If not set, container will grow with content and scrolling won't be visible.
+   */
+  @Input() maxHeight: string | undefined;
+
+  /**
    * Output event emitting the accumulated raw markdown content.
    * Emits whenever new content is received.
    */
   @Output() rawContentChange = new EventEmitter<string>();
+
+  /**
+   * Reference to the container element for auto-scrolling.
+   * Used to scroll to bottom when new content arrives.
+   */
+  @ViewChild('container', { static: false }) container!: ElementRef<HTMLDivElement>;
+
+  /**
+   * Flag to track if scrolling is needed after view update.
+   * Set to true when new content arrives, reset after scrolling.
+   */
+  private needsScroll = false;
 
   /**
    * Computed signal exposing all completed blocks.
@@ -284,6 +242,12 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy 
   protected rawContent = computed(() => this.state().rawContent);
 
   /**
+   * Signal tracking the copy to clipboard state.
+   * Used for UI feedback (icon change after copy).
+   */
+  protected copied = signal<boolean>(false);
+
+  /**
    * Internal state signal for the streaming process.
    * Initialized with empty state, updated by RxJS pipeline.
    */
@@ -302,6 +266,12 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy 
   private streamSubscription: Subscription | null = null;
 
   /**
+   * Timeout ID for copy state reset.
+   * Tracked for cleanup to prevent memory leaks.
+   */
+  private copyResetTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  /**
    * Pipeline configuration for stream processing.
    * Default values optimize for typical streaming scenarios.
    */
@@ -316,18 +286,21 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy 
    * @param preprocessor - Markdown preprocessor service for syntax correction
    * @param parser - Block parser service for converting markdown to blocks
    * @param cdr - Change detector reference for OnPush optimization
+   * @param shini - Shiki highlighter service for code syntax highlighting
    */
   constructor(
     private preprocessor: MarkdownPreprocessor,
     private parser: BlockParser,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private shini: ShiniHighlighter
   ) {}
 
   /**
    * Component initialization hook.
-   * Sets up the RxJS streaming pipeline.
+   * Sets up the RxJS streaming pipeline and initializes Shini.
    *
    * Pipeline implementation:
+   * - Initialize Shini highlighter (async, non-blocking)
    * - Subscribe to stream$
    * - Process each chunk through preprocessor
    * - Accumulate raw content
@@ -339,7 +312,14 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy 
     console.log('[StreamingMarkdownComponent] ngOnInit called');
     console.log('[StreamingMarkdownComponent] stream$ input:', this.stream$);
 
-    // Set up the streaming pipeline
+    // Initialize Shini highlighter asynchronously (don't block streaming)
+    this.shini.initialize().then(() => {
+      console.log('[StreamingMarkdownComponent] Shini initialized successfully');
+    }).catch((error) => {
+      console.error('[StreamingMarkdownComponent] Shini initialization failed:', error);
+    });
+
+    // Set up the streaming pipeline immediately
     this.subscribeToStream();
   }
 
@@ -399,6 +379,8 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy 
         this.state.set(updatedState);
         // Emit raw content change event for parent component
         this.rawContentChange.emit(updatedState.rawContent);
+        // Mark that scrolling is needed after view update
+        this.needsScroll = true;
         // Trigger change detection manually for OnPush strategy
         if (this.pipelineConfig.enableChangeDetectionOptimization) {
           this.cdr.markForCheck();
@@ -470,6 +452,100 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   /**
+   * After view checked hook.
+   * Scrolls the container to bottom when new content arrives.
+   */
+  ngAfterViewChecked(): void {
+    if (this.needsScroll && this.container?.nativeElement) {
+      const element = this.container.nativeElement;
+
+      // Use requestAnimationFrame to ensure DOM is fully rendered
+      requestAnimationFrame(() => {
+        if (!this.container?.nativeElement) return;
+
+        const el = this.container.nativeElement;
+        // Set scrollTop to scrollHeight to scroll to bottom
+        el.scrollTop = el.scrollHeight;
+
+        this.needsScroll = false;
+      });
+    }
+  }
+
+  /**
+   * Copies the raw markdown content to clipboard.
+   * Provides visual feedback by changing the copy button icon.
+   *
+   * Uses modern Clipboard API with fallback to legacy method.
+   */
+  async copyToClipboard(): Promise<void> {
+    const content = this.rawContent();
+
+    // Guard against empty content
+    if (!content) {
+      console.warn('[StreamingMarkdownComponent] No content to copy');
+      return;
+    }
+
+    try {
+      // Prefer modern Clipboard API (requires secure context)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(content);
+        console.log('[StreamingMarkdownComponent] Copied to clipboard via Clipboard API');
+      } else {
+        // Fallback to legacy execCommand method
+        this.fallbackCopy(content);
+        console.log('[StreamingMarkdownComponent] Copied to clipboard via fallback method');
+      }
+
+      // Update UI state to show success
+      this.copied.set(true);
+
+      // Clear any existing timeout to prevent memory leaks
+      if (this.copyResetTimeout) {
+        clearTimeout(this.copyResetTimeout);
+      }
+
+      // Reset UI state after 1.5 seconds
+      this.copyResetTimeout = setTimeout(() => {
+        this.copied.set(false);
+        this.copyResetTimeout = null;
+      }, 1500);
+
+    } catch (error) {
+      console.error('[StreamingMarkdownComponent] Copy to clipboard failed:', error);
+    }
+  }
+
+  /**
+   * Fallback method for copying to clipboard in older browsers.
+   * Creates a temporary textarea element to copy text.
+   *
+   * @param content - Text content to copy
+   */
+  private fallbackCopy(content: string): void {
+    const textArea = document.createElement('textarea');
+    textArea.value = content;
+
+    // Position off-screen to avoid visual flicker
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    textArea.style.top = '0';
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    // Execute copy command
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
+
+    if (!successful) {
+      throw new Error('execCommand("copy") failed');
+    }
+  }
+
+  /**
    * Cleanup hook for component destruction.
    * Unsubscribes from RxJS streams to prevent memory leaks.
    */
@@ -482,6 +558,12 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy 
     if (this.streamSubscription) {
       this.streamSubscription.unsubscribe();
       this.streamSubscription = null;
+    }
+
+    // Clear copy reset timeout
+    if (this.copyResetTimeout) {
+      clearTimeout(this.copyResetTimeout);
+      this.copyResetTimeout = null;
     }
 
     console.log('[StreamingMarkdownComponent] Cleanup complete');

@@ -1,0 +1,39 @@
+.markdown-paragraph {
+  margin-top: 0;
+  margin-bottom: var(--spacing-sm);
+  color: var(--foreground);
+  line-height: 1.6;
+}
+
+.markdown-paragraph.streaming {
+  opacity: 0.7;
+}
+
+.inline-bold {
+  font-weight: 600;
+}
+
+.inline-italic {
+  font-style: italic;
+}
+
+/* Inline code - use display: inline-block to break from parent line-height */
+.inline-code {
+  display: inline-block;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  background: var(--muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  line-height: 1 !important;
+  vertical-align: baseline;
+}
+
+/* Force line-height with ::ng-deep for nested elements */
+.markdown-paragraph ::ng-deep .inline-code {
+  line-height: 1 !important;
+}
+
+.markdown-paragraph ::ng-deep .inline-code * {
+  line-height: 1 !important;
+}

@@ -28,6 +28,11 @@ export class ShiniHighlighter implements IShiniHighlighter {
     themesLoaded: []
   })
 
+  /**
+   * Promise that resolves when initialization completes
+   */
+  private initPromise: Promise<void> | null = null
+
   constructor() {
     this.state = this._state.asReadonly()
   }
@@ -42,37 +47,42 @@ export class ShiniHighlighter implements IShiniHighlighter {
    * Preloads common languages and themes for optimal performance.
    */
   async initialize(): Promise<void> {
-    try {
-      // Load Shini WASM
-      const shiki = await this.loadShikiWasm()
+    // Store the promise for whenReady()
+    this.initPromise = (async () => {
+      try {
+        // Load Shini WASM
+        const shiki = await this.loadShikiWasm()
 
-      // Preload common languages
-      for (const lang of PRELOAD_LANGUAGES) {
-        await shiki.loadLanguage(lang)
+        // Preload common languages
+        for (const lang of PRELOAD_LANGUAGES) {
+          await shiki.loadLanguage(lang)
+        }
+
+        // Load themes
+        await shiki.loadTheme(SHINI_THEME_MAP.light)
+        await shiki.loadTheme(SHINI_THEME_MAP.dark)
+
+        // Update state
+        this._state.set({
+          initialized: true,
+          success: true,
+          languagesLoaded: PRELOAD_LANGUAGES.length,
+          themesLoaded: [SHINI_THEME_MAP.light, SHINI_THEME_MAP.dark]
+        })
+
+      } catch (error) {
+        // Handle initialization failure
+        this._state.set({
+          initialized: true,
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+          languagesLoaded: 0,
+          themesLoaded: []
+        })
       }
+    })()
 
-      // Load themes
-      await shiki.loadTheme(SHINI_THEME_MAP.light)
-      await shiki.loadTheme(SHINI_THEME_MAP.dark)
-
-      // Update state
-      this._state.set({
-        initialized: true,
-        success: true,
-        languagesLoaded: PRELOAD_LANGUAGES.length,
-        themesLoaded: [SHINI_THEME_MAP.light, SHINI_THEME_MAP.dark]
-      })
-
-    } catch (error) {
-      // Handle initialization failure
-      this._state.set({
-        initialized: true,
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-        languagesLoaded: 0,
-        themesLoaded: []
-      })
-    }
+    return this.initPromise
   }
 
   /**
@@ -130,7 +140,11 @@ export class ShiniHighlighter implements IShiniHighlighter {
    * Uses Shiki's codeToHtml for actual syntax highlighting.
    * Falls back to original code if Shiki is not ready or highlighting fails.
    */
-  async highlight(code: string, language: string, theme: 'light' | 'dark'): Promise<string> {
+  async highlight(
+    code: string,
+    language: string,
+    theme: 'light' | 'dark'
+  ): Promise<string> {
     console.log(`[ShiniHighlighter] highlight() called with:`, {
       language,
       theme,
@@ -140,35 +154,52 @@ export class ShiniHighlighter implements IShiniHighlighter {
     });
 
     if (!this.isReady()) {
-      console.warn('[ShiniHighlighter] Not ready, returning plain code')
-      return code
+      console.warn('[ShiniHighlighter] Not ready, returning plain code');
+      return code;
     }
 
     try {
-      console.log(`[ShiniHighlighter] About to call codeToHtml for ${language}`)
+      console.log(`[ShiniHighlighter] About to call codeToHtml for ${language}`);
 
       // Map theme names to Shiki theme identifiers
       const themeMap = {
         'light': 'github-light',
         'dark': 'dark-plus'
-      }
+      };
 
-      // Use Shiki's codeToHtml for syntax highlighting (returns Promise)
-      const html = await codeToHtml(code, {
-        lang: language,
-        theme: themeMap[theme]
-      })
+      // Split code into lines
+      const lines = code.split('\n');
 
-      console.log(`[ShiniHighlighter] codeToHtml returned:`, {
-        htmlLength: html.length,
-        hasStyle: html.includes('style='),
-        preview: html.substring(0, 300)
-      });
+      // Highlight each line individually
+      const highlightedLines = await Promise.all(
+        lines.map(async (line) => {
+          const html = await codeToHtml(line || ' ', { // Use space for empty lines
+            lang: language,
+            theme: themeMap[theme]
+          });
+          // Remove <pre> wrapper from each line
+          return html.replace(/^<pre[^>]*><code>(.*)<\/code><\/pre>$/, '$1');
+        })
+      );
 
-      return html
+      // Build final HTML with line numbers
+      const linesHtml = highlightedLines.map((highlightedLine, index) => {
+        const lineNum = index + 1;
+        const originalLine = lines[index];
+        const isEmpty = !originalLine.trim();
+
+        // For empty lines, use just &nbsp; without any highlighted HTML
+        const lineContent = isEmpty ? '&nbsp;' : highlightedLine;
+
+        // Important: No newlines or spaces in template string to avoid text nodes
+        // Use 'code-line' instead of 'line' to avoid conflict with Shiki's internal class names
+        return `<span class="code-line"><span class="line-number">${lineNum}</span><span class="line-content">${lineContent}</span></span>`;
+      }).join('');  // CRITICAL: Use empty string, not '\n', to avoid creating text nodes between lines
+
+      return linesHtml;
     } catch (error) {
-      console.error('[ShiniHighlighter] Highlighting failed:', error)
-      return code
+      console.error('[ShiniHighlighter] Highlighting failed:', error);
+      return code;
     }
   }
 
@@ -179,5 +210,33 @@ export class ShiniHighlighter implements IShiniHighlighter {
    */
   isReady(): boolean {
     return this.state().initialized && this.state().success
+  }
+
+  /**
+   * Wait for Shini to be ready
+   * Returns a promise that resolves when Shini is initialized successfully
+   * If already ready, resolves immediately
+   *
+   * @returns Promise that resolves when Shini is ready
+   */
+  async whenReady(): Promise<void> {
+    // If already ready, return immediately
+    if (this.isReady()) {
+      return
+    }
+
+    // If initialization was never called, call it
+    if (!this.initPromise) {
+      await this.initialize()
+      return
+    }
+
+    // Wait for existing initialization to complete
+    await this.initPromise
+
+    // If initialization failed, throw error
+    if (!this.isReady()) {
+      throw new Error('Shini initialization failed')
+    }
   }
 }

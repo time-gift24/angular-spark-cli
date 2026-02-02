@@ -1,0 +1,15 @@
+.markdown-heading {
+  font-weight: 600;
+  margin-top: var(--spacing-md);
+  margin-bottom: 0;
+  color: var(--foreground);
+}
+
+.markdown-heading.streaming {
+  opacity: 0.7;
+}
+
+.markdown-heading.fallback {
+  color: var(--destructive);
+  font-style: italic;
+}
