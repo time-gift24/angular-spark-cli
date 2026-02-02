@@ -7,7 +7,7 @@
  * Card container styles (no positioning - parent controls position)
  */
 export const cardContainer = [
-  'w-[380px] max-h-[60vh]',
+  'w-[380px]',
   'overflow-visible',
   'transition-opacity duration-300 cubic-bezier(0.4, 0, 0.2, 1)',
 ].join(' ');
@@ -15,7 +15,7 @@ export const cardContainer = [
 /**
  * Fixed positioning variant (for when parent wants fixed positioning)
  */
-export const cardFixed = ['fixed right-6 top-[90px]', 'z-[999]'].join(' ');
+export const cardFixed = ['fixed right-6 top-0 h-[calc(100vh-120px)]', 'z-[999]'].join(' ');
 
 /**
  * Relative positioning variant (for when parent wants relative positioning)
