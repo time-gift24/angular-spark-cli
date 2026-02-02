@@ -1,4 +1,20 @@
-/* CSS will be completed in Task 4 */
 :host {
   display: block;
+}
+
+/* Custom slide-in animation for ChatInput */
+@keyframes slideIn {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Apply animation when panel opens */
+.slide-in {
+  animation: slideIn 0.2s ease-out;
 }
