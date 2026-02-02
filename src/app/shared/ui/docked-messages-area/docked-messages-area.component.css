@@ -1,0 +1,44 @@
+:host {
+  display: block;
+}
+
+.docked-messages-area {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideInRight 0.2s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Scrollbar styling for messages */
+.docked-messages-area ::ng-deep .chat-messages-card {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.docked-messages-area ::ng-deep .chat-messages-card::-webkit-scrollbar {
+  width: 6px;
+}
+
+.docked-messages-area ::ng-deep .chat-messages-card::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.docked-messages-area ::ng-deep .chat-messages-card::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: var(--radius);
+}
+
+.docked-messages-area ::ng-deep .chat-messages-card::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
+}
