@@ -146,6 +146,27 @@ export interface IChangeDetector {
       class="streaming-markdown-container"
       [style.max-height]="maxHeight"
       [style.overflow-y]="maxHeight ? 'auto' : 'visible'">
+      <!-- Copy button - top-right corner -->
+      @if (rawContent().length > 0) {
+        <button
+          class="copy-button"
+          (click)="copyToClipboard()"
+          [title]="copied() ? 'Copied!' : 'Copy markdown'"
+          [attr.aria-label]="copied() ? 'Copied to clipboard' : 'Copy markdown to clipboard'">
+          @if (copied()) {
+            <!-- Check icon (✓) -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          } @else {
+            <!-- Copy clipboard icon (📋) -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+            </svg>
+          }
+        </button>
+      }
+
       <!-- Render all completed blocks -->
       @for (block of blocks(); track trackById(block)) {
         <app-markdown-block-router
@@ -219,6 +240,12 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
    * @returns Raw markdown text
    */
   protected rawContent = computed(() => this.state().rawContent);
+
+  /**
+   * Signal tracking the copy to clipboard state.
+   * Used for UI feedback (icon change after copy).
+   */
+  protected copied = signal<boolean>(false);
 
   /**
    * Internal state signal for the streaming process.
@@ -436,6 +463,73 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
 
         this.needsScroll = false;
       });
+    }
+  }
+
+  /**
+   * Copies the raw markdown content to clipboard.
+   * Provides visual feedback by changing the copy button icon.
+   *
+   * Uses modern Clipboard API with fallback to legacy method.
+   */
+  async copyToClipboard(): Promise<void> {
+    const content = this.rawContent();
+
+    // Guard against empty content
+    if (!content) {
+      console.warn('[StreamingMarkdownComponent] No content to copy');
+      return;
+    }
+
+    try {
+      // Prefer modern Clipboard API (requires secure context)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(content);
+        console.log('[StreamingMarkdownComponent] Copied to clipboard via Clipboard API');
+      } else {
+        // Fallback to legacy execCommand method
+        this.fallbackCopy(content);
+        console.log('[StreamingMarkdownComponent] Copied to clipboard via fallback method');
+      }
+
+      // Update UI state to show success
+      this.copied.set(true);
+
+      // Reset UI state after 1.5 seconds
+      setTimeout(() => {
+        this.copied.set(false);
+      }, 1500);
+
+    } catch (error) {
+      console.error('[StreamingMarkdownComponent] Copy to clipboard failed:', error);
+    }
+  }
+
+  /**
+   * Fallback method for copying to clipboard in older browsers.
+   * Creates a temporary textarea element to copy text.
+   *
+   * @param content - Text content to copy
+   */
+  private fallbackCopy(content: string): void {
+    const textArea = document.createElement('textarea');
+    textArea.value = content;
+
+    // Position off-screen to avoid visual flicker
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-9999px';
+    textArea.style.top = '0';
+
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    // Execute copy command
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
+
+    if (!successful) {
+      throw new Error('execCommand("copy") failed');
     }
   }
 

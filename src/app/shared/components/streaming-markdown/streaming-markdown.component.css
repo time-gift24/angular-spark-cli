@@ -54,3 +54,90 @@
 .markdown-paragraph ::ng-deep code {
   line-height: 1.2 !important;
 }
+
+/* ========================================
+ * Copy Button Styles
+ * Floating button for copying raw markdown
+ * ======================================== */
+
+/* Container positioning for copy button */
+.streaming-markdown-container {
+  position: relative;
+}
+
+/* Copy button - top-right corner */
+.copy-button {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+
+  /* Ultra compact sizing */
+  width: 28px;
+  height: 28px;
+
+  /* Mineral & Time color scheme - low saturation */
+  background: oklch(0.91 0.015 85); /* 绢黄 Aged Silk */
+  border: 1px solid oklch(0.85 0.015 85); /* 深绢黄 Dark Aged Silk */
+  border-radius: var(--radius-sm);
+
+  /* Icon styling */
+  color: oklch(0.28 0.03 185); /* 深灰 Dark Gray */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Icon size */
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Interactive states */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.9;
+  padding: 0;
+}
+
+/* Hover state - primary color (石绿 Malachite) */
+.copy-button:hover {
+  background: oklch(0.48 0.07 195); /* 石绿 Malachite */
+  color: white;
+  border-color: oklch(0.48 0.07 195);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+/* Active state */
+.copy-button:active {
+  transform: translateY(0);
+}
+
+/* Copied state - primary color background */
+.copy-button[aria-label*="Copied"] {
+  background: oklch(0.48 0.07 195); /* 石绿 Malachite */
+  color: white;
+  border-color: oklch(0.48 0.07 195);
+}
+
+/* Focus state for accessibility */
+.copy-button:focus-visible {
+  outline: 2px solid oklch(0.48 0.07 195); /* 石绿 Malachite */
+  outline-offset: 2px;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+}
+
+.copy-button {
+  animation: fadeIn 0.2s ease-out;
+}

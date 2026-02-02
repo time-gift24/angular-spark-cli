@@ -217,6 +217,11 @@
 }
 
 /* === Output Container === */
+.output-container-wrapper {
+  position: relative;
+  padding-bottom: 48px; /* Space for bottom copy button */
+}
+
 .output-container {
   padding: var(--spacing-lg);
   background: var(--card);
@@ -338,4 +343,84 @@
   .info-list {
     grid-template-columns: 1fr;
   }
+}
+
+/* ========================================
+ * External Copy Button (Bottom Right)
+ * Floating button outside the streaming container
+ * ======================================== */
+
+.copy-button-external {
+  position: absolute;
+  bottom: var(--spacing-md);
+  right: var(--spacing-md);
+
+  /* Ultra compact sizing */
+  width: 32px;
+  height: 32px;
+
+  /* Mineral & Time color scheme - low saturation */
+  background: oklch(0.48 0.07 195); /* 石绿 Malachite - primary color for visibility */
+  border: 1px solid oklch(0.48 0.07 195);
+  border-radius: var(--radius-md);
+
+  /* Icon styling */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Icon size */
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Interactive states */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  box-shadow: 0 2px 8px oklch(0.48 0.07 195 / 0.3);
+}
+
+/* Hover state - slightly lighter */
+.copy-button-external:hover {
+  background: oklch(0.52 0.07 195); /* Lighter malachite */
+  border-color: oklch(0.52 0.07 195);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px oklch(0.48 0.07 195 / 0.4);
+}
+
+/* Active state */
+.copy-button-external:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px oklch(0.48 0.07 195 / 0.3);
+}
+
+/* Copied state - same styling as it uses the primary color by default */
+.copy-button-external[aria-label*="Copied"] {
+  background: oklch(0.48 0.07 195);
+  border-color: oklch(0.48 0.07 195);
+}
+
+/* Focus state for accessibility */
+.copy-button-external:focus-visible {
+  outline: 2px solid oklch(0.48 0.07 195);
+  outline-offset: 2px;
+}
+
+/* Fade-in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.copy-button-external {
+  animation: fadeInUp 0.3s ease-out;
 }
