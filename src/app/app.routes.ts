@@ -128,6 +128,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'session-chat-container',
+        loadComponent: () =>
+          import('./demo/session-chat-container/demo-session-chat-container.component').then(
+            (m) => m.DemoSessionChatContainerComponent,
+          ),
+      },
+      {
         path: 'ai-chat-panel',
         loadComponent: () =>
           import('./demo/ai-chat-panel/demo-ai-chat-panel.component').then(
