@@ -64,7 +64,7 @@
 .markdown-code {
   /* 符合"矿物与时光"主题的柔和背景 */
   background: oklch(0.96 0.01 85); /* 非常浅的绢黄 */
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 0; /* 右上为0，左下为md */
   border-radius: 0;
   font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
   font-size: 0.875rem;
@@ -86,13 +86,14 @@
 .markdown-code .line {
   display: flex;
   line-height: 1.6;
-  padding-left: var(--spacing-sm);
+  padding-right: var(--spacing-lg); /* 右侧留白 */
 }
 
 /* 行号样式 */
 .markdown-code .line-number {
   color: oklch(0.60 0.02 230);
   min-width: 2.5em;
+  padding-left: var(--spacing-md); /* 行号左侧留白 */
   padding-right: var(--spacing-md);
   text-align: right;
   user-select: none;
