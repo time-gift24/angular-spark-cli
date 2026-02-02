@@ -64,7 +64,7 @@
 .markdown-code {
   /* 符合"矿物与时光"主题的柔和背景 */
   background: oklch(0.96 0.01 85); /* 非常浅的绢黄 */
-  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 0; /* 右上为0，左下为md */
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) 0; /* ultra compact: 上下4px, 右8px, 左0 */
   border-radius: 0;
   font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
   font-size: 0.875rem;
@@ -72,7 +72,7 @@
   margin: 0;
   border: none;
   box-shadow: none;
-  line-height: 1.2 !important; /* 设置为 1.2 以提供适当的行间距 */
+  line-height: 1.2 !important; /* ultra compact 行间距 */
 }
 
 /* Ensure pre tag also has line-height: 1.2 */
