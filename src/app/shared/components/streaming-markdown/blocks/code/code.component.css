@@ -1,6 +1,7 @@
 .code-block-wrapper {
   position: relative;
-  margin-bottom: 1px;
+  margin-top: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
   border-radius: var(--radius-md);
   overflow: hidden;
   border: 1px solid oklch(0.85 0.015 85);
@@ -61,15 +62,13 @@
 }
 
 /* Code block */
-.markdown-code {
+.code-block-wrapper > pre.markdown-code {
   /* 符合"矿物与时光"主题的柔和背景 */
   background: oklch(0.96 0.01 85); /* 非常浅的绢黄 */
-  padding: 1px var(--spacing-md) 1px 0; /* ultra compact: 上下1px, 右8px, 左0 */
   border-radius: 0;
   font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
   font-size: 0.875rem;
   overflow-x: auto;
-  margin: 0;
   border: none;
   box-shadow: none;
   line-height: 1.2 !important; /* ultra compact 行间距 */
@@ -89,43 +88,54 @@
 }
 
 /* Line wrapper - use ::ng-deep to penetrate ViewEncapsulation for innerHTML content */
-.markdown-code ::ng-deep .code-line {
+.markdown-code .code-line {
   display: flex !important;
   line-height: 1.2 !important; /* ultra compact 行间距 */
   padding-right: var(--spacing-lg);
-  align-items: flex-start !important;
+  align-items: center !important;
   margin: 0 !important; /* 移除所有 margin，仅使用 line-height 控制间距 */
   padding-top: 0 !important;
   padding-bottom: 0 !important;
-  gap: var(--spacing-md); /* 行号和代码之间的间隔 */
   min-height: 1.2em; /* 确保最小高度 */
 }
 
 /* Force line-height on all Shiki-generated elements */
-.markdown-code ::ng-deep .code-line * {
+.markdown-code .code-line * {
   line-height: 1.2 !important;
 }
 
 /* 行号样式 - use ::ng-deep to penetrate ViewEncapsulation */
-.markdown-code ::ng-deep .code-line .line-number {
+.markdown-code .code-line .line-number {
   color: oklch(0.60 0.02 230);
   min-width: 2.5em;
   padding-left: var(--spacing-md);
-  padding-right: var(--spacing-md);
+  padding-right: 0;
+  margin-right: var(--spacing-md) !important;
   text-align: right;
   user-select: none;
   opacity: 0.6;
   font-size: 0.8em;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
   line-height: 1.2 !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
+}
+
+.markdown-code .code-line .line-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: block;
 }
 
 .markdown-code code {
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
+  padding: 0 !important;  /* 移除浏览器默认 padding */
+  margin: 0 !important;   /* 移除浏览器默认 margin */
+  display: block !important;  /* 确保代码块是块级元素 */
 }
 
 .code-fallback {

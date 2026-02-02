@@ -9,7 +9,7 @@
  * Phase 3 - Task 3.3 Implementation
  */
 
-import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy, inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, of, timeout, catchError, from, switchMap } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -22,6 +22,7 @@ import { LANGUAGE_DISPLAY_NAMES } from '../../core/shini-types';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None, // Use None for innerHTML content (Shiki highlighting)
   template: `
     <div class="code-block-wrapper">
       @if (!streaming) {

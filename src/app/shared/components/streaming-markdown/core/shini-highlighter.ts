@@ -193,8 +193,8 @@ export class ShiniHighlighter implements IShiniHighlighter {
 
         // Important: No newlines or spaces in template string to avoid text nodes
         // Use 'code-line' instead of 'line' to avoid conflict with Shiki's internal class names
-        return `<div class="code-line"><span class="line-number">${lineNum}</span>${lineContent}</div>`;
-      }).join('');  // CRITICAL: Use empty string, not '\n', to avoid creating text nodes between divs
+        return `<span class="code-line"><span class="line-number">${lineNum}</span><span class="line-content">${lineContent}</span></span>`;
+      }).join('');  // CRITICAL: Use empty string, not '\n', to avoid creating text nodes between lines
 
       return linesHtml;
     } catch (error) {
