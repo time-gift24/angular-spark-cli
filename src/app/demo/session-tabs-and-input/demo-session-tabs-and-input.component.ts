@@ -127,6 +127,9 @@ export class DemoSessionTabsAndInputComponent {
       position: { x: 100, y: 100 },
       size: { width: 400, height: 500 },
       lastUpdated: Date.now(),
+      status: SessionStatus.IDLE,
+      color: 'default',
+      mode: 'docked',
     };
 
     this.sessionsInternal.update((map) => {

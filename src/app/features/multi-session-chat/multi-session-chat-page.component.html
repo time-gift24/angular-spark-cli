@@ -2,7 +2,7 @@
   <!-- Docked Messages Area (Right Side) -->
   @if (shouldShowDocked()) {
     <app-docked-messages-area
-      [messages]="activeSession()?.messages || []"
+      [messages]="activeMessages()"
     />
   }
 
@@ -10,7 +10,7 @@
   @if (shouldShowFloating()) {
     <app-floating-session-renderer
       [session]="activeSession()!"
-      [messages]="activeSession()?.messages || []"
+      [messages]="activeMessages()"
     />
   }
 

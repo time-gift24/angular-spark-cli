@@ -15,6 +15,7 @@ export const initialState: DemoState = {
         lastUpdated: Date.now() - 1000 * 60 * 5,
         status: SessionStatus.IDLE,
         color: 'default',
+        mode: 'docked',
       },
     ],
     [
@@ -29,6 +30,7 @@ export const initialState: DemoState = {
         lastUpdated: Date.now() - 1000 * 60 * 15,
         status: SessionStatus.IDLE,
         color: 'blue',
+        mode: 'docked',
       },
     ],
   ]),

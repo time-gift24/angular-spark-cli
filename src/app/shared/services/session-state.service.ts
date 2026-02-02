@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, Signal, effect, inject } from '@angular/core';
-import { SessionData, ChatMessage, PanelPosition, PanelSize } from '../models';
+import { SessionData, ChatMessage, PanelPosition, PanelSize, SessionStatus } from '../models';
 import { IdGenerator } from '../utils';
 import { SessionStorageService } from './session-storage.service';
 
@@ -501,6 +501,9 @@ export class SessionStateService {
       position: { ...DEFAULT_POSITION },
       size: { ...DEFAULT_SIZE },
       lastUpdated: now,
+      status: SessionStatus.IDLE,
+      color: 'default',
+      mode: 'docked',
     };
 
     // Create an updated sessions map with the new session

@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { SessionChatContainerComponent } from '@app/shared/ui/session-chat-container/session-chat-container.component';
 import { DockedMessagesAreaComponent } from '@app/shared/ui/docked-messages-area/docked-messages-area.component';
 import { FloatingSessionRendererComponent } from '@app/shared/ui/floating-session-renderer/floating-session-renderer.component';
-import { SessionData, SessionStatus, SessionColor, ChatMessage } from '@app/shared/models';
+import { SessionData, SessionStatus, SessionColor } from '@app/shared/models';
+import { ChatMessage } from '@app/shared/ui/ai-chat/types/chat.types';
 
 /**
  * Storage keys for multi-session chat
@@ -107,6 +108,13 @@ export class MultiSessionChatPageComponent {
    */
   readonly shouldShowFloating = computed(() => {
     return this.isOpen() && this.activeMode() === 'floating';
+  });
+
+  /**
+   * Active session messages (typed for components)
+   */
+  readonly activeMessages = computed(() => {
+    return (this.activeSession()?.messages || []) as any;
   });
 
   // ===== Constructor =====
@@ -304,7 +312,7 @@ export class MultiSessionChatPageComponent {
       if (session) {
         const updated: SessionData = {
           ...session,
-          messages: [...session.messages, message],
+          messages: [...session.messages, message as any],
           lastUpdated: Date.now()
         };
         newMap.set(sessionId, updated);
