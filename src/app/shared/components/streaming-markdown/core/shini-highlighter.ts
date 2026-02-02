@@ -191,9 +191,8 @@ export class ShiniHighlighter implements IShiniHighlighter {
         // For empty lines, use just &nbsp; without any highlighted HTML
         const lineContent = isEmpty ? '&nbsp;' : highlightedLine;
 
-        return `<div class="line">
-          <span class="line-number">${lineNum}</span>${lineContent}
-        </div>`;
+        // Important: No newlines or spaces in template string to avoid text nodes
+        return `<div class="line"><span class="line-number">${lineNum}</span>${lineContent}</div>`;
       }).join('\n');
 
       return linesHtml;
