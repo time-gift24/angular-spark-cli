@@ -21,24 +21,24 @@
 }
 
 /* Scrollbar styling for messages */
-.docked-messages-area ::ng-deep .chat-messages-card {
+.docked-messages-area ::ng-deep ai-chat-messages-card {
   height: 100%;
   overflow-y: auto;
 }
 
-.docked-messages-area ::ng-deep .chat-messages-card::-webkit-scrollbar {
+.docked-messages-area ::ng-deep ai-chat-messages-card::-webkit-scrollbar {
   width: 6px;
 }
 
-.docked-messages-area ::ng-deep .chat-messages-card::-webkit-scrollbar-track {
+.docked-messages-area ::ng-deep ai-chat-messages-card::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.docked-messages-area ::ng-deep .chat-messages-card::-webkit-scrollbar-thumb {
+.docked-messages-area ::ng-deep ai-chat-messages-card::-webkit-scrollbar-thumb {
   background: var(--muted-foreground);
   border-radius: var(--radius);
 }
 
-.docked-messages-area ::ng-deep .chat-messages-card::-webkit-scrollbar-thumb:hover {
+.docked-messages-area ::ng-deep ai-chat-messages-card::-webkit-scrollbar-thumb:hover {
   background: var(--foreground);
 }

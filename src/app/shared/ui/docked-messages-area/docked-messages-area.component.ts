@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy } from '@angular/core';
 import { ChatMessage } from '@app/shared/models';
-import { ChatMessagesCardComponent } from '@app/shared/ui/ai-chat/chat-messages-card';
+import { ChatMessagesCardComponent } from '@app/shared/ui/ai-chat/chat-messages-card/chat-messages-card.component';
 
 /**
  * DockedMessagesAreaComponent
@@ -29,7 +30,7 @@ import { ChatMessagesCardComponent } from '@app/shared/ui/ai-chat/chat-messages-
   imports: [CommonModule, ChatMessagesCardComponent],
   templateUrl: './docked-messages-area.component.html',
   styleUrl: './docked-messages-area.component.css',
-  changeDetection: 0  // OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DockedMessagesAreaComponent {
   /**
@@ -38,13 +39,6 @@ export class DockedMessagesAreaComponent {
    */
   @Input({ required: true })
   messages!: ChatMessage[];
-
-  /**
-   * Session ID for these messages
-   * @required
-   */
-  @Input({ required: true })
-  sessionId!: string;
 
   /**
    * Default container classes

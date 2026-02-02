@@ -214,6 +214,7 @@ export class AiChatPanelComponent {
       lastUpdated: Date.now(),
       status: SessionStatus.IDLE,
       color: 'default',
+      mode: 'docked',  // Default to docked mode
     };
 
     this.sessionsInternal.update((map) => {

@@ -1,8 +1,8 @@
 import { Component, signal, computed, Signal, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SessionChatContainerComponent } from '@app/shared/ui/session-chat-container';
-import { DockedMessagesAreaComponent } from '@app/shared/ui/docked-messages-area';
-import { FloatingSessionRendererComponent } from '@app/shared/ui/floating-session-renderer';
+import { SessionChatContainerComponent } from '@app/shared/ui/session-chat-container/session-chat-container.component';
+import { DockedMessagesAreaComponent } from '@app/shared/ui/docked-messages-area/docked-messages-area.component';
+import { FloatingSessionRendererComponent } from '@app/shared/ui/floating-session-renderer/floating-session-renderer.component';
 import { SessionData, SessionStatus, SessionColor, ChatMessage } from '@app/shared/models';
 
 /**

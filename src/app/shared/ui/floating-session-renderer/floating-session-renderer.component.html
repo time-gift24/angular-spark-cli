@@ -1,7 +1,7 @@
 <!-- Floating Session Renderer - Absolute Positioned -->
 <div [class]="containerClasses" [ngStyle]="getPositionStyle()">
-  <app-chat-messages-card
+  <ai-chat-messages-card
     [messages]="messages"
-    [sessionId]="session.id"
+    [position]="'relative'"
   />
 </div>

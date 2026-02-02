@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy } from '@angular/core';
 import { SessionData, ChatMessage } from '@app/shared/models';
-import { ChatMessagesCardComponent } from '@app/shared/ui/ai-chat/chat-messages-card';
+import { ChatMessagesCardComponent } from '@app/shared/ui/ai-chat/chat-messages-card/chat-messages-card.component';
 
 /**
  * Default floating session position
@@ -46,7 +47,7 @@ const MIN_POSITION = { x: 0, y: 0 };
   imports: [CommonModule, ChatMessagesCardComponent],
   templateUrl: './floating-session-renderer.component.html',
   styleUrl: './floating-session-renderer.component.css',
-  changeDetection: 0  // OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FloatingSessionRendererComponent {
   /**
