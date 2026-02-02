@@ -17,10 +17,23 @@
   font-style: italic;
 }
 
+/* Inline code - use display: inline-block to break from parent line-height */
 .inline-code {
-  font-family: 'Monaco', 'Menlo', monospace;
+  display: inline-block;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   background: var(--muted);
   padding: 2px 4px;
   border-radius: 3px;
   font-size: 0.9em;
+  line-height: 1 !important;
+  vertical-align: baseline;
+}
+
+/* Force line-height with ::ng-deep for nested elements */
+.markdown-paragraph ::ng-deep .inline-code {
+  line-height: 1 !important;
+}
+
+.markdown-paragraph ::ng-deep .inline-code * {
+  line-height: 1 !important;
 }

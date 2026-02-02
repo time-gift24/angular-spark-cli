@@ -12,7 +12,7 @@
 /* Block router wrapper - provides spacing between blocks */
 .markdown-block-router {
   display: block;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: 1px;
 }
 
 /* ========================================
