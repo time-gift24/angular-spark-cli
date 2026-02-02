@@ -49,15 +49,7 @@ import { LANGUAGE_DISPLAY_NAMES } from '../../core/shini-types';
       }
 
       <!-- Code block with line numbers -->
-      <pre [class]="codeWrapperClasses()" class="markdown-code">
-        @if (streaming) {
-          <code class="code-streaming">{{ code }}</code>
-        } @else if (highlightResult(); as safeHtml) {
-          <code [innerHTML]="safeHtml"></code>
-        } @else {
-          <code>{{ code }}</code>
-        }
-      </pre>
+      <pre [class]="codeWrapperClasses()" class="markdown-code">@if (streaming) {<code class="code-streaming">{{ code }}</code>} @else if (highlightResult(); as safeHtml) {<code [innerHTML]="safeHtml"></code>} @else {<code>{{ code }}</code>}</pre>
     </div>
   `,
   styleUrls: ['./code.component.css']

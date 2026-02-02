@@ -65,6 +65,7 @@
 .code-block-wrapper > pre.markdown-code {
   /* 符合"矿物与时光"主题的柔和背景 */
   background: oklch(0.96 0.01 85); /* 非常浅的绢黄 */
+  padding: var(--spacing-xs) var(--spacing-md) var(--spacing-xs) 0;
   border-radius: 0;
   font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
   font-size: 0.875rem;
@@ -92,7 +93,7 @@
   display: flex !important;
   line-height: 1.2 !important; /* ultra compact 行间距 */
   padding-right: var(--spacing-lg);
-  align-items: center !important;
+  align-items: baseline !important;
   margin: 0 !important; /* 移除所有 margin，仅使用 line-height 控制间距 */
   padding-top: 0 !important;
   padding-bottom: 0 !important;
@@ -116,8 +117,7 @@
   opacity: 0.6;
   font-size: 0.8em;
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
   line-height: 1.2 !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
