@@ -41,13 +41,16 @@ import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
     .docked-messages-wrapper {
       position: fixed !important;
       right: 24px !important;
-      top: 0 !important;
-      height: calc(100vh - 120px) !important;
+      top: 24px !important;
+      height: calc(100vh - 144px) !important;
       z-index: 999 !important;
       pointer-events: none;
+      width: 600px !important;
     }
     .docked-messages-wrapper ai-chat-messages-card {
       pointer-events: auto;
+      width: 100% !important;
+      height: 100% !important;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
