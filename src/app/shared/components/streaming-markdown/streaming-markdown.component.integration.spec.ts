@@ -43,6 +43,7 @@ describe('StreamingMarkdownComponent Integration Tests', () => {
   let parser: BlockParser;
   let shiniHighlighter: ShiniHighlighter;
   let cdr: ChangeDetectorRef;
+  let mockStream$: Subject<string>;
 
   /**
    * Helper: Create a mock Observable that emits values with delay
@@ -138,6 +139,9 @@ describe('StreamingMarkdownComponent Integration Tests', () => {
     parser = TestBed.inject(BlockParser);
     shiniHighlighter = TestBed.inject(ShiniHighlighter);
     cdr = TestBed.inject(ChangeDetectorRef);
+
+    // Initialize mock stream
+    mockStream$ = new Subject<string>();
   });
 
   afterEach(() => {
@@ -853,6 +857,118 @@ Escaped: \\*not italic\\*
 
       const blocks = getBlocks();
       expect(blocks.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Auto-scroll to Bottom', () => {
+    it('should scroll to bottom when new content arrives during streaming', async () => {
+      component.stream$ = mockStream$.asObservable();
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      // Get the container element
+      const containerElement: HTMLElement = fixture.nativeElement.querySelector('.streaming-markdown-container');
+      expect(containerElement).toBeTruthy();
+
+      // Set a fixed height to enable scrolling
+      containerElement.style.height = '200px';
+      containerElement.style.overflow = 'auto';
+      fixture.detectChanges(); // Trigger change detection after setting styles
+
+      // Send multiple chunks to simulate streaming
+      const chunks = ['# Title', '\n\nParagraph 1', '\n\nParagraph 2', '\n\nParagraph 3'];
+      for (const chunk of chunks) {
+        mockStream$.next(chunk);
+        await waitFor(20);
+        fixture.detectChanges();
+      }
+
+      mockStream$.complete();
+      await waitFor(50);
+      fixture.detectChanges(); // Final change detection
+
+      // Verify content was added - check for child elements
+      const childElements = containerElement.querySelectorAll('app-markdown-block-router');
+      expect(childElements.length).toBeGreaterThan(0);
+
+      // Verify scrollTop is at bottom (scrollHeight may be 0 in test environment, but we can check the relative position)
+      const scrollTop = containerElement.scrollTop;
+      const scrollHeight = containerElement.scrollHeight;
+      const clientHeight = containerElement.clientHeight;
+
+      // If there's content to scroll, scroll should be at bottom
+      if (scrollHeight > 0) {
+        const isAtBottom = (scrollTop + clientHeight) >= (scrollHeight - 5);
+        expect(isAtBottom).toBe(true);
+      }
+    });
+
+    it('should maintain scroll position at bottom after each chunk', async () => {
+      component.stream$ = mockStream$.asObservable();
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const containerElement: HTMLElement = fixture.nativeElement.querySelector('.streaming-markdown-container');
+      expect(containerElement).toBeTruthy();
+
+      // Set a fixed height to enable scrolling
+      containerElement.style.height = '150px';
+      containerElement.style.overflow = 'auto';
+      fixture.detectChanges();
+
+      const chunks = ['Line 1', '\nLine 2', '\nLine 3', '\nLine 4', '\nLine 5'];
+
+      for (const chunk of chunks) {
+        mockStream$.next(chunk);
+        await waitFor(20);
+        fixture.detectChanges();
+
+        // After each chunk, verify scroll is at or near bottom
+        const scrollTop = containerElement.scrollTop;
+        const scrollHeight = containerElement.scrollHeight;
+        const clientHeight = containerElement.clientHeight;
+
+        // Scroll should be at bottom (scrollTop + clientHeight >= scrollHeight - small tolerance)
+        const isAtBottom = (scrollTop + clientHeight) >= (scrollHeight - 5);
+        expect(isAtBottom).toBe(true);
+      }
+
+      mockStream$.complete();
+      await waitFor(50);
+    });
+
+    it('should scroll to bottom when streaming completes', async () => {
+      component.stream$ = mockStream$.asObservable();
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      const containerElement: HTMLElement = fixture.nativeElement.querySelector('.streaming-markdown-container');
+      expect(containerElement).toBeTruthy();
+
+      containerElement.style.height = '200px';
+      containerElement.style.overflow = 'auto';
+      fixture.detectChanges();
+
+      // Send content
+      mockStream$.next('# Title\n\n');
+      await waitFor(20);
+
+      mockStream$.next('Paragraph 1\n\n');
+      await waitFor(20);
+
+      mockStream$.next('Paragraph 2');
+      mockStream$.complete();
+      await waitFor(50);
+
+      fixture.detectChanges();
+
+      // Verify final scroll position is at bottom
+      const scrollTop = containerElement.scrollTop;
+      const scrollHeight = containerElement.scrollHeight;
+      const clientHeight = containerElement.clientHeight;
+
+      const isAtBottom = (scrollTop + clientHeight) >= (scrollHeight - 5);
+      expect(isAtBottom).toBe(true);
     });
   });
 });

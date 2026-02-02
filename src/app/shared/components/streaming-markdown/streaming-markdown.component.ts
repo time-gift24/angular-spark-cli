@@ -27,7 +27,10 @@ import {
   ChangeDetectorRef,
   computed,
   signal,
-  Signal
+  Signal,
+  ViewChild,
+  ElementRef,
+  AfterViewChecked
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subject, Subscription, of } from 'rxjs';
@@ -138,7 +141,11 @@ export interface IChangeDetector {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="streaming-markdown-container">
+    <div
+      #container
+      class="streaming-markdown-container"
+      [style.max-height]="maxHeight"
+      [style.overflow-y]="maxHeight ? 'auto' : 'visible'">
       <!-- Render all completed blocks -->
       @for (block of blocks(); track trackById(block)) {
         <app-markdown-block-router
@@ -155,7 +162,7 @@ export interface IChangeDetector {
     </div>
   `
 })
-export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy {
+export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy, AfterViewChecked {
   /**
    * Input stream of markdown text chunks.
    * Each emission represents a new chunk of markdown content.
@@ -165,10 +172,29 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy 
   @Input() stream$!: Observable<string>;
 
   /**
+   * Maximum height for the container (for auto-scroll functionality).
+   * Set to a CSS value like '500px', '60vh', etc. to enable scrolling.
+   * If not set, container will grow with content and scrolling won't be visible.
+   */
+  @Input() maxHeight: string | undefined;
+
+  /**
    * Output event emitting the accumulated raw markdown content.
    * Emits whenever new content is received.
    */
   @Output() rawContentChange = new EventEmitter<string>();
+
+  /**
+   * Reference to the container element for auto-scrolling.
+   * Used to scroll to bottom when new content arrives.
+   */
+  @ViewChild('container', { static: false }) container!: ElementRef<HTMLDivElement>;
+
+  /**
+   * Flag to track if scrolling is needed after view update.
+   * Set to true when new content arrives, reset after scrolling.
+   */
+  private needsScroll = false;
 
   /**
    * Computed signal exposing all completed blocks.
@@ -320,6 +346,8 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy 
         this.state.set(updatedState);
         // Emit raw content change event for parent component
         this.rawContentChange.emit(updatedState.rawContent);
+        // Mark that scrolling is needed after view update
+        this.needsScroll = true;
         // Trigger change detection manually for OnPush strategy
         if (this.pipelineConfig.enableChangeDetectionOptimization) {
           this.cdr.markForCheck();
@@ -388,6 +416,27 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy 
    */
   trackById(block: MarkdownBlock): string {
     return block.id;
+  }
+
+  /**
+   * After view checked hook.
+   * Scrolls the container to bottom when new content arrives.
+   */
+  ngAfterViewChecked(): void {
+    if (this.needsScroll && this.container?.nativeElement) {
+      const element = this.container.nativeElement;
+
+      // Use requestAnimationFrame to ensure DOM is fully rendered
+      requestAnimationFrame(() => {
+        if (!this.container?.nativeElement) return;
+
+        const el = this.container.nativeElement;
+        // Set scrollTop to scrollHeight to scroll to bottom
+        el.scrollTop = el.scrollHeight;
+
+        this.needsScroll = false;
+      });
+    }
   }
 
   /**

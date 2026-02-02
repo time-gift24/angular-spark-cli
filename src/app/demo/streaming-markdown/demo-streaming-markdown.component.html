@@ -50,6 +50,7 @@
     <div class="output-container">
       <app-streaming-markdown
         [stream$]="aiStream$"
+        [maxHeight]="'540px'"
         (rawContentChange)="onRawContentChange($event)">
       </app-streaming-markdown>
     </div>

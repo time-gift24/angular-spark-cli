@@ -7,6 +7,7 @@
 
 .streaming-markdown-container {
   /* Container for all rendered blocks */
+  /* overflow-y and max-height are set dynamically via component inputs */
 }
 
 /* Block router wrapper - provides spacing between blocks */
