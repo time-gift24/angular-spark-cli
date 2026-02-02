@@ -1,7 +1,7 @@
 # LLM 服务集成设计文档
 
 **日期：** 2026-02-02
-**设计目标：** 在 Angular 项目中集成 OpenAI 和 Ollama 大模型服务，支持流式输出
+**设计目标：** 在 Angular 项目中集成 OpenAI、Ollama 和智谱 AI 大模型服务，支持流式输出
 
 ---
 
@@ -9,7 +9,10 @@
 
 ### ✅ 包含功能
 - 统一的服务层接口（`LlmService`）
-- 支持两个提供商：OpenAI 和 Ollama
+- 支持三个提供商：
+  - **OpenAI** (GPT-4o, GPT-4.1 等)
+  - **Ollama** (本地 Llama, Mistral 等)
+  - **智谱 AI** (GLM-4, GLM-4-Air 等)
 - 基础对话输入（单次请求）
 - 流式响应输出（SSE）
 - 可配置切换提供商（通过依赖注入）
@@ -32,7 +35,8 @@ src/app/shared/services/llm/
 ├── providers/
 │   ├── llm-provider.adapter.ts       # 适配器抽象类
 │   ├── openai.adapter.ts             # OpenAI 适配器
-│   └── ollama.adapter.ts             # Ollama 适配器
+│   ├── ollama.adapter.ts             # Ollama 适配器
+│   └── zhipu.adapter.ts              # 智谱 AI 适配器
 ├── models/
 │   ├── llm-config.model.ts           # 配置模型
 │   ├── llm-message.model.ts          # 消息模型
@@ -86,6 +90,13 @@ abstract class LlmProviderAdapter {
 - 无需认证
 - 流式格式：兼容 OpenAI SSE 格式
 
+**ZhipuAdapter**
+- 使用 `HttpClient` 调用智谱 AI API
+- `baseUrl`: `https://open.bigmodel.cn/api/paas/v4`
+- 需要认证：`Authorization: Bearer {apiKey}`
+- 流式格式：兼容 OpenAI SSE 格式
+- 备注：智谱 API 完全兼容 OpenAI SDK 格式
+
 ---
 
 ## 3. 数据模型
@@ -93,9 +104,9 @@ abstract class LlmProviderAdapter {
 ### 3.1 LlmProviderConfig（提供商配置）
 ```typescript
 interface LlmProviderConfig {
-  type: 'openai' | 'ollama'           // 提供商类型
+  type: 'openai' | 'ollama' | 'zhipu'  // 提供商类型
   baseUrl: string                      // API 端点
-  model: string                        // 模型名称（如 gpt-4o, llama3.2）
+  model: string                        // 模型名称（如 gpt-4o, llama3.2, glm-4）
   apiKey?: string                      // API 密钥（Ollama 不需要）
   temperature?: number                 // 温度参数（可选，0-2）
 }
@@ -136,6 +147,7 @@ interface StreamChunk {
 │  LlmService 检查 providerConfig.type                             │
 │  → 'openai' → 选择 OpenAIAdapter                                 │
 │  → 'ollama' → 选择 OllamaAdapter                                 │
+│  → 'zhipu' → 选择 ZhipuAdapter                                   │
 └─────────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────────┐
@@ -217,6 +229,17 @@ interface StreamChunk {
     model: 'llama3.2'
   } as LlmProviderConfig
 }
+
+// 或智谱 AI 配置
+{
+  provide: LLM_CONFIG,
+  useValue: {
+    type: 'zhipu',
+    baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
+    model: 'glm-4',
+    apiKey: 'your-zhipu-api-key'
+  } as LlmProviderConfig
+}
 ```
 
 ### 6.2 在组件中使用
@@ -255,9 +278,10 @@ export class ChatComponent {
 - SSE 格式：`data: {...}\n\n`
 - 使用 RxJS `Observable` 包装流式响应
 
-### 7.2 Ollama 兼容性
-- Ollama API 兼容 OpenAI 的 `/chat/completions` 端点
-- 返回格式基本一致，可以在适配器层统一处理
+### 7.2 API 兼容性
+- **Ollama**: 完全兼容 OpenAI 的 `/chat/completions` 端点
+- **智谱 AI**: 完全兼容 OpenAI SDK 格式，API 端点也兼容 `/chat/completions`
+- 三者返回格式基本一致，可以在适配器层统一处理 SSE 流式响应
 
 ### 7.3 依赖注入
 - 使用 Angular DI 管理配置
@@ -275,10 +299,9 @@ export class ChatComponent {
 - 支持对话历史持久化
 
 ### 8.2 更多提供商
-- 通义千问（阿里云）
-- 文心一言（百度）
-- 智谱 AI（GLM）
-- Anthropic Claude
+- 通义千问（阿里云）- 兼容 OpenAI 格式
+- 文心一言（百度）- 兼容 OpenAI 格式
+- Anthropic Claude - 有自己的 API 格式，需要单独适配
 
 ### 8.3 高级功能
 - 自动重试机制（指数退避）
@@ -318,7 +341,8 @@ export class ChatComponent {
 
 ### 集成测试
 - 使用真实的 Ollama 本地服务测试
-- OpenAI 需要使用 mock server
+- 使用智谱 AI 进行真实 API 测试
+- OpenAI 需要使用 mock server（除非有测试密钥）
 
 ### E2E 测试
 - 测试完整的流式响应流程
