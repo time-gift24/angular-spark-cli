@@ -33,7 +33,6 @@ import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
     <div class="docked-messages-wrapper" [style.style]="wrapperStyle()">
       <ai-chat-messages-card
         [messages]="messages"
-        [position]="'fixed'"
       />
     </div>
   `,
