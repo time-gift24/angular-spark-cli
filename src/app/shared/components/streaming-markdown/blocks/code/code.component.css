@@ -82,24 +82,37 @@
   border-radius: 0 !important;
 }
 
-/* Line wrapper */
-.markdown-code .line {
-  display: flex;
-  line-height: 1.6;
-  padding-right: var(--spacing-lg); /* 右侧留白 */
+/* Line wrapper - use ::ng-deep to penetrate ViewEncapsulation for innerHTML content */
+.markdown-code ::ng-deep .line {
+  display: flex !important;
+  line-height: 1 !important;
+  padding-right: var(--spacing-lg);
+  align-items: flex-start !important;
+  margin: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  gap: var(--spacing-md); /* 行号和代码之间的间隔 */
 }
 
-/* 行号样式 */
-.markdown-code .line-number {
+/* Force line-height on all Shiki-generated elements */
+.markdown-code ::ng-deep .line * {
+  line-height: 1 !important;
+}
+
+/* 行号样式 - use ::ng-deep to penetrate ViewEncapsulation */
+.markdown-code ::ng-deep .line-number {
   color: oklch(0.60 0.02 230);
   min-width: 2.5em;
-  padding-left: var(--spacing-md); /* 行号左侧留白 */
+  padding-left: var(--spacing-md);
   padding-right: var(--spacing-md);
   text-align: right;
   user-select: none;
   opacity: 0.6;
   font-size: 0.8em;
   flex-shrink: 0;
+  line-height: 1 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .markdown-code code {

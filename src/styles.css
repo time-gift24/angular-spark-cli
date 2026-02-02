@@ -337,6 +337,19 @@
     line-height: 1.6;
   }
 
+  /* Exception: Code blocks should not inherit line-height from .markdown-block */
+  .markdown-code {
+    line-height: 1;
+  }
+
+  .markdown-code .line {
+    line-height: 1;
+  }
+
+  .markdown-code code {
+    line-height: 1;
+  }
+
   /* Paragraphs inside markdown */
   .markdown-block p {
     margin-top: var(--spacing-md);

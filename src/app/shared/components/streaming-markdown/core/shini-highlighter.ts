@@ -189,9 +189,9 @@ export class ShiniHighlighter implements IShiniHighlighter {
         const isEmpty = !lines[index].trim();
         const lineContent = isEmpty ? '&nbsp;' : line;
 
-        return `<span class="line">
+        return `<div class="line">
           <span class="line-number">${lineNum}</span>${lineContent}
-        </span>`;
+        </div>`;
       }).join('\n');
 
       return linesHtml;
