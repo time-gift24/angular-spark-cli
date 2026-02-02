@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DockedMessagesAreaComponent } from './docked-messages-area.component';
-import { ChatMessage } from '@app/shared/models';
 
 describe('DockedMessagesAreaComponent', () => {
   let component: DockedMessagesAreaComponent;
@@ -20,10 +19,10 @@ describe('DockedMessagesAreaComponent', () => {
   });
 
   it('should accept messages as input', () => {
-    const messages: ChatMessage[] = [
+    const messages = [
       {
         id: 'msg-1',
-        role: 'user',
+        role: 'user' as const,
         content: 'Hello',
         timestamp: Date.now()
       }
@@ -34,12 +33,5 @@ describe('DockedMessagesAreaComponent', () => {
 
     expect(component.messages.length).toBe(1);
     expect(component.messages[0].content).toBe('Hello');
-  });
-
-  it('should accept sessionId as input', () => {
-    component.sessionId = 'session-123';
-    fixture.detectChanges();
-
-    expect(component.sessionId).toBe('session-123');
   });
 });

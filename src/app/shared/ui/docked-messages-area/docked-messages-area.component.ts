@@ -8,19 +8,19 @@ import { ChatMessagesCardComponent } from '@app/shared/ui/ai-chat/chat-messages-
  * DockedMessagesAreaComponent
  *
  * Pure presentational component that displays chat messages in a
- * fixed right-side dock area. Used for sessions with mode='docked'.
+ * draggable card with fixed positioning. Used for sessions with mode='docked'.
  *
  * Features:
- * - Fixed positioning on right side of viewport
- * - Full height (above SessionChatContainer)
- * - Receives messages and sessionId as @Input
+ * - Fixed positioning with drag support (initially on right side)
+ * - Default size: 380px width, 60vh height
+ * - Receives messages as @Input
  * - Delegates rendering to ChatMessagesCardComponent
+ * - User can freely drag the card anywhere
  *
  * @example
  * ```html
  * <app-docked-messages-area
  *   [messages]="activeSession()?.messages || []"
- *   [sessionId]="activeSessionId()"
  * />
  * ```
  */
@@ -28,8 +28,12 @@ import { ChatMessagesCardComponent } from '@app/shared/ui/ai-chat/chat-messages-
   selector: 'app-docked-messages-area',
   standalone: true,
   imports: [CommonModule, ChatMessagesCardComponent],
-  templateUrl: './docked-messages-area.component.html',
-  styleUrl: './docked-messages-area.component.css',
+  template: `
+    <ai-chat-messages-card
+      [messages]="messages"
+      [position]="'fixed'"
+    />
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DockedMessagesAreaComponent {
@@ -39,22 +43,4 @@ export class DockedMessagesAreaComponent {
    */
   @Input({ required: true })
   messages!: ChatMessage[];
-
-  /**
-   * Default container classes
-   * Fixed position: right side, full height
-   */
-  protected readonly containerClasses = [
-    'docked-messages-area',
-    'fixed',
-    'right-0',
-    'top-0',
-    'bottom-[120px]',  // Leave space for SessionChatContainer at bottom
-    'w-[480px]',  // Fixed width for docked area
-    'bg-background/80',  // Semi-transparent background
-    'backdrop-blur-sm',  // Subtle glass effect
-    'border-l',
-    'border-border',
-    'shadow-xl'
-  ].join(' ');
 }
