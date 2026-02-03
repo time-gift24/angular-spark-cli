@@ -1,4 +1,3 @@
-import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { LlmProviderAdapter } from './llm-provider.adapter';
 import { LlmMessage, StreamChunk, LlmProviderConfig } from '../models';
