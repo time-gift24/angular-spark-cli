@@ -4,16 +4,20 @@ import { LlmProviderAdapter } from './llm-provider.adapter';
 import { LlmMessage, StreamChunk, LlmProviderConfig } from '../models';
 
 /**
- * OpenAI API adapter for streaming chat completions.
+ * Ollama adapter for streaming chat completions.
  *
- * Implements OpenAI-compatible API with Server-Sent Events (SSE) streaming.
+ * Ollama provides an OpenAI-compatible API format, so we can reuse the
+ * same SSE streaming logic from OpenAIAdapter. Key differences:
+ * - No API key required (local service)
+ * - Default baseUrl is http://localhost:11434
+ * - Response format uses message.content instead of choices[0].delta.content
  */
-export class OpenAIAdapter extends LlmProviderAdapter {
+export class OllamaAdapter extends LlmProviderAdapter {
   constructor(config: LlmProviderConfig) {
     super(config);
   }
   /**
-   * Initiates a streaming chat completion request using OpenAI API format
+   * Initiates a streaming chat completion request using Ollama API format
    * Uses fetch API with ReadableStream for proper SSE streaming
    * @param messages Array of conversation messages
    * @returns Observable emitting stream chunks incrementally
@@ -65,7 +69,8 @@ export class OpenAIAdapter extends LlmProviderAdapter {
 
               try {
                 const parsed = JSON.parse(jsonStr);
-                const content = parsed.choices?.[0]?.delta?.content;
+                // Ollama uses message.content format (OpenAI uses choices[0].delta.content)
+                const content = parsed.choices?.[0]?.delta?.content || parsed.message?.content;
                 if (content) {
                   subscriber.next({ content, done: false });
                 }
