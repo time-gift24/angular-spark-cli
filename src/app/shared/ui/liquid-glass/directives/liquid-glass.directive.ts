@@ -307,6 +307,20 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   /** Whether the mouse is hovering over the element */
   private isHovered = false;
 
+  /** Whether the element has keyboard focus */
+  private isFocused = false;
+
+  /**
+   * Check if element is in activated state
+   *
+   * Element is activated when EITHER hovered OR focused
+   *
+   * @returns true if element should show activation styling
+   */
+  private isActivated(): boolean {
+    return this.isHovered || this.isFocused;
+  }
+
   // ========== Lifecycle Hooks ==========
 
   /**
