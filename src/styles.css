@@ -214,6 +214,7 @@
     /* Accent - 泥金 (Gold): #C8A051 - 极少使用,边框/icon/悬停效果 */
     --accent: oklch(0.7 0.12 75);
     --accent-foreground: oklch(0.98 0.01 85);
+    --accent-hover: oklch(0.8 0.15 75); /* Brighter, more saturated */
 
     /* Destructive - 深红: 保持足够的对比度和可读性 */
     --destructive: oklch(0.5 0.2 25);
@@ -272,6 +273,7 @@
     /* Accent - 亮泥金: 暗夜中的金色点缀 */
     --accent: oklch(0.75 0.14 75);
     --accent-foreground: oklch(0.2 0.04 230);
+    --accent-hover: oklch(0.82 0.16 75); /* Brighter, more saturated */
 
     /* Destructive - 亮红: 暗色模式下保持足够的对比度 */
     --destructive: oklch(0.65 0.2 25);
