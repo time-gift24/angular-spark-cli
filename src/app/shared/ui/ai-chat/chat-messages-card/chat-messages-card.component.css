@@ -1,10 +1,8 @@
 /* Chat Messages Card Component - 矿物与时光主题 */
 
-/* Resize Handle (Top-Right only) */
+/* Resize Handle (base styles) */
 .resize-handle {
   position: absolute;
-  width: 20px;
-  height: 20px;
   z-index: 20;
   cursor: pointer;
   display: flex;
@@ -15,24 +13,82 @@
 }
 
 .chat-messages-card:hover .resize-handle {
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 .resize-handle:hover {
   opacity: 1 !important;
 }
 
-/* Northeast (top-right) - keeps bottom-left corner fixed */
+/* Northeast (top-right) corner handle */
 .resize-handle-ne {
+  position: absolute;
   top: 4px;
   right: 4px;
-  cursor: ne-resize;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  z-index: 30;
 }
 
 .resize-handle-ne svg {
   width: 16px;
   height: 16px;
   color: oklch(0.48 0.07 195);
+}
+
+/* Top Edge Handle */
+.resize-handle-top {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 8px;
+  cursor: ns-resize;
+  z-index: 25;
+}
+
+/* Bottom Edge Handle */
+.resize-handle-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  right: 20px;
+  height: 8px;
+  cursor: ns-resize;
+  z-index: 25;
+}
+
+/* Left Edge Handle */
+.resize-handle-left {
+  position: absolute;
+  left: 0;
+  top: 20px;
+  bottom: 20px;
+  width: 8px;
+  cursor: ew-resize;
+  z-index: 25;
+}
+
+/* Right Edge Handle */
+.resize-handle-right {
+  position: absolute;
+  right: 0;
+  top: 20px;
+  bottom: 20px;
+  width: 8px;
+  cursor: ew-resize;
+  z-index: 25;
+}
+
+/* Hover feedback for all edge handles */
+.resize-handle-top:hover,
+.resize-handle-bottom:hover,
+.resize-handle-left:hover,
+.resize-handle-right:hover {
+  background-color: oklch(0.48 0.07 195 / 0.3);
+  transition: background-color 0.15s ease;
+  opacity: 1 !important;
 }
 
 /* Drag Handle */

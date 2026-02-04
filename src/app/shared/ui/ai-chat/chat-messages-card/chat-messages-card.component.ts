@@ -18,6 +18,7 @@ import {
 import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
 import { ChatMessage } from '@app/shared/ui/ai-chat/types/chat.types';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { ResizeEdge, ResizeState, ResizeConstraints, CalculatedGeometry } from '@app/shared/ui/ai-chat/types';
 import {
   cardContainer,
   cardFixed,
@@ -80,8 +81,8 @@ import { cn } from '@app/shared/utils';
         </svg>
       </div>
 
-      <!-- Resize Handle (Top-Right only) -->
-      <div class="resize-handle resize-handle-ne" (mousedown)="startResize($event)">
+      <!-- Resize Handle (Top-Right corner) -->
+      <div class="resize-handle resize-handle-ne" (mousedown)="startResize('corner-ne', $event)">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -97,6 +98,30 @@ import { cn } from '@app/shared/utils';
           <path d="M8 3L21 16" />
         </svg>
       </div>
+
+      <!-- Top Edge Resize Handle -->
+      <div
+        class="resize-handle resize-handle-top"
+        (mousedown)="startResize('top', $event)"
+      ></div>
+
+      <!-- Bottom Edge Resize Handle -->
+      <div
+        class="resize-handle resize-handle-bottom"
+        (mousedown)="startResize('bottom', $event)"
+      ></div>
+
+      <!-- Left Edge Resize Handle -->
+      <div
+        class="resize-handle resize-handle-left"
+        (mousedown)="startResize('left', $event)"
+      ></div>
+
+      <!-- Right Edge Resize Handle -->
+      <div
+        class="resize-handle resize-handle-right"
+        (mousedown)="startResize('right', $event)"
+      ></div>
 
       <!-- Messages Container -->
       <div [class]="messagesContainerClasses()" #messagesContainer>
@@ -162,6 +187,17 @@ export class ChatMessagesCardComponent {
 
   // Resize state
   readonly isResizing = signal(false);
+
+  // NEW: Resize state signals (Phase 2: State Machine)
+  readonly currentResizeEdge = signal<ResizeEdge | null>(null);
+  private resizeState = signal<ResizeState | null>(null);
+
+  // NEW: Constraints as static readonly (Phase 2: State Machine)
+  private static readonly MIN_WIDTH = 280;
+  private static readonly MIN_HEIGHT = 200;
+  private static readonly VIEWPORT_PADDING = 8;
+
+  // Legacy state variables (will be removed in Phase 6)
   private startX = 0;
   private startY = 0;
   private startWidth = 0;
@@ -230,9 +266,11 @@ export class ChatMessagesCardComponent {
   }
 
   /**
-   * Start resizing the card (from top-right corner, keeping bottom-left fixed)
+   * Start resizing the card (from any edge or corner)
+   * @param edge The edge being dragged
+   * @param event Mouse event
    */
-  startResize(event: MouseEvent): void {
+  startResize(edge: ResizeEdge, event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
 
@@ -240,53 +278,96 @@ export class ChatMessagesCardComponent {
     const rect = card.getBoundingClientRect();
     const computedStyle = window.getComputedStyle(card);
 
-    this.isResizing.set(true);
-    this.startX = event.clientX;
-    this.startY = event.clientY;
-    this.startWidth = rect.width;
-    this.startHeight = rect.height;
-
-    // Store the bottom position to keep it fixed during resize
+    // Calculate initial positions
+    const topValue = computedStyle.top;
     const bottomValue = computedStyle.bottom;
-    if (bottomValue && bottomValue !== 'auto') {
-      this.startBottom = parseFloat(bottomValue);
-    } else {
-      // If bottom is not set, calculate it from top and height
-      const topValue = computedStyle.top;
-      const top = topValue && topValue !== 'auto' ? parseFloat(topValue) : 0;
-      const windowHeight = window.innerHeight;
-      this.startBottom = windowHeight - (top + rect.height);
-    }
+    const leftValue = computedStyle.left;
+    const rightValue = computedStyle.right;
+
+    const top = topValue && topValue !== 'auto' ? parseFloat(topValue) : rect.top;
+    const bottom = bottomValue && bottomValue !== 'auto' ? parseFloat(bottomValue) : window.innerHeight - rect.bottom;
+    const left = leftValue && leftValue !== 'auto' ? parseFloat(leftValue) : rect.left;
+    const right = rightValue && rightValue !== 'auto' ? parseFloat(rightValue) : window.innerWidth - rect.right;
+
+    // Populate resizeState signal
+    this.resizeState.set({
+      startMouseX: event.clientX,
+      startMouseY: event.clientY,
+      startTop: top,
+      startBottom: bottom,
+      startLeft: left,
+      startRight: right,
+      startWidth: rect.width,
+      startHeight: rect.height,
+      activeEdge: edge,
+    });
+
+    this.currentResizeEdge.set(edge);
+    this.isResizing.set(true);
+
+    // Set cursor based on edge
+    this.setBodyCursor(edge);
   }
 
   /**
-   * Handle resize during mouse move (top-right corner, bottom-left fixed)
+   * Set body cursor based on active edge
+   */
+  private setBodyCursor(edge: ResizeEdge): void {
+    const cursorMap: Record<ResizeEdge, string> = {
+      top: 'ns-resize',
+      bottom: 'ns-resize',
+      left: 'ew-resize',
+      right: 'ew-resize',
+      'corner-ne': 'nwse-resize',
+    };
+    document.body.style.cursor = cursorMap[edge];
+  }
+
+  /**
+   * Handle resize during mouse move
+   * Routes to appropriate edge calculation based on active edge
+   * (Phase 6: Event Integration)
    */
   @HostListener('window:mousemove', ['$event'])
   onResize(event: MouseEvent): void {
-    if (!this.isResizing() || !this.cardRef) return;
+    const edge = this.currentResizeEdge();
+    const state = this.resizeState();
+
+    if (!edge || !state || !this.cardRef) return;
 
     const card = this.cardRef.nativeElement;
-    const deltaX = event.clientX - this.startX;
-    const deltaY = event.clientY - this.startY;
+    const deltaX = event.clientX - state.startMouseX;
+    const deltaY = event.clientY - state.startMouseY;
+    const constraints = this.getConstraints();
 
-    // Minimum and maximum dimensions
-    const minWidth = 280;
-    const minHeight = 200;
-    const maxHeight = window.innerHeight;
+    // Route to appropriate calculation method
+    const geometry = this.calculateResizeForEdge(
+      edge,
+      state,
+      deltaX,
+      deltaY,
+      constraints
+    );
 
-    // Calculate new dimensions with constraints
-    const newWidth = Math.max(minWidth, this.startWidth + deltaX);
-    const newHeight = Math.max(minHeight, Math.min(maxHeight, this.startHeight - deltaY));
-
-    // Apply new size
-    card.style.width = `${newWidth}px`;
-    card.style.height = `${newHeight}px`;
-
-    // Keep bottom position fixed to maintain bottom-left corner
-    card.style.bottom = `${this.startBottom}px`;
-    // Clear top to let bottom control the vertical position
-    card.style.top = 'auto';
+    // Apply calculated geometry to card
+    if (geometry.width !== undefined) {
+      card.style.width = `${geometry.width}px`;
+    }
+    if (geometry.height !== undefined) {
+      card.style.height = `${geometry.height}px`;
+    }
+    if (geometry.top !== undefined) {
+      card.style.top = `${geometry.top}px`;
+    }
+    if (geometry.bottom !== undefined) {
+      card.style.bottom = `${geometry.bottom}px`;
+    }
+    if (geometry.left !== undefined) {
+      card.style.left = `${geometry.left}px`;
+    }
+    if (geometry.right !== undefined) {
+      card.style.right = `${geometry.right}px`;
+    }
   }
 
   /**
@@ -294,8 +375,185 @@ export class ChatMessagesCardComponent {
    */
   @HostListener('window:mouseup')
   stopResize(): void {
+    if (!this.isResizing()) return;
+
+    this.isResizing.set(false);
+    this.currentResizeEdge.set(null);
+    this.resizeState.set(null);
+    document.body.style.cursor = '';
+  }
+
+  /**
+   * Handle window blur to stop resize if mouse released outside window
+   */
+  @HostListener('window:blur')
+  onWindowBlur(): void {
     if (this.isResizing()) {
-      this.isResizing.set(false);
+      this.stopResize();
     }
+  }
+
+  /**
+   * Calculate top edge resize geometry
+   * (Phase 5: Edge Calculation Engine - Task 5.1)
+   */
+  private calculateTopResize(
+    state: ResizeState,
+    deltaY: number,
+    constraints: ResizeConstraints
+  ): CalculatedGeometry {
+    const { startTop, startHeight } = state;
+    const { minHeight, viewportPadding } = constraints;
+
+    const newHeight = Math.max(minHeight, startHeight - deltaY);
+    const newTop = Math.max(
+      viewportPadding,
+      startTop + (startHeight - newHeight)
+    );
+
+    return {
+      top: newTop,
+      height: newHeight,
+    };
+  }
+
+  /**
+   * Calculate bottom edge resize geometry
+   * (Phase 5: Edge Calculation Engine - Task 5.2)
+   */
+  private calculateBottomResize(
+    state: ResizeState,
+    deltaY: number,
+    constraints: ResizeConstraints
+  ): CalculatedGeometry {
+    const { startHeight, startTop } = state;
+    const { minHeight, windowHeight, viewportPadding } = constraints;
+
+    const newHeight = Math.max(
+      minHeight,
+      Math.min(windowHeight - startTop - viewportPadding, startHeight + deltaY)
+    );
+
+    return {
+      height: newHeight,
+    };
+  }
+
+  /**
+   * Calculate left edge resize geometry
+   * (Phase 5: Edge Calculation Engine - Task 5.3)
+   */
+  private calculateLeftResize(
+    state: ResizeState,
+    deltaX: number,
+    constraints: ResizeConstraints
+  ): CalculatedGeometry {
+    const { startLeft, startWidth } = state;
+    const { minWidth, viewportPadding } = constraints;
+
+    const newWidth = Math.max(minWidth, startWidth - deltaX);
+    const newLeft = Math.max(
+      viewportPadding,
+      startLeft + (startWidth - newWidth)
+    );
+
+    return {
+      left: newLeft,
+      width: newWidth,
+    };
+  }
+
+  /**
+   * Calculate right edge resize geometry
+   * (Phase 5: Edge Calculation Engine - Task 5.4)
+   */
+  private calculateRightResize(
+    state: ResizeState,
+    deltaX: number,
+    constraints: ResizeConstraints
+  ): CalculatedGeometry {
+    const { startWidth, startLeft } = state;
+    const { minWidth, windowWidth, viewportPadding } = constraints;
+
+    const newWidth = Math.max(
+      minWidth,
+      Math.min(windowWidth - startLeft - viewportPadding, startWidth + deltaX)
+    );
+
+    return {
+      width: newWidth,
+    };
+  }
+
+  /**
+   * Calculate corner-NE (top-right) resize geometry
+   * Extracted from existing onResize logic
+   * (Phase 5: Edge Calculation Engine - Task 5.5)
+   */
+  private calculateCornerNEResize(
+    state: ResizeState,
+    deltaX: number,
+    deltaY: number,
+    constraints: ResizeConstraints
+  ): CalculatedGeometry {
+    const { startWidth, startHeight, startTop, startBottom } = state;
+    const { minWidth, minHeight, windowHeight, viewportPadding } = constraints;
+
+    const newWidth = Math.max(minWidth, startWidth + deltaX);
+    const newHeight = Math.max(
+      minHeight,
+      Math.min(windowHeight - viewportPadding, startHeight - deltaY)
+    );
+    const newTop = startTop + (startHeight - newHeight);
+
+    return {
+      width: newWidth,
+      height: newHeight,
+      top: newTop,
+      bottom: startBottom,
+    };
+  }
+
+  /**
+   * Edge calculation router
+   * Dispatches to appropriate edge calculation method
+   * (Phase 5: Edge Calculation Engine - Task 5.6)
+   */
+  private calculateResizeForEdge(
+    edge: ResizeEdge,
+    state: ResizeState,
+    deltaX: number,
+    deltaY: number,
+    constraints: ResizeConstraints
+  ): CalculatedGeometry {
+    switch (edge) {
+      case 'top':
+        return this.calculateTopResize(state, deltaY, constraints);
+      case 'bottom':
+        return this.calculateBottomResize(state, deltaY, constraints);
+      case 'left':
+        return this.calculateLeftResize(state, deltaX, constraints);
+      case 'right':
+        return this.calculateRightResize(state, deltaX, constraints);
+      case 'corner-ne':
+        return this.calculateCornerNEResize(state, deltaX, deltaY, constraints);
+      default:
+        return {};
+    }
+  }
+
+  /**
+   * Get current resize constraints
+   * Returns constraint values based on current viewport size
+   * (Phase 2: State Machine)
+   */
+  private getConstraints(): ResizeConstraints {
+    return {
+      minWidth: ChatMessagesCardComponent.MIN_WIDTH,
+      minHeight: ChatMessagesCardComponent.MIN_HEIGHT,
+      viewportPadding: ChatMessagesCardComponent.VIEWPORT_PADDING,
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+    };
   }
 }

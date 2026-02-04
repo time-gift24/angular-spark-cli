@@ -20,8 +20,10 @@
       <ul class="features">
         <li>✨ 支持用户和 AI 两种消息类型</li>
         <li>🎯 AI 消息可配置操作按钮（复制、点赞等）</li>
-        <li>📐 父组件控制定位（fixed/relative）</li>
+        <li>📐 Fixed 定位 + 5 边拖拽 resize（上/下/左/右/右上角）</li>
         <li>💬 自动滚动到底部</li>
+        <li>🔒 最小尺寸约束（280×200px）</li>
+        <li>🖱️ Resize 时自动禁用拖拽</li>
       </ul>
     </div>
   </section>
@@ -30,12 +32,15 @@
   <section class="preview">
     <div class="preview-header">
       <h2>组件预览</h2>
-      <span class="badge">relative 定位</span>
+      <span class="badge">Fixed 定位 - 多边 Resize</span>
     </div>
-    <p class="preview-desc">卡片在页面中居中展示</p>
+    <p class="preview-desc">
+      卡片以 fixed 定位显示在屏幕右侧，可以拖拽 5 个边来调整大小：
+      上、下、左、右、右上角
+    </p>
 
     <div class="card-wrapper">
-      <ai-chat-messages-card position="relative" [messages]="messages()" />
+      <ai-chat-messages-card [messages]="messages()" />
     </div>
   </section>
 </div>
