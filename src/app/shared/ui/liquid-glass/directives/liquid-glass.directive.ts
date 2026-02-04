@@ -273,8 +273,11 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   /** Host element being decorated */
   private host!: HTMLElement;
 
-  /** Overlay div containing all visual effects */
+  /** Overlay div containing backdrop blur and background effects */
   private overlay!: HTMLDivElement;
+
+  /** Border layer - separate from overlay to avoid blur effect */
+  private borderLayer!: HTMLDivElement;
 
   /** SVG filter element (if filters enabled) */
   private svgFilter?: SVGSVGElement;
@@ -298,6 +301,11 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
 
   /** Current interpolated Y position */
   private curY = 0.5;
+
+  // ----- Hover State -----
+
+  /** Whether the mouse is hovering over the element */
+  private isHovered = false;
 
   // ========== Lifecycle Hooks ==========
 
@@ -361,7 +369,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   /**
    * Clean up created DOM elements
    *
-   * Removes SVG filter and overlay from host
+   * Removes SVG filter, overlay, and border layer from host
    */
   private cleanup(): void {
     if (this.svgFilter?.parentNode) {
@@ -369,6 +377,9 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     }
     if (this.overlay?.parentNode) {
       this.overlay.parentNode.removeChild(this.overlay);
+    }
+    if (this.borderLayer?.parentNode) {
+      this.borderLayer.parentNode.removeChild(this.borderLayer);
     }
   }
 
@@ -387,13 +398,12 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   /**
    * Create overlay div with all visual effects
    *
-   * The overlay contains:
-   * - Backdrop blur and saturation
-   * - Border with subtle glow
-   * - Radial gradient hotspot
-   * - Chromatic aberration filters
+   * Creates two layers:
+   * 1. overlay: Backdrop blur, saturation, and background gradients
+   * 2. borderLayer: Sharp border on top (not affected by blur)
    */
   private createOverlay(): void {
+    // Create background overlay (backdrop blur + gradients)
     this.overlay = this.r.createElement('div');
     // Insert overlay as FIRST child so content stays on top
     if (this.host.firstChild) {
@@ -402,7 +412,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
       this.r.appendChild(this.host, this.overlay);
     }
 
-    // ----- Base Styles -----
+    // ----- Overlay Base Styles -----
     this.r.setStyle(this.overlay, 'pointer-events', 'none');
     this.r.setStyle(this.overlay, 'position', 'absolute');
     this.r.setStyle(this.overlay, 'inset', '0');
@@ -424,17 +434,45 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
       `blur(${blurPx}px) saturate(${this.lgSaturation}%)`,
     );
 
-    // ----- Border and Shadow -----
+    // ----- Initial Background -----
+    this.updateOverlayBackground(0.5, 0.5);
+
+    // Create border layer (separate to avoid blur)
+    this.createBorderLayer();
+  }
+
+  /**
+   * Create border layer on top of overlay
+   *
+   * This layer contains only the border and shadow, not affected by backdrop-filter
+   */
+  private createBorderLayer(): void {
+    this.borderLayer = this.r.createElement('div');
+    // Insert border layer after overlay
+    if (this.overlay.nextSibling) {
+      this.r.insertBefore(this.host, this.borderLayer, this.overlay.nextSibling);
+    } else {
+      this.r.appendChild(this.host, this.borderLayer);
+    }
+
+    // ----- Border Layer Base Styles -----
+    this.r.setStyle(this.borderLayer, 'pointer-events', 'none');
+    this.r.setStyle(this.borderLayer, 'position', 'absolute');
+    this.r.setStyle(this.borderLayer, 'inset', '0');
+    this.r.setStyle(this.borderLayer, 'border-radius', 'inherit');
+    this.r.setStyle(this.borderLayer, 'z-index', '0'); // Above overlay (-1)
+    this.r.setStyle(this.borderLayer, 'transition', 'box-shadow 0.2s ease-out');
+
+    // ----- Initial Border Styles -----
     const borderColor = this.lgBorder || 'var(--accent)';
-    this.r.setStyle(this.overlay, 'border', `${this.lgBorderWidth}px solid ${borderColor}`);
+    this.r.setStyle(this.borderLayer, 'border-width', `${this.lgBorderWidth}px`);
+    this.r.setStyle(this.borderLayer, 'border-style', 'solid');
+    this.r.setStyle(this.borderLayer, 'border-color', borderColor);
     this.r.setStyle(
-      this.overlay,
+      this.borderLayer,
       'box-shadow',
       '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)',
     );
-
-    // ----- Initial Background -----
-    this.updateOverlayBackground(0.5, 0.5);
   }
 
   /**
@@ -536,14 +574,27 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   }
 
   /**
+   * Handle pointer enter event (hover activation)
+   *
+   * Sets hovered state and updates border to be brighter/deeper
+   */
+  @HostListener('pointerenter')
+  onPointerEnter(): void {
+    this.isHovered = true;
+    this.updateBorderColor();
+  }
+
+  /**
    * Handle pointer leave event
    *
-   * Resets hotspot to center position
+   * Resets hotspot to center position and restores normal border
    */
   @HostListener('pointerleave')
   onPointerLeave(): void {
+    this.isHovered = false;
     this.targetX = 0.5;
     this.targetY = 0.5;
+    this.updateBorderColor();
   }
 
   /**
@@ -594,5 +645,35 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    */
   private clamp01(v: number): number {
     return Math.max(0, Math.min(1, v));
+  }
+
+  /**
+   * Update border color based on hover state
+   *
+   * When hovered: uses brighter/deeper border color with enhanced glow
+   * When not hovered: uses normal border color from theme or custom input
+   */
+  private updateBorderColor(): void {
+    if (!this.borderLayer) return;
+
+    const baseBorder = this.lgBorder || 'var(--accent)';
+
+    if (this.isHovered) {
+      // Hover state: enhance border with stronger glow
+      this.r.setStyle(this.borderLayer, 'border-color', baseBorder);
+      this.r.setStyle(
+        this.borderLayer,
+        'box-shadow',
+        '0 6px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.25), 0 0 0 1px var(--accent), 0 0 12px var(--accent)',
+      );
+    } else {
+      // Normal state: restore original border
+      this.r.setStyle(this.borderLayer, 'border-color', baseBorder);
+      this.r.setStyle(
+        this.borderLayer,
+        'box-shadow',
+        '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)',
+      );
+    }
   }
 }
