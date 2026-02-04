@@ -612,6 +612,28 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   }
 
   /**
+   * Handle focus event (keyboard navigation)
+   *
+   * Sets focused state and updates border to show activation
+   */
+  @HostListener('focus')
+  onFocus(): void {
+    this.isFocused = true;
+    this.updateBorderColor();
+  }
+
+  /**
+   * Handle blur event (loss of keyboard focus)
+   *
+   * Clears focused state and restores normal border if not hovered
+   */
+  @HostListener('blur')
+  onBlur(): void {
+    this.isFocused = false;
+    this.updateBorderColor();
+  }
+
+  /**
    * Start animation loop with exponential smoothing
    *
    * Uses RequestAnimationFrame for smooth 60fps animation.
