@@ -27,7 +27,7 @@
   right: 4px;
   width: 20px;
   height: 20px;
-  cursor: nwse-resize;
+  cursor: nesw-resize;
   z-index: 30;
 }
 

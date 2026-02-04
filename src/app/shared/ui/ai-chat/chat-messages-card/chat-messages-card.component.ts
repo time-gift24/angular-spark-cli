@@ -318,7 +318,7 @@ export class ChatMessagesCardComponent {
       bottom: 'ns-resize',
       left: 'ew-resize',
       right: 'ew-resize',
-      'corner-ne': 'nwse-resize',
+      'corner-ne': 'nesw-resize',
     };
     document.body.style.cursor = cursorMap[edge];
   }
@@ -350,23 +350,28 @@ export class ChatMessagesCardComponent {
     );
 
     // Apply calculated geometry to card
+    // Clear conflicting positioning properties first
+    if (geometry.left !== undefined) {
+      card.style.right = 'auto';  // Clear right when setting left
+      card.style.left = `${geometry.left}px`;
+    } else if (geometry.right !== undefined) {
+      card.style.left = 'auto';   // Clear left when setting right
+      card.style.right = `${geometry.right}px`;
+    }
+
+    if (geometry.top !== undefined) {
+      card.style.bottom = 'auto'; // Clear bottom when setting top
+      card.style.top = `${geometry.top}px`;
+    } else if (geometry.bottom !== undefined) {
+      card.style.top = 'auto';    // Clear top when setting bottom
+      card.style.bottom = `${geometry.bottom}px`;
+    }
+
     if (geometry.width !== undefined) {
       card.style.width = `${geometry.width}px`;
     }
     if (geometry.height !== undefined) {
       card.style.height = `${geometry.height}px`;
-    }
-    if (geometry.top !== undefined) {
-      card.style.top = `${geometry.top}px`;
-    }
-    if (geometry.bottom !== undefined) {
-      card.style.bottom = `${geometry.bottom}px`;
-    }
-    if (geometry.left !== undefined) {
-      card.style.left = `${geometry.left}px`;
-    }
-    if (geometry.right !== undefined) {
-      card.style.right = `${geometry.right}px`;
     }
   }
 
