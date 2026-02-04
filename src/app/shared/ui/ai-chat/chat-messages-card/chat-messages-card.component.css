@@ -1,15 +1,24 @@
 /* Chat Messages Card Component - 矿物与时光主题 */
 
+/* === Z-Index System === */
+/* These should ideally be moved to styles.css for global consistency */
+:root {
+  --z-drag-handle: 15;
+  --z-resize-handle-base: 20;
+  --z-resize-handle-edge: 25;
+  --z-resize-handle-corner: 30;
+}
+
 /* Resize Handle (base styles) */
 .resize-handle {
   position: absolute;
-  z-index: 20;
+  z-index: var(--z-resize-handle-base);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 150ms ease-in-out;
+  transition: opacity var(--duration-fast) var(--ease-out);
 }
 
 .chat-messages-card:hover .resize-handle {
@@ -23,62 +32,62 @@
 /* Northeast (top-right) corner handle */
 .resize-handle-ne {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 20px;
-  height: 20px;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  width: 1.25rem;
+  height: 1.25rem;
   cursor: nesw-resize;
-  z-index: 30;
+  z-index: var(--z-resize-handle-corner);
 }
 
 .resize-handle-ne svg {
-  width: 16px;
-  height: 16px;
-  color: oklch(0.48 0.07 195);
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-primary);
 }
 
 /* Top Edge Handle */
 .resize-handle-top {
   position: absolute;
   top: 0;
-  left: 20px;
-  right: 20px;
-  height: 8px;
+  left: var(--spacing-xl);
+  right: var(--spacing-xl);
+  height: var(--spacing-md);
   cursor: ns-resize;
-  z-index: 25;
+  z-index: var(--z-resize-handle-edge);
 }
 
 /* Bottom Edge Handle */
 .resize-handle-bottom {
   position: absolute;
   bottom: 0;
-  left: 20px;
-  right: 20px;
-  height: 8px;
+  left: var(--spacing-xl);
+  right: var(--spacing-xl);
+  height: var(--spacing-md);
   cursor: ns-resize;
-  z-index: 25;
+  z-index: var(--z-resize-handle-edge);
 }
 
 /* Left Edge Handle */
 .resize-handle-left {
   position: absolute;
   left: 0;
-  top: 20px;
-  bottom: 20px;
-  width: 8px;
+  top: var(--spacing-xl);
+  bottom: var(--spacing-xl);
+  width: var(--spacing-md);
   cursor: ew-resize;
-  z-index: 25;
+  z-index: var(--z-resize-handle-edge);
 }
 
 /* Right Edge Handle */
 .resize-handle-right {
   position: absolute;
   right: 0;
-  top: 20px;
-  bottom: 20px;
-  width: 8px;
+  top: var(--spacing-xl);
+  bottom: var(--spacing-xl);
+  width: var(--spacing-md);
   cursor: ew-resize;
-  z-index: 25;
+  z-index: var(--z-resize-handle-edge);
 }
 
 /* Hover feedback for all edge handles */
@@ -86,8 +95,8 @@
 .resize-handle-bottom:hover,
 .resize-handle-left:hover,
 .resize-handle-right:hover {
-  background-color: oklch(0.48 0.07 195 / 0.3);
-  transition: background-color 0.15s ease;
+  background-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+  transition: background-color var(--duration-instant) var(--ease-out);
   opacity: 1 !important;
 }
 
@@ -100,22 +109,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 24px;
+  width: 3.75rem;
+  height: 1.5rem;
   cursor: move;
   padding: 0;
   margin: 0;
   background: transparent;
   border: none;
-  z-index: 15;
+  z-index: var(--z-drag-handle);
 }
 
 .drag-handle svg {
-  width: 16px;
-  height: 16px;
-  color: oklch(0.48 0.07 195);
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-primary);
   opacity: 0.6;
-  transition: opacity 150ms ease-in-out;
+  transition: opacity var(--duration-fast) var(--ease-out);
 }
 
 .drag-handle:hover svg {
@@ -125,7 +134,7 @@
 /* CDK Drag Preview Styles */
 .cdk-drag-preview {
   opacity: 0.8;
-  box-shadow: 0 8px 24px oklch(0.28 0.03 185 / 30%);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-foreground) 30%, transparent);
   transition: none !important;
 }
 
@@ -176,17 +185,17 @@
 }
 
 .chat-messages::-webkit-scrollbar-track {
-  background: oklch(1 0 0 / 50%);
-  border-radius: 3px;
+  background: var(--color-muted);
+  border-radius: var(--radius-sm);
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
-  background: oklch(0.85 0.015 85);
-  border-radius: 3px;
+  background: var(--color-muted-foreground);
+  border-radius: var(--radius-sm);
 }
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.8 0.015 85);
+  background: var(--color-foreground);
 }
 
 /* Responsive sizing for fixed positioning */

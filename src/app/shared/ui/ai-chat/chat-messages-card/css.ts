@@ -9,7 +9,7 @@
 export const cardContainer = [
   'w-[380px]',
   'overflow-visible',
-  'transition-opacity duration-300 cubic-bezier(0.4, 0, 0.2, 1)',
+  'transition-opacity duration-300 ease-in-out',
 ].join(' ');
 
 /**

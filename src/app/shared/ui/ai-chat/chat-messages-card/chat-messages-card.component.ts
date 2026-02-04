@@ -7,13 +7,13 @@
 import {
   Component,
   input,
-  output,
   ViewChild,
   ElementRef,
   afterNextRender,
   computed,
   signal,
   HostListener,
+  effect,
 } from '@angular/core';
 import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
 import { ChatMessage } from '@app/shared/ui/ai-chat/types/chat.types';
@@ -31,7 +31,6 @@ import {
   messageBubbleUser,
   messageBubbleAssistant,
   aiBubbleContent,
-  aiBubbleParagraph,
   actionButtonsContainer,
   actionButton,
   actionIcon,
@@ -52,15 +51,15 @@ import { cn } from '@app/shared/utils';
       #card
       liquidGlass
       lgTheme="mineral-light"
-      lgCornerRadius="12px"
+      lgCornerRadius="var(--radius-xl)"
       [lgBlurAmount]="0.5"
       [lgDisplacementScale]="0"
-      lgTint="oklch(0 0 0 / 2%)"
-      lgHotspot="oklch(1 0 0 / 3%)"
+      lgTint="color-mix(in oklch, var(--color-foreground) 2%, transparent)"
+      lgHotspot="color-mix(in oklch, var(--color-background) 3%, transparent)"
       lgAriaLabel="Chat messages card"
       [class]="cardClasses()"
       cdkDrag
-      [cdkDragBoundary]="cdkDragBoundary() || '.cdk-drop-list'"
+      [cdkDragBoundary]="dragBoundary()"
       [cdkDragStartDelay]="0"
       [cdkDragDisabled]="isResizing()"
     >
@@ -179,11 +178,24 @@ export class ChatMessagesCardComponent {
 
   /**
    * Drag boundary selector for constraining drag area
-   * Default: undefined (no boundary constraint)
+   * Default: '.cdk-drop-list' (fallback boundary for safety)
+   * Set to empty string '' for no boundary constraint
    */
   readonly cdkDragBoundary = input<string | HTMLElement | ElementRef<HTMLElement> | undefined>(
     undefined,
   );
+
+  /**
+   * Computed drag boundary with proper fallback
+   * Returns undefined when no boundary should be applied
+   */
+  protected readonly dragBoundary = computed(() => {
+    const boundary = this.cdkDragBoundary();
+    // If explicitly set to empty string, return undefined for no boundary
+    if (boundary === '') return undefined as any;
+    // Otherwise use the provided value or fallback to '.cdk-drop-list'
+    return boundary || '.cdk-drop-list';
+  });
 
   // Resize state
   readonly isResizing = signal(false);
@@ -212,7 +224,6 @@ export class ChatMessagesCardComponent {
   readonly messageWrapperBase = messageWrapper;
   readonly messageBubbleBase = messageBubble;
   readonly aiBubbleContentBase = aiBubbleContent;
-  readonly aiBubbleParagraphBase = aiBubbleParagraph;
   readonly actionButtonsContainerBase = actionButtonsContainer;
   readonly actionButtonBase = actionButton;
   readonly actionIconBase = actionIcon;
@@ -250,8 +261,24 @@ export class ChatMessagesCardComponent {
   protected actionIconClasses = computed(() => this.actionIconBase);
 
   constructor() {
-    afterNextRender(() => {
-      this.scrollToBottom();
+    // Reactive auto-scroll: scroll to bottom when new messages arrive
+    // Only scroll if user is already near bottom (within 100px threshold)
+    effect(() => {
+      const messages = this.messages();
+      if (messages.length === 0) return;
+
+      // Wait for DOM to update
+      setTimeout(() => {
+        if (this.messagesContainerRef) {
+          const container = this.messagesContainerRef.nativeElement;
+          const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+
+          // Only auto-scroll if user is already near bottom
+          if (isNearBottom) {
+            this.scrollToBottom();
+          }
+        }
+      }, 0);
     });
   }
 
