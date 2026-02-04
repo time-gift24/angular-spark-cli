@@ -684,27 +684,28 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   }
 
   /**
-   * Update border color based on hover state
+   * Update border color based on hover/focus state
    *
-   * When hovered: uses brighter/deeper border color with enhanced glow
-   * When not hovered: uses normal border color from theme or custom input
+   * When activated (hovered OR focused): uses brighter accent color with enhanced glow
+   * When not activated: uses normal border color from theme or custom input
    */
   private updateBorderColor(): void {
     if (!this.borderLayer) return;
 
-    const baseBorder = this.lgBorder || 'var(--accent)';
+    const baseColor = this.lgBorder || 'var(--accent)';
+    const activeColor = 'var(--accent-hover)';
 
-    if (this.isHovered) {
-      // Hover state: enhance border with stronger glow
-      this.r.setStyle(this.borderLayer, 'border-color', baseBorder);
+    if (this.isActivated()) {
+      // Activated state: brighter border with enhanced glow
+      this.r.setStyle(this.borderLayer, 'border-color', activeColor);
       this.r.setStyle(
         this.borderLayer,
         'box-shadow',
-        '0 6px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.25), 0 0 0 1px var(--accent), 0 0 12px var(--accent)',
+        '0 6px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.25), 0 0 0 1px var(--accent), 0 0 12px var(--accent-hover)',
       );
     } else {
-      // Normal state: restore original border
-      this.r.setStyle(this.borderLayer, 'border-color', baseBorder);
+      // Default state: normal border with subtle shadow
+      this.r.setStyle(this.borderLayer, 'border-color', baseColor);
       this.r.setStyle(
         this.borderLayer,
         'box-shadow',
