@@ -70,11 +70,22 @@ describe('LiquidGlassDirective', () => {
   });
 
   describe('border behavior', () => {
+    /**
+     * Helper function to create a fresh fixture and get the directive instance.
+     * This reduces code duplication in test setup.
+     */
+    function createFreshFixture(): LiquidGlassDirective {
+      const newFixture = TestBed.createComponent(TestHostComponent);
+      const directiveInstance = newFixture.debugElement
+        .query(By.directive(LiquidGlassDirective))
+        .injector.get(LiquidGlassDirective);
+      newFixture.detectChanges();
+      return directiveInstance;
+    }
+
     it('should use --primary in normal state when lgBorder not provided', () => {
       // Arrange
-      fixture = TestBed.createComponent(TestHostComponent);
-      directive = fixture.debugElement.query(By.directive(LiquidGlassDirective)).injector.get(LiquidGlassDirective);
-      fixture.detectChanges(); // Trigger ngOnInit
+      directive = createFreshFixture();
 
       // Act - ensure normal state (not hovered, not focused)
       directive['isHovered'] = false;
@@ -89,9 +100,7 @@ describe('LiquidGlassDirective', () => {
 
     it('should apply focus ring in activated state', () => {
       // Arrange
-      fixture = TestBed.createComponent(TestHostComponent);
-      directive = fixture.debugElement.query(By.directive(LiquidGlassDirective)).injector.get(LiquidGlassDirective);
-      fixture.detectChanges();
+      directive = createFreshFixture();
 
       // Act - activate by hovering
       directive['isHovered'] = true;
@@ -109,11 +118,11 @@ describe('LiquidGlassDirective', () => {
 
     it('should preserve lgBorder in normal state', () => {
       // Arrange
-      fixture = TestBed.createComponent(TestHostComponent);
-      const element = fixture.debugElement.query(By.directive(LiquidGlassDirective)).nativeElement;
-      element.setAttribute('lgBorder', 'red');
+      directive = createFreshFixture();
+      const debugElement = fixture.debugElement.query(By.directive(LiquidGlassDirective));
+      const nativeElement = debugElement.nativeElement;
 
-      directive = fixture.debugElement.query(By.directive(LiquidGlassDirective)).injector.get(LiquidGlassDirective);
+      nativeElement.setAttribute('lgBorder', 'red');
       directive.lgBorder = 'red';
       fixture.detectChanges();
 
@@ -127,11 +136,11 @@ describe('LiquidGlassDirective', () => {
 
     it('should use primary focus ring even with custom lgBorder', () => {
       // Arrange
-      fixture = TestBed.createComponent(TestHostComponent);
-      const element = fixture.debugElement.query(By.directive(LiquidGlassDirective)).nativeElement;
-      element.setAttribute('lgBorder', 'blue');
+      directive = createFreshFixture();
+      const debugElement = fixture.debugElement.query(By.directive(LiquidGlassDirective));
+      const nativeElement = debugElement.nativeElement;
 
-      directive = fixture.debugElement.query(By.directive(LiquidGlassDirective)).injector.get(LiquidGlassDirective);
+      nativeElement.setAttribute('lgBorder', 'blue');
       directive.lgBorder = 'blue';
       fixture.detectChanges();
 
