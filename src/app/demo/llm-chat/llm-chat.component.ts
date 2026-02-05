@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LlmService } from '@app/shared/services/llm';
+import { LlmService, LlmMessage } from '@app/shared/services/llm';
 
 @Component({
   selector: 'app-llm-chat',
@@ -18,30 +18,42 @@ export class LlmChatComponent {
   readonly isLoading = signal(false);
   readonly error = signal<string | null>(null);
 
-  async sendMessage() {
+  sendMessage() {
     const message = this.userInput().trim();
-    if (!message) return;
+    if (!message || this.isLoading()) return;
 
     this.isLoading.set(true);
     this.error.set(null);
     this.response.set('');
+    this.userInput.set('');
 
-    try {
-      let fullResponse = '';
+    const messages: LlmMessage[] = [
+      { role: 'user', content: message }
+    ];
 
-      // Stream the response
-      for await (const chunk of this.llmService.streamChat(message)) {
-        if (chunk.content) {
+    let fullResponse = '';
+
+    this.llmService.streamChat(messages).subscribe({
+      next: (chunk) => {
+        if (chunk.error) {
+          console.error('LLM Error:', chunk.error);
+          this.error.set(chunk.error.message);
+          this.isLoading.set(false);
+        } else if (chunk.content) {
           fullResponse += chunk.content;
           this.response.set(fullResponse);
         }
+
+        if (chunk.done) {
+          this.isLoading.set(false);
+        }
+      },
+      error: (err) => {
+        console.error('LLM Service Error:', err);
+        this.error.set(err instanceof Error ? err.message : 'Unknown error occurred');
+        this.isLoading.set(false);
       }
-    } catch (err) {
-      console.error('LLM Service Error:', err);
-      this.error.set(err instanceof Error ? err.message : 'Unknown error occurred');
-    } finally {
-      this.isLoading.set(false);
-    }
+    });
   }
 
   clearChat() {
