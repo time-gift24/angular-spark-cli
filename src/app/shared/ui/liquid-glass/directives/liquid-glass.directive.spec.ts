@@ -68,4 +68,82 @@ describe('LiquidGlassDirective', () => {
       expect(directive['isActivated']()).toBe(true);
     });
   });
+
+  describe('border behavior', () => {
+    it('should use --primary in normal state when lgBorder not provided', () => {
+      // Arrange
+      fixture = TestBed.createComponent(TestHostComponent);
+      directive = fixture.debugElement.query(By.directive(LiquidGlassDirective)).injector.get(LiquidGlassDirective);
+      fixture.detectChanges(); // Trigger ngOnInit
+
+      // Act - ensure normal state (not hovered, not focused)
+      directive['isHovered'] = false;
+      directive['isFocused'] = false;
+      directive['updateBorderColor']();
+
+      // Assert
+      const borderLayer = directive['borderLayer'];
+      expect(borderLayer).toBeTruthy();
+      expect(borderLayer.style.borderColor).toBe('var(--primary)');
+    });
+
+    it('should apply focus ring in activated state', () => {
+      // Arrange
+      fixture = TestBed.createComponent(TestHostComponent);
+      directive = fixture.debugElement.query(By.directive(LiquidGlassDirective)).injector.get(LiquidGlassDirective);
+      fixture.detectChanges();
+
+      // Act - activate by hovering
+      directive['isHovered'] = true;
+      directive['updateBorderColor']();
+
+      // Assert
+      const borderLayer = directive['borderLayer'];
+      const boxShadow = borderLayer.style.boxShadow;
+
+      // Should contain the focus ring
+      expect(boxShadow).toContain('0 0 0 3px');
+      expect(boxShadow).toContain('oklch(from var(--primary)');
+      expect(boxShadow).toContain('calc(l + 0.15)');
+    });
+
+    it('should preserve lgBorder in normal state', () => {
+      // Arrange
+      fixture = TestBed.createComponent(TestHostComponent);
+      const element = fixture.debugElement.query(By.directive(LiquidGlassDirective)).nativeElement;
+      element.setAttribute('lgBorder', 'red');
+
+      directive = fixture.debugElement.query(By.directive(LiquidGlassDirective)).injector.get(LiquidGlassDirective);
+      directive.lgBorder = 'red';
+      fixture.detectChanges();
+
+      // Act
+      directive['isFocused'] = false;
+      directive['updateBorderColor']();
+
+      // Assert
+      expect(directive['borderLayer'].style.borderColor).toBe('red');
+    });
+
+    it('should use primary focus ring even with custom lgBorder', () => {
+      // Arrange
+      fixture = TestBed.createComponent(TestHostComponent);
+      const element = fixture.debugElement.query(By.directive(LiquidGlassDirective)).nativeElement;
+      element.setAttribute('lgBorder', 'blue');
+
+      directive = fixture.debugElement.query(By.directive(LiquidGlassDirective)).injector.get(LiquidGlassDirective);
+      directive.lgBorder = 'blue';
+      fixture.detectChanges();
+
+      // Act - activate
+      directive['isHovered'] = true;
+      directive['updateBorderColor']();
+
+      // Assert - border keeps custom color, but focus ring uses primary
+      expect(directive['borderLayer'].style.borderColor).toBe('blue');
+
+      const boxShadow = directive['borderLayer'].style.boxShadow;
+      expect(boxShadow).toContain('var(--primary)'); // Focus ring uses primary
+    });
+  });
 });
