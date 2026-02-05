@@ -60,6 +60,27 @@ import { LiquidGlassDirective } from '@shared/ui/liquid-glass';
 </div>
 ```
 
+### Border Colors
+
+The liquid-glass directive uses the design system's primary color for borders:
+
+- **Normal State**: Uses `--primary` (石绿 Malachite) by default
+- **Activated State**: Adds a focus ring with `oklch(from var(--primary) calc(l + 0.15) c h / 0.25)`
+
+This matches the input component's border behavior for design system consistency.
+
+### Custom Border Colors
+
+You can override the border color using the `lgBorder` input:
+
+```html
+<div liquidGlass lgBorder="red">
+  Custom red border
+</div>
+```
+
+**Note:** The focus ring in activated state always uses the primary color for consistency, even when `lgBorder` is set.
+
 ### Spacing & Layout
 
 ```html
