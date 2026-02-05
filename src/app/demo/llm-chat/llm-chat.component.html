@@ -1,0 +1,70 @@
+<div class="llm-chat-container">
+  <div class="chat-header">
+    <h1>LLM Chat Demo</h1>
+    <p class="subtitle">Test the LLM service integration</p>
+  </div>
+
+  <div class="chat-content">
+    <!-- Error Display -->
+    @if (error()) {
+      <div class="error-message">
+        <strong>Error:</strong> {{ error() }}
+      </div>
+    }
+
+    <!-- Response Display -->
+    @if (response()) {
+      <div class="response-box">
+        <h3>Response:</h3>
+        <div class="response-content">{{ response() }}</div>
+      </div>
+    }
+
+    <!-- Loading Indicator -->
+    @if (isLoading()) {
+      <div class="loading-indicator">
+        <span class="spinner"></span>
+        Generating response...
+      </div>
+    }
+
+    <!-- Input Area -->
+    <div class="input-area">
+      <textarea
+        [(ngModel)]="userInput"
+        placeholder="Enter your message here..."
+        [disabled]="isLoading()"
+        rows="4"
+        class="message-input"
+      ></textarea>
+
+      <div class="button-group">
+        <button
+          (click)="sendMessage()"
+          [disabled]="isLoading() || !userInput().trim()"
+          class="btn btn-primary"
+        >
+          @if (isLoading()) {
+            Sending...
+          } @else {
+            Send Message
+          }
+        </button>
+
+        <button
+          (click)="clearChat()"
+          [disabled]="isLoading()"
+          class="btn btn-secondary"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="info-box">
+      <strong>Note:</strong> Make sure to configure your API key in
+      <code>src/app/app.config.ts</code> before using this demo.
+    </div>
+  </div>
+</div>
