@@ -163,6 +163,11 @@ export const routes: Routes = [
             (m) => m.DemoMultiSessionChatComponent,
           ),
       },
+      {
+        path: 'llm-chat',
+        loadComponent: () =>
+          import('./demo/llm-chat/llm-chat.component').then((m) => m.LlmChatComponent),
+      },
     ],
   },
 ];
