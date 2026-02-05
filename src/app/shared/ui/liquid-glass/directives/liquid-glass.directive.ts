@@ -173,6 +173,13 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   @Input() lgBorderWidth: number = 1;
 
   /**
+   * Border width in pixels when activated (hovered or focused)
+   *
+   * @default 2
+   */
+  @Input() lgBorderWidthActive: number = 2;
+
+  /**
    * Internal padding in pixels
    *
    * Note: This is for the overlay only, not the host content
@@ -475,7 +482,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     this.r.setStyle(this.borderLayer, 'inset', '0');
     this.r.setStyle(this.borderLayer, 'border-radius', 'inherit');
     this.r.setStyle(this.borderLayer, 'z-index', '0'); // Above overlay (-1)
-    this.r.setStyle(this.borderLayer, 'transition', 'box-shadow 0.2s ease-out');
+    this.r.setStyle(this.borderLayer, 'transition', 'box-shadow 0.2s ease-out, border-color 0.2s ease-out, border-width 0.2s ease-out');
 
     // ----- Initial Border Styles -----
     const borderColor = this.lgBorder || 'var(--accent)';
@@ -686,25 +693,27 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   /**
    * Update border color based on hover/focus state
    *
-   * When activated (hovered OR focused): uses brighter accent color with enhanced glow
+   * When activated (hovered OR focused): uses deeper red-gold accent color with enhanced glow
    * When not activated: uses normal border color from theme or custom input
    */
   private updateBorderColor(): void {
     if (!this.borderLayer) return;
 
     const baseColor = this.lgBorder || 'var(--accent)';
-    const activeColor = 'var(--accent-hover)';
+    const activeColor = 'var(--accent-active)';
 
     if (this.isActivated()) {
-      // Activated state: brighter border with enhanced glow
+      // Activated state: deeper red-gold border, thicker, enhanced glow
+      this.r.setStyle(this.borderLayer, 'border-width', `${this.lgBorderWidthActive}px`);
       this.r.setStyle(this.borderLayer, 'border-color', activeColor);
       this.r.setStyle(
         this.borderLayer,
         'box-shadow',
-        '0 6px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.25), 0 0 0 1px var(--accent), 0 0 12px var(--accent-hover)',
+        '0 6px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.25), 0 0 0 1px var(--accent), 0 0 12px var(--accent-active)',
       );
     } else {
       // Default state: normal border with subtle shadow
+      this.r.setStyle(this.borderLayer, 'border-width', `${this.lgBorderWidth}px`);
       this.r.setStyle(this.borderLayer, 'border-color', baseColor);
       this.r.setStyle(
         this.borderLayer,

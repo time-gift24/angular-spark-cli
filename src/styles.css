@@ -215,6 +215,7 @@
     --accent: oklch(0.7 0.12 75);
     --accent-foreground: oklch(0.98 0.01 85);
     --accent-hover: oklch(0.8 0.15 75); /* Brighter, more saturated */
+    --accent-active: oklch(0.6 0.18 65); /* 偏红的泥金色 - 激活态 */
 
     /* Destructive - 深红: 保持足够的对比度和可读性 */
     --destructive: oklch(0.5 0.2 25);
@@ -274,6 +275,7 @@
     --accent: oklch(0.75 0.14 75);
     --accent-foreground: oklch(0.2 0.04 230);
     --accent-hover: oklch(0.82 0.16 75); /* Brighter, more saturated */
+    --accent-active: oklch(0.65 0.19 65); /* 偏红的泥金色 - 激活态 */
 
     /* Destructive - 亮红: 暗色模式下保持足够的对比度 */
     --destructive: oklch(0.65 0.2 25);
