@@ -485,7 +485,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     this.r.setStyle(this.borderLayer, 'transition', 'box-shadow 0.2s ease-out, border-color 0.2s ease-out, border-width 0.2s ease-out');
 
     // ----- Initial Border Styles -----
-    const borderColor = this.lgBorder || 'var(--accent)';
+    const borderColor = this.lgBorder || 'var(--primary)';
     this.r.setStyle(this.borderLayer, 'border-width', `${this.lgBorderWidth}px`);
     this.r.setStyle(this.borderLayer, 'border-style', 'solid');
     this.r.setStyle(this.borderLayer, 'border-color', borderColor);
