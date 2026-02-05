@@ -693,33 +693,29 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   /**
    * Update border color based on hover/focus state
    *
-   * When activated (hovered OR focused): uses deeper red-gold accent color with enhanced glow
+   * When activated (hovered OR focused): uses primary color with external focus ring
    * When not activated: uses normal border color from theme or custom input
    */
   private updateBorderColor(): void {
     if (!this.borderLayer) return;
 
     const baseColor = this.lgBorder || 'var(--primary)';
-    const activeColor = 'var(--accent-active)';
+
+    // Shadow constants
+    const baseShadow = '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)';
+    const focusRing = '0 0 0 3px oklch(from var(--primary) calc(l + 0.15) c h / 0.25)';
+    const activatedShadow = '0 6px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.25), ' + focusRing;
 
     if (this.isActivated()) {
-      // Activated state: deeper red-gold border, thicker, enhanced glow
-      this.r.setStyle(this.borderLayer, 'border-width', `${this.lgBorderWidthActive}px`);
-      this.r.setStyle(this.borderLayer, 'border-color', activeColor);
-      this.r.setStyle(
-        this.borderLayer,
-        'box-shadow',
-        '0 6px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.25), 0 0 0 1px var(--accent), 0 0 12px var(--accent-active)',
-      );
-    } else {
-      // Default state: normal border with subtle shadow
-      this.r.setStyle(this.borderLayer, 'border-width', `${this.lgBorderWidth}px`);
+      // Activated state: keep border color, add focus ring
       this.r.setStyle(this.borderLayer, 'border-color', baseColor);
-      this.r.setStyle(
-        this.borderLayer,
-        'box-shadow',
-        '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)',
-      );
+      this.r.setStyle(this.borderLayer, 'border-width', `${this.lgBorderWidthActive}px`);
+      this.r.setStyle(this.borderLayer, 'box-shadow', activatedShadow);
+    } else {
+      // Normal state: use primary/base color
+      this.r.setStyle(this.borderLayer, 'border-color', baseColor);
+      this.r.setStyle(this.borderLayer, 'border-width', `${this.lgBorderWidth}px`);
+      this.r.setStyle(this.borderLayer, 'box-shadow', baseShadow);
     }
   }
 }
