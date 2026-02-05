@@ -699,7 +699,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   private updateBorderColor(): void {
     if (!this.borderLayer) return;
 
-    const baseColor = this.lgBorder || 'var(--accent)';
+    const baseColor = this.lgBorder || 'var(--primary)';
     const activeColor = 'var(--accent-active)';
 
     if (this.isActivated()) {
