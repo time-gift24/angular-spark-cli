@@ -8,7 +8,7 @@ import {
   inject,
 } from '@angular/core';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@app/shared';
+import { cn } from '@app/shared/utils';
 
 /**
  * Button variants using class-variance-authority

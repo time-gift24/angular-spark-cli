@@ -28,7 +28,7 @@ import { StatusBadgesComponent } from '../status-badges/status-badges.component'
 import { SessionToggleComponent } from '../session-toggle-button/session-toggle-button.component';
 import { StatusBadge, BadgeType, ChatMessage as AiChatChatMessage } from '../types/chat.types';
 import { SessionData, SessionStatus, SessionColor, ChatMessage } from '@app/shared/models';
-import { cn } from '@app/shared';
+import { cn } from '@app/shared/utils';
 
 /**
  * Storage key for sessions data

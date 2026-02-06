@@ -35,7 +35,7 @@ import {
   actionButton,
   actionIcon,
 } from './css';
-import { cn } from '@app/shared';
+import { cn } from '@app/shared/utils';
 
 /**
  * Chat messages card component
@@ -63,21 +63,9 @@ import { cn } from '@app/shared';
       [cdkDragStartDelay]="0"
       [cdkDragDisabled]="isResizing()"
     >
-      <!-- Drag Handle -->
+      <!-- Drag Handle — iOS-style pill grabber -->
       <div class="drag-handle" cdkDragHandle>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
+        <div class="drag-pill"></div>
       </div>
 
       <!-- Resize Handle (Top-Right corner) -->

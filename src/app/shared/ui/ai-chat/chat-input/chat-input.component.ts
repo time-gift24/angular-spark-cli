@@ -29,7 +29,7 @@ import {
   toolbarIcon,
   sendIcon,
 } from './css';
-import { cn } from '@app/shared';
+import { cn } from '@app/shared/utils';
 
 /**
  * Chat input component with modern pill design
@@ -42,7 +42,7 @@ import { cn } from '@app/shared';
   imports: [LiquidGlassDirective, ButtonComponent],
   styleUrls: ['./chat-input.component.css'],
   host: {
-    '[class]': 'hostClasses()',
+    class: 'block',
   },
   template: `
     <div [class]="inputContainer">
@@ -270,8 +270,6 @@ export class ChatInputComponent {
   readonly sendIconBase = sendIcon;
 
   // Computed classes
-  protected hostClasses = computed(() => cn('block', this.isFocused() ? 'focused' : ''));
-
   protected inputWrapperClasses = computed(() =>
     cn(this.inputWrapper, this.isFocused() ? 'focus-within' : ''),
   );

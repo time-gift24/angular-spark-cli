@@ -178,6 +178,53 @@
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
+  /* Spring easing curves via CSS linear() */
+  /*
+   * Spring-smooth: gentle settle, no visible overshoot
+   * Use for: collapse/expand, fade transitions, subtle state changes
+   */
+  --ease-spring-smooth: linear(
+    0, 0.011, 0.044, 0.098, 0.175, 0.273, 0.393, 0.535,
+    0.696, 0.869, 1.035, 1.17, 1.251, 1.274, 1.249,
+    1.196, 1.13, 1.067, 1.014, 0.978, 0.959, 0.954,
+    0.961, 0.975, 0.99, 1.002, 1.008, 1.008, 1.004, 1
+  );
+
+  /*
+   * Spring-bounce: visible overshoot + settle
+   * Use for: panel open, element entrance, tab switch indicator
+   */
+  --ease-spring-bounce: linear(
+    0, 0.009, 0.035, 0.078, 0.141, 0.223, 0.326, 0.447,
+    0.583, 0.73, 0.876, 1.01, 1.12, 1.194, 1.229, 1.226,
+    1.191, 1.131, 1.056, 0.975, 0.9, 0.84, 0.802, 0.785,
+    0.793, 0.822, 0.867, 0.92, 0.972, 1.012, 1.034, 1.035,
+    1.016, 0.987, 0.956, 0.932, 0.92, 0.924, 0.942, 0.968,
+    0.996, 1.014, 1.02, 1.013, 1
+  );
+
+  /*
+   * Spring-snappy: fast attack, quick settle, minimal overshoot
+   * Use for: button press feedback, micro-interactions, hover states
+   */
+  --ease-spring-snappy: linear(
+    0, 0.05, 0.18, 0.37, 0.58, 0.77, 0.91, 1.01,
+    1.07, 1.08, 1.05, 1.01, 0.98, 0.97, 0.98, 0.99, 1
+  );
+
+  /* Spring animation durations */
+  --duration-spring-fast: 350ms;
+  --duration-spring-normal: 500ms;
+  --duration-spring-slow: 700ms;
+
+  /* Stagger delay tokens for choreographed entrances */
+  --stagger-1: 0ms;
+  --stagger-2: 40ms;
+  --stagger-3: 80ms;
+  --stagger-4: 120ms;
+  --stagger-5: 160ms;
+  --stagger-6: 200ms;
+
   /* Opacity levels */
   --opacity-disabled: 0.5;
   --opacity-hover: 0.9;
@@ -333,5 +380,94 @@
   }
   small {
     @apply text-xs font-normal;
+  }
+}
+
+/* === Spring Animation Keyframes === */
+
+/* Panel entrance: scale + fade from bottom-right origin */
+@keyframes spring-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Panel exit: scale + fade to bottom-right origin */
+@keyframes spring-scale-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+}
+
+/* Message bubble entrance: slight scale + vertical slide */
+@keyframes spring-message-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Generic fade + slide up (for content sections) */
+@keyframes spring-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Button press: scale down then spring back (applied on :active) */
+@keyframes spring-press {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Collapse: height shrink with fade */
+@keyframes spring-collapse {
+  from {
+    opacity: 1;
+    transform: scaleY(1);
+    max-height: 999px;
+  }
+  to {
+    opacity: 0;
+    transform: scaleY(0.95);
+    max-height: 0;
+  }
+}
+
+/* Expand: height grow with fade */
+@keyframes spring-expand {
+  from {
+    opacity: 0;
+    transform: scaleY(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
   }
 }
