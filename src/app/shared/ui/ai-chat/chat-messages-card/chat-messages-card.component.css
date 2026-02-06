@@ -18,7 +18,7 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity var(--duration-fast) var(--ease-out);
+  transition: opacity var(--duration-spring-fast) var(--ease-spring-smooth);
 }
 
 .chat-messages-card:hover .resize-handle {
@@ -96,7 +96,7 @@
 .resize-handle-left:hover,
 .resize-handle-right:hover {
   background-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
-  transition: background-color var(--duration-instant) var(--ease-out);
+  transition: background-color var(--duration-spring-fast) var(--ease-spring-smooth), opacity var(--duration-spring-fast) var(--ease-spring-smooth);
   opacity: 1 !important;
 }
 
@@ -119,16 +119,18 @@
   z-index: var(--z-drag-handle);
 }
 
-.drag-handle svg {
-  width: 1rem;
-  height: 1rem;
-  color: var(--color-primary);
-  opacity: 0.6;
-  transition: opacity var(--duration-fast) var(--ease-out);
+.drag-pill {
+  width: 36px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--color-muted-foreground);
+  opacity: 0.35;
+  transition: opacity var(--duration-spring-fast) var(--ease-spring-smooth), width var(--duration-spring-fast) var(--ease-spring-snappy);
 }
 
-.drag-handle:hover svg {
-  opacity: 1;
+.drag-handle:hover .drag-pill {
+  opacity: 0.7;
+  width: 44px;
 }
 
 /* CDK Drag Preview Styles */
@@ -149,34 +151,49 @@
 
 /* Slide in animation */
 .chat-messages-card {
-  animation: slideInRight 0.4s ease-out;
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  animation: spring-scale-in var(--duration-spring-normal) var(--ease-spring-bounce);
+  transform-origin: top center;
 }
 
 /* Message slide in animation */
 .message {
-  animation: messageSlideIn 0.3s ease-out;
+  animation: spring-message-in var(--duration-spring-fast) var(--ease-spring-bounce);
 }
 
-@keyframes messageSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.message.justify-end {
+  /* User messages: spring from right */
+  transform-origin: bottom right;
+}
+
+.message.justify-start {
+  /* Assistant messages: spring from left */
+  transform-origin: bottom left;
+}
+
+/* Message stagger for initial load */
+.message:nth-child(1) {
+  animation-delay: var(--stagger-1);
+  animation-fill-mode: backwards;
+}
+
+.message:nth-child(2) {
+  animation-delay: var(--stagger-2);
+  animation-fill-mode: backwards;
+}
+
+.message:nth-child(3) {
+  animation-delay: var(--stagger-3);
+  animation-fill-mode: backwards;
+}
+
+.message:nth-child(4) {
+  animation-delay: var(--stagger-4);
+  animation-fill-mode: backwards;
+}
+
+.message:nth-child(5) {
+  animation-delay: var(--stagger-5);
+  animation-fill-mode: backwards;
 }
 
 /* Scrollbar */
@@ -209,5 +226,18 @@
     top: 75px;
     width: calc(100vw - 32px);
     max-height: 50vh;
+  }
+}
+
+/* ===== Accessibility ===== */
+@media (prefers-reduced-motion: reduce) {
+  .chat-messages-card,
+  .message {
+    animation: none;
+  }
+
+  .drag-pill,
+  .resize-handle {
+    transition: none;
   }
 }

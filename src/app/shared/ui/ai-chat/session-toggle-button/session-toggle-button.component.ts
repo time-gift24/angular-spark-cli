@@ -13,7 +13,7 @@ import {
   notificationBadge,
   toggleIcon,
 } from './css';
-import { cn } from '@app/shared';
+import { cn } from '@app/shared/utils';
 
 /**
  * Session toggle button component

@@ -25,7 +25,7 @@ export const sessionToggleBase = [
   'shadow-[0_6px_20px_oklch(0.28_0.03_185_/25%),0_0_0_3px_oklch(0.48_0.07_195_/30%)]',
   'cursor-pointer',
   'flex items-center justify-center',
-  'transition-all duration-300 ease-in-out',
+  'transition-transform duration-[350ms] ease-[var(--ease-spring-snappy)]',
   'z-[1000]',
   'p-0 text-white',
   'hover:bg-[oklch(0.48_0.07_195)]',
