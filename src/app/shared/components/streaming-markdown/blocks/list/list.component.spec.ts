@@ -23,13 +23,14 @@ describe('MarkdownListComponent', () => {
   let component: MarkdownListComponent;
   let fixture: ComponentFixture<MarkdownListComponent>;
 
-  const createMockBlock = (content: string, items?: MarkdownBlock[]): MarkdownBlock => ({
+  const createMockBlock = (content: string, items?: MarkdownBlock[], subtype?: 'ordered' | 'unordered'): MarkdownBlock => ({
     id: `block-${Math.random()}`,
     type: BlockType.LIST,
     content,
     isComplete: true,
     position: 0,
-    items
+    items,
+    subtype
   });
 
   beforeEach(async () => {
@@ -39,6 +40,8 @@ describe('MarkdownListComponent', () => {
 
     fixture = TestBed.createComponent(MarkdownListComponent);
     component = fixture.componentInstance;
+    // Provide a default block so the component doesn't error on required input
+    component.block = createMockBlock('', []);
   });
 
   describe('Component Creation', () => {
@@ -64,13 +67,12 @@ describe('MarkdownListComponent', () => {
   });
 
   describe('Unordered List Rendering', () => {
-    it('should render ul element when ordered is false', () => {
-      component.items = [
+    it('should render ul element when subtype is not ordered', () => {
+      component.block = createMockBlock('', [
         createMockBlock('Item 1'),
         createMockBlock('Item 2'),
         createMockBlock('Item 3')
-      ];
-      component.ordered = false;
+      ]);
       fixture.detectChanges();
 
       const ul = fixture.nativeElement.querySelector('ul');
@@ -78,9 +80,8 @@ describe('MarkdownListComponent', () => {
       expect(ul.classList.contains('markdown-list')).toBe(true);
     });
 
-    it('should not render ol when ordered is false', () => {
-      component.items = [createMockBlock('Item')];
-      component.ordered = false;
+    it('should not render ol when subtype is not ordered', () => {
+      component.block = createMockBlock('', [createMockBlock('Item')]);
       fixture.detectChanges();
 
       const ol = fixture.nativeElement.querySelector('ol');
@@ -88,11 +89,11 @@ describe('MarkdownListComponent', () => {
     });
 
     it('should render all list items', () => {
-      component.items = [
+      component.block = createMockBlock('', [
         createMockBlock('First'),
         createMockBlock('Second'),
         createMockBlock('Third')
-      ];
+      ]);
       fixture.detectChanges();
 
       const lis = fixture.nativeElement.querySelectorAll('li');
@@ -103,7 +104,7 @@ describe('MarkdownListComponent', () => {
     });
 
     it('should apply correct CSS classes to list items', () => {
-      component.items = [createMockBlock('Test')];
+      component.block = createMockBlock('', [createMockBlock('Test')]);
       fixture.detectChanges();
 
       const li = fixture.nativeElement.querySelector('li');
@@ -113,12 +114,11 @@ describe('MarkdownListComponent', () => {
   });
 
   describe('Ordered List Rendering', () => {
-    it('should render ol element when ordered is true', () => {
-      component.items = [
+    it('should render ol element when subtype is ordered', () => {
+      component.block = createMockBlock('', [
         createMockBlock('Item 1'),
         createMockBlock('Item 2')
-      ];
-      component.ordered = true;
+      ], 'ordered');
       fixture.detectChanges();
 
       const ol = fixture.nativeElement.querySelector('ol');
@@ -126,9 +126,8 @@ describe('MarkdownListComponent', () => {
       expect(ol.classList.contains('markdown-list')).toBe(true);
     });
 
-    it('should not render ul when ordered is true', () => {
-      component.items = [createMockBlock('Item')];
-      component.ordered = true;
+    it('should not render ul when subtype is ordered', () => {
+      component.block = createMockBlock('', [createMockBlock('Item')], 'ordered');
       fixture.detectChanges();
 
       const ul = fixture.nativeElement.querySelector('ul');
@@ -136,11 +135,10 @@ describe('MarkdownListComponent', () => {
     });
 
     it('should render list items in ol', () => {
-      component.items = [
+      component.block = createMockBlock('', [
         createMockBlock('First'),
         createMockBlock('Second')
-      ];
-      component.ordered = true;
+      ], 'ordered');
       fixture.detectChanges();
 
       const lis = fixture.nativeElement.querySelectorAll('ol li');
@@ -150,13 +148,12 @@ describe('MarkdownListComponent', () => {
 
   describe('Nested List Support', () => {
     it('should render nested lists', () => {
-      component.items = [
+      component.block = createMockBlock('', [
         createMockBlock('Parent 1', [
           createMockBlock('Child 1.1'),
           createMockBlock('Child 1.2')
         ])
-      ];
-      component.ordered = false;
+      ]);
       fixture.detectChanges();
 
       const nestedList = fixture.nativeElement.querySelector('app-markdown-list');
@@ -164,11 +161,11 @@ describe('MarkdownListComponent', () => {
     });
 
     it('should pass depth to nested lists', () => {
-      component.items = [
+      component.block = createMockBlock('', [
         createMockBlock('Parent', [
           createMockBlock('Child')
         ])
-      ];
+      ]);
       component.depth = 0;
       fixture.detectChanges();
 
@@ -176,27 +173,14 @@ describe('MarkdownListComponent', () => {
       expect(nestedList.getAttribute('ng-reflect-depth')).toBe('1');
     });
 
-    it('should maintain ordered type in nested lists', () => {
-      component.items = [
-        createMockBlock('Parent', [
-          createMockBlock('Child')
-        ])
-      ];
-      component.ordered = true;
-      fixture.detectChanges();
-
-      const nestedList = fixture.nativeElement.querySelector('app-markdown-list');
-      expect(nestedList.getAttribute('ng-reflect-ordered')).toBe('true');
-    });
-
     it('should handle multiple levels of nesting', () => {
-      component.items = [
+      component.block = createMockBlock('', [
         createMockBlock('Level 1', [
           createMockBlock('Level 2', [
             createMockBlock('Level 3')
           ])
         ])
-      ];
+      ]);
       component.depth = 0;
       fixture.detectChanges();
 
@@ -205,11 +189,11 @@ describe('MarkdownListComponent', () => {
     });
 
     it('should apply depth-specific classes to nested items', () => {
-      component.items = [
+      component.block = createMockBlock('', [
         createMockBlock('Parent', [
           createMockBlock('Child')
         ])
-      ];
+      ]);
       component.depth = 1;
       fixture.detectChanges();
 
@@ -220,7 +204,7 @@ describe('MarkdownListComponent', () => {
 
   describe('CSS Classes', () => {
     it('should apply markdown-list class to list element', () => {
-      component.items = [createMockBlock('Test')];
+      component.block = createMockBlock('', [createMockBlock('Test')]);
       fixture.detectChanges();
 
       const list = fixture.nativeElement.querySelector('ul');
@@ -228,7 +212,7 @@ describe('MarkdownListComponent', () => {
     });
 
     it('should apply block-list class to list element', () => {
-      component.items = [createMockBlock('Test')];
+      component.block = createMockBlock('', [createMockBlock('Test')]);
       fixture.detectChanges();
 
       const list = fixture.nativeElement.querySelector('ul');
@@ -236,7 +220,7 @@ describe('MarkdownListComponent', () => {
     });
 
     it('should include depth in item class', () => {
-      component.items = [createMockBlock('Test')];
+      component.block = createMockBlock('', [createMockBlock('Test')]);
       component.depth = 2;
       fixture.detectChanges();
 
@@ -245,10 +229,10 @@ describe('MarkdownListComponent', () => {
     });
 
     it('should apply list-item class to all items', () => {
-      component.items = [
+      component.block = createMockBlock('', [
         createMockBlock('Item 1'),
         createMockBlock('Item 2')
-      ];
+      ]);
       fixture.detectChanges();
 
       const lis = fixture.nativeElement.querySelectorAll('li');
@@ -260,7 +244,6 @@ describe('MarkdownListComponent', () => {
   describe('getItemClass Method', () => {
     it('should return correct class for depth 0', () => {
       component.depth = 0;
-      // Access through test since getItemClass is protected
       const itemClass = (component as any).getItemClass();
       expect(itemClass).toBe('list-item depth-0');
     });
@@ -280,7 +263,7 @@ describe('MarkdownListComponent', () => {
 
   describe('Edge Cases', () => {
     it('should handle empty items array', () => {
-      component.items = [];
+      component.block = createMockBlock('', []);
       fixture.detectChanges();
 
       const lis = fixture.nativeElement.querySelectorAll('li');
@@ -288,7 +271,7 @@ describe('MarkdownListComponent', () => {
     });
 
     it('should handle single item', () => {
-      component.items = [createMockBlock('Only item')];
+      component.block = createMockBlock('', [createMockBlock('Only item')]);
       fixture.detectChanges();
 
       const lis = fixture.nativeElement.querySelectorAll('li');
@@ -296,7 +279,7 @@ describe('MarkdownListComponent', () => {
     });
 
     it('should handle item with empty content', () => {
-      component.items = [createMockBlock('')];
+      component.block = createMockBlock('', [createMockBlock('')]);
       fixture.detectChanges();
 
       const li = fixture.nativeElement.querySelector('li');
@@ -304,7 +287,7 @@ describe('MarkdownListComponent', () => {
     });
 
     it('should handle item with special characters', () => {
-      component.items = [createMockBlock('Item with <special> & "characters"')];
+      component.block = createMockBlock('', [createMockBlock('Item with <special> & "characters"')]);
       fixture.detectChanges();
 
       const li = fixture.nativeElement.querySelector('li');
@@ -313,7 +296,7 @@ describe('MarkdownListComponent', () => {
 
     it('should handle item with very long content', () => {
       const longContent = 'A'.repeat(500);
-      component.items = [createMockBlock(longContent)];
+      component.block = createMockBlock('', [createMockBlock(longContent)]);
       fixture.detectChanges();
 
       const li = fixture.nativeElement.querySelector('li');
@@ -321,9 +304,9 @@ describe('MarkdownListComponent', () => {
     });
 
     it('should handle item with empty nested items array', () => {
-      component.items = [
+      component.block = createMockBlock('', [
         createMockBlock('Parent', [])
-      ];
+      ]);
       fixture.detectChanges();
 
       const nestedList = fixture.nativeElement.querySelector('app-markdown-list');
@@ -331,9 +314,9 @@ describe('MarkdownListComponent', () => {
     });
 
     it('should handle null nested items', () => {
-      component.items = [
+      component.block = createMockBlock('', [
         createMockBlock('Parent', null as unknown as MarkdownBlock[])
-      ];
+      ]);
       fixture.detectChanges();
 
       const li = fixture.nativeElement.querySelector('li');
@@ -346,7 +329,7 @@ describe('MarkdownListComponent', () => {
       const items = Array.from({ length: 100 }, (_, i) =>
         createMockBlock(`Item ${i}`)
       );
-      component.items = items;
+      component.block = createMockBlock('', items);
       fixture.detectChanges();
 
       const lis = fixture.nativeElement.querySelectorAll('li');
@@ -356,11 +339,11 @@ describe('MarkdownListComponent', () => {
 
   describe('Mixed Content', () => {
     it('should handle items with and without nested lists', () => {
-      component.items = [
+      component.block = createMockBlock('', [
         createMockBlock('Item 1'),
         createMockBlock('Item 2', [createMockBlock('Nested')]),
         createMockBlock('Item 3')
-      ];
+      ]);
       fixture.detectChanges();
 
       const lis = fixture.nativeElement.querySelectorAll('ul > li');

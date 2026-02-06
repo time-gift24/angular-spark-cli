@@ -1,91 +1,77 @@
 /**
  * Markdown Block Router Component
  *
- * Routes markdown blocks to their respective rendering components
- * based on block type. Handles unknown types with graceful fallback.
+ * Dynamically routes markdown blocks to their registered renderer components
+ * using NgComponentOutlet and the plugin-based BlockComponentRegistry.
  *
- * Phase 3 - Router Implementation
+ * Lookup order:
+ * 1. Custom matchers from plugins (in registration order)
+ * 2. Direct type → component map lookup
+ * 3. Fallback to UNKNOWN or PARAGRAPH component
  */
 
-import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { MarkdownBlock, BlockType } from '../../core/models';
-import { MarkdownParagraphComponent } from '../paragraph/paragraph.component';
-import { MarkdownHeadingComponent } from '../heading/heading.component';
-import { MarkdownCodeComponent } from '../code/code.component';
-import { MarkdownListComponent } from '../list/list.component';
-import { MarkdownBlockquoteComponent } from '../blockquote/blockquote.component';
+import { BLOCK_COMPONENT_REGISTRY, BlockComponentRegistry } from '../../core/plugin';
 
 @Component({
   selector: 'app-markdown-block-router',
   standalone: true,
-  imports: [
-    CommonModule,
-    MarkdownParagraphComponent,
-    MarkdownHeadingComponent,
-    MarkdownCodeComponent,
-    MarkdownListComponent,
-    MarkdownBlockquoteComponent
-  ],
+  imports: [CommonModule, NgComponentOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="markdown-block-router" [attr.data-block-type]="block.type">
-      @switch (block.type) {
-        @case ('paragraph') {
-          <app-markdown-paragraph
-            [content]="block.content"
-            [streaming]="!isComplete" />
-        }
-        @case ('heading') {
-          <app-markdown-heading
-            [level]="block.level || 1"
-            [content]="block.content"
-            [streaming]="!isComplete" />
-        }
-        @case ('code') {
-          <app-markdown-code
-            [code]="block.rawContent || block.content"
-            [language]="block.language || 'text'"
-            [streaming]="!isComplete" />
-        }
-        @case ('list') {
-          <app-markdown-list
-            [items]="block.items || []"
-            [ordered]="block.subtype === 'ordered'"
-            [depth]="0" />
-        }
-        @case ('blockquote') {
-          <app-markdown-blockquote
-            [content]="block.content"
-            [streaming]="!isComplete" />
-        }
-        @default {
-          <app-markdown-paragraph [content]="block.content" />
-        }
+      @if (resolvedComponent()) {
+        <ng-container
+          *ngComponentOutlet="resolvedComponent(); inputs: resolvedInputs()" />
       }
     </div>
   `
 })
-export class MarkdownBlockRouterComponent implements OnChanges {
+export class MarkdownBlockRouterComponent {
   @Input({ required: true }) block!: MarkdownBlock;
   @Input() isComplete: boolean = true;
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['block'] && changes['block'].currentValue) {
-      const block = changes['block'].currentValue as MarkdownBlock;
+  private registry = inject(BLOCK_COMPONENT_REGISTRY);
 
-      // Log warning for unknown block types
-      const knownTypes = [
-        BlockType.PARAGRAPH,
-        BlockType.HEADING,
-        BlockType.CODE_BLOCK,
-        BlockType.LIST,
-        BlockType.BLOCKQUOTE
-      ];
+  resolvedComponent = computed(() => this.lookupComponent(this.block));
 
-      if (!knownTypes.includes(block.type)) {
-        console.warn(`[MarkdownBlockRouter] Unknown block type: ${block.type}, rendering as paragraph`);
+  resolvedInputs = computed(() => ({
+    block: this.block,
+    isComplete: this.isComplete
+  }));
+
+  private lookupComponent(block: MarkdownBlock): any {
+    if (!block) return null;
+
+    // 1. Check custom matchers first
+    for (const entry of this.registry.matchers) {
+      if (entry.matcher(block)) {
+        // Return the first component from the matching plugin
+        const keys = Object.keys(entry.components);
+        if (keys.length > 0) {
+          return entry.components[keys[0]];
+        }
       }
     }
+
+    // 2. Direct type lookup
+    const component = this.registry.componentMap.get(block.type);
+    if (component) {
+      return component;
+    }
+
+    // 3. Fallback chain: UNKNOWN → PARAGRAPH → null
+    const fallback =
+      this.registry.componentMap.get(BlockType.UNKNOWN) ||
+      this.registry.componentMap.get(BlockType.PARAGRAPH);
+
+    if (fallback) {
+      return fallback;
+    }
+
+    console.warn(`[MarkdownBlockRouter] No component found for block type: ${block.type}`);
+    return null;
   }
 }

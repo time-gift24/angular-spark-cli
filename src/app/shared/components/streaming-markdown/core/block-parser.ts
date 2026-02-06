@@ -150,7 +150,7 @@ export interface IBlockParser {
  * Implementation of the block parser service.
  * Uses marked.js for tokenization and custom logic for block assembly.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class BlockParser implements IBlockParser {
   /**
    * Parses markdown text into blocks.

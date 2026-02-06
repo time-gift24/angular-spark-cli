@@ -1,18 +1,19 @@
 /**
  * Markdown Code Component
  *
- * Renders code blocks with syntax highlighting using Shiki.
+ * Renders code blocks with syntax highlighting using Shiki token-based rendering.
  * Includes language label, copy button, and line numbers.
  * Falls back to plain text if highlighting fails.
  * Skips highlighting during streaming for performance.
  *
- * Phase 3 - Task 3.3 Implementation
+ * Implements BlockRenderer interface for plugin architecture.
+ * Uses token-based rendering (no innerHTML / DomSanitizer).
  */
 
-import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy, inject, ViewEncapsulation } from '@angular/core';
+import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, of, timeout, catchError, from, switchMap } from 'rxjs';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { from, switchMap, timeout, catchError, of } from 'rxjs';
+import { MarkdownBlock, CodeLine } from '../../core/models';
 import { ShiniHighlighter } from '../../core/shini-highlighter';
 import { IErrorHandler, ComponentErrorType } from '../../core/error-handling';
 import { LANGUAGE_DISPLAY_NAMES } from '../../core/shini-types';
@@ -22,10 +23,9 @@ import { LANGUAGE_DISPLAY_NAMES } from '../../core/shini-types';
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.None, // Use None for innerHTML content (Shiki highlighting)
   template: `
     <div class="code-block-wrapper">
-      @if (!streaming) {
+      @if (isComplete) {
         <!-- Header bar with language label and copy button -->
         <div class="code-header">
           <span class="code-language">{{ displayLanguage }}</span>
@@ -49,52 +49,55 @@ import { LANGUAGE_DISPLAY_NAMES } from '../../core/shini-types';
       }
 
       <!-- Code block with line numbers -->
-      <pre [class]="codeWrapperClasses()" class="markdown-code">@if (streaming) {<code class="code-streaming">{{ code }}</code>} @else if (highlightResult(); as safeHtml) {<code [innerHTML]="safeHtml"></code>} @else {<code>{{ code }}</code>}</pre>
+      <pre [class]="codeWrapperClasses()" class="markdown-code">@if (!isComplete) {<code class="code-streaming">{{ code }}</code>} @else if (highlightedLines().length > 0) {<code>@for (line of highlightedLines(); track line.lineNumber) {<span class="code-line"><span class="line-number">{{ line.lineNumber }}</span><span class="line-content">@for (token of line.tokens; track $index) {<span [style.color]="token.color" [class.italic]="token.fontStyle === 1" [class.bold]="token.fontStyle === 2" [class.underline]="token.fontStyle === 4">{{ token.content }}</span>}</span></span>}</code>} @else {<code>{{ code }}</code>}</pre>
     </div>
   `,
   styleUrls: ['./code.component.css']
 })
 export class MarkdownCodeComponent implements OnChanges {
-  @Input({ required: true }) code!: string;
-  @Input() language: string = 'text';
-  @Input() streaming: boolean = false;
+  @Input({ required: true }) block!: MarkdownBlock;
+  @Input() isComplete: boolean = true;
 
-  highlightResult = signal<SafeHtml | null>(null);
+  highlightedLines = signal<CodeLine[]>([]);
   codeWrapperClasses = signal<string>('markdown-code block-code');
   copied = signal<boolean>(false);
 
+  private shiniHighlighter = inject(ShiniHighlighter);
+  private errorHandler?: IErrorHandler;
+
+  get code(): string {
+    return this.block.rawContent || this.block.content;
+  }
+
+  get language(): string {
+    return this.block.language || 'text';
+  }
+
   get displayLanguage(): string {
-    // Capitalize first letter of language
-    const lang = this.language || 'text';
+    const lang = this.language;
     const displayName = (LANGUAGE_DISPLAY_NAMES as Record<string, string>)[lang];
     return displayName || lang.charAt(0).toUpperCase() + lang.slice(1);
   }
 
-  private shiniHighlighter = inject(ShiniHighlighter);
-  private domSanitizer = inject(DomSanitizer);
-  private errorHandler?: IErrorHandler;
-
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['code'] || changes['language'] || changes['streaming']) {
+    if (changes['block'] || changes['isComplete']) {
       this.highlightCode();
     }
   }
 
   private highlightCode(): void {
-    if (this.streaming) {
-      return; // 流式状态下不高亮
+    if (!this.isComplete) {
+      this.highlightedLines.set([]);
+      return;
     }
 
-    // Wait for Shini to be ready, then highlight
     from(this.shiniHighlighter.whenReady())
       .pipe(
-        switchMap(() => {
-          // Shini is ready, now highlight the code
-          return from(this.shiniHighlighter.highlight(this.code, this.language, 'light'));
-        }),
+        switchMap(() =>
+          from(this.shiniHighlighter.highlightToTokens(this.code, this.language, 'light'))
+        ),
         timeout(5000),
         catchError((error) => {
-          // Log error if error handler is available
           if (this.errorHandler) {
             this.errorHandler.handle({
               type: ComponentErrorType.HIGHLIGHT_FAILED,
@@ -104,44 +107,23 @@ export class MarkdownCodeComponent implements OnChanges {
           } else {
             console.error('[MarkdownCodeComponent] Highlight failed:', error);
           }
-
-          // Return fallback HTML (escaped)
-          return of(this.escapeHtml(this.code));
+          return of(this.shiniHighlighter.plainTextFallback(this.code));
         })
       )
-      .subscribe((html: string) => {
-        // Bypass Angular's HTML sanitization to allow inline styles from Shiki
-        const safeHtml = this.domSanitizer.bypassSecurityTrustHtml(html);
-        this.highlightResult.set(safeHtml);
+      .subscribe((lines: CodeLine[]) => {
+        this.highlightedLines.set(lines);
       });
   }
 
-  /**
-   * Copy code to clipboard
-   */
   async copyToClipboard(): Promise<void> {
     try {
       await navigator.clipboard.writeText(this.code);
       this.copied.set(true);
-
-      // Reset copied state after 2 seconds
       setTimeout(() => {
         this.copied.set(false);
       }, 2000);
     } catch (error) {
       console.error('[MarkdownCodeComponent] Failed to copy:', error);
     }
-  }
-
-  /**
-   * Escape HTML special characters
-   */
-  private escapeHtml(text: string): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
   }
 }

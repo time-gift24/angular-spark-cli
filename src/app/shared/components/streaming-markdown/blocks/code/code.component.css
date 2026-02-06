@@ -63,8 +63,7 @@
 
 /* Code block */
 .code-block-wrapper > pre.markdown-code {
-  /* 符合"矿物与时光"主题的柔和背景 */
-  background: oklch(0.96 0.01 85); /* 非常浅的绢黄 */
+  background: oklch(0.96 0.01 85);
   padding: var(--spacing-xs) var(--spacing-md) var(--spacing-xs) 0;
   border-radius: 0;
   font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
@@ -72,40 +71,26 @@
   overflow-x: auto;
   border: none;
   box-shadow: none;
-  line-height: 1.2 !important; /* ultra compact 行间距 */
-}
-
-/* Ensure pre tag also has line-height: 1.2 */
-.markdown-code pre {
   line-height: 1.2 !important;
 }
 
-/* 覆盖 Shini 的默认样式以匹配主题 */
-.markdown-code pre.shiki {
-  background: transparent !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border-radius: 0 !important;
-}
-
-/* Line wrapper - use ::ng-deep to penetrate ViewEncapsulation for innerHTML content */
+/* Line wrapper */
 .markdown-code .code-line {
   display: flex !important;
-  line-height: 1.2 !important; /* ultra compact 行间距 */
+  line-height: 1.2 !important;
   padding-right: var(--spacing-lg);
   align-items: baseline !important;
-  margin: 0 !important; /* 移除所有 margin，仅使用 line-height 控制间距 */
+  margin: 0 !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
-  min-height: 1.2em; /* 确保最小高度 */
+  min-height: 1.2em;
 }
 
-/* Force line-height on all Shiki-generated elements */
 .markdown-code .code-line * {
   line-height: 1.2 !important;
 }
 
-/* 行号样式 - use ::ng-deep to penetrate ViewEncapsulation */
+/* Line number */
 .markdown-code .code-line .line-number {
   color: oklch(0.60 0.02 230);
   min-width: 2.5em;
@@ -133,9 +118,9 @@
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
-  padding: 0 !important;  /* 移除浏览器默认 padding */
-  margin: 0 !important;   /* 移除浏览器默认 margin */
-  display: block !important;  /* 确保代码块是块级元素 */
+  padding: 0 !important;
+  margin: 0 !important;
+  display: block !important;
 }
 
 .code-fallback {
@@ -145,4 +130,17 @@
 
 .code-streaming {
   opacity: 0.7;
+}
+
+/* Token font style classes */
+.italic {
+  font-style: italic;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.underline {
+  text-decoration: underline;
 }

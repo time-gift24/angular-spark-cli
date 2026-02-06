@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MarkdownHeadingComponent } from './heading.component';
+import { MarkdownBlock, BlockType } from '../../core/models';
 
 // Vitest imports
 import { beforeEach, describe, it, expect } from 'vitest';
@@ -16,6 +17,16 @@ import { beforeEach, describe, it, expect } from 'vitest';
  * - Streaming state management
  * - CSS class application
  */
+
+const createMockBlock = (type: BlockType, content: string = 'test', overrides: Partial<MarkdownBlock> = {}): MarkdownBlock => ({
+  id: `block-${Math.random()}`,
+  type,
+  content,
+  isComplete: true,
+  position: 0,
+  ...overrides
+});
+
 describe('MarkdownHeadingComponent', () => {
   let component: MarkdownHeadingComponent;
   let fixture: ComponentFixture<MarkdownHeadingComponent>;
@@ -27,6 +38,8 @@ describe('MarkdownHeadingComponent', () => {
 
     fixture = TestBed.createComponent(MarkdownHeadingComponent);
     component = fixture.componentInstance;
+    // Provide a default block so the component doesn't error on required input
+    component.block = createMockBlock(BlockType.HEADING, '', { level: 1 });
   });
 
   describe('Component Creation', () => {
@@ -34,8 +47,8 @@ describe('MarkdownHeadingComponent', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should have default streaming state as false', () => {
-      expect(component.streaming).toBe(false);
+    it('should have default isComplete state as true', () => {
+      expect(component.isComplete).toBe(true);
     });
 
     it('should initialize with base heading classes', () => {
@@ -45,8 +58,7 @@ describe('MarkdownHeadingComponent', () => {
 
   describe('Heading Level Rendering', () => {
     it('should render h1 when level is 1', () => {
-      component.level = 1;
-      component.content = 'Test Heading 1';
+      component.block = createMockBlock(BlockType.HEADING, 'Test Heading 1', { level: 1 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h1');
@@ -55,8 +67,7 @@ describe('MarkdownHeadingComponent', () => {
     });
 
     it('should render h2 when level is 2', () => {
-      component.level = 2;
-      component.content = 'Test Heading 2';
+      component.block = createMockBlock(BlockType.HEADING, 'Test Heading 2', { level: 2 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h2');
@@ -65,8 +76,7 @@ describe('MarkdownHeadingComponent', () => {
     });
 
     it('should render h3 when level is 3', () => {
-      component.level = 3;
-      component.content = 'Test Heading 3';
+      component.block = createMockBlock(BlockType.HEADING, 'Test Heading 3', { level: 3 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h3');
@@ -75,8 +85,7 @@ describe('MarkdownHeadingComponent', () => {
     });
 
     it('should render h4 when level is 4', () => {
-      component.level = 4;
-      component.content = 'Test Heading 4';
+      component.block = createMockBlock(BlockType.HEADING, 'Test Heading 4', { level: 4 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h4');
@@ -85,8 +94,7 @@ describe('MarkdownHeadingComponent', () => {
     });
 
     it('should render h5 when level is 5', () => {
-      component.level = 5;
-      component.content = 'Test Heading 5';
+      component.block = createMockBlock(BlockType.HEADING, 'Test Heading 5', { level: 5 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h5');
@@ -95,8 +103,7 @@ describe('MarkdownHeadingComponent', () => {
     });
 
     it('should render h6 when level is 6', () => {
-      component.level = 6;
-      component.content = 'Test Heading 6';
+      component.block = createMockBlock(BlockType.HEADING, 'Test Heading 6', { level: 6 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h6');
@@ -107,8 +114,7 @@ describe('MarkdownHeadingComponent', () => {
     });
 
     it('should render only one heading element at a time', () => {
-      component.level = 2;
-      component.content = 'Test';
+      component.block = createMockBlock(BlockType.HEADING, 'Test', { level: 2 });
       fixture.detectChanges();
 
       const headings = fixture.nativeElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
@@ -119,8 +125,7 @@ describe('MarkdownHeadingComponent', () => {
 
   describe('Invalid Level Fallback', () => {
     it('should fallback to h6 when level is 0', () => {
-      component.level = 0;
-      component.content = 'Invalid Level 0';
+      component.block = createMockBlock(BlockType.HEADING, 'Invalid Level 0', { level: 0 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h6.fallback');
@@ -130,8 +135,7 @@ describe('MarkdownHeadingComponent', () => {
     });
 
     it('should fallback to h6 when level is negative', () => {
-      component.level = -1;
-      component.content = 'Negative Level';
+      component.block = createMockBlock(BlockType.HEADING, 'Negative Level', { level: -1 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h6.fallback');
@@ -140,8 +144,7 @@ describe('MarkdownHeadingComponent', () => {
     });
 
     it('should fallback to h6 when level is greater than 6', () => {
-      component.level = 10;
-      component.content = 'Level Too High';
+      component.block = createMockBlock(BlockType.HEADING, 'Level Too High', { level: 10 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h6.fallback');
@@ -150,8 +153,7 @@ describe('MarkdownHeadingComponent', () => {
     });
 
     it('should apply fallback styling for invalid levels', () => {
-      component.level = 99;
-      component.content = 'Invalid';
+      component.block = createMockBlock(BlockType.HEADING, 'Invalid', { level: 99 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h6');
@@ -162,8 +164,7 @@ describe('MarkdownHeadingComponent', () => {
 
   describe('Content Rendering', () => {
     it('should display plain text content', () => {
-      component.level = 1;
-      component.content = 'Simple Heading';
+      component.block = createMockBlock(BlockType.HEADING, 'Simple Heading', { level: 1 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h1');
@@ -171,8 +172,7 @@ describe('MarkdownHeadingComponent', () => {
     });
 
     it('should handle empty content', () => {
-      component.level = 2;
-      component.content = '';
+      component.block = createMockBlock(BlockType.HEADING, '', { level: 2 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h2');
@@ -180,8 +180,7 @@ describe('MarkdownHeadingComponent', () => {
     });
 
     it('should handle special characters in content', () => {
-      component.level = 3;
-      component.content = 'Heading with <special> & "characters"';
+      component.block = createMockBlock(BlockType.HEADING, 'Heading with <special> & "characters"', { level: 3 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h3');
@@ -190,8 +189,7 @@ describe('MarkdownHeadingComponent', () => {
 
     it('should handle long content', () => {
       const longContent = 'A'.repeat(500);
-      component.level = 1;
-      component.content = longContent;
+      component.block = createMockBlock(BlockType.HEADING, longContent, { level: 1 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h1');
@@ -200,56 +198,58 @@ describe('MarkdownHeadingComponent', () => {
   });
 
   describe('Streaming State', () => {
-    it('should apply streaming class when streaming is true', () => {
-      component.level = 1;
-      component.content = 'Streaming Heading';
-      component.streaming = true;
+    it('should apply streaming class when isComplete is false', () => {
+      component.block = createMockBlock(BlockType.HEADING, 'Streaming Heading', { level: 1 });
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       expect(component.headingClasses()).toBe('markdown-heading streaming');
     });
 
-    it('should not apply streaming class when streaming is false', () => {
-      component.level = 1;
-      component.content = 'Static Heading';
-      component.streaming = false;
+    it('should not apply streaming class when isComplete is true', () => {
+      component.block = createMockBlock(BlockType.HEADING, 'Static Heading', { level: 1 });
+      component.isComplete = true;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       expect(component.headingClasses()).toBe('markdown-heading');
     });
 
-    it('should update classes when streaming changes from false to true', () => {
-      component.level = 2;
-      component.content = 'Content';
-      component.streaming = false;
+    it('should update classes when isComplete changes from true to false', () => {
+      component.block = createMockBlock(BlockType.HEADING, 'Content', { level: 2 });
+      component.isComplete = true;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       expect(component.headingClasses()).toBe('markdown-heading');
 
-      component.streaming = true;
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       expect(component.headingClasses()).toBe('markdown-heading streaming');
     });
 
-    it('should update classes when streaming changes from true to false', () => {
-      component.level = 3;
-      component.content = 'Content';
-      component.streaming = true;
+    it('should update classes when isComplete changes from false to true', () => {
+      component.block = createMockBlock(BlockType.HEADING, 'Content', { level: 3 });
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       expect(component.headingClasses()).toBe('markdown-heading streaming');
 
-      component.streaming = false;
+      component.isComplete = true;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       expect(component.headingClasses()).toBe('markdown-heading');
     });
 
     it('should apply streaming class to the rendered heading element', () => {
-      component.level = 1;
-      component.content = 'Streaming';
-      component.streaming = true;
+      component.block = createMockBlock(BlockType.HEADING, 'Streaming', { level: 1 });
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h1');
@@ -259,8 +259,7 @@ describe('MarkdownHeadingComponent', () => {
 
   describe('CSS Classes', () => {
     it('should always apply markdown-heading class', () => {
-      component.level = 4;
-      component.content = 'Test';
+      component.block = createMockBlock(BlockType.HEADING, 'Test', { level: 4 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h4');
@@ -268,9 +267,9 @@ describe('MarkdownHeadingComponent', () => {
     });
 
     it('should maintain base class when streaming', () => {
-      component.level = 5;
-      component.content = 'Test';
-      component.streaming = true;
+      component.block = createMockBlock(BlockType.HEADING, 'Test', { level: 5 });
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h5');
@@ -281,8 +280,7 @@ describe('MarkdownHeadingComponent', () => {
 
   describe('Edge Cases', () => {
     it('should handle level as string that converts to number', () => {
-      component.level = '2' as unknown as number;
-      component.content = 'String Level';
+      component.block = createMockBlock(BlockType.HEADING, 'String Level', { level: '2' as unknown as number });
       fixture.detectChanges();
 
       // Since @switch uses ===, string '2' will not match number 2
@@ -292,8 +290,7 @@ describe('MarkdownHeadingComponent', () => {
     });
 
     it('should handle undefined content by setting it', () => {
-      component.level = 1;
-      component.content = undefined as unknown as string;
+      component.block = createMockBlock(BlockType.HEADING, undefined as unknown as string, { level: 1 });
       fixture.detectChanges();
 
       const heading = fixture.nativeElement.querySelector('h1');

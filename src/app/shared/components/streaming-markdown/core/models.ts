@@ -43,20 +43,30 @@ export interface MarkdownInline {
 }
 
 /**
- * Syntax highlighting token (for future extensions)
+ * A single syntax-highlighted token within a code line.
+ * Produced by Shiki's codeToTokensBase().
  */
 export interface SyntaxToken {
-  type: string;
   content: string;
-  color: string;
+  color?: string;
+  /** 1 = italic, 2 = bold, 4 = underline (bitmask from Shiki FontStyle) */
+  fontStyle?: number;
 }
 
 /**
- * Code block highlighting result
+ * A single line of syntax-highlighted code.
+ */
+export interface CodeLine {
+  lineNumber: number;
+  tokens: SyntaxToken[];
+}
+
+/**
+ * Code block highlighting result (token-based)
  */
 export interface HighlightResult {
-  html: string;
-  fallback: boolean; // whether it fell back to plain text
+  lines: CodeLine[];
+  fallback: boolean;
 }
 
 /**

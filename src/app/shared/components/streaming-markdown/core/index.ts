@@ -11,7 +11,6 @@ export {
   type ShiniInitializationState,
   type ShiniLanguage,
   type ShiniTheme,
-  type HighlightResult,
   type FallbackHighlightResult,
   LANGUAGE_DISPLAY_NAMES,
   PRELOAD_LANGUAGES,
@@ -49,6 +48,31 @@ export {
   type CssVariableSetterOptions,
   type ICssVariableUtils
 } from './css-variables.types';
+
+// Plugin architecture
+export {
+  type BlockRenderer,
+  type BlockMatcher,
+  type StreamdownPlugin,
+  type BlockComponentRegistry,
+  STREAMDOWN_PLUGINS,
+  BLOCK_COMPONENT_REGISTRY
+} from './plugin';
+
+export { provideStreamingMarkdown } from './provide-streaming-markdown';
+
+// Domain models
+export {
+  type SyntaxToken,
+  type CodeLine,
+  type MarkdownBlock,
+  type MarkdownInline,
+  type StreamingState,
+  type ParserResult,
+  type HighlightResult,
+  BlockType,
+  createEmptyState
+} from './models';
 
 // Error handling types
 export {

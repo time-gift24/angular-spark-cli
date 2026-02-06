@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MarkdownBlockquoteComponent } from './blockquote.component';
+import { MarkdownBlock, BlockType } from '../../core/models';
 
 // Vitest imports
 import { beforeEach, describe, it, expect } from 'vitest';
@@ -17,6 +18,16 @@ import { beforeEach, describe, it, expect } from 'vitest';
  * - Streaming indicator display
  * - Edge cases
  */
+
+const createMockBlock = (type: BlockType, content: string = 'test', overrides: Partial<MarkdownBlock> = {}): MarkdownBlock => ({
+  id: `block-${Math.random()}`,
+  type,
+  content,
+  isComplete: true,
+  position: 0,
+  ...overrides
+});
+
 describe('MarkdownBlockquoteComponent', () => {
   let component: MarkdownBlockquoteComponent;
   let fixture: ComponentFixture<MarkdownBlockquoteComponent>;
@@ -28,6 +39,8 @@ describe('MarkdownBlockquoteComponent', () => {
 
     fixture = TestBed.createComponent(MarkdownBlockquoteComponent);
     component = fixture.componentInstance;
+    // Provide a default block so the component doesn't error on required input
+    component.block = createMockBlock(BlockType.BLOCKQUOTE, '');
   });
 
   describe('Component Creation', () => {
@@ -35,8 +48,8 @@ describe('MarkdownBlockquoteComponent', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should have default streaming state as false', () => {
-      expect(component.streaming).toBe(false);
+    it('should have default isComplete state as true', () => {
+      expect(component.isComplete).toBe(true);
     });
 
     it('should initialize with base blockquote classes', () => {
@@ -46,7 +59,7 @@ describe('MarkdownBlockquoteComponent', () => {
 
   describe('Content Rendering', () => {
     it('should render blockquote element', () => {
-      component.content = 'This is a quote';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'This is a quote');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -54,7 +67,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should display plain text content', () => {
-      component.content = 'Simple quote text';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Simple quote text');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -62,7 +75,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should handle empty content', () => {
-      component.content = '';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, '');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -70,7 +83,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should handle single line quote', () => {
-      component.content = 'Single line quote';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Single line quote');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -78,7 +91,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should handle multiline quote', () => {
-      component.content = 'Line 1\nLine 2\nLine 3';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Line 1\nLine 2\nLine 3');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -86,7 +99,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should handle special characters in content', () => {
-      component.content = 'Quote with <special> & "characters"';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Quote with <special> & "characters"');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -95,7 +108,7 @@ describe('MarkdownBlockquoteComponent', () => {
 
     it('should handle very long content', () => {
       const longContent = 'A'.repeat(500);
-      component.content = longContent;
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, longContent);
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -103,7 +116,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should preserve whitespace in content', () => {
-      component.content = '  Quote with spaces   ';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, '  Quote with spaces   ');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -112,51 +125,56 @@ describe('MarkdownBlockquoteComponent', () => {
   });
 
   describe('Streaming State', () => {
-    it('should apply streaming class when streaming is true', () => {
-      component.content = 'Streaming quote';
-      component.streaming = true;
+    it('should apply streaming class when isComplete is false', () => {
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Streaming quote');
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       expect(component.blockquoteClasses()).toBe('markdown-blockquote block-blockquote streaming');
     });
 
-    it('should not apply streaming class when streaming is false', () => {
-      component.content = 'Static quote';
-      component.streaming = false;
+    it('should not apply streaming class when isComplete is true', () => {
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Static quote');
+      component.isComplete = true;
       fixture.detectChanges();
 
       expect(component.blockquoteClasses()).toBe('markdown-blockquote block-blockquote');
     });
 
-    it('should update classes when streaming changes from false to true', () => {
-      component.content = 'Quote';
-      component.streaming = false;
+    it('should update classes when isComplete changes from true to false', () => {
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Quote');
+      component.isComplete = true;
       fixture.detectChanges();
 
       expect(component.blockquoteClasses()).toBe('markdown-blockquote block-blockquote');
 
-      component.streaming = true;
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       expect(component.blockquoteClasses()).toBe('markdown-blockquote block-blockquote streaming');
     });
 
-    it('should update classes when streaming changes from true to false', () => {
-      component.content = 'Quote';
-      component.streaming = true;
+    it('should update classes when isComplete changes from false to true', () => {
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Quote');
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       expect(component.blockquoteClasses()).toBe('markdown-blockquote block-blockquote streaming');
 
-      component.streaming = false;
+      component.isComplete = true;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       expect(component.blockquoteClasses()).toBe('markdown-blockquote block-blockquote');
     });
 
     it('should apply streaming class to blockquote element', () => {
-      component.content = 'Quote';
-      component.streaming = true;
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Quote');
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -165,18 +183,18 @@ describe('MarkdownBlockquoteComponent', () => {
   });
 
   describe('Streaming Indicator', () => {
-    it('should show streaming indicator when streaming is true', () => {
-      component.content = 'Quote';
-      component.streaming = true;
+    it('should show streaming indicator when isComplete is false', () => {
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Quote');
+      component.isComplete = false;
       fixture.detectChanges();
 
       const indicator = fixture.nativeElement.querySelector('.streaming-indicator');
       expect(indicator).toBeTruthy();
     });
 
-    it('should not show streaming indicator when streaming is false', () => {
-      component.content = 'Quote';
-      component.streaming = false;
+    it('should not show streaming indicator when isComplete is true', () => {
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Quote');
+      component.isComplete = true;
       fixture.detectChanges();
 
       const indicator = fixture.nativeElement.querySelector('.streaming-indicator');
@@ -184,14 +202,14 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should hide streaming indicator when streaming stops', () => {
-      component.content = 'Quote';
-      component.streaming = true;
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Quote');
+      component.isComplete = false;
       fixture.detectChanges();
 
       let indicator = fixture.nativeElement.querySelector('.streaming-indicator');
       expect(indicator).toBeTruthy();
 
-      component.streaming = false;
+      component.isComplete = true;
       fixture.detectChanges();
 
       indicator = fixture.nativeElement.querySelector('.streaming-indicator');
@@ -199,8 +217,8 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should render streaming indicator as span', () => {
-      component.content = 'Quote';
-      component.streaming = true;
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Quote');
+      component.isComplete = false;
       fixture.detectChanges();
 
       const indicator = fixture.nativeElement.querySelector('.streaming-indicator');
@@ -210,7 +228,7 @@ describe('MarkdownBlockquoteComponent', () => {
 
   describe('CSS Classes', () => {
     it('should apply markdown-blockquote class', () => {
-      component.content = 'Test';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Test');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -218,7 +236,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should apply block-blockquote class', () => {
-      component.content = 'Test';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Test');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -226,8 +244,9 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should maintain all base classes when streaming', () => {
-      component.content = 'Test';
-      component.streaming = true;
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Test');
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -237,8 +256,8 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should not have streaming class when not streaming', () => {
-      component.content = 'Test';
-      component.streaming = false;
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Test');
+      component.isComplete = true;
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -248,7 +267,7 @@ describe('MarkdownBlockquoteComponent', () => {
 
   describe('Edge Cases', () => {
     it('should handle unicode characters', () => {
-      component.content = '测试中文 🎉 العربية';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, '测试中文 🎉 العربية');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -256,7 +275,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should handle content with only spaces', () => {
-      component.content = '     ';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, '     ');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -264,7 +283,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should handle content with newlines only', () => {
-      component.content = '\n\n\n';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, '\n\n\n');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -272,7 +291,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should handle tabs in content', () => {
-      component.content = '\tIndented quote\t';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, '\tIndented quote\t');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -280,7 +299,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should handle mixed whitespace', () => {
-      component.content = '  \n\t  \n  ';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, '  \n\t  \n  ');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -288,7 +307,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should handle number as content', () => {
-      component.content = 123 as unknown as string;
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 123 as unknown as string);
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -296,7 +315,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should handle undefined content by showing undefined', () => {
-      component.content = undefined as unknown as string;
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, undefined as unknown as string);
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -306,7 +325,7 @@ describe('MarkdownBlockquoteComponent', () => {
 
   describe('Template Structure', () => {
     it('should have only one blockquote element', () => {
-      component.content = 'Quote';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Quote');
       fixture.detectChanges();
 
       const blockquotes = fixture.nativeElement.querySelectorAll('blockquote');
@@ -314,7 +333,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should render content directly in blockquote', () => {
-      component.content = 'Direct content';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Direct content');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -326,7 +345,7 @@ describe('MarkdownBlockquoteComponent', () => {
 
   describe('Real-world Scenarios', () => {
     it('should handle typical markdown quote', () => {
-      component.content = '> This is a quoted text from someone famous';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, '> This is a quoted text from someone famous');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -334,7 +353,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should handle multiline blockquote', () => {
-      component.content = '> First line\n> Second line\n> Third line';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, '> First line\n> Second line\n> Third line');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -342,7 +361,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should handle quote with attribution', () => {
-      component.content = 'The only way to do great work is to love what you do.\n— Steve Jobs';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'The only way to do great work is to love what you do.\n— Steve Jobs');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');
@@ -350,7 +369,7 @@ describe('MarkdownBlockquoteComponent', () => {
     });
 
     it('should handle code-like content in quote', () => {
-      component.content = 'Use `const x = 1;` for declarations';
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'Use `const x = 1;` for declarations');
       fixture.detectChanges();
 
       const blockquote = fixture.nativeElement.querySelector('blockquote');

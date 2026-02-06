@@ -2,7 +2,9 @@
  * Markdown List Component
  *
  * Renders ordered and unordered lists with nested list support.
- * Phase 3 - Component Implementation
+ *
+ * Implements BlockRenderer interface for plugin architecture.
+ * Retains an additional `depth` input for recursive indentation.
  */
 
 import { Component, Input, signal, ChangeDetectionStrategy } from '@angular/core';
@@ -21,8 +23,8 @@ import { MarkdownBlock } from '../../core/models';
           {{ item.content }}
           @if (item.items && item.items.length > 0) {
             <app-markdown-list
-              [items]="item.items"
-              [ordered]="false"
+              [block]="item"
+              [isComplete]="isComplete"
               [depth]="depth + 1" />
           }
         </li>
@@ -36,8 +38,8 @@ import { MarkdownBlock } from '../../core/models';
             {{ item.content }}
             @if (item.items && item.items.length > 0) {
               <app-markdown-list
-                [items]="item.items"
-                [ordered]="true"
+                [block]="item"
+                [isComplete]="isComplete"
                 [depth]="depth + 1" />
             }
           </li>
@@ -48,12 +50,20 @@ import { MarkdownBlock } from '../../core/models';
   styleUrls: ['./list.component.css']
 })
 export class MarkdownListComponent {
-  @Input({ required: true }) items!: MarkdownBlock[];
-  @Input() ordered: boolean = false;
+  @Input({ required: true }) block!: MarkdownBlock;
+  @Input() isComplete: boolean = true;
   @Input() depth: number = 0;
 
   listClasses = signal<string>('markdown-list block-list');
   itemClass = 'list-item';
+
+  get items(): MarkdownBlock[] {
+    return this.block.items || [];
+  }
+
+  get ordered(): boolean {
+    return this.block.subtype === 'ordered';
+  }
 
   protected getItemClass(): string {
     return `${this.itemClass} depth-${this.depth}`;

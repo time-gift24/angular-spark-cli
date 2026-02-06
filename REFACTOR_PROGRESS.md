@@ -7,23 +7,25 @@ Refactor streaming-markdown from hardcoded @switch routing to Registry + NgCompo
 
 | Step | Description | Status |
 |------|-------------|--------|
-| 1 | Define plugin interfaces & DI tokens (`core/plugin.ts`, `core/provide-streaming-markdown.ts`) | pending |
-| 2 | Create builtin plugin (`plugins/builtin-plugin.ts`) | pending |
-| 3a | Migrate heading component to BlockRenderer interface | pending |
-| 3b | Migrate paragraph component to BlockRenderer interface | pending |
-| 3c | Migrate code component to BlockRenderer interface | pending |
-| 3d | Migrate list component to BlockRenderer interface | pending |
-| 3e | Migrate blockquote component to BlockRenderer interface | pending |
-| 4a | Update `core/models.ts` - SyntaxToken, CodeLine | pending |
-| 4b | Update `core/shini-highlighter.ts` - add highlightToTokens() | pending |
-| 4c | Rewrite code component template (token-based, no innerHTML) | pending |
-| 4d | Update code component CSS (remove ::ng-deep, add .italic/.bold) | pending |
-| 5 | Rewrite block-router with NgComponentOutlet + Registry | pending |
-| 6a | Update `app.config.ts` with provideStreamingMarkdown() | pending |
-| 6b | Update `core/block-parser.ts` - remove providedIn: 'root' | pending |
-| 6c | Update `core/index.ts` - add new exports | pending |
-| 7 | Cleanup: remove old interfaces, deprecated methods, DomSanitizer | pending |
-| 8 | Build verification (`ng build`) | pending |
+| 1 | Define plugin interfaces & DI tokens (`core/plugin.ts`, `core/provide-streaming-markdown.ts`) | done |
+| 2 | Create builtin plugin (`plugins/builtin-plugin.ts`) | done |
+| 3a | Migrate heading component to BlockRenderer interface | done |
+| 3b | Migrate paragraph component to BlockRenderer interface | done |
+| 3c | Migrate code component to BlockRenderer interface | done |
+| 3d | Migrate list component to BlockRenderer interface | done |
+| 3e | Migrate blockquote component to BlockRenderer interface | done |
+| 4a | Update `core/models.ts` - SyntaxToken, CodeLine | done |
+| 4b | Update `core/shini-highlighter.ts` - add highlightToTokens() | done |
+| 4c | Rewrite code component template (token-based, no innerHTML) | done |
+| 4d | Update code component CSS (remove ::ng-deep, add .italic/.bold) | done |
+| 5 | Rewrite block-router with NgComponentOutlet + Registry | done |
+| 6a | Update `app.config.ts` with provideStreamingMarkdown() | done |
+| 6b | Update `core/block-parser.ts` - remove providedIn: 'root' | done |
+| 6c | Update `core/index.ts` - add new exports | done |
+| 7 | Cleanup: remove old interfaces, deprecated methods, DomSanitizer | done |
+| 8 | Build verification (`ng build`) | done |
+| 9 | Update spec files for new BlockRenderer interface | done |
+| 10 | Fix angular.json test config (add buildTarget) | done |
 
 ## File Change Map
 
@@ -37,11 +39,30 @@ Refactor streaming-markdown from hardcoded @switch routing to Registry + NgCompo
 | MODIFY | `core/block-parser.ts` | 6b |
 | MODIFY | `core/index.ts` | 6c |
 | MODIFY | `blocks/block-router/block-router.component.ts` | 5 |
+| MODIFY | `blocks/block-router/block-router.component.spec.ts` | 9 |
 | MODIFY | `blocks/heading/heading.component.ts` | 3a |
+| MODIFY | `blocks/heading/heading.component.spec.ts` | 9 |
 | MODIFY | `blocks/paragraph/paragraph.component.ts` | 3b |
+| MODIFY | `blocks/paragraph/paragraph.component.spec.ts` | 9 |
 | MODIFY | `blocks/code/code.component.ts` | 3c, 4c |
 | MODIFY | `blocks/code/code.component.css` | 4d |
+| MODIFY | `blocks/code/code.component.spec.ts` | 9 |
 | MODIFY | `blocks/list/list.component.ts` | 3d |
+| MODIFY | `blocks/list/list.component.spec.ts` | 9 |
 | MODIFY | `blocks/blockquote/blockquote.component.ts` | 3e |
+| MODIFY | `blocks/blockquote/blockquote.component.spec.ts` | 9 |
+| MODIFY | `streaming-markdown.component.css` | 7 |
 | MODIFY | `app.config.ts` | 6a |
-| DELETE (content) | `core/component-interfaces.ts` | 7 |
+| MODIFY | `angular.json` | 10 |
+| DELETE | `core/component-interfaces.ts` | 7 |
+
+## Verification Results
+
+- `ng build`: passes (no errors, only pre-existing budget warnings)
+- `innerHTML` in component .ts files: none (only in comments)
+- `DomSanitizer` in component .ts files: none (only in comments)
+- `ViewEncapsulation.None`: fully removed
+- `@switch` in block-router: fully removed, replaced with NgComponentOutlet
+- `::ng-deep` in code.component.css: fully removed
+- Plugin registry: working via `provideStreamingMarkdown(builtinPlugin())` in app.config.ts
+- All spec files: updated to use `block`/`isComplete` interface

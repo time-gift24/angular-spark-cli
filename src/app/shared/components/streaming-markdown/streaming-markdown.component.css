@@ -32,26 +32,8 @@
   line-height: 1.2;
 }
 
-/* Force line-height: 1.2 on all code elements using ::ng-deep */
-/* This is critical for innerHTML content and Shiki output */
+/* Code line-height override */
 .markdown-code {
-  line-height: 1.2 !important;
-}
-
-.markdown-code ::ng-deep code {
-  line-height: 1.2 !important;
-}
-
-.markdown-code ::ng-deep .code-line {
-  line-height: 1.2 !important;
-}
-
-.markdown-code ::ng-deep .code-line * {
-  line-height: 1.2 !important;
-}
-
-/* Also apply to inline code within paragraphs */
-.markdown-paragraph ::ng-deep code {
   line-height: 1.2 !important;
 }
 

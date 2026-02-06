@@ -2,11 +2,13 @@
  * Markdown Blockquote Component
  *
  * Renders quoted text with left border styling.
- * Phase 3 - Component Implementation
+ *
+ * Implements BlockRenderer interface for plugin architecture.
  */
 
 import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MarkdownBlock } from '../../core/models';
 
 @Component({
   selector: 'app-markdown-blockquote',
@@ -15,8 +17,8 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <blockquote [class]="blockquoteClasses()">
-      {{ content }}
-      @if (streaming) {
+      {{ block.content }}
+      @if (!isComplete) {
         <span class="streaming-indicator"></span>
       }
     </blockquote>
@@ -24,20 +26,20 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./blockquote.component.css']
 })
 export class MarkdownBlockquoteComponent implements OnChanges {
-  @Input({ required: true }) content!: string;
-  @Input() streaming: boolean = false;
+  @Input({ required: true }) block!: MarkdownBlock;
+  @Input() isComplete: boolean = true;
 
   blockquoteClasses = signal<string>('markdown-blockquote block-blockquote');
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['streaming']) {
+    if (changes['isComplete']) {
       this.updateClasses();
     }
   }
 
   private updateClasses(): void {
     const baseClass = 'markdown-blockquote block-blockquote';
-    const streamingClass = this.streaming ? ' streaming' : '';
+    const streamingClass = !this.isComplete ? ' streaming' : '';
     this.blockquoteClasses.set(`${baseClass}${streamingClass}`);
   }
 }

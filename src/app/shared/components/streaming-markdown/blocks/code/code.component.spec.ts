@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, Input, signal } from '@angular/core';
 import { MarkdownCodeComponent } from './code.component';
-import { SafeHtml } from '@angular/platform-browser';
+import { MarkdownBlock, BlockType, CodeLine } from '../../core/models';
+import { ShiniHighlighter } from '../../core/shini-highlighter';
 
 // Vitest imports
 import { beforeEach, describe, it, expect, vi } from 'vitest';
@@ -21,19 +21,33 @@ import { beforeEach, describe, it, expect, vi } from 'vitest';
  * - CSS classes
  */
 
+const createMockBlock = (type: BlockType, content: string = 'test', overrides: Partial<MarkdownBlock> = {}): MarkdownBlock => ({
+  id: `block-${Math.random()}`,
+  type,
+  content,
+  isComplete: true,
+  position: 0,
+  ...overrides
+});
+
 // Mock ShiniHighlighter
+const mockHighlightedLines: CodeLine[] = [
+  { lineNumber: 1, tokens: [{ content: 'highlighted code', color: '#000' }] }
+];
+
 const mockShiniHighlighter = {
   whenReady: vi.fn(() => Promise.resolve()),
+  highlightToTokens: vi.fn(() => Promise.resolve(mockHighlightedLines)),
+  plainTextFallback: vi.fn((code: string) =>
+    code.split('\n').map((line, index) => ({
+      lineNumber: index + 1,
+      tokens: [{ content: line || ' ' }]
+    }))
+  ),
+  initialize: vi.fn(() => Promise.resolve()),
   highlight: vi.fn(() => Promise.resolve('<code>highlighted code</code>')),
-  initialize: vi.fn(() => Promise.resolve())
-};
-
-// Mock DomSanitizer
-const mockDomSanitizer = {
-  bypassSecurityTrustHtml: vi.fn((html: string) => {
-    const safeHtml: SafeHtml = html as unknown as SafeHtml;
-    return safeHtml;
-  })
+  isReady: vi.fn(() => true),
+  state: { initialized: true, success: true, languagesLoaded: 8, themesLoaded: ['github-light', 'dark-plus'] }
 };
 
 describe('MarkdownCodeComponent', () => {
@@ -47,17 +61,14 @@ describe('MarkdownCodeComponent', () => {
     await TestBed.configureTestingModule({
       imports: [MarkdownCodeComponent],
       providers: [
-        { provide: 'ShiniHighlighter', useValue: mockShiniHighlighter },
-        { provide: 'DomSanitizer', useValue: mockDomSanitizer }
+        { provide: ShiniHighlighter, useValue: mockShiniHighlighter }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(MarkdownCodeComponent);
     component = fixture.componentInstance;
-
-    // Inject mocks manually since component uses inject()
-    (component as any).shiniHighlighter = mockShiniHighlighter;
-    (component as any).domSanitizer = mockDomSanitizer;
+    // Provide a default block so the component doesn't error on required input
+    component.block = createMockBlock(BlockType.CODE_BLOCK, '', { rawContent: '' });
   });
 
   describe('Component Creation', () => {
@@ -69,16 +80,16 @@ describe('MarkdownCodeComponent', () => {
       expect(component.language).toBe('text');
     });
 
-    it('should have default streaming state as false', () => {
-      expect(component.streaming).toBe(false);
+    it('should have default isComplete state as true', () => {
+      expect(component.isComplete).toBe(true);
     });
 
     it('should initialize with copied state as false', () => {
       expect(component.copied()).toBe(false);
     });
 
-    it('should initialize with null highlight result', () => {
-      expect(component.highlightResult()).toBeNull();
+    it('should initialize with empty highlighted lines', () => {
+      expect(component.highlightedLines()).toEqual([]);
     });
 
     it('should initialize with base code wrapper classes', () => {
@@ -88,8 +99,8 @@ describe('MarkdownCodeComponent', () => {
 
   describe('Code Rendering', () => {
     it('should render code element', async () => {
-      component.code = 'const x = 1;';
-      component.language = 'javascript';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'const x = 1;', { language: 'javascript', rawContent: 'const x = 1;' });
+      component.ngOnChanges({ block: {} as any });
       fixture.detectChanges();
 
       // Wait for async highlighting
@@ -100,9 +111,10 @@ describe('MarkdownCodeComponent', () => {
       expect(code).toBeTruthy();
     });
 
-    it('should render plain code when streaming', () => {
-      component.code = 'streaming code';
-      component.streaming = true;
+    it('should render plain code when streaming (isComplete=false)', () => {
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'streaming code', { rawContent: 'streaming code' });
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       const code = fixture.nativeElement.querySelector('code.code-streaming');
@@ -110,19 +122,19 @@ describe('MarkdownCodeComponent', () => {
       expect(code.textContent).toBe('streaming code');
     });
 
-    it('should not call highlight when streaming', async () => {
-      component.code = 'test';
-      component.streaming = true;
+    it('should not call highlightToTokens when streaming', async () => {
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'test', { rawContent: 'test' });
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      expect(mockShiniHighlighter.highlight).not.toHaveBeenCalled();
+      expect(mockShiniHighlighter.highlightToTokens).not.toHaveBeenCalled();
     });
 
     it('should display code content when no highlighting', () => {
-      component.code = 'plain code';
-      component.language = 'text';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'plain code', { language: 'text', rawContent: 'plain code' });
       fixture.detectChanges();
 
       const code = fixture.nativeElement.querySelector('code');
@@ -130,7 +142,7 @@ describe('MarkdownCodeComponent', () => {
     });
 
     it('should handle empty code', () => {
-      component.code = '';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, '', { rawContent: '' });
       fixture.detectChanges();
 
       const code = fixture.nativeElement.querySelector('code');
@@ -138,7 +150,7 @@ describe('MarkdownCodeComponent', () => {
     });
 
     it('should handle special characters in code', () => {
-      component.code = '<div>&"test"</div>';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, '<div>&"test"</div>', { rawContent: '<div>&"test"</div>' });
       fixture.detectChanges();
 
       const code = fixture.nativeElement.querySelector('code');
@@ -148,54 +160,53 @@ describe('MarkdownCodeComponent', () => {
 
   describe('Language Display', () => {
     it('should capitalize language name', () => {
-      component.language = 'javascript';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, '', { language: 'javascript', rawContent: '' });
       fixture.detectChanges();
 
-      expect(component.displayLanguage).toBe('Javascript');
+      expect(component.displayLanguage).toBe('JavaScript');
     });
 
     it('should display TypeScript', () => {
-      component.language = 'typescript';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, '', { language: 'typescript', rawContent: '' });
       fixture.detectChanges();
 
-      expect(component.displayLanguage).toBe('Typescript');
+      expect(component.displayLanguage).toBe('TypeScript');
     });
 
     it('should display Python', () => {
-      component.language = 'python';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, '', { language: 'python', rawContent: '' });
       fixture.detectChanges();
 
       expect(component.displayLanguage).toBe('Python');
     });
 
     it('should display unknown language capitalized', () => {
-      component.language = 'unknownlang';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, '', { language: 'unknownlang', rawContent: '' });
       fixture.detectChanges();
 
       expect(component.displayLanguage).toBe('Unknownlang');
     });
 
-    it('should display Text for default language', () => {
-      component.language = 'text';
+    it('should display Plain Text for default language', () => {
+      component.block = createMockBlock(BlockType.CODE_BLOCK, '', { language: 'text', rawContent: '' });
       fixture.detectChanges();
 
-      expect(component.displayLanguage).toBe('Text');
+      expect(component.displayLanguage).toBe('Plain Text');
     });
 
-    it('should show language label in header when not streaming', () => {
-      component.code = 'test';
-      component.language = 'javascript';
-      component.streaming = false;
+    it('should show language label in header when isComplete is true', () => {
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'test', { language: 'javascript', rawContent: 'test' });
+      component.isComplete = true;
       fixture.detectChanges();
 
       const languageLabel = fixture.nativeElement.querySelector('.code-language');
       expect(languageLabel).toBeTruthy();
-      expect(languageLabel.textContent).toBe('Javascript');
+      expect(languageLabel.textContent).toBe('JavaScript');
     });
 
-    it('should hide header when streaming', () => {
-      component.code = 'test';
-      component.streaming = true;
+    it('should hide header when isComplete is false', () => {
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'test', { rawContent: 'test' });
+      component.isComplete = false;
       fixture.detectChanges();
 
       const header = fixture.nativeElement.querySelector('.code-header');
@@ -213,18 +224,18 @@ describe('MarkdownCodeComponent', () => {
       });
     });
 
-    it('should show copy button when not streaming', () => {
-      component.code = 'test';
-      component.streaming = false;
+    it('should show copy button when isComplete is true', () => {
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'test', { rawContent: 'test' });
+      component.isComplete = true;
       fixture.detectChanges();
 
       const button = fixture.nativeElement.querySelector('.copy-button');
       expect(button).toBeTruthy();
     });
 
-    it('should not show copy button when streaming', () => {
-      component.code = 'test';
-      component.streaming = true;
+    it('should not show copy button when isComplete is false', () => {
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'test', { rawContent: 'test' });
+      component.isComplete = false;
       fixture.detectChanges();
 
       const button = fixture.nativeElement.querySelector('.copy-button');
@@ -232,7 +243,7 @@ describe('MarkdownCodeComponent', () => {
     });
 
     it('should copy code to clipboard when button clicked', async () => {
-      component.code = 'code to copy';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'code to copy', { rawContent: 'code to copy' });
       fixture.detectChanges();
 
       const button = fixture.nativeElement.querySelector('.copy-button');
@@ -244,7 +255,7 @@ describe('MarkdownCodeComponent', () => {
     });
 
     it('should show copied state after successful copy', async () => {
-      component.code = 'test code';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'test code', { rawContent: 'test code' });
       fixture.detectChanges();
 
       const button = fixture.nativeElement.querySelector('.copy-button');
@@ -259,7 +270,7 @@ describe('MarkdownCodeComponent', () => {
     it('should reset copied state after 2 seconds', async () => {
       vi.useFakeTimers();
 
-      component.code = 'test';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'test', { rawContent: 'test' });
       fixture.detectChanges();
 
       const button = fixture.nativeElement.querySelector('.copy-button');
@@ -280,7 +291,7 @@ describe('MarkdownCodeComponent', () => {
     it('should handle clipboard errors gracefully', async () => {
       navigator.clipboard.writeText = vi.fn(() => Promise.reject(new Error('Clipboard failed')));
 
-      component.code = 'test';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'test', { rawContent: 'test' });
       fixture.detectChanges();
 
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -296,18 +307,18 @@ describe('MarkdownCodeComponent', () => {
   });
 
   describe('Streaming State', () => {
-    it('should hide header when streaming is true', () => {
-      component.code = 'test';
-      component.streaming = true;
+    it('should hide header when isComplete is false', () => {
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'test', { rawContent: 'test' });
+      component.isComplete = false;
       fixture.detectChanges();
 
       const header = fixture.nativeElement.querySelector('.code-header');
       expect(header).toBeFalsy();
     });
 
-    it('should show streaming class on code when streaming', () => {
-      component.code = 'streaming code';
-      component.streaming = true;
+    it('should show streaming class on code when isComplete is false', () => {
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'streaming code', { rawContent: 'streaming code' });
+      component.isComplete = false;
       fixture.detectChanges();
 
       const code = fixture.nativeElement.querySelector('code.code-streaming');
@@ -316,14 +327,15 @@ describe('MarkdownCodeComponent', () => {
     });
 
     it('should not trigger highlighting during streaming', async () => {
-      component.code = 'test code';
-      component.streaming = true;
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'test code', { rawContent: 'test code' });
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      expect(mockShiniHighlighter.highlight).not.toHaveBeenCalled();
-      expect(component.highlightResult()).toBeNull();
+      expect(mockShiniHighlighter.highlightToTokens).not.toHaveBeenCalled();
+      expect(component.highlightedLines()).toEqual([]);
     });
   });
 
@@ -335,10 +347,10 @@ describe('MarkdownCodeComponent', () => {
 
   describe('Error Handling', () => {
     it('should handle highlight errors and fallback to plain text', async () => {
-      mockShiniHighlighter.highlight.mockRejectedValue(new Error('Highlight failed'));
+      mockShiniHighlighter.highlightToTokens.mockRejectedValue(new Error('Highlight failed'));
 
-      component.code = 'error code';
-      component.language = 'javascript';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'error code', { language: 'javascript', rawContent: 'error code' });
+      component.ngOnChanges({ block: {} as any });
       fixture.detectChanges();
 
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -348,22 +360,23 @@ describe('MarkdownCodeComponent', () => {
       expect(code).toBeTruthy();
     });
 
-    it('should escape HTML in fallback mode', async () => {
-      mockShiniHighlighter.highlight.mockRejectedValue(new Error('Error'));
+    it('should use plainTextFallback on highlight error', async () => {
+      mockShiniHighlighter.highlightToTokens.mockRejectedValue(new Error('Error'));
 
-      component.code = '<div>test</div>';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, '<div>test</div>', { rawContent: '<div>test</div>' });
+      component.ngOnChanges({ block: {} as any });
       fixture.detectChanges();
 
       await new Promise(resolve => setTimeout(resolve, 100));
       fixture.detectChanges();
 
-      expect(mockShiniHighlighter.highlight).toHaveBeenCalled();
+      expect(mockShiniHighlighter.plainTextFallback).toHaveBeenCalled();
     });
   });
 
   describe('CSS Classes and Structure', () => {
     it('should wrap code in code-block-wrapper', () => {
-      component.code = 'test';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'test', { rawContent: 'test' });
       fixture.detectChanges();
 
       const wrapper = fixture.nativeElement.querySelector('.code-block-wrapper');
@@ -371,7 +384,7 @@ describe('MarkdownCodeComponent', () => {
     });
 
     it('should apply markdown-code class to pre element', () => {
-      component.code = 'test';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'test', { rawContent: 'test' });
       fixture.detectChanges();
 
       const pre = fixture.nativeElement.querySelector('pre.markdown-code');
@@ -379,7 +392,7 @@ describe('MarkdownCodeComponent', () => {
     });
 
     it('should apply block-code class to pre element', () => {
-      component.code = 'test';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'test', { rawContent: 'test' });
       fixture.detectChanges();
 
       const pre = fixture.nativeElement.querySelector('pre.block-code');
@@ -387,10 +400,22 @@ describe('MarkdownCodeComponent', () => {
     });
   });
 
+  describe('Code getter', () => {
+    it('should prefer rawContent over content', () => {
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'content', { rawContent: 'rawContent' });
+      expect(component.code).toBe('rawContent');
+    });
+
+    it('should fall back to content if rawContent not available', () => {
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'content');
+      expect(component.code).toBe('content');
+    });
+  });
+
   describe('Edge Cases', () => {
     it('should handle very long code', () => {
       const longCode = 'const x = '.repeat(1000);
-      component.code = longCode;
+      component.block = createMockBlock(BlockType.CODE_BLOCK, longCode, { rawContent: longCode });
       fixture.detectChanges();
 
       const code = fixture.nativeElement.querySelector('code');
@@ -398,7 +423,7 @@ describe('MarkdownCodeComponent', () => {
     });
 
     it('should handle multiline code', () => {
-      component.code = 'line1\nline2\nline3';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, 'line1\nline2\nline3', { rawContent: 'line1\nline2\nline3' });
       fixture.detectChanges();
 
       const code = fixture.nativeElement.querySelector('code');
@@ -406,7 +431,7 @@ describe('MarkdownCodeComponent', () => {
     });
 
     it('should handle code with tabs', () => {
-      component.code = '\tconst x = 1;\n\treturn x;';
+      component.block = createMockBlock(BlockType.CODE_BLOCK, '\tconst x = 1;\n\treturn x;', { rawContent: '\tconst x = 1;\n\treturn x;' });
       fixture.detectChanges();
 
       const code = fixture.nativeElement.querySelector('code');
@@ -414,10 +439,10 @@ describe('MarkdownCodeComponent', () => {
     });
 
     it('should handle undefined language', () => {
-      component.language = undefined as unknown as string;
+      component.block = createMockBlock(BlockType.CODE_BLOCK, '', { language: undefined, rawContent: '' });
       fixture.detectChanges();
 
-      expect(component.displayLanguage).toBe('Text');
+      expect(component.displayLanguage).toBe('Plain Text');
     });
   });
 });

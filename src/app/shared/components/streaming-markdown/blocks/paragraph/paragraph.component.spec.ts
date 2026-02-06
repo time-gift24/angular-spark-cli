@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MarkdownParagraphComponent, MarkdownInline } from './paragraph.component';
+import { MarkdownParagraphComponent } from './paragraph.component';
+import { MarkdownBlock, BlockType, MarkdownInline } from '../../core/models';
 
 // Vitest imports
 import { beforeEach, describe, it, expect } from 'vitest';
@@ -17,6 +18,16 @@ import { beforeEach, describe, it, expect } from 'vitest';
  * - CSS class application
  * - Edge cases (empty content, special characters)
  */
+
+const createMockBlock = (type: BlockType, content: string = 'test', overrides: Partial<MarkdownBlock> = {}): MarkdownBlock => ({
+  id: `block-${Math.random()}`,
+  type,
+  content,
+  isComplete: true,
+  position: 0,
+  ...overrides
+});
+
 describe('MarkdownParagraphComponent', () => {
   let component: MarkdownParagraphComponent;
   let fixture: ComponentFixture<MarkdownParagraphComponent>;
@@ -28,6 +39,8 @@ describe('MarkdownParagraphComponent', () => {
 
     fixture = TestBed.createComponent(MarkdownParagraphComponent);
     component = fixture.componentInstance;
+    // Provide a default block so the component doesn't error on required input
+    component.block = createMockBlock(BlockType.PARAGRAPH, '');
   });
 
   describe('Component Creation', () => {
@@ -35,22 +48,22 @@ describe('MarkdownParagraphComponent', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should have default streaming state as false', () => {
-      expect(component.streaming).toBe(false);
+    it('should have default isComplete state as true', () => {
+      expect(component.isComplete).toBe(true);
     });
 
     it('should initialize with base paragraph classes', () => {
       expect(component.paragraphClasses()).toBe('markdown-paragraph block-paragraph');
     });
 
-    it('should have undefined inlines by default', () => {
-      expect(component.inlines).toBeUndefined();
+    it('should have undefined children by default', () => {
+      expect(component.block.children).toBeUndefined();
     });
   });
 
   describe('Plain Text Rendering', () => {
-    it('should render plain text content when no inlines provided', () => {
-      component.content = 'This is a simple paragraph.';
+    it('should render plain text content when no children provided', () => {
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'This is a simple paragraph.');
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -58,7 +71,7 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should render single line text', () => {
-      component.content = 'Single line';
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'Single line');
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -66,7 +79,7 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should handle empty content', () => {
-      component.content = '';
+      component.block = createMockBlock(BlockType.PARAGRAPH, '');
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -74,7 +87,7 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should handle special characters in content', () => {
-      component.content = 'Text with <special> & "characters"';
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'Text with <special> & "characters"');
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -82,7 +95,7 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should handle multiline text', () => {
-      component.content = 'Line 1\nLine 2\nLine 3';
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'Line 1\nLine 2\nLine 3');
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -91,7 +104,7 @@ describe('MarkdownParagraphComponent', () => {
 
     it('should handle very long content', () => {
       const longContent = 'A'.repeat(1000);
-      component.content = longContent;
+      component.block = createMockBlock(BlockType.PARAGRAPH, longContent);
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -101,11 +114,10 @@ describe('MarkdownParagraphComponent', () => {
 
   describe('Inline Elements Rendering', () => {
     it('should render bold inline element', () => {
-      const inlines: MarkdownInline[] = [
+      const children: MarkdownInline[] = [
         { type: 'bold', content: 'bold text' }
       ];
-      component.content = '';
-      component.inlines = inlines;
+      component.block = createMockBlock(BlockType.PARAGRAPH, '', { children });
       fixture.detectChanges();
 
       const span = fixture.nativeElement.querySelector('span.inline-bold');
@@ -114,11 +126,10 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should render italic inline element', () => {
-      const inlines: MarkdownInline[] = [
+      const children: MarkdownInline[] = [
         { type: 'italic', content: 'italic text' }
       ];
-      component.content = '';
-      component.inlines = inlines;
+      component.block = createMockBlock(BlockType.PARAGRAPH, '', { children });
       fixture.detectChanges();
 
       const span = fixture.nativeElement.querySelector('span.inline-italic');
@@ -127,11 +138,10 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should render code inline element', () => {
-      const inlines: MarkdownInline[] = [
+      const children: MarkdownInline[] = [
         { type: 'code', content: 'code' }
       ];
-      component.content = '';
-      component.inlines = inlines;
+      component.block = createMockBlock(BlockType.PARAGRAPH, '', { children });
       fixture.detectChanges();
 
       const span = fixture.nativeElement.querySelector('span.inline-code');
@@ -140,13 +150,12 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should render multiple inline elements', () => {
-      const inlines: MarkdownInline[] = [
+      const children: MarkdownInline[] = [
         { type: 'bold', content: 'bold' },
         { type: 'italic', content: 'italic' },
         { type: 'code', content: 'code' }
       ];
-      component.content = '';
-      component.inlines = inlines;
+      component.block = createMockBlock(BlockType.PARAGRAPH, '', { children });
       fixture.detectChanges();
 
       const spans = fixture.nativeElement.querySelectorAll('span');
@@ -157,12 +166,11 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should not add space after last inline element', () => {
-      const inlines: MarkdownInline[] = [
+      const children: MarkdownInline[] = [
         { type: 'bold', content: 'first' },
         { type: 'italic', content: 'second' }
       ];
-      component.content = '';
-      component.inlines = inlines;
+      component.block = createMockBlock(BlockType.PARAGRAPH, '', { children });
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -172,12 +180,11 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should add spaces between inline elements', () => {
-      const inlines: MarkdownInline[] = [
+      const children: MarkdownInline[] = [
         { type: 'bold', content: 'first' },
         { type: 'italic', content: 'second' }
       ];
-      component.content = '';
-      component.inlines = inlines;
+      component.block = createMockBlock(BlockType.PARAGRAPH, '', { children });
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -188,12 +195,11 @@ describe('MarkdownParagraphComponent', () => {
       expect(text?.includes('  ')).toBe(true); // Has double space from template + trim
     });
 
-    it('should prefer inlines over plain content', () => {
-      const inlines: MarkdownInline[] = [
+    it('should prefer children over plain content', () => {
+      const children: MarkdownInline[] = [
         { type: 'bold', content: 'formatted' }
       ];
-      component.content = 'plain text';
-      component.inlines = inlines;
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'plain text', { children });
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -202,9 +208,8 @@ describe('MarkdownParagraphComponent', () => {
       expect(span).toBeTruthy();
     });
 
-    it('should not render inlines when array is empty', () => {
-      component.content = 'plain text';
-      component.inlines = [];
+    it('should not render children when array is empty', () => {
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'plain text', { children: [] });
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -215,41 +220,41 @@ describe('MarkdownParagraphComponent', () => {
   });
 
   describe('Streaming State', () => {
-    it('should apply streaming class when streaming is true', () => {
-      component.content = 'Streaming content';
-      component.streaming = true;
-      component.ngOnChanges({ streaming: {} as any });
+    it('should apply streaming class when isComplete is false', () => {
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'Streaming content');
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       expect(component.paragraphClasses()).toBe('markdown-paragraph block-paragraph streaming');
     });
 
-    it('should not apply streaming class when streaming is false', () => {
-      component.content = 'Static content';
-      component.streaming = false;
+    it('should not apply streaming class when isComplete is true', () => {
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'Static content');
+      component.isComplete = true;
       fixture.detectChanges();
 
       expect(component.paragraphClasses()).toBe('markdown-paragraph block-paragraph');
     });
 
-    it('should update classes when streaming changes', () => {
-      component.content = 'Content';
-      component.streaming = false;
+    it('should update classes when isComplete changes', () => {
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'Content');
+      component.isComplete = true;
       fixture.detectChanges();
 
       expect(component.paragraphClasses()).toBe('markdown-paragraph block-paragraph');
 
-      component.streaming = true;
-      component.ngOnChanges({ streaming: {} as any });
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       expect(component.paragraphClasses()).toBe('markdown-paragraph block-paragraph streaming');
     });
 
     it('should apply streaming class to paragraph element', () => {
-      component.content = 'Test';
-      component.streaming = true;
-      component.ngOnChanges({ streaming: {} as any });
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'Test');
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -259,7 +264,7 @@ describe('MarkdownParagraphComponent', () => {
 
   describe('CSS Classes', () => {
     it('should apply markdown-paragraph class', () => {
-      component.content = 'Test';
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'Test');
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -267,7 +272,7 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should apply block-paragraph class', () => {
-      component.content = 'Test';
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'Test');
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -275,9 +280,9 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should maintain all base classes when streaming', () => {
-      component.content = 'Test';
-      component.streaming = true;
-      component.ngOnChanges({ streaming: {} as any });
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'Test');
+      component.isComplete = false;
+      component.ngOnChanges({ isComplete: {} as any });
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -306,9 +311,8 @@ describe('MarkdownParagraphComponent', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle null inlines', () => {
-      component.content = 'Test';
-      component.inlines = null as unknown as MarkdownInline[];
+    it('should handle null children', () => {
+      component.block = createMockBlock(BlockType.PARAGRAPH, 'Test', { children: null as unknown as MarkdownInline[] });
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -316,11 +320,10 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should handle inline with empty content', () => {
-      const inlines: MarkdownInline[] = [
+      const children: MarkdownInline[] = [
         { type: 'bold', content: '' }
       ];
-      component.content = '';
-      component.inlines = inlines;
+      component.block = createMockBlock(BlockType.PARAGRAPH, '', { children });
       fixture.detectChanges();
 
       const span = fixture.nativeElement.querySelector('span.inline-bold');
@@ -329,11 +332,10 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should handle inline with special characters', () => {
-      const inlines: MarkdownInline[] = [
+      const children: MarkdownInline[] = [
         { type: 'code', content: '<div>&"test"</div>' }
       ];
-      component.content = '';
-      component.inlines = inlines;
+      component.block = createMockBlock(BlockType.PARAGRAPH, '', { children });
       fixture.detectChanges();
 
       const span = fixture.nativeElement.querySelector('span.inline-code');
@@ -341,7 +343,7 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should handle unicode characters in content', () => {
-      component.content = '测试中文 🎉 العربية';
+      component.block = createMockBlock(BlockType.PARAGRAPH, '测试中文 🎉 العربية');
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
@@ -349,7 +351,7 @@ describe('MarkdownParagraphComponent', () => {
     });
 
     it('should handle number as content', () => {
-      component.content = 123 as unknown as string;
+      component.block = createMockBlock(BlockType.PARAGRAPH, 123 as unknown as string);
       fixture.detectChanges();
 
       const paragraph = fixture.nativeElement.querySelector('p');
