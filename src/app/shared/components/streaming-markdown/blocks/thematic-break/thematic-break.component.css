@@ -1,0 +1,6 @@
+.markdown-hr {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: var(--spacing-lg) 0;
+}

@@ -21,15 +21,15 @@ export interface IShiniHighlighter {
   initialize(): Promise<void>;
 
   /**
-   * Highlight code with syntax highlighting and line numbers
-   * Async operation using Shiki's codeToHtml
+   * Highlight code and return structured token lines.
+   * This is the primary API — no innerHTML needed.
    *
    * @param code - Raw code string to highlight
    * @param language - Programming language identifier (e.g., 'typescript', 'python')
    * @param theme - Theme name ('light' or 'dark')
-   * @returns HTML string with syntax highlighting and line numbers, or escaped plain text as fallback
+   * @returns Array of CodeLine objects with syntax tokens
    */
-  highlight(code: string, language: string, theme: 'light' | 'dark'): Promise<string>;
+  highlightToTokens(code: string, language: string, theme: 'light' | 'dark'): Promise<import('./models').CodeLine[]>;
 
   /**
    * Check if Shini is ready for highlighting

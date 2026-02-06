@@ -12,16 +12,20 @@ import { MarkdownHeadingComponent } from '../blocks/heading/heading.component';
 import { MarkdownCodeComponent } from '../blocks/code/code.component';
 import { MarkdownListComponent } from '../blocks/list/list.component';
 import { MarkdownBlockquoteComponent } from '../blocks/blockquote/blockquote.component';
+import { MarkdownThematicBreakComponent } from '../blocks/thematic-break/thematic-break.component';
+import { MarkdownTableComponent } from '../blocks/table/table.component';
 
 /**
  * Creates the builtin plugin with all standard block renderers.
  *
  * Block type mapping:
- * - PARAGRAPH, THEMATIC_BREAK, HTML, UNKNOWN → MarkdownParagraphComponent
+ * - PARAGRAPH, HTML, UNKNOWN → MarkdownParagraphComponent
  * - HEADING → MarkdownHeadingComponent
  * - CODE_BLOCK → MarkdownCodeComponent
  * - LIST → MarkdownListComponent
  * - BLOCKQUOTE → MarkdownBlockquoteComponent
+ * - THEMATIC_BREAK → MarkdownThematicBreakComponent
+ * - TABLE → MarkdownTableComponent
  */
 export function builtinPlugin(): StreamdownPlugin {
   return {
@@ -32,7 +36,8 @@ export function builtinPlugin(): StreamdownPlugin {
       [BlockType.CODE_BLOCK]: MarkdownCodeComponent,
       [BlockType.LIST]: MarkdownListComponent,
       [BlockType.BLOCKQUOTE]: MarkdownBlockquoteComponent,
-      [BlockType.THEMATIC_BREAK]: MarkdownParagraphComponent,
+      [BlockType.THEMATIC_BREAK]: MarkdownThematicBreakComponent,
+      [BlockType.TABLE]: MarkdownTableComponent,
       [BlockType.HTML]: MarkdownParagraphComponent,
       [BlockType.UNKNOWN]: MarkdownParagraphComponent,
     }

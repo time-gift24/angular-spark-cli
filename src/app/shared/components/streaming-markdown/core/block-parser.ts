@@ -4,6 +4,11 @@
  * This module implements the block-based parsing logic for streaming markdown.
  * It converts markdown text into structured blocks with support for incremental
  * parsing and streaming scenarios.
+ *
+ * Performance optimizations:
+ * - Deterministic block IDs (type-position) for stable DOM reuse via @for track
+ * - Incremental parsing with cache: only re-tokenize the "tail" after last stable boundary
+ * - No UUID dependency
  */
 
 import { Injectable } from '@angular/core';
@@ -11,117 +16,22 @@ import { marked } from 'marked';
 import { Token } from 'marked';
 import {
   MarkdownBlock,
+  MarkdownInline,
   ParserResult,
   BlockType
 } from './models';
-import { v4 as uuidv4 } from 'uuid';
 
 // Type alias for Marked.js tokens
 type MarkedToken = Token;
 
-/**
- * Strategy interface for merging tokens into markdown blocks.
- * Determines when and how adjacent tokens should be combined.
- */
-interface TokenMergeStrategy {
-  /**
-   * Determines if two tokens can be merged into a single block.
-   * @param token - The current token
-   * @param nextToken - The next token to check merge compatibility
-   * @returns true if tokens can be merged, false otherwise
-   */
-  canMerge(token: MarkedToken, nextToken: MarkedToken): boolean;
-
-  /**
-   * Merges a sequence of tokens into a single MarkdownBlock.
-   * @param tokens - Array of tokens to merge
-   * @returns A merged MarkdownBlock instance
-   */
-  merge(tokens: MarkedToken[]): MarkdownBlock;
-}
-
-/**
- * Factory interface for creating markdown blocks.
- * Provides a consistent way to instantiate block objects with proper metadata.
- */
-interface IBlockFactory {
-  /**
-   * Creates a paragraph block.
-   * @param content - The paragraph content
-   * @param position - Position in the document (0-indexed)
-   * @returns A new MarkdownBlock of type PARAGRAPH
-   */
-  createParagraph(content: string, position: number): MarkdownBlock;
-
-  /**
-   * Creates a heading block.
-   * @param content - The heading content
-   * @param level - Heading level (1-6)
-   * @param position - Position in the document (0-indexed)
-   * @returns A new MarkdownBlock of type HEADING
-   */
-  createHeading(content: string, level: number, position: number): MarkdownBlock;
-
-  /**
-   * Creates a code block.
-   * @param content - The code content
-   * @param position - Position in the document (0-indexed)
-   * @param language - Optional programming language identifier
-   * @returns A new MarkdownBlock of type CODE_BLOCK
-   */
-  createCodeBlock(content: string, position: number, language?: string): MarkdownBlock;
-
-  /**
-   * Creates a list block.
-   * @param items - Array of list items
-   * @param position - Position in the document (0-indexed)
-   * @returns A new MarkdownBlock of type LIST
-   */
-  createList(items: string[], position: number): MarkdownBlock;
-
-  /**
-   * Creates a blockquote block.
-   * @param content - The blockquote content
-   * @param position - Position in the document (0-indexed)
-   * @returns A new MarkdownBlock of type BLOCKQUOTE
-   */
-  createBlockquote(content: string, position: number): MarkdownBlock;
-
-  /**
-   * Creates a horizontal rule (thematic break) block.
-   * @param position - Position in the document (0-indexed)
-   * @returns A new MarkdownBlock of type THEMATIC_BREAK
-   */
-  createHr(position: number): MarkdownBlock;
-
-  /**
-   * Creates an HTML block.
-   * @param content - The HTML content
-   * @param position - Position in the document (0-indexed)
-   * @returns A new MarkdownBlock of type HTML
-   */
-  createHtmlBlock(content: string, position: number): MarkdownBlock;
-}
-
-/**
- * Internal state maintained during incremental parsing.
- * Tracks parsing context across multiple parse calls.
- */
-interface ParsingState {
-  /** Array of completed blocks parsed so far */
-  blocks: MarkdownBlock[];
-
-  /** Current text buffer being accumulated */
-  currentBuffer: string;
-
-  /** Flag indicating if parser is inside a code block */
-  inCodeBlock: boolean;
-
-  /** Flag indicating if parser is inside an HTML block */
-  inHtmlBlock: boolean;
-
-  /** Language identifier for the current code block */
-  codeBlockLanguage?: string;
+/** Internal cache for incremental parsing */
+interface IncrementalCache {
+  /** Text that has been fully parsed into stable blocks */
+  parsedText: string;
+  /** Blocks from parsedText (all complete, stable IDs) */
+  stableBlocks: MarkdownBlock[];
+  /** Byte offset where the last stable block ends in parsedText */
+  stableTextEnd: number;
 }
 
 /**
@@ -129,21 +39,10 @@ interface ParsingState {
  * Parses markdown text into structured blocks with support for streaming scenarios.
  */
 export interface IBlockParser {
-  /**
-   * Parses markdown text into blocks.
-   * @param text - The complete markdown text to parse
-   * @returns ParserResult containing all parsed blocks and completion status
-   */
   parse(text: string): ParserResult;
-
-  /**
-   * Performs incremental parsing by comparing previous and new text.
-   * Optimizes parsing by only processing changed portions.
-   * @param previousText - The text from the previous parse call
-   * @param newText - The new text to parse
-   * @returns ParserResult containing updated blocks and completion status
-   */
   parseIncremental(previousText: string, newText: string): ParserResult;
+  /** Clear internal cache (call when stream$ changes) */
+  reset(): void;
 }
 
 /**
@@ -152,36 +51,31 @@ export interface IBlockParser {
  */
 @Injectable()
 export class BlockParser implements IBlockParser {
+  private cache: IncrementalCache = { parsedText: '', stableBlocks: [], stableTextEnd: 0 };
+
+  /**
+   * Generate deterministic ID from block type + position.
+   * Same block at same position always gets same ID → Angular @for track reuses DOM nodes.
+   */
+  private generateStableId(type: string, position: number): string {
+    return `${type}-${position}`;
+  }
+
   /**
    * Parses markdown text into blocks.
-   * @param text - The complete markdown text to parse
-   * @returns ParserResult containing all parsed blocks
-   *
-   * @example
-   * ```typescript
-   * const parser = new BlockParser();
-   * const result = parser.parse('# Heading\n\nParagraph text');
-   * console.log(result.blocks); // [HeadingBlock, ParagraphBlock]
-   * ```
    */
   parse(text: string): ParserResult {
-    // Handle empty input
     if (!text || text.trim().length === 0) {
       return { blocks: [], hasIncompleteBlock: false };
     }
 
     const blocks: MarkdownBlock[] = [];
     let position = 0;
-
-    // Check if text ends with incomplete block
-    // Common indicators: unclosed code block, unclosed list, etc.
     const hasIncompleteBlock = this.detectIncompleteBlock(text);
 
     try {
-      // Tokenize the markdown text using marked.js
       const tokens = marked.lexer(text);
 
-      // Convert each token to a MarkdownBlock
       for (const token of tokens) {
         const block = this.tokenToBlock(token, position);
         if (block) {
@@ -190,28 +84,141 @@ export class BlockParser implements IBlockParser {
         }
       }
 
-      // If incomplete block detected, remove the last block from completed blocks
-      // (it will be set as currentBlock by the streaming component)
-      let completedBlocks = [...blocks];
-      if (hasIncompleteBlock && completedBlocks.length > 0) {
-        // Keep the incomplete block in the array - streaming component will handle it
-      }
-
       return {
-        blocks: completedBlocks,
+        blocks,
         hasIncompleteBlock
       };
     } catch (error) {
       console.error('[BlockParser] Parse error:', error);
-      // Return partial result on error
       return { blocks, hasIncompleteBlock: false };
     }
   }
 
   /**
+   * Performs incremental parsing for streaming scenarios.
+   *
+   * Algorithm:
+   * 1. If !newText.startsWith(cache.parsedText) → reset cache, full parse
+   * 2. Find last double-newline boundary in text → stableTextEnd
+   * 3. stableBlocks = blocks from text[0..stableTextEnd] (cached, not re-parsed)
+   * 4. tailText = text[stableTextEnd..end]
+   * 5. tailTokens = marked.lexer(tailText) — only parse the tail
+   * 6. tailBlocks = tailTokens.map(tokenToBlock) with position offset
+   * 7. return { blocks: [...stableBlocks, ...tailBlocks], hasIncompleteBlock }
+   * 8. Update cache
+   */
+  parseIncremental(previousText: string, newText: string): ParserResult {
+    // Edge case: no previous text (first chunk)
+    if (!previousText || previousText.length === 0) {
+      const result = this.parse(newText);
+      this.updateCache(newText, result.blocks);
+      return result;
+    }
+
+    // Edge case: new text is shorter or completely different
+    if (!newText.startsWith(previousText)) {
+      this.reset();
+      const result = this.parse(newText);
+      this.updateCache(newText, result.blocks);
+      return result;
+    }
+
+    // Find the last double-newline boundary — everything before it is "stable"
+    const lastBoundary = this.findLastStableBoundary(newText);
+
+    if (lastBoundary <= 0) {
+      // No stable boundary found, full parse
+      const result = this.parse(newText);
+      this.updateCache(newText, result.blocks);
+      return result;
+    }
+
+    // Check if we can reuse cached stable blocks
+    const stableText = newText.substring(0, lastBoundary);
+
+    let stableBlocks: MarkdownBlock[];
+    if (this.cache.parsedText.length > 0 && stableText.startsWith(this.cache.parsedText.substring(0, this.cache.stableTextEnd)) && this.cache.stableTextEnd === lastBoundary) {
+      // Cache hit: stable portion unchanged
+      stableBlocks = this.cache.stableBlocks;
+    } else {
+      // Cache miss: re-parse stable portion
+      const stableResult = this.parse(stableText);
+      stableBlocks = stableResult.blocks;
+    }
+
+    // Parse only the tail
+    const tailText = newText.substring(lastBoundary);
+    const hasIncompleteBlock = this.detectIncompleteBlock(newText);
+
+    if (!tailText.trim()) {
+      const allBlocks = [...stableBlocks];
+      this.cache = { parsedText: newText, stableBlocks: [...stableBlocks], stableTextEnd: lastBoundary };
+      return { blocks: allBlocks, hasIncompleteBlock };
+    }
+
+    try {
+      const tailTokens = marked.lexer(tailText);
+      const positionOffset = stableBlocks.length;
+      const tailBlocks: MarkdownBlock[] = [];
+
+      let tailPos = 0;
+      for (const token of tailTokens) {
+        const block = this.tokenToBlock(token, positionOffset + tailPos);
+        if (block) {
+          tailBlocks.push(block);
+          tailPos++;
+        }
+      }
+
+      const allBlocks = [...stableBlocks, ...tailBlocks];
+
+      // Update cache
+      this.cache = { parsedText: newText, stableBlocks: [...stableBlocks], stableTextEnd: lastBoundary };
+
+      return { blocks: allBlocks, hasIncompleteBlock };
+    } catch (error) {
+      console.error('[BlockParser] Incremental parse error:', error);
+      // Fallback to full parse
+      const result = this.parse(newText);
+      this.updateCache(newText, result.blocks);
+      return result;
+    }
+  }
+
+  /** Clear internal cache (call when stream$ changes) */
+  reset(): void {
+    this.cache = { parsedText: '', stableBlocks: [], stableTextEnd: 0 };
+  }
+
+  /**
+   * Find the last stable boundary (double newline) in text.
+   * Everything before this boundary is considered "stable" and won't change.
+   */
+  private findLastStableBoundary(text: string): number {
+    const lastDoubleNewline = text.lastIndexOf('\n\n');
+    if (lastDoubleNewline === -1) return 0;
+    // Return position after the double newline
+    return lastDoubleNewline + 2;
+  }
+
+  /** Update the incremental cache after a parse */
+  private updateCache(text: string, blocks: MarkdownBlock[]): void {
+    const boundary = this.findLastStableBoundary(text);
+    if (boundary > 0) {
+      // Only cache blocks that fall within the stable boundary
+      const stableResult = this.parse(text.substring(0, boundary));
+      this.cache = {
+        parsedText: text,
+        stableBlocks: stableResult.blocks,
+        stableTextEnd: boundary
+      };
+    } else {
+      this.cache = { parsedText: text, stableBlocks: [], stableTextEnd: 0 };
+    }
+  }
+
+  /**
    * Detects if the text ends with an incomplete block.
-   * @param text - The markdown text to check
-   * @returns true if the text appears to have an incomplete block
    */
   private detectIncompleteBlock(text: string): boolean {
     const trimmed = text.trim();
@@ -222,30 +229,14 @@ export class BlockParser implements IBlockParser {
       return true;
     }
 
-    // Check for unclosed fences
     const lines = trimmed.split('\n');
     const lastNonEmptyLine = lines.reverse().find(line => line.trim().length > 0);
 
     if (lastNonEmptyLine) {
-      // Check if last line is a heading (no content yet)
-      if (/^#{1,6}\s*$/.test(lastNonEmptyLine)) {
-        return true;
-      }
-
-      // Check if last line is an unordered list item
-      if (/^[\*\-+]\s*$/.test(lastNonEmptyLine)) {
-        return true;
-      }
-
-      // Check if last line is an ordered list item
-      if (/^\d+\.\s*$/.test(lastNonEmptyLine)) {
-        return true;
-      }
-
-      // Check if last line is a blockquote marker
-      if (/^>\s*$/.test(lastNonEmptyLine)) {
-        return true;
-      }
+      if (/^#{1,6}\s*$/.test(lastNonEmptyLine)) return true;
+      if (/^[\*\-+]\s*$/.test(lastNonEmptyLine)) return true;
+      if (/^\d+\.\s*$/.test(lastNonEmptyLine)) return true;
+      if (/^>\s*$/.test(lastNonEmptyLine)) return true;
     }
 
     return false;
@@ -253,32 +244,37 @@ export class BlockParser implements IBlockParser {
 
   /**
    * Converts a marked.js token to a MarkdownBlock.
-   * @param token - The marked.js token
-   * @param position - The block position in the document
-   * @returns A MarkdownBlock or null if token type is not supported
    */
   private tokenToBlock(token: MarkedToken, position: number): MarkdownBlock | null {
     const baseBlock = {
-      id: uuidv4(),
+      id: this.generateStableId(token.type, position),
       position,
       isComplete: true
     };
 
     switch (token.type) {
-      case 'heading':
+      case 'heading': {
+        const headingToken = token as any;
+        const children = headingToken.tokens ? this.parseInlineTokens(headingToken.tokens) : undefined;
         return {
           ...baseBlock,
           type: BlockType.HEADING,
           content: this.extractText(token),
-          level: (token as any).depth || 1
+          level: headingToken.depth || 1,
+          children
         };
+      }
 
-      case 'paragraph':
+      case 'paragraph': {
+        const paraToken = token as any;
+        const children = paraToken.tokens ? this.parseInlineTokens(paraToken.tokens) : undefined;
         return {
           ...baseBlock,
           type: BlockType.PARAGRAPH,
-          content: this.extractText(token)
+          content: this.extractText(token),
+          children
         };
+      }
 
       case 'code':
         return {
@@ -289,16 +285,45 @@ export class BlockParser implements IBlockParser {
           language: (token as any).lang || undefined
         };
 
-      case 'list':
-        const items = (token as any).items || [];
-        const listContent = items
-          .map((item: any) => this.extractText(item))
-          .join('\n');
+      case 'list': {
+        const listToken = token as any;
+        const items = listToken.items || [];
+        const subtype = listToken.ordered ? 'ordered' : 'unordered';
+        const parsedItems: MarkdownBlock[] = items.map((item: any, i: number) => {
+          const itemId = `${baseBlock.id}-item-${i}`;
+          const itemBlock: MarkdownBlock = {
+            id: itemId,
+            type: BlockType.PARAGRAPH,
+            content: item.text || '',
+            isComplete: true,
+            position: i
+          };
+          // Handle nested lists
+          if (item.tokens) {
+            const nestedLists = item.tokens.filter((t: any) => t.type === 'list');
+            if (nestedLists.length > 0) {
+              const nestedList = nestedLists[0];
+              const nestedItems = (nestedList.items || []).map((ni: any, j: number) => ({
+                id: `${itemId}-nested-${j}`,
+                type: BlockType.PARAGRAPH,
+                content: ni.text || '',
+                isComplete: true,
+                position: j
+              }));
+              itemBlock.items = nestedItems;
+              itemBlock.subtype = nestedList.ordered ? 'ordered' : 'unordered';
+            }
+          }
+          return itemBlock;
+        });
         return {
           ...baseBlock,
           type: BlockType.LIST,
-          content: listContent
+          content: items.map((item: any) => item.text || '').join('\n'),
+          subtype: subtype as 'ordered' | 'unordered',
+          items: parsedItems
         };
+      }
 
       case 'blockquote':
         return {
@@ -321,30 +346,77 @@ export class BlockParser implements IBlockParser {
           content: (token as any).raw || ''
         };
 
+      case 'table': {
+        const tableToken = token as any;
+        const headerCells = tableToken.header?.map((h: any) => h.text || '') || [];
+        const bodyRows = tableToken.rows?.map((row: any) =>
+          row.map((cell: any) => cell.text || '')
+        ) || [];
+        const alignments = tableToken.align || [];
+        return {
+          ...baseBlock,
+          type: BlockType.TABLE,
+          content: '',
+          tableData: { headers: headerCells, rows: bodyRows, align: alignments }
+        };
+      }
+
+      case 'space':
+        // Whitespace-only tokens — skip silently
+        return null;
+
       default:
-        console.warn('[BlockParser] Unsupported token type:', token.type);
+        // Silently skip unsupported token types
         return null;
     }
   }
 
   /**
+   * Parse marked.js inline tokens into MarkdownInline array.
+   * Maps: strong→bold, em→italic, codespan→code, link→link, br→hard-break, text→text
+   */
+  private parseInlineTokens(tokens: any[]): MarkdownInline[] {
+    if (!tokens || !Array.isArray(tokens)) return [];
+
+    const result: MarkdownInline[] = [];
+    for (const token of tokens) {
+      switch (token.type) {
+        case 'strong':
+          result.push({ type: 'bold', content: token.text || '' });
+          break;
+        case 'em':
+          result.push({ type: 'italic', content: token.text || '' });
+          break;
+        case 'codespan':
+          result.push({ type: 'code', content: token.text || '' });
+          break;
+        case 'link':
+          result.push({ type: 'link', content: token.text || '', href: token.href });
+          break;
+        case 'br':
+          result.push({ type: 'hard-break', content: '' });
+          break;
+        case 'text':
+        default:
+          result.push({ type: 'text', content: token.text || token.raw || '' });
+          break;
+      }
+    }
+    return result;
+  }
+
+  /**
    * Extracts text content from a token.
-   * Returns the original markdown to preserve formatting for most types,
-   * but uses text content for headings to avoid displaying # symbols.
-   * @param token - The token to extract text from
-   * @returns Original markdown text representation of the token
    */
   private extractText(token: any): string {
     if (!token) return '';
 
     // For headings, use text property (without # symbols)
-    // This prevents "# Heading" from displaying with the hash symbols
     if (token.type === 'heading') {
       return token.text || '';
     }
 
     // Prefer raw property for other types (preserves formatting)
-    // This preserves * for emphasis, > for blockquotes, etc.
     if (token.raw) return token.raw;
 
     // Fallback to text property for code blocks
@@ -358,73 +430,5 @@ export class BlockParser implements IBlockParser {
     }
 
     return '';
-  }
-
-  /**
-   * Performs incremental parsing for streaming scenarios.
-   *
-   * Optimization strategy:
-   * 1. If previousText is empty, parse entire newText
-   * 2. If newText extends previousText, only parse the delta
-   * 3. Otherwise, parse entire newText (fallback)
-   *
-   * This optimization avoids re-tokenizing completed blocks,
-   * improving performance for long streaming sessions.
-   *
-   * @param previousText - The text from the previous parse call
-   * @param newText - The new text to parse
-   * @returns ParserResult containing updated blocks
-   *
-   * @example
-   * ```typescript
-   * const parser = new BlockParser();
-   * const result1 = parser.parseIncremental('', '# Heading');
-   * // Returns: { blocks: [HeadingBlock], hasIncompleteBlock: false }
-   *
-   * const result2 = parser.parseIncremental('# Heading', '# Heading\n\nParagraph');
-   * // Returns: { blocks: [HeadingBlock, ParagraphBlock], hasIncompleteBlock: false }
-   * ```
-   */
-  parseIncremental(previousText: string, newText: string): ParserResult {
-    // Edge case: no previous text (first chunk)
-    if (!previousText || previousText.length === 0) {
-      return this.parse(newText);
-    }
-
-    // Edge case: new text is shorter or completely different
-    if (newText.length <= previousText.length) {
-      // Fallback: parse everything
-      return this.parse(newText);
-    }
-
-    // Check if newText extends previousText (streaming scenario)
-    const isExtension = newText.startsWith(previousText);
-
-    if (!isExtension) {
-      // Text changed, not just extended - parse everything
-      return this.parse(newText);
-    }
-
-    // Streaming scenario: newText = previousText + delta
-    // Extract only the new portion
-    const delta = newText.substring(previousText.length);
-
-    // Strategy: Parse only the delta to find new/incomplete blocks
-    // This avoids re-tokenizing the entire document
-
-    // Check if delta contains complete block separators
-    const blockSeparators = ['\n\n', '\n# ', '\n```', '\n* ', '\n- ', '\n1. ', '\n> '];
-    const hasCompleteBlocks = blockSeparators.some(sep => delta.includes(sep));
-
-    if (!hasCompleteBlocks) {
-      // Delta is likely extending the current block
-      // Parse the full text to get updated current block
-      return this.parse(newText);
-    }
-
-    // Delta contains complete blocks - parse everything for correctness
-    // In production, we could cache previous blocks and only tokenize delta
-    // For now, full parse is safe and correct
-    return this.parse(newText);
   }
 }

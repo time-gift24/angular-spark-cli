@@ -85,16 +85,22 @@ export class MarkdownCodeComponent implements OnChanges {
     }
   }
 
+  private getCurrentTheme(): 'light' | 'dark' {
+    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  }
+
   private highlightCode(): void {
     if (!this.isComplete) {
       this.highlightedLines.set([]);
       return;
     }
 
+    const theme = this.getCurrentTheme();
+
     from(this.shiniHighlighter.whenReady())
       .pipe(
         switchMap(() =>
-          from(this.shiniHighlighter.highlightToTokens(this.code, this.language, 'light'))
+          from(this.shiniHighlighter.highlightToTokens(this.code, this.language, theme))
         ),
         timeout(5000),
         catchError((error) => {

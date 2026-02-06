@@ -341,7 +341,7 @@ const EXAMPLE_EDGE_CASES: ShiniEdgeCaseTestCase[] = [
  *     const itOrSkip = skip ? it.skip : it;
  *     itOrSkip(description, async () => {
  *       await service.initialize();
- *       const result = service.highlight(input.code, input.language, input.theme);
+ *       const result = service.highlightToTokens(input.code, input.language, input.theme);
  *
  *       if (expected.containsTokens) {
  *         expected.containsTokens.forEach(token => {
@@ -396,7 +396,7 @@ describe('ShiniHighlighter Service Skeleton', () => {
     it('should implement IShiniHighlighter interface', () => {
       // Verify all required methods exist
       expect(typeof service.initialize).toBe('function');
-      expect(typeof service.highlight).toBe('function');
+      expect(typeof service.highlightToTokens).toBe('function');
       expect(typeof service.isReady).toBe('function');
 
       // Verify state signal exists
@@ -552,42 +552,47 @@ describe('ShiniHighlighter Service Skeleton', () => {
     });
   });
 
-  describe('highlight() Method - Stub Implementation', () => {
+  describe('highlightToTokens() Method', () => {
     const testCode = 'const x = 42;';
     const testLanguage = 'typescript';
-    const testTheme = 'light';
+    const testTheme: 'light' | 'dark' = 'light';
 
-    it('should return a string', () => {
-      const result = service.highlight(testCode, testLanguage, testTheme);
-      expect(typeof result).toBe('string');
+    it('should return an array', async () => {
+      const result = await service.highlightToTokens(testCode, testLanguage, testTheme);
+      expect(Array.isArray(result)).toBe(true);
     });
 
-    it('should return the input code unchanged (stub)', () => {
-      const result = service.highlight(testCode, testLanguage, testTheme);
-      expect(result).toBe(testCode);
+    it('should return CodeLine objects with lineNumber and tokens', async () => {
+      await service.initialize();
+      const result = await service.highlightToTokens(testCode, testLanguage, testTheme);
+      expect(result.length).toBeGreaterThan(0);
+      expect(result[0].lineNumber).toBeDefined();
+      expect(result[0].tokens).toBeDefined();
     });
 
-    it('should handle empty code strings', () => {
-      const result = service.highlight('', testLanguage, testTheme);
-      expect(result).toBe('');
+    it('should handle empty code strings', async () => {
+      const result = await service.highlightToTokens('', testLanguage, testTheme);
+      expect(Array.isArray(result)).toBe(true);
     });
 
-    it('should handle different languages', () => {
+    it('should handle different languages', async () => {
+      await service.initialize();
       const languages = ['typescript', 'python', 'javascript', 'html', 'css'];
 
-      languages.forEach(lang => {
-        const result = service.highlight(testCode, lang, testTheme);
-        expect(result).toBe(testCode);
-      });
+      for (const lang of languages) {
+        const result = await service.highlightToTokens(testCode, lang, testTheme);
+        expect(Array.isArray(result)).toBe(true);
+      }
     });
 
-    it('should handle both light and dark themes', () => {
+    it('should handle both light and dark themes', async () => {
+      await service.initialize();
       const themes: Array<'light' | 'dark'> = ['light', 'dark'];
 
-      themes.forEach(theme => {
-        const result = service.highlight(testCode, testLanguage, theme);
-        expect(result).toBe(testCode);
-      });
+      for (const theme of themes) {
+        const result = await service.highlightToTokens(testCode, testLanguage, theme);
+        expect(Array.isArray(result)).toBe(true);
+      }
     });
   });
 
@@ -632,7 +637,7 @@ describe('ShiniHighlighter Service Skeleton', () => {
       // Verify the service matches the expected interface
       const methods: Array<keyof IShiniHighlighter> = [
         'initialize',
-        'highlight',
+        'highlightToTokens',
         'isReady'
       ];
 
@@ -660,26 +665,26 @@ describe('ShiniHighlighter Service Skeleton', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle special characters in code', () => {
+    it('should handle special characters in code', async () => {
       const specialCode = '<script>alert("test");</script>';
-      const result = service.highlight(specialCode, 'javascript', 'dark');
-      expect(result).toBe(specialCode);
+      const result = await service.highlightToTokens(specialCode, 'javascript', 'dark');
+      expect(Array.isArray(result)).toBe(true);
     });
 
-    it('should handle multiline code', () => {
+    it('should handle multiline code', async () => {
       const multilineCode = `
         function example() {
           return true;
         }
       `;
-      const result = service.highlight(multilineCode, 'typescript', 'light');
-      expect(result).toBe(multilineCode);
+      const result = await service.highlightToTokens(multilineCode, 'typescript', 'light');
+      expect(Array.isArray(result)).toBe(true);
     });
 
-    it('should handle very long code strings', () => {
+    it('should handle very long code strings', async () => {
       const longCode = 'const x = 1;'.repeat(1000);
-      const result = service.highlight(longCode, 'text', 'light');
-      expect(result).toBe(longCode);
+      const result = await service.highlightToTokens(longCode, 'text', 'light');
+      expect(Array.isArray(result)).toBe(true);
     });
   });
 });
@@ -717,8 +722,8 @@ describe.skip('ShiniHighlighter - Real Shiki Integration (Phase 7.3+)', () => {
     EXAMPLE_TEST_CASES.forEach((testCase) => {
       const itOrSkip = testCase.skip ? it.skip : it;
 
-      itOrSkip(testCase.description, () => {
-        const result = service.highlight(
+      itOrSkip(testCase.description, async () => {
+        const result = await service.highlightToTokens(
           testCase.input.code,
           testCase.input.language,
           testCase.input.theme

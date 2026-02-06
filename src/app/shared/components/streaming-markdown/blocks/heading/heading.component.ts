@@ -18,13 +18,13 @@ import { MarkdownBlock } from '../../core/models';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @switch (block.level || 1) {
-      @case (1) { <h1 [class]="headingClasses()">{{ block.content }}</h1> }
-      @case (2) { <h2 [class]="headingClasses()">{{ block.content }}</h2> }
-      @case (3) { <h3 [class]="headingClasses()">{{ block.content }}</h3> }
-      @case (4) { <h4 [class]="headingClasses()">{{ block.content }}</h4> }
-      @case (5) { <h5 [class]="headingClasses()">{{ block.content }}</h5> }
-      @case (6) { <h6 [class]="headingClasses()">{{ block.content }}</h6> }
-      @default { <h6 class="markdown-heading fallback">{{ block.content }}</h6> }
+      @case (1) { <h1 [class]="headingClasses()">@if (block.children?.length) { @for (inline of block.children; track $index) { @switch (inline.type) { @case ('link') { <a [href]="inline.href" class="inline-link" target="_blank" rel="noopener">{{ inline.content }}</a> } @case ('code') { <code class="inline-code">{{ inline.content }}</code> } @default { <span [class]="getInlineClass(inline.type)">{{ inline.content }}</span> } } } } @else { {{ block.content }} }@if (!isComplete) { <span class="streaming-cursor"></span> }</h1> }
+      @case (2) { <h2 [class]="headingClasses()">@if (block.children?.length) { @for (inline of block.children; track $index) { @switch (inline.type) { @case ('link') { <a [href]="inline.href" class="inline-link" target="_blank" rel="noopener">{{ inline.content }}</a> } @case ('code') { <code class="inline-code">{{ inline.content }}</code> } @default { <span [class]="getInlineClass(inline.type)">{{ inline.content }}</span> } } } } @else { {{ block.content }} }@if (!isComplete) { <span class="streaming-cursor"></span> }</h2> }
+      @case (3) { <h3 [class]="headingClasses()">@if (block.children?.length) { @for (inline of block.children; track $index) { @switch (inline.type) { @case ('link') { <a [href]="inline.href" class="inline-link" target="_blank" rel="noopener">{{ inline.content }}</a> } @case ('code') { <code class="inline-code">{{ inline.content }}</code> } @default { <span [class]="getInlineClass(inline.type)">{{ inline.content }}</span> } } } } @else { {{ block.content }} }@if (!isComplete) { <span class="streaming-cursor"></span> }</h3> }
+      @case (4) { <h4 [class]="headingClasses()">@if (block.children?.length) { @for (inline of block.children; track $index) { @switch (inline.type) { @case ('link') { <a [href]="inline.href" class="inline-link" target="_blank" rel="noopener">{{ inline.content }}</a> } @case ('code') { <code class="inline-code">{{ inline.content }}</code> } @default { <span [class]="getInlineClass(inline.type)">{{ inline.content }}</span> } } } } @else { {{ block.content }} }@if (!isComplete) { <span class="streaming-cursor"></span> }</h4> }
+      @case (5) { <h5 [class]="headingClasses()">@if (block.children?.length) { @for (inline of block.children; track $index) { @switch (inline.type) { @case ('link') { <a [href]="inline.href" class="inline-link" target="_blank" rel="noopener">{{ inline.content }}</a> } @case ('code') { <code class="inline-code">{{ inline.content }}</code> } @default { <span [class]="getInlineClass(inline.type)">{{ inline.content }}</span> } } } } @else { {{ block.content }} }@if (!isComplete) { <span class="streaming-cursor"></span> }</h5> }
+      @case (6) { <h6 [class]="headingClasses()">@if (block.children?.length) { @for (inline of block.children; track $index) { @switch (inline.type) { @case ('link') { <a [href]="inline.href" class="inline-link" target="_blank" rel="noopener">{{ inline.content }}</a> } @case ('code') { <code class="inline-code">{{ inline.content }}</code> } @default { <span [class]="getInlineClass(inline.type)">{{ inline.content }}</span> } } } } @else { {{ block.content }} }@if (!isComplete) { <span class="streaming-cursor"></span> }</h6> }
+      @default { <h6 class="markdown-heading fallback">{{ block.content }}@if (!isComplete) { <span class="streaming-cursor"></span> }</h6> }
     }
   `,
   styleUrls: ['./heading.component.css']
@@ -45,5 +45,9 @@ export class MarkdownHeadingComponent implements OnChanges {
     const baseClass = 'markdown-heading';
     const streamingClass = !this.isComplete ? ' streaming' : '';
     this.headingClasses.set(`${baseClass}${streamingClass}`);
+  }
+
+  getInlineClass(type: string): string {
+    return `inline-${type}`;
   }
 }

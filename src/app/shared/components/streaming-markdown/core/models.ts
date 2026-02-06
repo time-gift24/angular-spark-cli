@@ -113,6 +113,13 @@ export interface MarkdownBlock {
   /** Nested list items (for list blocks) */
   items?: MarkdownBlock[];
 
+  /** Table data, only for TABLE type blocks */
+  tableData?: {
+    headers: string[];
+    rows: string[][];
+    align?: (string | null)[];
+  };
+
   /** Highlighted HTML output (for code blocks with syntax highlighting) */
   highlightedHTML?: string;
 

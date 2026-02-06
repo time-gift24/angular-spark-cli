@@ -19,7 +19,7 @@ import { MarkdownBlock } from '../../core/models';
     <blockquote [class]="blockquoteClasses()">
       {{ block.content }}
       @if (!isComplete) {
-        <span class="streaming-indicator"></span>
+        <span class="streaming-cursor"></span>
       }
     </blockquote>
   `,

@@ -19,12 +19,18 @@ import { MarkdownBlock } from '../../core/models';
   template: `
     <p [class]="paragraphClasses()">
       @if (block.children && block.children.length > 0) {
-        @for (inline of block.children; track inline.type; let last = $last) {
-          <span [class]="getInlineClass(inline.type)">{{ inline.content }}</span>{{ last ? '' : ' ' }}
+        @for (inline of block.children; track $index) {
+          @switch (inline.type) {
+            @case ('link') { <a [href]="inline.href" class="inline-link" target="_blank" rel="noopener">{{ inline.content }}</a> }
+            @case ('code') { <code class="inline-code">{{ inline.content }}</code> }
+            @case ('hard-break') { <br /> }
+            @default { <span [class]="getInlineClass(inline.type)">{{ inline.content }}</span> }
+          }
         }
       } @else {
         {{ block.content }}
       }
+      @if (!isComplete) { <span class="streaming-cursor"></span> }
     </p>
   `,
   styleUrls: ['./paragraph.component.css']

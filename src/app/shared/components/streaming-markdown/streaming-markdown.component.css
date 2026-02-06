@@ -123,3 +123,21 @@
 .copy-button {
   animation: fadeIn 0.2s ease-out;
 }
+
+/* ========================================
+ * Unified Streaming Cursor
+ * All block types show ▌ blinking cursor
+ * during streaming state
+ * ======================================== */
+
+.streaming-cursor::after {
+  content: '▌';
+  color: var(--primary);
+  animation: cursor-blink 1s step-end infinite;
+  font-weight: 400;
+  margin-left: 1px;
+}
+
+@keyframes cursor-blink {
+  50% { opacity: 0; }
+}

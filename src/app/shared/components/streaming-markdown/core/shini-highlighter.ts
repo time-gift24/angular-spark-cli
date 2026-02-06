@@ -1,5 +1,5 @@
 import { Injectable, signal, Signal } from '@angular/core'
-import { codeToHtml, codeToTokensBase, type ThemedToken } from 'shiki'
+import { codeToTokensBase, type ThemedToken } from 'shiki'
 import {
   IShiniHighlighter,
   ShiniInitializationState,
@@ -127,45 +127,6 @@ export class ShiniHighlighter implements IShiniHighlighter {
       lineNumber: index + 1,
       tokens: [{ content: line || ' ' }]
     }))
-  }
-
-  /**
-   * @deprecated Use highlightToTokens() instead. Will be removed in next major version.
-   */
-  async highlight(
-    code: string,
-    language: string,
-    theme: 'light' | 'dark'
-  ): Promise<string> {
-    if (!this.isReady()) {
-      return code
-    }
-
-    try {
-      const shikiTheme = THEME_MAP[theme] || THEME_MAP['light']
-      const lines = code.split('\n')
-
-      const highlightedLines = await Promise.all(
-        lines.map(async (line) => {
-          const html = await codeToHtml(line || ' ', {
-            lang: language,
-            theme: shikiTheme
-          })
-          return html.replace(/^<pre[^>]*><code>(.*)<\/code><\/pre>$/, '$1')
-        })
-      )
-
-      return highlightedLines.map((highlightedLine, index) => {
-        const lineNum = index + 1
-        const originalLine = lines[index]
-        const isEmpty = !originalLine.trim()
-        const lineContent = isEmpty ? '&nbsp;' : highlightedLine
-        return `<span class="code-line"><span class="line-number">${lineNum}</span><span class="line-content">${lineContent}</span></span>`
-      }).join('')
-    } catch (error) {
-      console.error('[ShiniHighlighter] Highlighting failed:', error)
-      return code
-    }
   }
 
   isReady(): boolean {
