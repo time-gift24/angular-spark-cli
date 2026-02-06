@@ -5,10 +5,9 @@ import {
   contentChildren,
   input,
   output,
-  ViewEncapsulation,
 } from '@angular/core';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@app/shared/lib/cn';
+import { cn } from '@app/shared';
 
 const tabsListVariants = cva(
   'rounded-lg p-[3px] data-[variant=line]:rounded-none group/tabs-list text-muted-foreground inline-flex w-fit items-center justify-center group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col',
@@ -35,7 +34,6 @@ export type TabsVariant = VariantProps<typeof tabsListVariants>['variant'];
       <ng-content />
     </div>
   `,
-  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TabsComponent {
@@ -60,7 +58,6 @@ export class TabsComponent {
     '[class]': 'computedClass()',
     '[style]': '"height: var(--tabs-list-height)"',
   },
-  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TabsListComponent {
@@ -89,7 +86,6 @@ export class TabsListComponent {
       <ng-content />
     </button>
   `,
-  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TabsTriggerComponent {
@@ -141,7 +137,6 @@ export class TabsTriggerComponent {
       <ng-content />
     </div>
   `,
-  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TabsContentComponent {

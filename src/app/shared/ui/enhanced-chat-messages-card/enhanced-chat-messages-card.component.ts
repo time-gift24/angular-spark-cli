@@ -14,7 +14,7 @@ import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
 import { ChatMessage } from '@app/shared/ui/ai-chat/types/chat.types';
 import { DragDropModule, CdkDragStart, CdkDragEnd } from '@angular/cdk/drag-drop';
 import { CardState } from '@app/shared/ui/ai-chat/types/card-state.interface';
-import { cn } from '@app/shared/utils';
+import { cn } from '@app/shared';
 
 /**
  * Enhanced Chat Messages Card Component

@@ -1,5 +1,5 @@
 import { Component, input, output, computed, signal, ChangeDetectionStrategy } from '@angular/core';
-import { cn } from '@app/shared/utils';
+import { cn } from '@app/shared';
 
 export type SheetSide = 'top' | 'right' | 'bottom' | 'left';
 

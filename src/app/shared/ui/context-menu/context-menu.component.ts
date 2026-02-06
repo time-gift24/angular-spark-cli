@@ -1,7 +1,6 @@
 import {
   Component,
   Directive,
-  Input,
   input,
   signal,
   computed,
@@ -262,7 +261,7 @@ export class ContextMenuContentComponent {
   standalone: true,
 })
 export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
-  @Input('uiContextMenuTrigger') menuItems: ContextMenuItem[] = [];
+  readonly uiContextMenuTrigger = input<ContextMenuItem[]>([]);
   private elementRef = inject(ElementRef);
   private menuContainer: HTMLElement | null = null;
   private activeMenu = signal<HTMLElement | null>(null);
@@ -305,7 +304,7 @@ export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
     this.menuContainer.appendChild(menuEl);
 
     // Render menu items
-    this.renderMenu(menuEl, this.menuItems);
+    this.renderMenu(menuEl, this.uiContextMenuTrigger());
 
     // Position menu to stay within viewport
     this.positionMenu();

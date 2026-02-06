@@ -35,7 +35,7 @@ import {
   actionButton,
   actionIcon,
 } from './css';
-import { cn } from '@app/shared/utils';
+import { cn } from '@app/shared';
 
 /**
  * Chat messages card component

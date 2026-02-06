@@ -155,6 +155,47 @@ icon:    30px × 30px
 - `ghost`: 仅悬停效果
 - `link`: 下划线链接
 
+### Avatar 组件
+
+```css
+/* Avatar 尺寸 tokens */
+--avatar-size-sm: 2rem;   /* 32px */
+--avatar-size-md: 2.5rem; /* 40px */
+--avatar-size-lg: 3rem;   /* 48px */
+--avatar-size-xl: 4rem;   /* 64px */
+
+/* Avatar 字体大小 */
+--avatar-font-size-sm: 0.75rem; /* 12px */
+--avatar-font-size-md: 0.875rem; /* 14px */
+--avatar-font-size-lg: 1rem;     /* 16px */
+```
+
+### Progress 组件
+
+```css
+/* Progress 高度 */
+--progress-height: 0.25rem; /* 4px */
+```
+
+### Slider 组件
+
+```css
+/* Slider 尺寸 */
+--slider-height: 0.375rem;      /* 6px - track height */
+--slider-thumb-size: 1rem;      /* 16px */
+--slider-thumb-scale: 1.25;     /* 20px - hover/focus */
+```
+
+### Skeleton 组件
+
+```typescript
+// Size presets
+sm:   { height: '1.5rem', width: '4rem' }
+md:   { height: '2rem', width: '8rem' }
+lg:   { height: '2.5rem', width: '12rem' }
+full: { height: '100%', width: '100%' }
+```
+
 ### 2. 通用组件规范
 
 所有组件应遵循：

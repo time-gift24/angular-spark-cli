@@ -6,7 +6,7 @@ import {
   EventEmitter,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { cn } from '@app/shared/utils';
+import { cn } from '@app/shared';
 
 export type SwitchSize = 'sm' | 'default';
 

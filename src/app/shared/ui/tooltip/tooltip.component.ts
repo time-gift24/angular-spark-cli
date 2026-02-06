@@ -5,15 +5,13 @@ import {
   contentChildren,
   input,
   signal,
-  ViewEncapsulation,
 } from '@angular/core';
-import { cn } from '@app/shared/lib/cn';
+import { cn } from '@app/shared';
 
 @Component({
   selector: '[ui-tooltip-trigger]',
   standalone: true,
   template: ` <ng-content /> `,
-  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TooltipTriggerComponent {}
@@ -33,7 +31,6 @@ export class TooltipTriggerComponent {}
   host: {
     '[class]': 'hostClasses()',
   },
-  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TooltipContentComponent {
@@ -81,7 +78,6 @@ export class TooltipContentComponent {
       <ng-content />
     </div>
   `,
-  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TooltipComponent {

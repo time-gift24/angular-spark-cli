@@ -6,10 +6,9 @@ import {
   input,
   output,
   viewChild,
-  ViewEncapsulation,
 } from '@angular/core';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@app/shared/lib/cn';
+import { cn } from '@app/shared';
 
 const checkboxVariants = cva(
   // Base styles - ultra compact
@@ -72,7 +71,6 @@ export type CheckboxVariant = VariantProps<typeof checkboxVariants>;
       }
     `,
   ],
-  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CheckboxComponent {
@@ -89,7 +87,7 @@ export class CheckboxComponent {
   readonly required = input<boolean>(false);
   readonly name = input<string>('');
   readonly value = input<string>('on');
-  readonly class = input<CheckboxVariant>('');
+  readonly class = input<string>('');
 
   // Outputs
   readonly checkedChange = output<boolean>();

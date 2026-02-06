@@ -29,7 +29,7 @@ import {
   toolbarIcon,
   sendIcon,
 } from './css';
-import { cn } from '@app/shared/utils';
+import { cn } from '@app/shared';
 
 /**
  * Chat input component with modern pill design

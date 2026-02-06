@@ -19,7 +19,7 @@ import {
   badgeIcon,
   badgeText,
 } from './css';
-import { cn } from '@app/shared/utils';
+import { cn } from '@app/shared';
 
 /**
  * Status badge component

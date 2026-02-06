@@ -1,5 +1,5 @@
 import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
-import { cn } from '@app/shared/utils';
+import { cn } from '@app/shared';
 
 @Component({
   selector: 'div[spark-card]',
