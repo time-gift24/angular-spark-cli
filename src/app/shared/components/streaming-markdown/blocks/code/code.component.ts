@@ -10,13 +10,14 @@
  * Uses token-based rendering (no innerHTML / DomSanitizer).
  */
 
-import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { from, switchMap, timeout, catchError, of } from 'rxjs';
 import { MarkdownBlock, CodeLine } from '../../core/models';
 import { ShiniHighlighter } from '../../core/shini-highlighter';
 import { IErrorHandler, ComponentErrorType } from '../../core/error-handling';
 import { LANGUAGE_DISPLAY_NAMES } from '../../core/shini-types';
+import { HighlightSchedulerService } from '../../core/highlight-scheduler.service';
 
 @Component({
   selector: 'app-markdown-code',
@@ -69,12 +70,23 @@ import { LANGUAGE_DISPLAY_NAMES } from '../../core/shini-types';
 export class MarkdownCodeComponent implements OnChanges {
   @Input({ required: true }) block!: MarkdownBlock;
   @Input() isComplete: boolean = true;
+  @Input() blockIndex: number = -1;
+  @Input() enableLazyHighlight: boolean = false;
 
   highlightedLines = signal<CodeLine[]>([]);
   codeWrapperClasses = signal<string>('markdown-code block-code');
   copied = signal<boolean>(false);
 
+  /** Whether this block is eligible for lazy highlighting */
+  readonly canLazyHighlight = computed(() =>
+    this.enableLazyHighlight &&
+    this.block.type === 'code' &&
+    this.isComplete &&
+    !this.block.isHighlighted
+  );
+
   private shiniHighlighter = inject(ShiniHighlighter);
+  private highlightScheduler = inject(HighlightSchedulerService);
   private errorHandler?: IErrorHandler;
 
   get code(): string {
@@ -93,7 +105,13 @@ export class MarkdownCodeComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['block'] || changes['isComplete']) {
-      this.highlightCode();
+      // If lazy highlighting is enabled and block is complete, queue it
+      if (this.canLazyHighlight() && this.blockIndex >= 0) {
+        this.queueForHighlighting();
+      } else {
+        // Otherwise highlight immediately
+        this.highlightCode();
+      }
     }
   }
 
@@ -101,6 +119,24 @@ export class MarkdownCodeComponent implements OnChanges {
     return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
   }
 
+  /**
+   * Queue this block for lazy highlighting via scheduler
+   */
+  private queueForHighlighting(): void {
+    if (!this.isComplete || this.block.isHighlighted) {
+      return;
+    }
+
+    // Add block to highlight queue
+    this.highlightScheduler.queueBlock(this.block, this.blockIndex);
+
+    // Subscribe to highlight results via the scheduler's state
+    // The component will receive updated highlighted data through the block reference
+  }
+
+  /**
+   * Immediate highlighting (non-lazy path)
+   */
   private highlightCode(): void {
     if (!this.isComplete) {
       this.highlightedLines.set([]);

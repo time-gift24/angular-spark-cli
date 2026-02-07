@@ -131,6 +131,12 @@ export interface MarkdownBlock {
   /** Signal-based highlight result (for reactive highlighting) */
   highlightResult?: Signal<HighlightResult | null>;
 
+  /** Whether this block has been syntax-highlighted (for code blocks) */
+  isHighlighted?: boolean;
+
+  /** Whether this block is eligible for lazy highlighting (code blocks only) */
+  canLazyHighlight?: boolean;
+
   /** Nested blocks (for blockquote containing paragraphs, lists, etc.) */
   blocks?: MarkdownBlock[];
 

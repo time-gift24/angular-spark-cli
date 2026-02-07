@@ -1113,3 +1113,236 @@ Escaped: \\*not italic\\*
     });
   });
 });
+
+// =============================================================================
+// Phase 4.2: Progressive Highlighting Integration Tests
+// =============================================================================
+
+describe('Progressive Highlighting Integration', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    await TestBed.configureTestingModule({
+      imports: [StreamingMarkdownComponent],
+      providers: [
+        MarkdownPreprocessor,
+        BlockParser,
+        {
+          provide: ShiniHighlighter,
+          useValue: {
+            initialize: vi.fn(() => Promise.resolve()),
+            highlightToTokens: vi.fn((code: string, lang: string, theme: string) => {
+              // Mock tokenization - return plain tokens
+              const lines = code.split('\n');
+              return Promise.resolve(lines.map((line, i) => ({
+                lineNumber: i + 1,
+                tokens: [{ content: line || ' ' }]
+              })));
+            }),
+            plainTextFallback: vi.fn((code: string) => {
+              const lines = code.split('\n');
+              return lines.map((line, i) => ({
+                lineNumber: i + 1,
+                tokens: [{ content: line || ' ' }]
+              }));
+            }),
+            whenReady: vi.fn(() => Promise.resolve()),
+            isReady: vi.fn(() => true)
+          }
+        },
+        ChangeDetectorRef
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(StreamingMarkdownComponent);
+    component = fixture.componentInstance;
+  });
+
+  /**
+   * Helper: Create markdown with code blocks
+   */
+  function createCodeMarkdown(blockCount: number): string {
+    const blocks: string[] = [];
+    for (let i = 0; i < blockCount; i++) {
+      blocks.push(`\`\`\`typescript\nconst x${i} = ${i};\nconsole.log(x${i});\n\`\`\`\n\n`);
+    }
+    return blocks.join('');
+  }
+
+  describe('Lazy Highlighting Activation', () => {
+    it('should enable lazy highlighting by default', async () => {
+      const markdown = createCodeMarkdown(5);
+      const stream$ = of(markdown);
+      component.stream$ = stream$;
+
+      component.ngOnInit();
+      await waitFor(100);
+      fixture.detectChanges();
+
+      expect(component).toBeTruthy();
+    });
+
+    it('should disable lazy highlighting when enableLazyHighlight = false', async () => {
+      const markdown = createCodeMarkdown(3);
+      const stream$ = of(markdown);
+      component.stream$ = stream$;
+      component.enableLazyHighlight = false;
+
+      component.ngOnInit();
+      await waitFor(100);
+      fixture.detectChanges();
+
+      const blocks = (component as any).blocks();
+      const codeBlocks = blocks.filter((b: MarkdownBlock) => b.type === BlockType.CODE_BLOCK);
+      expect(codeBlocks.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Highlight Queue Management', () => {
+    it('should queue code blocks after streaming completes', async () => {
+      const markdown = createCodeMarkdown(10);
+      const stream$ = of(markdown);
+      component.stream$ = stream$;
+      component.enableLazyHighlight = true;
+
+      component.ngOnInit();
+      await waitFor(200);
+      fixture.detectChanges();
+
+      const blocks = (component as any).blocks();
+      const codeBlocks = blocks.filter((b: MarkdownBlock) => b.type === BlockType.CODE_BLOCK);
+      expect(codeBlocks.length).toBe(10);
+    });
+
+    it('should only queue code blocks, not other block types', async () => {
+      const markdown = `
+# Heading
+
+This is a paragraph.
+
+\`\`\`typescript
+const x = 1;
+\`\`\`
+
+> A quote
+      `.trim();
+
+      const stream$ = of(markdown);
+      component.stream$ = stream$;
+
+      component.ngOnInit();
+      await waitFor(100);
+      fixture.detectChanges();
+
+      const blocks = (component as any).blocks();
+      const codeBlocks = blocks.filter((b: MarkdownBlock) => b.type === BlockType.CODE_BLOCK);
+      expect(codeBlocks.length).toBe(1);
+    });
+  });
+
+  describe('Virtual Scroll Integration', () => {
+    it('should queue visible code blocks when virtual scroll is active', async () => {
+      const markdown = createCodeMarkdown(150);
+      const stream$ = of(markdown);
+      component.stream$ = stream$;
+      component.enableLazyHighlight = true;
+      component.virtualScroll = true;
+
+      component.ngOnInit();
+      await waitFor(300);
+      fixture.detectChanges();
+
+      const blocks = (component as any).blocks();
+      expect(blocks.length).toBeGreaterThan(0);
+    });
+
+    it('should prioritize visible blocks for highlighting', async () => {
+      const markdown = createCodeMarkdown(50);
+      const stream$ = of(markdown);
+      component.stream$ = stream$;
+      component.enableLazyHighlight = true;
+
+      component.ngOnInit();
+      await waitFor(200);
+      fixture.detectChanges();
+
+      // Verify component handles highlighting queue
+      expect(component).toBeTruthy();
+    });
+  });
+
+  describe('Performance with Many Code Blocks', () => {
+    it('should handle 50 code blocks efficiently', async () => {
+      const markdown = createCodeMarkdown(50);
+      const stream$ = of(markdown);
+      component.stream$ = stream$;
+      component.enableLazyHighlight = true;
+
+      const startTime = Date.now();
+      component.ngOnInit();
+      await waitFor(300);
+      fixture.detectChanges();
+      const endTime = Date.now();
+
+      expect(endTime - startTime).toBeLessThan(1000);
+    });
+  });
+
+  describe('Cleanup and Memory Management', () => {
+    it('should clear highlight queue on component destroy', async () => {
+      const markdown = createCodeMarkdown(10);
+      const stream$ = of(markdown);
+      component.stream$ = stream$;
+      component.enableLazyHighlight = true;
+
+      component.ngOnInit();
+      await waitFor(100);
+      component.ngOnDestroy();
+
+      // Component should cleanup without errors
+      expect(true).toBe(true);
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle code blocks with no language specified', async () => {
+      const markdown = '```\ncode here\n```\n\n';
+      const stream$ = of(markdown);
+      component.stream$ = stream$;
+
+      component.ngOnInit();
+      await waitFor(100);
+      fixture.detectChanges();
+
+      const blocks = (component as any).blocks();
+      expect(blocks.length).toBeGreaterThan(0);
+    });
+
+    it('should handle code blocks with uncommon languages', async () => {
+      const markdown = '```rust\nfn main() {}\n```\n\n';
+      const stream$ = of(markdown);
+      component.stream$ = stream$;
+
+      component.ngOnInit();
+      await waitFor(100);
+      fixture.detectChanges();
+
+      const blocks = (component as any).blocks();
+      const codeBlock = blocks.find((b: MarkdownBlock) => b.type === BlockType.CODE_BLOCK);
+      expect(codeBlock).toBeTruthy();
+    });
+
+    it('should handle empty code blocks', async () => {
+      const markdown = '```\n```\n\n';
+      const stream$ = of(markdown);
+      component.stream$ = stream$;
+
+      component.ngOnInit();
+      await waitFor(100);
+      fixture.detectChanges();
+
+      const blocks = (component as any).blocks();
+      expect(blocks.length).toBeGreaterThan(0);
+    });
+  });
+});

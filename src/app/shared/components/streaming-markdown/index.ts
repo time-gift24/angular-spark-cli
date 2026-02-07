@@ -53,7 +53,9 @@ export type { HeightMeasurement } from './blocks/block-height-tracker.directive'
 
 // Core services (for advanced usage)
 export { ShiniHighlighter } from './core/shini-highlighter';
-export { ThemeService } from './core/theme.service';
+export { ThemeService } from './core/theme-service';
+export { HighlightSchedulerService } from './core/highlight-scheduler.service';
+export type { HighlightSchedulerConfig, HighlightPriority } from './core/highlight-scheduler.service';
 
 // Plugin types
 export {

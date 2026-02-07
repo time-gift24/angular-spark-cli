@@ -52,6 +52,8 @@ import {
   BlockParser
 } from './core/block-parser';
 import { ShiniHighlighter } from './core/shini-highlighter';
+import { HighlightSchedulerService } from './core/highlight-scheduler.service';
+import { BlockType } from './core/models';
 
 /**
  * Configuration for the RxJS streaming pipeline.
@@ -107,7 +109,8 @@ export interface IChangeDetector {
   providers: [
     MarkdownPreprocessor,
     BlockParser,
-    VirtualScrollService
+    VirtualScrollService,
+    HighlightSchedulerService
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -180,6 +183,7 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
   @Input() stream$!: Observable<string>;
   @Input() maxHeight: string | undefined;
   @Input() virtualScroll: VirtualScrollConfig | boolean = true;
+  @Input() enableLazyHighlight: boolean = true;
   @Output() rawContentChange = new EventEmitter<string>();
 
   @ViewChild('container', { static: false }) container!: ElementRef<HTMLDivElement>;
@@ -245,7 +249,8 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     private parser: BlockParser,
     private cdr: ChangeDetectorRef,
     private shini: ShiniHighlighter,
-    private virtualScrollService: VirtualScrollService
+    private virtualScrollService: VirtualScrollService,
+    private highlightScheduler: HighlightSchedulerService
   ) {}
 
   ngOnInit(): void {
@@ -314,6 +319,12 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
         if (this.pipelineConfig.enableChangeDetectionOptimization) {
           this.cdr.markForCheck();
         }
+
+        // If stream completes (no current block), initialize lazy highlighting
+        if (!updatedState.currentBlock && this.enableLazyHighlight) {
+          // Use setTimeout to defer until after rendering
+          setTimeout(() => this.initializeLazyHighlighting(), 0);
+        }
       },
       error: (error: Error) => {
         console.error('[StreamingMarkdownComponent] Subscription error:', error);
@@ -361,9 +372,49 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
 
   /**
    * Handle visible range changes from virtual scroll viewport
+   * Queues code blocks for highlighting based on visibility
    */
   onVisibleRangeChange(window: VirtualWindow): void {
     this.visibleWindow.set(window);
+
+    // Queue visible code blocks for lazy highlighting
+    if (this.enableLazyHighlight && this.shouldUseVirtualScroll()) {
+      this.queueVisibleCodeBlocks(window);
+    }
+  }
+
+  /**
+   * Queue code blocks in the visible window for highlighting
+   */
+  private queueVisibleCodeBlocks(window: VirtualWindow): void {
+    const allBlocks = this.blocks();
+    const start = Math.max(0, window.start - 5); // Include some overscan
+    const end = Math.min(allBlocks.length, window.end + 5);
+
+    for (let i = start; i < end; i++) {
+      const block = allBlocks[i];
+      if (block.type === BlockType.CODE_BLOCK && !block.isHighlighted) {
+        this.highlightScheduler.queueBlock(block, i);
+      }
+    }
+  }
+
+  /**
+   * Initialize lazy highlighting for all code blocks after streaming completes
+   */
+  private initializeLazyHighlighting(): void {
+    if (!this.enableLazyHighlight) {
+      return;
+    }
+
+    // Queue all code blocks for progressive highlighting
+    const allBlocks = this.blocks();
+    for (let i = 0; i < allBlocks.length; i++) {
+      const block = allBlocks[i];
+      if (block.type === BlockType.CODE_BLOCK && !block.isHighlighted) {
+        this.highlightScheduler.queueBlock(block, i);
+      }
+    }
   }
 
   ngAfterViewChecked(): void {
@@ -458,5 +509,8 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
 
     // Clean up virtual scroll service state
     this.virtualScrollService.clearHeightCache();
+
+    // Clear highlight scheduler queue
+    this.highlightScheduler.clearQueue();
   }
 }
