@@ -35,9 +35,14 @@ import {
   MarkdownBlock,
   StreamingState,
   ParserResult,
-  createEmptyState
+  createEmptyState,
+  VirtualScrollConfig,
+  VirtualWindow,
+  DEFAULT_VIRTUAL_SCROLL_CONFIG
 } from './core/models';
 import { MarkdownBlockRouterComponent } from './blocks/block-router/block-router.component';
+import { VirtualScrollViewportComponent } from './blocks/virtual-scroll-viewport.component';
+import { VirtualScrollService } from './core/virtual-scroll.service';
 import {
   IMarkdownPreprocessor,
   MarkdownPreprocessor
@@ -98,22 +103,22 @@ export interface IChangeDetector {
 @Component({
   selector: 'app-streaming-markdown',
   standalone: true,
-  imports: [MarkdownBlockRouterComponent, CommonModule],
+  imports: [MarkdownBlockRouterComponent, VirtualScrollViewportComponent, CommonModule],
   providers: [
     MarkdownPreprocessor,
-    BlockParser
+    BlockParser,
+    VirtualScrollService
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       #container
-      class="streaming-markdown-container"
-      [style.max-height]="maxHeight"
-      [style.overflow-y]="maxHeight ? 'auto' : 'visible'">
+      class="streaming-markdown-container relative"
+      [style.max-height]="maxHeight">
       <!-- Copy button - top-right corner -->
       @if (rawContent().length > 0) {
         <button
-          class="copy-button"
+          class="copy-button absolute top-2 right-2 z-10"
           (click)="copyToClipboard()"
           [title]="copied() ? 'Copied!' : 'Copy markdown'"
           [attr.aria-label]="copied() ? 'Copied to clipboard' : 'Copy markdown to clipboard'">
@@ -131,18 +136,42 @@ export interface IChangeDetector {
         </button>
       }
 
-      <!-- Render all completed blocks -->
-      @for (block of blocks(); track trackById(block)) {
-        <app-markdown-block-router
-          [block]="block"
-          [isComplete]="true" />
-      }
+      <!-- Virtual scroll mode - activates after streaming completes with enough blocks -->
+      @if (shouldUseVirtualScroll()) {
+        <app-virtual-scroll-viewport
+          [blocks]="blocks"
+          [config]="virtualScrollConfig()"
+          [window]="visibleWindow()"
+          (visibleRangeChange)="onVisibleRangeChange($event)"
+          class="overflow-auto"
+          [style.max-height]="maxHeight">
+          <!-- Render visible blocks only -->
+          @for (block of visibleBlocks(); track trackById(block)) {
+            <app-markdown-block-router
+              [block]="block"
+              [isComplete]="true" />
+          }
+        </app-virtual-scroll-viewport>
+      } @else {
+        <!-- Standard rendering mode - during streaming or with few blocks -->
+        <div
+          class="overflow-auto"
+          [style.max-height]="maxHeight"
+          [style.overflow-y]="maxHeight ? 'auto' : 'visible'">
+          <!-- Render all completed blocks -->
+          @for (block of blocks(); track trackById(block)) {
+            <app-markdown-block-router
+              [block]="block"
+              [isComplete]="true" />
+          }
 
-      <!-- Render currently streaming block (if any) -->
-      @if (currentBlock()) {
-        <app-markdown-block-router
-          [block]="currentBlock()!"
-          [isComplete]="false" />
+          <!-- Render currently streaming block (if any) -->
+          @if (currentBlock()) {
+            <app-markdown-block-router
+              [block]="currentBlock()!"
+              [isComplete]="false" />
+          }
+        </div>
       }
     </div>
   `
@@ -150,9 +179,11 @@ export interface IChangeDetector {
 export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy, AfterViewChecked {
   @Input() stream$!: Observable<string>;
   @Input() maxHeight: string | undefined;
+  @Input() virtualScroll: VirtualScrollConfig | boolean = true;
   @Output() rawContentChange = new EventEmitter<string>();
 
   @ViewChild('container', { static: false }) container!: ElementRef<HTMLDivElement>;
+  @ViewChild(VirtualScrollViewportComponent, { static: false }) virtualViewport?: VirtualScrollViewportComponent;
 
   private needsScroll = false;
 
@@ -160,6 +191,44 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
   protected currentBlock = computed(() => this.state().currentBlock);
   protected rawContent = computed(() => this.state().rawContent);
   protected copied = signal<boolean>(false);
+
+  /** Virtual scroll configuration - computed from input */
+  protected virtualScrollConfig = computed<VirtualScrollConfig>(() => {
+    if (typeof this.virtualScroll === 'boolean') {
+      return {
+        ...DEFAULT_VIRTUAL_SCROLL_CONFIG,
+        enabled: this.virtualScroll
+      };
+    }
+    return { ...DEFAULT_VIRTUAL_SCROLL_CONFIG, ...this.virtualScroll };
+  });
+
+  /** Whether virtual scrolling should be active */
+  protected shouldUseVirtualScroll = computed(() => {
+    const config = this.virtualScrollConfig();
+    const blockCount = this.blocks().length;
+    const isStreaming = this.currentBlock() !== null;
+    // Only use virtual scroll after streaming completes and block count exceeds threshold
+    return config.enabled && !isStreaming && blockCount >= (config.minBlocksForVirtual ?? 100);
+  });
+
+  /** Current visible window for virtual scrolling */
+  protected visibleWindow = signal<VirtualWindow>({
+    start: 0,
+    end: 0,
+    totalHeight: 0,
+    offsetTop: 0
+  });
+
+  /** Currently visible blocks based on virtual window */
+  protected visibleBlocks = computed(() => {
+    if (!this.shouldUseVirtualScroll()) {
+      return this.blocks();
+    }
+    const window = this.visibleWindow();
+    const allBlocks = this.blocks();
+    return allBlocks.slice(Math.max(0, window.start), Math.min(allBlocks.length, window.end + 1));
+  });
 
   private state = signal<StreamingState>(createEmptyState());
   private destroy$ = new Subject<void>();
@@ -175,7 +244,8 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     private preprocessor: MarkdownPreprocessor,
     private parser: BlockParser,
     private cdr: ChangeDetectorRef,
-    private shini: ShiniHighlighter
+    private shini: ShiniHighlighter,
+    private virtualScrollService: VirtualScrollService
   ) {}
 
   ngOnInit(): void {
@@ -289,14 +359,34 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     return block.id;
   }
 
+  /**
+   * Handle visible range changes from virtual scroll viewport
+   */
+  onVisibleRangeChange(window: VirtualWindow): void {
+    this.visibleWindow.set(window);
+  }
+
   ngAfterViewChecked(): void {
-    if (this.needsScroll && this.container?.nativeElement) {
+    if (!this.needsScroll) return;
+
+    // During streaming, scroll the standard container
+    if (!this.shouldUseVirtualScroll() && this.container?.nativeElement) {
       requestAnimationFrame(() => {
         if (!this.container?.nativeElement) return;
 
         const el = this.container.nativeElement;
-        el.scrollTop = el.scrollHeight;
+        const scrollContainer = el.querySelector('.overflow-auto') as HTMLElement;
+        if (scrollContainer) {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }
 
+        this.needsScroll = false;
+      });
+    }
+    // For virtual scroll mode, we'll scroll when switching modes
+    else if (this.shouldUseVirtualScroll() && this.virtualViewport) {
+      requestAnimationFrame(() => {
+        this.virtualViewport?.scrollToBottom();
         this.needsScroll = false;
       });
     }
@@ -365,5 +455,8 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
       clearTimeout(this.copyResetTimeout);
       this.copyResetTimeout = null;
     }
+
+    // Clean up virtual scroll service state
+    this.virtualScrollService.clearHeightCache();
   }
 }

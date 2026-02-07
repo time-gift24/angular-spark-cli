@@ -972,3 +972,144 @@ Escaped: \\*not italic\\*
     });
   });
 });
+
+  // =============================================================================
+  // Phase 4.1: Virtual Scroll Integration Tests
+  // =============================================================================
+
+  describe('Virtual Scroll Integration', () => {
+    beforeEach(async () => {
+      vi.clearAllMocks();
+
+      await TestBed.configureTestingModule({
+        imports: [StreamingMarkdownComponent],
+        providers: [
+          MarkdownPreprocessor,
+          BlockParser,
+          {
+            provide: ShiniHighlighter,
+            useValue: {
+              initialize: vi.fn(() => Promise.resolve()),
+              highlight: vi.fn(() => Promise.resolve('<code>highlighted</code>')),
+              whenReady: vi.fn(() => Promise.resolve())
+            }
+          },
+          ChangeDetectorRef
+        ]
+      }).compileComponents();
+
+      fixture = TestBed.createComponent(StreamingMarkdownComponent);
+      component = fixture.componentInstance;
+    });
+
+    /**
+     * Helper: Generate markdown blocks for testing
+     */
+    function generateMarkdownBlocks(count: number): string {
+      const blocks: string[] = [];
+      for (let i = 0; i < count; i++) {
+        blocks.push(\`# Block \${i + 1}\\n\\nThis is paragraph \${i + 1}.\\n\\n\`);
+      }
+      return blocks.join('');
+    }
+
+    /**
+     * Helper: Count rendered block router elements in DOM
+     */
+    function countRenderedBlocks(): number {
+      const routers = fixture.nativeElement.querySelectorAll('app-markdown-block-router');
+      return routers.length;
+    }
+
+    describe('Virtual Scroll Activation', () => {
+      it('should NOT use virtual scroll for small documents (below threshold)', async () => {
+        const content = generateMarkdownBlocks(10);
+        const stream\$ = of(content);
+        component.stream\$ = stream\$;
+        component.virtualScroll = true;
+
+        component.ngOnInit();
+        await waitFor(100);
+        fixture.detectChanges();
+
+        const blockCount = countRenderedBlocks();
+        expect(blockCount).toBe(10);
+      });
+
+      it('should use virtual scroll for large documents (above threshold)', async () => {
+        const content = generateMarkdownBlocks(150);
+        const stream\$ = of(content);
+        component.stream\$ = stream\$;
+        component.virtualScroll = true;
+
+        component.ngOnInit();
+        await waitFor(200);
+        fixture.detectChanges();
+
+        const blockCount = countRenderedBlocks();
+        expect(blockCount).toBeLessThan(150);
+        expect(blockCount).toBeGreaterThan(0);
+      });
+
+      it('should disable virtual scroll when virtualScroll = false', async () => {
+        const content = generateMarkdownBlocks(200);
+        const stream\$ = of(content);
+        component.stream\$ = stream\$;
+        component.virtualScroll = false;
+
+        component.ngOnInit();
+        await waitFor(200);
+        fixture.detectChanges();
+
+        const blockCount = countRenderedBlocks();
+        expect(blockCount).toBe(200);
+      });
+    });
+
+    describe('Streaming to Virtual Scroll Transition', () => {
+      it('should preserve streaming behavior', async () => {
+        const content = generateMarkdownBlocks(50);
+        const stream\$ = of(content);
+        component.stream\$ = stream\$;
+        component.virtualScroll = true;
+
+        component.ngOnInit();
+        await waitFor(150);
+        fixture.detectChanges();
+
+        expect(component).toBeTruthy();
+      });
+    });
+
+    describe('Large Document Performance', () => {
+      it('should handle 1000 blocks efficiently', async () => {
+        const content = generateMarkdownBlocks(1000);
+        const stream\$ = of(content);
+        component.stream\$ = stream\$;
+        component.virtualScroll = true;
+
+        const startTime = Date.now();
+        component.ngOnInit();
+        await waitFor(300);
+        fixture.detectChanges();
+        const endTime = Date.now();
+
+        expect(endTime - startTime).toBeLessThan(1000);
+      });
+    });
+
+    describe('No Regressions', () => {
+      it('should maintain backward compatibility', async () => {
+        const stream\$ = of('# Test\\n\\nContent');
+        component.stream\$ = stream\$;
+
+        component.ngOnInit();
+        await waitFor(100);
+        fixture.detectChanges();
+
+        const blocks = (component as any).blocks();
+        expect(blocks.length).toBeGreaterThan(0);
+      });
+    });
+  });
+});

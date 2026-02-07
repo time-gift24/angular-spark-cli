@@ -71,8 +71,15 @@ export {
   type ParserResult,
   type HighlightResult,
   BlockType,
-  createEmptyState
+  createEmptyState,
+  type VirtualScrollConfig,
+  type VirtualWindow,
+  type BlockRenderState,
+  DEFAULT_VIRTUAL_SCROLL_CONFIG
 } from './models';
+
+// Virtual scroll service
+export { VirtualScrollService } from './virtual-scroll.service';
 
 // Error handling types
 export {

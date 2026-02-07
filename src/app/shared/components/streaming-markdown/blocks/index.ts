@@ -7,3 +7,5 @@ export { MarkdownThematicBreakComponent } from './thematic-break/thematic-break.
 export { MarkdownTableComponent } from './table/table.component';
 export { MarkdownBlockRouterComponent } from './block-router/block-router.component';
 export { MarkdownFootnoteComponent } from './footnote/footnote.component';
+export { VirtualScrollViewportComponent, type ScrollEvent } from './virtual-scroll-viewport.component';
+export { BlockHeightTrackerDirective, type HeightMeasurement } from './block-height-tracker.directive';

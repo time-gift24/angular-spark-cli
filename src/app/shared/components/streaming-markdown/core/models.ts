@@ -169,6 +169,74 @@ export interface ParserResult {
 }
 
 /**
+ * Configuration for virtual scrolling behavior.
+ * Allows tuning of performance vs. rendering characteristics.
+ */
+export interface VirtualScrollConfig {
+  /** Enable virtual scrolling (default: true for 100+ blocks) */
+  enabled: boolean;
+
+  /** Number of blocks to render outside viewport (default: 5) */
+  overscan?: number;
+
+  /** Estimated block height in pixels (default: 60) */
+  estimatedBlockHeight?: number;
+
+  /** Minimum block count to trigger virtual scrolling (default: 100) */
+  minBlocksForVirtual?: number;
+}
+
+/**
+ * Represents the visible window of blocks in a virtual scroll container.
+ * Computed based on viewport position and scroll offset.
+ */
+export interface VirtualWindow {
+  /** Start index of visible window */
+  start: number;
+
+  /** End index of visible window */
+  end: number;
+
+  /** Total scrollable height */
+  totalHeight: number;
+
+  /** Offset in pixels for content positioning */
+  offsetTop: number;
+}
+
+/**
+ * Per-block render state for virtual scrolling optimization.
+ * Tracks which blocks are currently rendered and their measured heights.
+ */
+export interface BlockRenderState {
+  /** Block ID */
+  id: string;
+
+  /** Is block currently rendered in DOM? */
+  isRendered: boolean;
+
+  /** Has block been syntax-highlighted? (for code blocks) */
+  isHighlighted: boolean;
+
+  /** Estimated height */
+  estimatedHeight: number;
+
+  /** Actual measured height (if known) */
+  actualHeight?: number;
+}
+
+/**
+ * Default virtual scroll configuration.
+ * Provides sensible defaults for most use cases.
+ */
+export const DEFAULT_VIRTUAL_SCROLL_CONFIG: VirtualScrollConfig = {
+  enabled: true,
+  overscan: 5,
+  estimatedBlockHeight: 60,
+  minBlocksForVirtual: 100
+};
+
+/**
  * Factory function to create an empty StreamingState.
  * Used to initialize the streaming markdown system.
  *

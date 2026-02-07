@@ -1,0 +1,231 @@
+/**
+ * Virtual Scroll Viewport Component
+ *
+ * Provides a scrollable viewport container for virtual scrolling.
+ * Wraps the visible block rendering area and forwards scroll events
+ * to the VirtualScrollService. Uses requestAnimationFrame for throttled
+ * scroll event handling.
+ *
+ * Features:
+ * - OnPush change detection for optimal performance
+ * - Throttled scroll events via requestAnimationFrame
+ * - Tailwind classes for all styling (no custom CSS)
+ * - Content projection for flexible rendering
+ */
+
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ViewChild,
+  ElementRef,
+  OnDestroy,
+  ChangeDetectionStrategy,
+  computed,
+  signal,
+  Signal
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  MarkdownBlock,
+  VirtualScrollConfig,
+  VirtualWindow,
+  DEFAULT_VIRTUAL_SCROLL_CONFIG
+} from '../core/models';
+
+/**
+ * Scroll event data emitted by the viewport
+ */
+export interface ScrollEvent {
+  scrollTop: number;
+  scrollHeight: number;
+  clientHeight: number;
+}
+
+/**
+ * Virtual scroll viewport component.
+ * Provides the scroll container and manages scroll position tracking.
+ */
+@Component({
+  selector: 'app-virtual-scroll-viewport',
+  standalone: true,
+  imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div
+      #viewport
+      class="overflow-auto overflow-y-auto overflow-x-hidden relative"
+      (scroll)="onScroll($event)"
+    >
+      <div
+        class="virtual-scroll-spacer relative"
+        [style.height.px]="totalHeight()"
+      >
+        <div
+          class="virtual-scroll-content absolute left-0 right-0"
+          [style.transform]="'translateY(' + offsetTop() + 'px)'"
+        >
+          <ng-content />
+        </div>
+      </div>
+    </div>
+  `
+})
+export class VirtualScrollViewportComponent implements OnDestroy {
+  /** Reference to the viewport element */
+  @ViewChild('viewport', { static: true }) viewport!: ElementRef<HTMLDivElement>;
+
+  /** All blocks (for computing total height) */
+  @Input({ required: true }) set blocks(value: Signal<MarkdownBlock[]> | MarkdownBlock[]) {
+    this.blocksSignal.set(Array.isArray(value) ? value : value());
+  }
+
+  /** Virtual scroll configuration */
+  @Input({ required: true }) set config(value: VirtualScrollConfig) {
+    this.configSignal.set(value);
+  }
+  get config(): VirtualScrollConfig {
+    return this.configSignal();
+  }
+
+  /** Current visible window (for positioning content) */
+  @Input({ required: true }) set window(value: VirtualWindow) {
+    this.windowSignal.set(value);
+  }
+
+  /** Emitted when the visible block range changes */
+  @Output() readonly visibleRangeChange = new EventEmitter<VirtualWindow>();
+
+  /** Emitted on scroll events (throttled) */
+  @Output() readonly scroll = new EventEmitter<ScrollEvent>();
+
+  /** Internal signals for reactive state */
+  private blocksSignal = signal<MarkdownBlock[]>([]);
+  private configSignal = signal<VirtualScrollConfig>(DEFAULT_VIRTUAL_SCROLL_CONFIG);
+  private windowSignal = signal<VirtualWindow>({
+    start: 0,
+    end: 0,
+    totalHeight: 0,
+    offsetTop: 0
+  });
+
+  /** Scroll position signal */
+  readonly scrollTop = signal(0);
+
+  /** Viewport height signal */
+  readonly viewportHeight = signal(0);
+
+  /** Total scrollable height */
+  readonly totalHeight = computed(() => this.windowSignal().totalHeight);
+
+  /** Content offset for positioning */
+  readonly offsetTop = computed(() => this.windowSignal().offsetTop);
+
+  /** RAF ID for scroll throttling */
+  private rafId: number | null = null;
+
+  /** Last scroll position for diffing */
+  private lastScrollTop = 0;
+
+  /** Target scroll position for RAF */
+  private targetScrollTop = 0;
+
+  ngOnDestroy(): void {
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+  }
+
+  /**
+   * Handle scroll events with requestAnimationFrame throttling
+   */
+  onScroll(event: Event): void {
+    const target = event.target as HTMLElement;
+    this.targetScrollTop = target.scrollTop;
+
+    // Only request RAF if not already pending and scroll position changed
+    if (this.rafId === null && this.targetScrollTop !== this.lastScrollTop) {
+      this.rafId = requestAnimationFrame(() => this.processScroll());
+    }
+  }
+
+  /**
+   * Process scroll update (called via RAF)
+   */
+  private processScroll(): void {
+    this.rafId = null;
+
+    if (this.targetScrollTop === this.lastScrollTop) {
+      return;
+    }
+
+    this.lastScrollTop = this.targetScrollTop;
+    this.scrollTop.set(this.targetScrollTop);
+
+    // Update viewport height
+    if (this.viewport?.nativeElement) {
+      this.viewportHeight.set(this.viewport.nativeElement.clientHeight);
+    }
+
+    // Emit scroll event
+    this.scroll.emit({
+      scrollTop: this.targetScrollTop,
+      scrollHeight: this.viewport.nativeElement.scrollHeight,
+      clientHeight: this.viewport.nativeElement.clientHeight
+    });
+
+    // Emit visible range change
+    this.visibleRangeChange.emit(this.windowSignal());
+  }
+
+  /**
+   * Programmatically scroll to a position
+   */
+  scrollTo(scrollTop: number): void {
+    if (this.viewport?.nativeElement) {
+      this.viewport.nativeElement.scrollTop = scrollTop;
+    }
+  }
+
+  /**
+   * Scroll to the bottom of the content
+   */
+  scrollToBottom(): void {
+    if (this.viewport?.nativeElement) {
+      const el = this.viewport.nativeElement;
+      el.scrollTop = el.scrollHeight;
+    }
+  }
+
+  /**
+   * Get the current viewport element
+   */
+  getViewportElement(): HTMLDivElement | undefined {
+    return this.viewport?.nativeElement;
+  }
+
+  /**
+   * Measure and return the viewport dimensions
+   */
+  getViewportDimensions(): { scrollTop: number; scrollHeight: number; clientHeight: number } {
+    const el = this.viewport?.nativeElement;
+    if (!el) {
+      return { scrollTop: 0, scrollHeight: 0, clientHeight: 0 };
+    }
+
+    return {
+      scrollTop: el.scrollTop,
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight
+    };
+  }
+
+  /**
+   * Reset scroll position to top
+   */
+  resetScroll(): void {
+    this.scrollTo(0);
+  }
+}
