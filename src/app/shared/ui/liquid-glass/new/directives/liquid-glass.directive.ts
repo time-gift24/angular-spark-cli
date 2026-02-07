@@ -28,10 +28,33 @@ import {
   HostListener,
   PLATFORM_ID,
 } from '@angular/core';
-import { getDisplacementMap } from '../utils/displacement-maps';
 import { isPlatformBrowser } from '@angular/common';
+import { displacementMap as standardMap } from '../constants/displacement-map';
+import { polarDisplacementMap as polarMap } from '../constants/polar-displacement-map';
+import { prominentDisplacementMap as prominentMap } from '../constants/prominent-displacement-map';
 
 type GlassFilterMode = 'standard' | 'polar' | 'prominent' | 'shader';
+
+/**
+ * Get the displacement map URL based on mode
+ * Returns raw data URLs (not CSS url() format) for use in SVG feImage href
+ */
+function getDisplacementMapUrl(mode: GlassFilterMode): string {
+  switch (mode) {
+    case 'standard':
+      return standardMap;
+    case 'polar':
+      return polarMap;
+    case 'prominent':
+      return prominentMap;
+    case 'shader':
+      // For shader mode, we'd use a dynamically generated map
+      // For now, fall back to standard
+      return standardMap;
+    default:
+      return standardMap;
+  }
+}
 
 /**
  * Liquid Glass Directive
@@ -97,7 +120,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   private filterId = '';
   private animationFrameId = 0;
   private cleanup: (() => void)[] = [];
-  private styleEl: HTMLStyleElement | null = null;
+  private warpLayer: HTMLElement | null = null;
 
   // Mouse tracking state
   private curX = 0.5;
@@ -129,7 +152,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     this.filterId = `lg-filter-${Math.random().toString(16).slice(2)}`;
 
     this.setupHostStyles();
-    this.createPseudoElementStyles();
+    this.createWarpLayer();
     this.createSvgFilter();
     this.createBorderLayer();
     this.startAnimationLoop();
@@ -139,9 +162,6 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     cancelAnimationFrame(this.animationFrameId);
     this.cleanup.forEach(fn => fn());
-    if (this.styleEl) {
-      this.styleEl.remove();
-    }
   }
 
   // ========== Setup Methods ==========
@@ -151,51 +171,68 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     this.renderer.setStyle(this.host, 'transition', 'all ease-out 0.2s');
     this.renderer.setStyle(this.host, 'padding', this.liquidGlassPadding());
     this.renderer.setStyle(this.host, 'box-shadow', '0px 12px 40px rgba(0, 0, 0, 0.25)');
+    this.renderer.setStyle(this.host, 'overflow', 'hidden');
   }
 
   /**
-   * Create CSS for ::before pseudo-element that handles backdrop-filter
-   * This avoids DOM manipulation issues with content projection
+   * Create a warp layer element (real DOM) that handles backdrop-filter
+   * This matches the component's approach and avoids pseudo-element filter issues
    */
-  private createPseudoElementStyles(): void {
-    // Create unique class for this instance
-    const uniqueClass = `lg-${this.filterId}`;
-    this.renderer.addClass(this.host, uniqueClass);
+  private createWarpLayer(): void {
+    this.warpLayer = this.renderer.createElement('span');
 
-    this.styleEl = this.renderer.createElement('style') as HTMLStyleElement;
+    // Add class for styling
+    this.renderer.addClass(this.warpLayer, 'lg-warp');
 
+    // Position and size - match the component's warp layer behavior exactly
+    this.renderer.setStyle(this.warpLayer, 'position', 'absolute');
+    this.renderer.setStyle(this.warpLayer, 'inset', '-50%');
+    this.renderer.setStyle(this.warpLayer, 'width', '200%');
+    this.renderer.setStyle(this.warpLayer, 'height', '200%');
+    this.renderer.setStyle(this.warpLayer, 'pointer-events', 'none');
+    this.renderer.setStyle(this.warpLayer, 'z-index', '0');
+    this.renderer.setStyle(this.warpLayer, 'border-radius', 'inherit');
+
+    // Background gradients (same as before)
+    this.renderer.setStyle(
+      this.warpLayer,
+      'background',
+      `radial-gradient(
+        140px 140px at 50% 50%,
+        rgba(255,255,255,0.15),
+        rgba(255,255,255,0.08) 35%,
+        rgba(255,255,255,0) 70%
+      ),
+      linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 65%),
+      rgba(0,0,0,0.12)`
+    );
+
+    // Backdrop filter and SVG filter
     const blur = this.backdropBlur;
     const saturation = this.liquidGlassSaturation();
+    this.renderer.setStyle(this.warpLayer, 'backdrop-filter', `blur(${blur}px) saturate(${saturation}%)`);
+    this.renderer.setStyle(this.warpLayer, 'filter', `url(#${this.filterId})`);
 
-    const css = `
-      .${uniqueClass}::before {
-        content: '';
-        position: absolute;
-        inset: -50%;
-        width: 200%;
-        height: 200%;
-        pointer-events: none;
-        z-index: 0;
-        border-radius: inherit;
-        background: radial-gradient(
-          140px 140px at 50% 50%,
-          rgba(255,255,255,0.15),
-          rgba(255,255,255,0.08) 35%,
-          rgba(255,255,255,0) 70%
-        ),
-        linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 65%),
-        rgba(0,0,0,0.12);
-        backdrop-filter: blur(${blur}px) saturate(${saturation}%);
-        filter: url(#${this.filterId});
-      }
-      .${uniqueClass} > * {
-        position: relative;
-        z-index: 1;
-      }
-    `;
+    // Insert at the beginning so it's behind the content
+    this.renderer.insertBefore(this.host, this.warpLayer, this.host.firstChild);
 
-    this.styleEl.textContent = css;
-    this.renderer.appendChild(document.head, this.styleEl);
+    // Ensure all direct children have higher z-index
+    const children = this.host.children;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i] as HTMLElement;
+      if (child !== this.warpLayer) {
+        this.renderer.setStyle(child, 'position', 'relative');
+        this.renderer.setStyle(child, 'z-index', '1');
+      }
+    }
+
+    // Track for cleanup
+    this.cleanup.push(() => {
+      if (this.warpLayer) {
+        this.renderer.removeChild(this.host, this.warpLayer);
+        this.warpLayer = null;
+      }
+    });
   }
 
   private createSvgFilter(): void {
@@ -211,32 +248,168 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     const filter = this.renderer.createElement('filter', 'svg');
 
     this.renderer.setAttribute(filter, 'id', this.filterId);
-    this.renderer.setAttribute(filter, 'x', '-20%');
-    this.renderer.setAttribute(filter, 'y', '-20%');
-    this.renderer.setAttribute(filter, 'width', '140%');
-    this.renderer.setAttribute(filter, 'height', '140%');
+    // Match component's filter region
+    this.renderer.setAttribute(filter, 'x', '-35%');
+    this.renderer.setAttribute(filter, 'y', '-35%');
+    this.renderer.setAttribute(filter, 'width', '170%');
+    this.renderer.setAttribute(filter, 'height', '170%');
     this.renderer.setAttribute(filter, 'color-interpolation-filters', 'sRGB');
 
     // Create displacement map image
-    const displacementMapUrl = getDisplacementMap(this.liquidGlassMode());
+    const displacementMapUrl = getDisplacementMapUrl(this.liquidGlassMode());
     const feImage = this.renderer.createElement('feImage', 'svg');
-    this.renderer.setAttribute(feImage, 'href', displacementMapUrl);
+    this.renderer.setAttribute(feImage, 'id', 'feimage');
     this.renderer.setAttribute(feImage, 'x', '0');
     this.renderer.setAttribute(feImage, 'y', '0');
     this.renderer.setAttribute(feImage, 'width', '100%');
     this.renderer.setAttribute(feImage, 'height', '100%');
     this.renderer.setAttribute(feImage, 'result', 'DISPLACEMENT_MAP');
+    this.renderer.setAttribute(feImage, 'href', displacementMapUrl);
+    this.renderer.setAttribute(feImage, 'preserveAspectRatio', 'xMidYMid slice');
 
-    // Create displacement map
-    const displacement = this.renderer.createElement('feDisplacementMap', 'svg');
-    this.renderer.setAttribute(displacement, 'in', 'SourceGraphic');
-    this.renderer.setAttribute(displacement, 'in2', 'DISPLACEMENT_MAP');
-    this.renderer.setAttribute(displacement, 'scale', String(this.liquidGlassDisplacementScale()));
-    this.renderer.setAttribute(displacement, 'xChannelSelector', 'R');
-    this.renderer.setAttribute(displacement, 'yChannelSelector', 'G');
+    // Create edge mask using the displacement map itself
+    const feColorMatrix = this.renderer.createElement('feColorMatrix', 'svg');
+    this.renderer.setAttribute(feColorMatrix, 'in', 'DISPLACEMENT_MAP');
+    this.renderer.setAttribute(feColorMatrix, 'type', 'matrix');
+    this.renderer.setAttribute(feColorMatrix, 'values', '0.3 0.3 0.3 0 0 0.3 0.3 0.3 0 0 0.3 0.3 0.3 0 0 0 0 0 1 0');
+    this.renderer.setAttribute(feColorMatrix, 'result', 'EDGE_INTENSITY');
 
+    const feComponentTransfer = this.renderer.createElement('feComponentTransfer', 'svg');
+    this.renderer.setAttribute(feComponentTransfer, 'in', 'EDGE_INTENSITY');
+    this.renderer.setAttribute(feComponentTransfer, 'result', 'EDGE_MASK');
+
+    const feFuncA = this.renderer.createElement('feFuncA', 'svg');
+    this.renderer.setAttribute(feFuncA, 'type', 'discrete');
+    this.renderer.setAttribute(feFuncA, 'tableValues', '0 0.1 1');
+    feComponentTransfer.appendChild(feFuncA);
+
+    // Original undisplaced image for center
+    const feOffset = this.renderer.createElement('feOffset', 'svg');
+    this.renderer.setAttribute(feOffset, 'in', 'SourceGraphic');
+    this.renderer.setAttribute(feOffset, 'dx', '0');
+    this.renderer.setAttribute(feOffset, 'dy', '0');
+    this.renderer.setAttribute(feOffset, 'result', 'CENTER_ORIGINAL');
+
+    // Calculate displacement scales for chromatic aberration
+    const aberrationIntensity = this.liquidGlassAberrationIntensity();
+    const baseScale = -this.liquidGlassDisplacementScale();
+    const redScale = baseScale;
+    const greenScale = baseScale * (1 - aberrationIntensity * 0.05);
+    const blueScale = baseScale * (1 - aberrationIntensity * 0.1);
+
+    // Red channel displacement
+    const redDisplacement = this.renderer.createElement('feDisplacementMap', 'svg');
+    this.renderer.setAttribute(redDisplacement, 'in', 'SourceGraphic');
+    this.renderer.setAttribute(redDisplacement, 'in2', 'DISPLACEMENT_MAP');
+    this.renderer.setAttribute(redDisplacement, 'scale', String(redScale));
+    this.renderer.setAttribute(redDisplacement, 'xChannelSelector', 'R');
+    this.renderer.setAttribute(redDisplacement, 'yChannelSelector', 'B');
+    this.renderer.setAttribute(redDisplacement, 'result', 'RED_DISPLACED');
+
+    const redMatrix = this.renderer.createElement('feColorMatrix', 'svg');
+    this.renderer.setAttribute(redMatrix, 'in', 'RED_DISPLACED');
+    this.renderer.setAttribute(redMatrix, 'type', 'matrix');
+    this.renderer.setAttribute(redMatrix, 'values', '1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0');
+    this.renderer.setAttribute(redMatrix, 'result', 'RED_CHANNEL');
+
+    // Green channel displacement
+    const greenDisplacement = this.renderer.createElement('feDisplacementMap', 'svg');
+    this.renderer.setAttribute(greenDisplacement, 'in', 'SourceGraphic');
+    this.renderer.setAttribute(greenDisplacement, 'in2', 'DISPLACEMENT_MAP');
+    this.renderer.setAttribute(greenDisplacement, 'scale', String(greenScale));
+    this.renderer.setAttribute(greenDisplacement, 'xChannelSelector', 'R');
+    this.renderer.setAttribute(greenDisplacement, 'yChannelSelector', 'B');
+    this.renderer.setAttribute(greenDisplacement, 'result', 'GREEN_DISPLACED');
+
+    const greenMatrix = this.renderer.createElement('feColorMatrix', 'svg');
+    this.renderer.setAttribute(greenMatrix, 'in', 'GREEN_DISPLACED');
+    this.renderer.setAttribute(greenMatrix, 'type', 'matrix');
+    this.renderer.setAttribute(greenMatrix, 'values', '0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0');
+    this.renderer.setAttribute(greenMatrix, 'result', 'GREEN_CHANNEL');
+
+    // Blue channel displacement
+    const blueDisplacement = this.renderer.createElement('feDisplacementMap', 'svg');
+    this.renderer.setAttribute(blueDisplacement, 'in', 'SourceGraphic');
+    this.renderer.setAttribute(blueDisplacement, 'in2', 'DISPLACEMENT_MAP');
+    this.renderer.setAttribute(blueDisplacement, 'scale', String(blueScale));
+    this.renderer.setAttribute(blueDisplacement, 'xChannelSelector', 'R');
+    this.renderer.setAttribute(blueDisplacement, 'yChannelSelector', 'B');
+    this.renderer.setAttribute(blueDisplacement, 'result', 'BLUE_DISPLACED');
+
+    const blueMatrix = this.renderer.createElement('feColorMatrix', 'svg');
+    this.renderer.setAttribute(blueMatrix, 'in', 'BLUE_DISPLACED');
+    this.renderer.setAttribute(blueMatrix, 'type', 'matrix');
+    this.renderer.setAttribute(blueMatrix, 'values', '0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0');
+    this.renderer.setAttribute(blueMatrix, 'result', 'BLUE_CHANNEL');
+
+    // Combine all channels with screen blend mode for chromatic aberration
+    const blend1 = this.renderer.createElement('feBlend', 'svg');
+    this.renderer.setAttribute(blend1, 'in', 'GREEN_CHANNEL');
+    this.renderer.setAttribute(blend1, 'in2', 'BLUE_CHANNEL');
+    this.renderer.setAttribute(blend1, 'mode', 'screen');
+    this.renderer.setAttribute(blend1, 'result', 'GB_COMBINED');
+
+    const blend2 = this.renderer.createElement('feBlend', 'svg');
+    this.renderer.setAttribute(blend2, 'in', 'RED_CHANNEL');
+    this.renderer.setAttribute(blend2, 'in2', 'GB_COMBINED');
+    this.renderer.setAttribute(blend2, 'mode', 'screen');
+    this.renderer.setAttribute(blend2, 'result', 'RGB_COMBINED');
+
+    // Add slight blur to soften the aberration effect
+    const blurStdDeviation = Math.max(0.1, 0.5 - aberrationIntensity * 0.1);
+    const feGaussianBlur = this.renderer.createElement('feGaussianBlur', 'svg');
+    this.renderer.setAttribute(feGaussianBlur, 'in', 'RGB_COMBINED');
+    this.renderer.setAttribute(feGaussianBlur, 'stdDeviation', String(blurStdDeviation));
+    this.renderer.setAttribute(feGaussianBlur, 'result', 'ABERRATED_BLURRED');
+
+    // Apply edge mask to aberration effect
+    const composite1 = this.renderer.createElement('feComposite', 'svg');
+    this.renderer.setAttribute(composite1, 'in', 'ABERRATED_BLURRED');
+    this.renderer.setAttribute(composite1, 'in2', 'EDGE_MASK');
+    this.renderer.setAttribute(composite1, 'operator', 'in');
+    this.renderer.setAttribute(composite1, 'result', 'EDGE_ABERRATION');
+
+    // Create inverted mask for center
+    const feComponentTransfer2 = this.renderer.createElement('feComponentTransfer', 'svg');
+    this.renderer.setAttribute(feComponentTransfer2, 'in', 'EDGE_MASK');
+    this.renderer.setAttribute(feComponentTransfer2, 'result', 'INVERTED_MASK');
+
+    const feFuncA2 = this.renderer.createElement('feFuncA', 'svg');
+    this.renderer.setAttribute(feFuncA2, 'type', 'table');
+    this.renderer.setAttribute(feFuncA2, 'tableValues', '1 0');
+    feComponentTransfer2.appendChild(feFuncA2);
+
+    const composite2 = this.renderer.createElement('feComposite', 'svg');
+    this.renderer.setAttribute(composite2, 'in', 'CENTER_ORIGINAL');
+    this.renderer.setAttribute(composite2, 'in2', 'INVERTED_MASK');
+    this.renderer.setAttribute(composite2, 'operator', 'in');
+    this.renderer.setAttribute(composite2, 'result', 'CENTER_CLEAN');
+
+    // Combine edge aberration with clean center
+    const composite3 = this.renderer.createElement('feComposite', 'svg');
+    this.renderer.setAttribute(composite3, 'in', 'EDGE_ABERRATION');
+    this.renderer.setAttribute(composite3, 'in2', 'CENTER_CLEAN');
+    this.renderer.setAttribute(composite3, 'operator', 'over');
+
+    // Append all elements in correct order
     filter.appendChild(feImage);
-    filter.appendChild(displacement);
+    filter.appendChild(feColorMatrix);
+    filter.appendChild(feComponentTransfer);
+    filter.appendChild(feOffset);
+    filter.appendChild(redDisplacement);
+    filter.appendChild(redMatrix);
+    filter.appendChild(greenDisplacement);
+    filter.appendChild(greenMatrix);
+    filter.appendChild(blueDisplacement);
+    filter.appendChild(blueMatrix);
+    filter.appendChild(blend1);
+    filter.appendChild(blend2);
+    filter.appendChild(feGaussianBlur);
+    filter.appendChild(composite1);
+    filter.appendChild(feComponentTransfer2);
+    filter.appendChild(composite2);
+    filter.appendChild(composite3);
+
     defs.appendChild(filter);
     this.svgFilter.appendChild(defs);
     this.renderer.appendChild(this.host, this.svgFilter);
