@@ -26,17 +26,12 @@ import {
   Renderer2,
   NgZone,
   HostListener,
-  EventEmitter,
+  PLATFORM_ID,
 } from '@angular/core';
-import { ShaderDisplacementService } from '../services/shader-displacement.service';
 import { getDisplacementMap } from '../utils/displacement-maps';
+import { isPlatformBrowser } from '@angular/common';
 
 type GlassFilterMode = 'standard' | 'polar' | 'prominent' | 'shader';
-
-interface MousePosition {
-  readonly x: number;
-  readonly y: number;
-}
 
 /**
  * Liquid Glass Directive
@@ -57,7 +52,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   private readonly elementRef = inject(ElementRef);
   private readonly renderer = inject(Renderer2);
   private readonly ngZone = inject(NgZone);
-  private readonly shaderService = inject(ShaderDisplacementService);
+  private readonly platformId = inject(PLATFORM_ID);
 
   // ========== Inputs ==========
 
@@ -93,7 +88,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
 
   // ========== Outputs ==========
 
-  readonly liquidGlassClick = new EventEmitter<void>();
+  readonly liquidGlassClick = output<void>();
 
   // ========== Private State ==========
 
@@ -105,15 +100,14 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   private styleEl: HTMLStyleElement | null = null;
 
   // Mouse tracking state
-  private targetX = 0.5;
-  private targetY = 0.5;
   private curX = 0.5;
   private curY = 0.5;
   private isHovered = false;
   private isActive = false;
   private glassSize = { width: 270, height: 69 };
   private internalGlobalMousePos = { x: 0, y: 0 };
-  private internalMouseOffset = { x: 0, y: 0 };
+  private targetX = 0.5;
+  private targetY = 0.5;
 
   // ========== Computed Values ==========
 
@@ -129,7 +123,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   // ========== Lifecycle ==========
 
   ngOnInit(): void {
-    if (!this.isEnabled) return;
+    if (!this.isEnabled || !isPlatformBrowser(this.platformId)) return;
 
     this.host = this.elementRef.nativeElement as HTMLElement;
     this.filterId = `lg-filter-${Math.random().toString(16).slice(2)}`;
@@ -137,7 +131,6 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     this.setupHostStyles();
     this.createPseudoElementStyles();
     this.createSvgFilter();
-    this.createOverlay();
     this.createBorderLayer();
     this.startAnimationLoop();
     this.setupMouseTracking();
@@ -205,23 +198,6 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     this.renderer.appendChild(document.head, this.styleEl);
   }
 
-  private createOverlay(): void {
-    // Overlay is now handled by ::before pseudo-element
-    // This method is kept for compatibility but does nothing
-  }
-
-  private updateOverlayBackground(x: number, y: number): void {
-    // Update the ::before pseudo-element background via CSS variable
-    const xPct = (x * 100).toFixed(2);
-    const yPct = (y * 100).toFixed(2);
-
-    this.renderer.setStyle(
-      this.host,
-      '--lg-bg-pos',
-      `${xPct}% ${yPct}%`
-    );
-  }
-
   private createSvgFilter(): void {
     const isFirefox = typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().includes('firefox');
     if (isFirefox) return;
@@ -264,6 +240,14 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     defs.appendChild(filter);
     this.svgFilter.appendChild(defs);
     this.renderer.appendChild(this.host, this.svgFilter);
+
+    // Track for cleanup
+    this.cleanup.push(() => {
+      if (this.svgFilter) {
+        this.renderer.removeChild(this.host, this.svgFilter);
+        this.svgFilter = null;
+      }
+    });
   }
 
   private createBorderLayer(): void {
@@ -282,6 +266,11 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     this.renderer.setStyle(borderLayer, 'border', '1px solid rgba(255,255,255,0.2)');
 
     this.renderer.appendChild(this.host, borderLayer);
+
+    // Track for cleanup
+    this.cleanup.push(() => {
+      this.renderer.removeChild(this.host, borderLayer);
+    });
   }
 
   // ========== Animation ==========
@@ -290,6 +279,17 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     const k = 1 - Math.pow(1 - this.liquidGlassElasticity(), 2);
 
     const loop = () => {
+      // Only animate when hovered, active, or mouse is near to avoid wasting CPU
+      if (!this.isHovered && !this.isActive) {
+        // Check if mouse is within activation zone
+        const fadeIn = this.calculateFadeInFactor();
+        if (fadeIn === 0) {
+          // Idle - continue loop but skip heavy calculations
+          this.animationFrameId = requestAnimationFrame(loop);
+          return;
+        }
+      }
+
       this.curX += (this.targetX - this.curX) * k;
       this.curY += (this.targetY - this.curY) * k;
 
@@ -388,15 +388,6 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   private setupMouseTracking(): void {
     this.ngZone.runOutsideAngular(() => {
       const unlisten = this.renderer.listen(this.host, 'mousemove', (e: MouseEvent) => {
-        const rect = this.host.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-
-        this.internalMouseOffset = {
-          x: ((e.clientX - centerX) / rect.width) * 100,
-          y: ((e.clientY - centerY) / rect.height) * 100,
-        };
-
         this.internalGlobalMousePos = {
           x: e.clientX,
           y: e.clientY,

@@ -11,20 +11,40 @@ import { prominentDisplacementMap } from '../../new/constants/prominent-displace
 export type GlassFilterMode = 'standard' | 'polar' | 'prominent' | 'shader';
 
 /**
+ * Safe displacement map URLs (pre-vetted base64 data URLs)
+ */
+const SAFE_DISPLACEMENT_MAPS: Record<GlassFilterMode, string> = {
+  standard: displacementMap,
+  polar: polarDisplacementMap,
+  prominent: prominentDisplacementMap,
+  shader: displacementMap, // fallback
+};
+
+/**
+ * Validates that a URL is a safe data URL or matches our allowed patterns
+ */
+function isValidDisplacementMapUrl(url: string): boolean {
+  // Only allow data: URLs with image/svg+xml or image/jpeg
+  const safeDataUrlPattern = /^data:image\/(svg\+xml|jpeg);base64,[a-zA-Z0-9+/=]+$/;
+  return safeDataUrlPattern.test(url);
+}
+
+/**
  * Helper function to get the displacement map URL based on mode
  */
 function getDisplacementMap(mode: GlassFilterMode, shaderMapUrl?: string): string {
   switch (mode) {
     case 'standard':
-      return displacementMap;
+      return SAFE_DISPLACEMENT_MAPS.standard;
     case 'polar':
-      return polarDisplacementMap;
+      return SAFE_DISPLACEMENT_MAPS.polar;
     case 'prominent':
-      return prominentDisplacementMap;
+      return SAFE_DISPLACEMENT_MAPS.prominent;
     case 'shader':
-      return shaderMapUrl || displacementMap;
+      // For shader mode, return the provided shaderMapUrl or fallback
+      return shaderMapUrl || SAFE_DISPLACEMENT_MAPS.standard;
     default:
-      return displacementMap;
+      return SAFE_DISPLACEMENT_MAPS.standard;
   }
 }
 
@@ -225,8 +245,21 @@ export class GlassFilterComponent implements OnInit, OnDestroy {
 
   /** Computed: Displacement map href based on mode */
   protected readonly displacementMapHref = computed(() => {
-    const map = getDisplacementMap(this.mode(), this.shaderMapUrl());
-    return this.sanitizer.bypassSecurityTrustResourceUrl(map) as unknown as string;
+    // Use generated shader URL if in shader mode, otherwise use pre-defined maps
+    let mapUrl: string;
+    if (this.mode() === 'shader') {
+      mapUrl = this.generatedShaderUrl || SAFE_DISPLACEMENT_MAPS.standard;
+    } else {
+      mapUrl = getDisplacementMap(this.mode());
+    }
+
+    // Validate the URL before using it
+    if (!isValidDisplacementMapUrl(mapUrl)) {
+      console.warn(`[GlassFilter] Invalid displacement map URL, falling back to standard mode`, mapUrl);
+      mapUrl = SAFE_DISPLACEMENT_MAPS.standard;
+    }
+
+    return this.sanitizer.bypassSecurityTrustResourceUrl(mapUrl) as unknown as string;
   });
 
   /** Computed: Red channel displacement scale */

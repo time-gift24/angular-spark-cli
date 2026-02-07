@@ -20,15 +20,15 @@ import {
   inject,
   ElementRef,
   Renderer2,
-  DestroyRef,
   AfterViewInit,
   OnDestroy,
   NgZone,
+  PLATFORM_ID,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GlassContainerComponent } from './glass-container.component';
-import { GlassFilterComponent, GlassFilterMode } from './glass-filter.component';
-import { ShaderDisplacementService } from '../../new/services/shader-displacement.service';
+import type { GlassFilterMode } from './glass-filter.component';
+import { isPlatformBrowser } from '@angular/common';
 
 /**
  * Mouse position coordinates
@@ -73,19 +73,21 @@ interface MousePosition {
     @if (overLight()) {
       <!-- Over light effect layer 1 -->
       <div
-        class="spk-over-light-layer-1 pointer-events-none"
+        class="spk-over-light-layer-1 pointer-events-none transition-all duration-150 ease-in-out"
         [style.opacity]="overLight() ? 0.2 : 0"
       ></div>
 
       <!-- Over light effect layer 2 (mix-blend-overlay) -->
       <div
-        class="spk-over-light-layer-2 pointer-events-none mix-blend-overlay"
+        class="spk-over-light-layer-2 pointer-events-none transition-all duration-150 ease-in-out mix-blend-overlay"
         [style.opacity]="overLight() ? 1 : 0"
       ></div>
     }
 
     <!-- Main glass container -->
     <spk-glass-container
+      [class]="glassClass()"
+      [style]="containerStyle()"
       [displacementScale]="containerDisplacementScale()"
       [blurAmount]="blurAmount()"
       [saturation]="saturation()"
@@ -106,7 +108,7 @@ interface MousePosition {
       <ng-content />
     </spk-glass-container>
 
-    @if (showEffects()) {
+    @if (overLight()) {
       <!-- Border layer 1 - screen blend mode -->
       <span
         class="spk-border-layer-1 pointer-events-none"
@@ -121,7 +123,7 @@ interface MousePosition {
     }
 
     <!-- Hover effects -->
-    @if (showEffects()) {
+    @if (hasClick()) {
       <div
         class="spk-hover-effect pointer-events-none"
         [style.opacity]="(isHovered() || isActive()) ? 0.5 : 0"
@@ -143,6 +145,15 @@ interface MousePosition {
       }
       .pointer-events-none {
         pointer-events: none;
+      }
+      .transition-all {
+        transition-property: all;
+      }
+      .duration-150 {
+        transition-duration: 150ms;
+      }
+      .ease-in-out {
+        transition-timing-function: ease-in-out;
       }
       .mix-blend-overlay {
         mix-blend-mode: overlay;
@@ -199,9 +210,8 @@ interface MousePosition {
 export class LiquidGlassComponent implements AfterViewInit, OnDestroy {
   private readonly elementRef = inject(ElementRef);
   private readonly renderer = inject(Renderer2);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
-  private readonly shaderService = inject(ShaderDisplacementService);
+  private readonly platformId = inject(PLATFORM_ID);
 
   // ========== Inputs ==========
 
@@ -243,6 +253,9 @@ export class LiquidGlassComponent implements AfterViewInit, OnDestroy {
   /** Emitted when component is clicked */
   readonly click = output<void>();
 
+  /** Track if click output has observers (manual flag) */
+  hasClickHandler = false;
+
   // ========== Internal State ==========
 
   /** Hover state signal */
@@ -260,8 +273,8 @@ export class LiquidGlassComponent implements AfterViewInit, OnDestroy {
   /** Internal mouse offset (when external not provided) */
   readonly internalMouseOffset = signal({ x: 0, y: 0 });
 
-  /** Mouse container element reference (optional) */
-  private mouseContainer: HTMLElement | null = null;
+  /** Stores cleanup functions for event listeners */
+  private readonly cleanupFunctions: (() => void)[] = [];
 
   // ========== Computed Values ==========
 
@@ -275,9 +288,17 @@ export class LiquidGlassComponent implements AfterViewInit, OnDestroy {
     return this.mouseOffset() || this.internalMouseOffset();
   });
 
-  /** Whether to show decorative effects */
-  readonly showEffects = computed(() => {
-    return this.overLight() || true;
+  /** Whether this component has click handling */
+  readonly hasClick = computed(() => this.hasClickHandler);
+
+  /** CSS class for glass container */
+  readonly glassClass = computed(() => {
+    return '';
+  });
+
+  /** Container style (empty for now) */
+  readonly containerStyle = computed(() => {
+    return {};
   });
 
   /** Displacement scale for container (reduced in over-light mode) */
@@ -293,32 +314,6 @@ export class LiquidGlassComponent implements AfterViewInit, OnDestroy {
       : this.directionalScale();
 
     return `translate(${translation.x}px, ${translation.y}px) ${scale}`;
-  });
-
-  // ========== Border Layer Styles (dynamic backgrounds) ==========
-
-  /** Border layer 1 background - screen blend mode */
-  readonly borderLayer1Background = computed(() => {
-    const offset = this.effectiveMouseOffset();
-    return `linear-gradient(
-      ${135 + offset.x * 1.2}deg,
-      rgba(255, 255, 255, 0.0) 0%,
-      rgba(255, 255, 255, ${0.12 + Math.abs(offset.x) * 0.008}) ${Math.max(10, 33 + offset.y * 0.3)}%,
-      rgba(255, 255, 255, ${0.4 + Math.abs(offset.x) * 0.012}) ${Math.min(90, 66 + offset.y * 0.4)}%,
-      rgba(255, 255, 255, 0.0) 100%
-    )`;
-  });
-
-  /** Border layer 2 background - overlay blend mode */
-  readonly borderLayer2Background = computed(() => {
-    const offset = this.effectiveMouseOffset();
-    return `linear-gradient(
-      ${135 + offset.x * 1.2}deg,
-      rgba(255, 255, 255, 0.0) 0%,
-      rgba(255, 255, 255, ${0.32 + Math.abs(offset.x) * 0.008}) ${Math.max(10, 33 + offset.y * 0.3)}%,
-      rgba(255, 255, 255, ${0.6 + Math.abs(offset.x) * 0.012}) ${Math.min(90, 66 + offset.y * 0.4)}%,
-      rgba(255, 255, 255, 0.0) 100%
-    )`;
   });
 
   // ========== Core Algorithms ==========
@@ -449,13 +444,16 @@ export class LiquidGlassComponent implements AfterViewInit, OnDestroy {
       this.setupMouseTracking();
     }
 
-    // Set up resize listener
-    window.addEventListener('resize', this.updateGlassSize);
+    // Set up resize listener (only in browser)
+    if (isPlatformBrowser(this.platformId)) {
+      window.addEventListener('resize', this.updateGlassSizeBound);
+      this.cleanupFunctions.push(() => window.removeEventListener('resize', this.updateGlassSizeBound));
+    }
   }
 
   ngOnDestroy(): void {
-    window.removeEventListener('resize', this.updateGlassSize);
-    this.cleanupMouseTracking();
+    // Clean up all registered cleanup functions
+    this.cleanupFunctions.forEach(fn => fn());
   }
 
   // ========== Private Methods ==========
@@ -472,14 +470,21 @@ export class LiquidGlassComponent implements AfterViewInit, OnDestroy {
   };
 
   /**
-   * Set up internal mouse tracking
+   * Bound version of updateGlassSize for event listener
+   */
+  private readonly updateGlassSizeBound = (): void => {
+    this.updateGlassSize();
+  };
+
+  /**
+   * Set up internal mouse tracking with proper cleanup
    */
   private setupMouseTracking(): void {
-    const container = this.mouseContainer || this.elementRef.nativeElement;
+    const hostEl = this.elementRef.nativeElement as HTMLElement;
 
     this.ngZone.runOutsideAngular(() => {
-      this.renderer.listen(container, 'mousemove', (e: MouseEvent) => {
-        const rect = container.getBoundingClientRect();
+      const unlisten = this.renderer.listen(hostEl, 'mousemove', (e: MouseEvent) => {
+        const rect = hostEl.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
 
@@ -493,14 +498,10 @@ export class LiquidGlassComponent implements AfterViewInit, OnDestroy {
           y: e.clientY,
         });
       });
-    });
-  }
 
-  /**
-   * Clean up mouse tracking
-   */
-  private cleanupMouseTracking(): void {
-    // Renderer listeners are automatically cleaned up
+      // Store cleanup function
+      this.cleanupFunctions.push(unlisten);
+    });
   }
 
   // ========== Event Handlers ==========

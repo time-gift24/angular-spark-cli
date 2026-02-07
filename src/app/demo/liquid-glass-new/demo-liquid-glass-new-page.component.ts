@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { LiquidGlassComponent, LiquidGlassDirective } from '@app/shared/ui/liquid-glass/new';
+import {
+  LiquidGlassComponentV2,
+  LiquidGlassDirectiveV2,
+} from '@app/shared/ui';
 
 /**
  * Liquid Glass New Demo Page
@@ -11,7 +14,7 @@ import { LiquidGlassComponent, LiquidGlassDirective } from '@app/shared/ui/liqui
 @Component({
   selector: 'app-demo-liquid-glass-new-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, LiquidGlassComponent, LiquidGlassDirective],
+  imports: [CommonModule, RouterLink, LiquidGlassComponentV2, LiquidGlassDirectiveV2],
   template: `
     <div class="demo-page">
       <div class="demo-header">
