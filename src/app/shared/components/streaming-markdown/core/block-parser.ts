@@ -73,8 +73,11 @@ export class BlockParser implements IBlockParser {
     let position = 0;
     const hasIncompleteBlock = this.detectIncompleteBlock(text);
 
+    // Extract footnote definitions before parsing
+    const { cleanedText, footnoteDefs } = this.extractFootnotes(text);
+
     try {
-      const tokens = marked.lexer(text);
+      const tokens = marked.lexer(cleanedText);
 
       for (const token of tokens) {
         const block = this.tokenToBlock(token, position);
@@ -82,6 +85,18 @@ export class BlockParser implements IBlockParser {
           blocks.push(block);
           position++;
         }
+      }
+
+      // Append footnote definitions block if any exist
+      if (footnoteDefs.size > 0) {
+        blocks.push({
+          id: this.generateStableId('footnote_def', position),
+          type: BlockType.FOOTNOTE_DEF,
+          content: '',
+          isComplete: true,
+          position,
+          footnoteDefs
+        });
       }
 
       return {
@@ -150,15 +165,39 @@ export class BlockParser implements IBlockParser {
     const tailText = newText.substring(lastBoundary);
     const hasIncompleteBlock = this.detectIncompleteBlock(newText);
 
+    // Collect footnote defs from stable blocks (if any FOOTNOTE_DEF block exists)
+    const mergedFootnoteDefs = new Map<string, string>();
+    const stableBlocksWithoutFootnotes = stableBlocks.filter(b => {
+      if (b.type === BlockType.FOOTNOTE_DEF && b.footnoteDefs) {
+        b.footnoteDefs.forEach((v, k) => mergedFootnoteDefs.set(k, v));
+        return false;
+      }
+      return true;
+    });
+
     if (!tailText.trim()) {
-      const allBlocks = [...stableBlocks];
+      const allBlocks = [...stableBlocksWithoutFootnotes];
+      if (mergedFootnoteDefs.size > 0) {
+        allBlocks.push({
+          id: this.generateStableId('footnote_def', allBlocks.length),
+          type: BlockType.FOOTNOTE_DEF,
+          content: '',
+          isComplete: true,
+          position: allBlocks.length,
+          footnoteDefs: mergedFootnoteDefs
+        });
+      }
       this.cache = { parsedText: newText, stableBlocks: [...stableBlocks], stableTextEnd: lastBoundary };
       return { blocks: allBlocks, hasIncompleteBlock };
     }
 
     try {
-      const tailTokens = marked.lexer(tailText);
-      const positionOffset = stableBlocks.length;
+      // Extract footnotes from tail before tokenizing
+      const { cleanedText: cleanedTail, footnoteDefs: tailFootnoteDefs } = this.extractFootnotes(tailText);
+      tailFootnoteDefs.forEach((v, k) => mergedFootnoteDefs.set(k, v));
+
+      const tailTokens = marked.lexer(cleanedTail);
+      const positionOffset = stableBlocksWithoutFootnotes.length;
       const tailBlocks: MarkdownBlock[] = [];
 
       let tailPos = 0;
@@ -170,7 +209,19 @@ export class BlockParser implements IBlockParser {
         }
       }
 
-      const allBlocks = [...stableBlocks, ...tailBlocks];
+      const allBlocks = [...stableBlocksWithoutFootnotes, ...tailBlocks];
+
+      // Append merged footnote defs if any
+      if (mergedFootnoteDefs.size > 0) {
+        allBlocks.push({
+          id: this.generateStableId('footnote_def', allBlocks.length),
+          type: BlockType.FOOTNOTE_DEF,
+          content: '',
+          isComplete: true,
+          position: allBlocks.length,
+          footnoteDefs: mergedFootnoteDefs
+        });
+      }
 
       // Update cache
       this.cache = { parsedText: newText, stableBlocks: [...stableBlocks], stableTextEnd: lastBoundary };
@@ -325,12 +376,26 @@ export class BlockParser implements IBlockParser {
         };
       }
 
-      case 'blockquote':
+      case 'blockquote': {
+        const bqToken = token as any;
+        const nestedBlocks: MarkdownBlock[] = [];
+        if (bqToken.tokens && Array.isArray(bqToken.tokens)) {
+          let nestedPos = 0;
+          for (const nestedToken of bqToken.tokens) {
+            const nestedBlock = this.tokenToBlock(nestedToken, nestedPos);
+            if (nestedBlock) {
+              nestedBlocks.push(nestedBlock);
+              nestedPos++;
+            }
+          }
+        }
         return {
           ...baseBlock,
           type: BlockType.BLOCKQUOTE,
-          content: this.extractText(token)
+          content: this.extractText(token),
+          blocks: nestedBlocks.length > 0 ? nestedBlocks : undefined
         };
+      }
 
       case 'hr':
         return {
@@ -373,7 +438,9 @@ export class BlockParser implements IBlockParser {
 
   /**
    * Parse marked.js inline tokens into MarkdownInline array.
-   * Maps: strong→bold, em→italic, codespan→code, link→link, br→hard-break, text→text
+   * Recursively handles nested tokens (e.g. bold containing italic).
+   * Maps: strong→bold, em→italic, del→strikethrough, codespan→code,
+   *       link→link, image→image, br→hard-break, html→sup/sub/footnote-ref
    */
   private parseInlineTokens(tokens: any[]): MarkdownInline[] {
     if (!tokens || !Array.isArray(tokens)) return [];
@@ -381,28 +448,89 @@ export class BlockParser implements IBlockParser {
     const result: MarkdownInline[] = [];
     for (const token of tokens) {
       switch (token.type) {
-        case 'strong':
-          result.push({ type: 'bold', content: token.text || '' });
+        case 'strong': {
+          const children = token.tokens ? this.parseInlineTokens(token.tokens) : undefined;
+          result.push({ type: 'bold', content: token.text || '', children });
           break;
-        case 'em':
-          result.push({ type: 'italic', content: token.text || '' });
+        }
+        case 'em': {
+          const children = token.tokens ? this.parseInlineTokens(token.tokens) : undefined;
+          result.push({ type: 'italic', content: token.text || '', children });
           break;
+        }
+        case 'del': {
+          const children = token.tokens ? this.parseInlineTokens(token.tokens) : undefined;
+          result.push({ type: 'strikethrough', content: token.text || '', children });
+          break;
+        }
         case 'codespan':
           result.push({ type: 'code', content: token.text || '' });
           break;
-        case 'link':
-          result.push({ type: 'link', content: token.text || '', href: token.href });
+        case 'link': {
+          const children = token.tokens ? this.parseInlineTokens(token.tokens) : undefined;
+          result.push({ type: 'link', content: token.text || '', href: token.href, children });
+          break;
+        }
+        case 'image':
+          result.push({ type: 'image', content: token.text || '', src: token.href, alt: token.text || '' });
           break;
         case 'br':
           result.push({ type: 'hard-break', content: '' });
           break;
-        case 'text':
-        default:
-          result.push({ type: 'text', content: token.text || token.raw || '' });
+        case 'html': {
+          const raw: string = token.raw || token.text || '';
+          // Parse <sup>...</sup> and <sub>...</sub>
+          const supMatch = raw.match(/^<sup>([\s\S]*?)<\/sup>$/i);
+          if (supMatch) {
+            result.push({ type: 'sup', content: supMatch[1] });
+            break;
+          }
+          const subMatch = raw.match(/^<sub>([\s\S]*?)<\/sub>$/i);
+          if (subMatch) {
+            result.push({ type: 'sub', content: subMatch[1] });
+            break;
+          }
+          // Fallback: render raw HTML as text
+          result.push({ type: 'text', content: raw });
           break;
+        }
+        case 'text':
+        default: {
+          // marked.js text tokens can themselves contain nested tokens
+          if (token.tokens && token.tokens.length > 0) {
+            result.push(...this.parseInlineTokens(token.tokens));
+          } else {
+            result.push({ type: 'text', content: token.text || token.raw || '' });
+          }
+          break;
+        }
       }
     }
     return result;
+  }
+
+  /**
+   * Extract footnote definitions from text and convert references to sup tags.
+   * Definitions: `[^id]: text` → removed from text, stored in map
+   * References: `[^id]` → converted to `<sup>` for marked.js to handle
+   */
+  private extractFootnotes(text: string): { cleanedText: string; footnoteDefs: Map<string, string> } {
+    const footnoteDefs = new Map<string, string>();
+
+    // Extract definitions: [^id]: text (at start of line)
+    let cleanedText = text.replace(/^\[\^([^\]]+)\]:\s*(.+)$/gm, (_match, id, content) => {
+      footnoteDefs.set(id, content.trim());
+      return '';
+    });
+
+    // Convert references: [^id] → <sup><a href="#fn-id">[id]</a></sup>
+    if (footnoteDefs.size > 0) {
+      cleanedText = cleanedText.replace(/\[\^([^\]]+)\]/g, (_match, id) => {
+        return `<sup><a href="#fn-${id}">[${id}]</a></sup>`;
+      });
+    }
+
+    return { cleanedText, footnoteDefs };
   }
 
   /**

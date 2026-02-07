@@ -14,6 +14,7 @@ import { MarkdownListComponent } from '../blocks/list/list.component';
 import { MarkdownBlockquoteComponent } from '../blocks/blockquote/blockquote.component';
 import { MarkdownThematicBreakComponent } from '../blocks/thematic-break/thematic-break.component';
 import { MarkdownTableComponent } from '../blocks/table/table.component';
+import { MarkdownFootnoteComponent } from '../blocks/footnote/footnote.component';
 
 /**
  * Creates the builtin plugin with all standard block renderers.
@@ -38,6 +39,7 @@ export function builtinPlugin(): StreamdownPlugin {
       [BlockType.BLOCKQUOTE]: MarkdownBlockquoteComponent,
       [BlockType.THEMATIC_BREAK]: MarkdownThematicBreakComponent,
       [BlockType.TABLE]: MarkdownTableComponent,
+      [BlockType.FOOTNOTE_DEF]: MarkdownFootnoteComponent,
       [BlockType.HTML]: MarkdownParagraphComponent,
       [BlockType.UNKNOWN]: MarkdownParagraphComponent,
     }

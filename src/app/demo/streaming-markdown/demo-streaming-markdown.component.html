@@ -79,17 +79,17 @@
     </div>
   </section>
 
-  <!-- Raw Markdown Section -->
-  <section class="raw-section">
-    <div class="raw-header">
-      <h2>Raw Markdown Content</h2>
-      <button
-        class="control-button outline sm"
-        (click)="rawMarkdown = ''">
-        Clear
-      </button>
+  <!-- Rendering Showcase Section -->
+  <section class="output-section">
+    <div class="output-header">
+      <h2>Rendering Showcase</h2>
+      <span class="showcase-badge">Phase 3</span>
     </div>
-    <pre class="raw-content"><code>{{ rawMarkdown }}</code></pre>
+    <div class="output-container">
+      <app-streaming-markdown
+        [stream$]="showcaseStream$">
+      </app-streaming-markdown>
+    </div>
   </section>
 
   <!-- Info Section -->
@@ -98,11 +98,14 @@
       <h2>Features</h2>
     </div>
     <ul class="info-list">
-      <li>Real-time markdown parsing and rendering</li>
-      <li>Angular Signals for reactive state management</li>
-      <li>RxJS Observable pipeline for streaming</li>
-      <li>OnPush change detection strategy</li>
-      <li>Block-level granularity for optimal performance</li>
+      <li>Nested inline formatting (bold+italic, strikethrough)</li>
+      <li>Image rendering with responsive sizing</li>
+      <li>Blockquote with nested blocks (paragraphs, lists, code)</li>
+      <li>Code block: syntax highlighting, copy & download</li>
+      <li>Table with CSV copy & download toolbar</li>
+      <li>Footnotes with back-references</li>
+      <li>Superscript & subscript support</li>
+      <li>Self-healing preprocessor (12 handlers)</li>
     </ul>
   </section>
 </div>

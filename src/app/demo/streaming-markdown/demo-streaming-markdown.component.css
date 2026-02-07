@@ -99,6 +99,19 @@
   color: var(--primary);
 }
 
+.showcase-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--spacing-sm);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.625rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 /* === Section Styling === */
 .controls-section,
 .output-section,

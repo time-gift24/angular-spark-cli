@@ -2,6 +2,8 @@
  * Markdown Blockquote Component
  *
  * Renders quoted text with left border styling.
+ * Supports nested block content (paragraphs, lists, code, etc.)
+ * via the block router component.
  *
  * Implements BlockRenderer interface for plugin architecture.
  */
@@ -9,15 +11,22 @@
 import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MarkdownBlock } from '../../core/models';
+import { MarkdownBlockRouterComponent } from '../block-router/block-router.component';
 
 @Component({
   selector: 'app-markdown-blockquote',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MarkdownBlockRouterComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <blockquote [class]="blockquoteClasses()">
-      {{ block.content }}
+      @if (block.blocks?.length) {
+        @for (child of block.blocks; track child.id) {
+          <app-markdown-block-router [block]="child" [isComplete]="isComplete" />
+        }
+      } @else {
+        {{ block.content }}
+      }
       @if (!isComplete) {
         <span class="streaming-cursor"></span>
       }

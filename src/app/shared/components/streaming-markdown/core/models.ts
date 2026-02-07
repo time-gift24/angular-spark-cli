@@ -23,6 +23,7 @@ export enum BlockType {
   // Future extensions
   TABLE = 'table',
   CALLOUT = 'callout',
+  FOOTNOTE_DEF = 'footnote_def',
   // Fallback types
   UNKNOWN = 'unknown',
   RAW = 'raw'
@@ -34,12 +35,16 @@ export enum BlockType {
 export type StreamingStatus = 'idle' | 'streaming' | 'completed' | 'error';
 
 /**
- * Inline element types for rich text within paragraphs and list items
+ * Inline element types for rich text within paragraphs and list items.
+ * Supports nesting via optional `children` array (e.g. bold+italic).
  */
 export interface MarkdownInline {
-  type: 'text' | 'bold' | 'italic' | 'code' | 'link' | 'hard-break';
+  type: 'text' | 'bold' | 'italic' | 'strikethrough' | 'code' | 'link' | 'image' | 'hard-break' | 'sup' | 'sub' | 'footnote-ref';
   content: string;
-  href?: string; // for link type
+  href?: string;
+  src?: string;
+  alt?: string;
+  children?: MarkdownInline[];
 }
 
 /**
@@ -125,6 +130,15 @@ export interface MarkdownBlock {
 
   /** Signal-based highlight result (for reactive highlighting) */
   highlightResult?: Signal<HighlightResult | null>;
+
+  /** Nested blocks (for blockquote containing paragraphs, lists, etc.) */
+  blocks?: MarkdownBlock[];
+
+  /** Footnote identifier (for FOOTNOTE_DEF blocks) */
+  footnoteId?: string;
+
+  /** Footnote definitions map (for FOOTNOTE_DEF blocks) */
+  footnoteDefs?: Map<string, string>;
 }
 
 /**

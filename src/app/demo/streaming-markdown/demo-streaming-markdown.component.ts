@@ -10,10 +10,74 @@
  */
 
 import { Component, Injectable, OnDestroy, Inject, signal, inject } from '@angular/core';
-import { Observable, Subject, EMPTY, Subscription } from 'rxjs';
+import { Observable, Subject, EMPTY, Subscription, of, delay } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { StreamingMarkdownComponent } from '@app/shared/components/streaming-markdown/streaming-markdown.component';
 import { IMockAIApi, MockAIApi, StreamPattern } from './mock-ai.service';
+
+/** Static markdown content showcasing all Phase 3 rendering capabilities */
+const SHOWCASE_CONTENT = `## Inline Formatting
+
+**Bold**, *italic*, \`inline code\`, ~~strikethrough~~
+
+Nested: ***bold italic***, **bold with \`code\` inside**, *italic with **bold** nested*
+
+## Image
+
+![Mountain Landscape](https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=300&fit=crop)
+
+## Blockquote (Nested Content)
+
+> **Note:** Blockquote now supports rich nested content.
+>
+> Including **bold**, *italic*, and nested structures:
+>
+> - List item inside blockquote
+> - Another item
+>
+> \`\`\`typescript
+> const x = "code inside blockquote";
+> \`\`\`
+
+## Code Block (Copy & Download)
+
+\`\`\`typescript
+interface Feature {
+  name: string;
+  phase: number;
+  supported: boolean;
+}
+
+const features: Feature[] = [
+  { name: 'Inline nesting', phase: 1, supported: true },
+  { name: 'Image', phase: 2, supported: true },
+];
+\`\`\`
+
+## Table (CSV Copy & Download)
+
+| Feature | Phase | Status |
+|---------|-------|--------|
+| Inline nesting | P1 | Supported |
+| Image | P2 | Supported |
+| Blockquote nesting | P3 | Supported |
+| Preprocessor | P4 | Overhauled |
+| Code download | P5 | Supported |
+| Table export | P6 | Supported |
+| Footnotes | P7 | Supported |
+| Sup/Sub | P8 | Supported |
+
+## Superscript & Subscript
+
+E = mc<sup>2</sup>, H<sub>2</sub>O, x<sup>n</sup> + y<sup>n</sup> = z<sup>n</sup>
+
+## Footnotes
+
+Incremental parsing[^1] with self-healing preprocessor[^2] enables robust streaming.
+
+[^1]: Only the tail after the last stable boundary is re-tokenized.
+[^2]: 12 priority-ordered handlers auto-close unclosed markers.
+`;
 
 /**
  * Interface for stream lifecycle control.
@@ -187,6 +251,12 @@ export class DemoStreamingMarkdownComponent implements OnDestroy {
    * Updated by StreamingMarkdownComponent via rawContentChange event.
    */
   rawMarkdown = '';
+
+  /**
+   * Static showcase stream for demonstrating new rendering capabilities.
+   * Emits once on page load — no button click needed.
+   */
+  showcaseStream$ = of(SHOWCASE_CONTENT).pipe(delay(100));
 
   /**
    * Signal tracking the copy to clipboard state.

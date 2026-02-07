@@ -115,55 +115,96 @@ export class MockAIApi implements IMockAIApi {
    */
   private readonly defaultContent = `# Streaming Markdown Demo
 
-This is a demonstration of the streaming markdown component with syntax highlighting.
+This is a demonstration of the streaming markdown component with **full rendering capabilities**.
 
-## Features
+## Inline Formatting
 
-- Real-time markdown rendering
-- Streaming text support
-- Optimized change detection
-- **Syntax highlighting** for code blocks
+Basic: **bold**, *italic*, \`inline code\`, ~~strikethrough~~
 
-## TypeScript Example
+Nested: ***bold and italic***, **bold with \`code\` inside**, *italic with **bold** nested*
+
+Links: [Angular Documentation](https://angular.dev) with **[bold link](https://example.com)**
+
+## Image
+
+![Mountain Landscape](https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=300&fit=crop)
+
+## Blockquote with Nested Content
+
+> **Note:** This blockquote contains rich nested content.
+>
+> It supports multiple paragraphs, **bold text**, *italic*, and even:
+>
+> - Nested list item 1
+> - Nested list item 2
+>
+> > And nested blockquotes too!
+
+## Code Blocks
 
 \`\`\`typescript
-// Define a greeting message
-const greeting = "Hello, World!";
-
-// Log the greeting to console
-console.log(greeting);
-
-// Function to demonstrate syntax highlighting
-function add(a: number, b: number): number {
-  return a + b;
+// TypeScript example — try the copy & download buttons →
+interface StreamConfig {
+  bufferTime: number;
+  maxChunkSize: number;
 }
 
-// Call the function
-const result = add(5, 3);
-console.log(\`Result: \${result}\`);
+function createStream(config: StreamConfig): Observable<string> {
+  return source$.pipe(
+    bufferTime(config.bufferTime),
+    map(chunks => chunks.join('')),
+    filter(chunk => chunk.length > 0)
+  );
+}
 \`\`\`
-
-## Python Example
 
 \`\`\`python
-# Python syntax highlighting example
-def greet(name: str) -> str:
-    return f"Hello, {name}!"
+# Python example
+def fibonacci(n: int) -> list[int]:
+    """Generate Fibonacci sequence up to n terms."""
+    seq = [0, 1]
+    for _ in range(2, n):
+        seq.append(seq[-1] + seq[-2])
+    return seq[:n]
 
-# Call the function
-message = greet("World")
-print(message)
+print(fibonacci(10))
 \`\`\`
 
-## Blockquote
+## Table with Export
 
-> The best way to predict the future is to create it.
-> *— Peter Drucker*
+| Feature | Status | Phase |
+|---------|--------|-------|
+| Inline nesting | Supported | P1 |
+| Image rendering | Supported | P2 |
+| Blockquote nesting | Supported | P3 |
+| Preprocessor | Overhauled | P4 |
+| Code download | Supported | P5 |
+| Table CSV export | Supported | P6 |
+| Footnotes | Supported | P7 |
+| Sup/Sub | Supported | P8 |
+
+## Superscript & Subscript
+
+Einstein's famous equation: E = mc<sup>2</sup>
+
+Water molecule: H<sub>2</sub>O
+
+## Footnotes
+
+Streaming markdown uses incremental parsing[^1] with self-healing syntax correction[^2] for robust real-time rendering.
+
+The preprocessor handles 12 different marker types[^3] to ensure correct output during streaming.
+
+[^1]: Only the "tail" after the last stable boundary is re-tokenized on each update.
+[^2]: Unclosed markers like \`**bold\` are automatically closed before parsing.
+[^3]: Including code blocks, math blocks, bold-italic, links, images, and more.
+
+---
 
 ### Conclusion
 
 This component provides efficient markdown streaming with Angular Signals and RxJS.
-Professional syntax highlighting is powered by Shiki.
+Professional syntax highlighting is powered by **Shiki**, with ~~no innerHTML~~ token-based rendering.
 `;
 
   /**

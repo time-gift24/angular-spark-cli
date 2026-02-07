@@ -29,22 +29,34 @@ import { LANGUAGE_DISPLAY_NAMES } from '../../core/shini-types';
         <!-- Header bar with language label and copy button -->
         <div class="code-header">
           <span class="code-language">{{ displayLanguage }}</span>
-          <button
-            class="copy-button"
-            (click)="copyToClipboard()"
-            [title]="copied() ? 'Copied!' : 'Copy code'"
-            [class.copied]="copied()">
-            @if (!copied()) {
+          <div class="code-actions">
+            <button
+              class="code-action-button"
+              (click)="downloadCode()"
+              title="Download code">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
               </svg>
-            } @else {
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-            }
-          </button>
+            </button>
+            <button
+              class="code-action-button"
+              (click)="copyToClipboard()"
+              [title]="copied() ? 'Copied!' : 'Copy code'"
+              [class.copied]="copied()">
+              @if (!copied()) {
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              } @else {
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              }
+            </button>
+          </div>
         </div>
       }
 
@@ -131,5 +143,35 @@ export class MarkdownCodeComponent implements OnChanges {
     } catch (error) {
       console.error('[MarkdownCodeComponent] Failed to copy:', error);
     }
+  }
+
+  downloadCode(): void {
+    const ext = this.getFileExtension(this.language);
+    const filename = `code.${ext}`;
+    const blob = new Blob([this.code], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  private getFileExtension(lang: string): string {
+    const extMap: Record<string, string> = {
+      typescript: 'ts', javascript: 'js', python: 'py', java: 'java',
+      cpp: 'cpp', 'c++': 'cpp', c: 'c', csharp: 'cs', 'c#': 'cs',
+      go: 'go', rust: 'rs', ruby: 'rb', php: 'php', swift: 'swift',
+      kotlin: 'kt', scala: 'scala', html: 'html', css: 'css',
+      scss: 'scss', less: 'less', json: 'json', yaml: 'yaml',
+      yml: 'yml', xml: 'xml', sql: 'sql', bash: 'sh', shell: 'sh',
+      sh: 'sh', zsh: 'zsh', powershell: 'ps1', dockerfile: 'Dockerfile',
+      markdown: 'md', toml: 'toml', ini: 'ini', lua: 'lua',
+      r: 'r', dart: 'dart', elixir: 'ex', erlang: 'erl',
+      haskell: 'hs', perl: 'pl', text: 'txt',
+    };
+    return extMap[lang.toLowerCase()] || lang || 'txt';
   }
 }

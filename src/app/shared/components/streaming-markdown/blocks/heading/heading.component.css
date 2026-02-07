@@ -13,3 +13,53 @@
   color: var(--destructive);
   font-style: italic;
 }
+
+.inline-link {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.inline-link:hover {
+  opacity: 0.8;
+}
+
+.inline-code {
+  display: inline-block;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  background: var(--muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.85em;
+  line-height: 1 !important;
+  vertical-align: baseline;
+}
+
+.inline-strikethrough {
+  text-decoration: line-through;
+}
+
+.inline-image {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  margin: var(--spacing-sm) 0;
+  display: inline-block;
+}
+
+.inline-bold {
+  font-weight: 600;
+}
+
+.inline-italic {
+  font-style: italic;
+}
+
+.footnote-ref a {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.8em;
+}
+
+.footnote-ref a:hover {
+  text-decoration: underline;
+}

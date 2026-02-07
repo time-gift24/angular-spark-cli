@@ -1,12 +1,9 @@
 /**
  * Markdown Preprocessor Service
  *
- * Phase 3: Self-Healing Syntax Correction
- *
- * This service provides markdown preprocessing capabilities including:
- * - Automatic detection of unclosed markers
- * - Self-healing syntax correction
- * - Priority-based marker handling
+ * Handler-based architecture aligned with remend for self-healing syntax correction.
+ * Each handler has a priority and processes text independently, with code-block
+ * awareness to avoid corrupting fenced content.
  *
  * @module StreamingMarkdown.Core
  */
@@ -17,19 +14,12 @@ import { Injectable } from '@angular/core';
  * Represents a detected markdown marker with its position and closure state
  */
 export interface MarkerMatch {
-  /** The marker string (e.g., '```', '**', '$$') */
   marker: string;
-  /** Start index of the marker in the text */
   startIndex: number;
-  /** End index of the marker in the text */
   endIndex: number;
-  /** Whether the marker has been properly closed */
   isClosed: boolean;
 }
 
-/**
- * Type of markdown marker
- */
 export type MarkerType =
   | 'code_block'
   | 'math_block'
@@ -38,27 +28,13 @@ export type MarkerType =
   | 'italic'
   | 'strikethrough';
 
-/**
- * Configuration rule for a markdown marker
- */
 export interface MarkerRule {
-  /** Type identifier for the marker */
   type: MarkerType;
-  /** Opening marker string */
   opening: string;
-  /** Closing marker string */
   closing: string;
-  /** Priority for handling (lower = higher priority) */
   priority: number;
 }
 
-/**
- * Priority configuration for markdown markers
- *
- * Lower priority numbers indicate higher precedence.
- * Code blocks and math blocks must be handled first to prevent
- * their content from being interpreted as inline formatting.
- */
 export const MARKER_RULES: readonly MarkerRule[] = [
   { type: 'code_block', opening: '```', closing: '```', priority: 0 },
   { type: 'math_block', opening: '$$', closing: '$$', priority: 10 },
@@ -68,204 +44,384 @@ export const MARKER_RULES: readonly MarkerRule[] = [
   { type: 'strikethrough', opening: '~~', closing: '~~', priority: 400 },
 ] as const;
 
-/**
- * Interface for detecting and fixing unclosed markdown markers
- */
 export interface IMarkerDetector {
-  /**
-   * Detects all unclosed markdown markers in the given text
-   * @param text - The markdown text to analyze
-   * @returns Array of detected markers with their closure status
-   */
   detectUnclosedMarkers(text: string): MarkerMatch[];
-
-  /**
-   * Automatically closes unclosed markers in the text
-   * @param text - The markdown text to fix
-   * @param matches - Array of detected marker matches
-   * @returns The text with unclosed markers closed
-   */
   closeMarkers(text: string, matches: MarkerMatch[]): string;
 }
 
-/**
- * Interface for markdown preprocessing service
- */
 export interface IMarkdownPreprocessor {
-  /**
-   * Processes markdown text with self-healing syntax correction
-   * @param text - The raw markdown text to process
-   * @returns Preprocessed markdown text with corrected syntax
-   */
   process(text: string): string;
 }
 
-/**
- * Implementation of the marker detector
- * Handles detection and closing of unclosed markdown markers
- */
-class MarkerDetector implements IMarkerDetector {
-  /**
-   * Detects all unclosed markdown markers in the given text
-   * Uses priority-based processing to avoid conflicts
-   *
-   * @param text - The markdown text to analyze
-   * @returns Array of detected markers with their closure status
-   */
-  detectUnclosedMarkers(text: string): MarkerMatch[] {
-    const matches: MarkerMatch[] = [];
-
-    // Process markers in priority order (low to high)
-    const sortedRules = [...MARKER_RULES].sort((a, b) => a.priority - b.priority);
-
-    for (const rule of sortedRules) {
-      let searchStart = 0;
-      let openIndex = -1;
-
-      while (searchStart < text.length) {
-        // Find opening marker
-        openIndex = text.indexOf(rule.opening, searchStart);
-
-        if (openIndex === -1) {
-          // No more opening markers found
-          break;
-        }
-
-        // Find closing marker after the opening
-        const closeIndex = text.indexOf(rule.closing, openIndex + rule.opening.length);
-
-        if (closeIndex === -1) {
-          // Unclosed marker found
-          matches.push({
-            marker: rule.opening,
-            startIndex: openIndex,
-            endIndex: openIndex + rule.opening.length,
-            isClosed: false
-          });
-          break; // Only care about the last unclosed marker
-        }
-
-        // Marker is closed, move past this pair
-        searchStart = closeIndex + rule.closing.length;
-      }
-    }
-
-    return matches;
-  }
-
-  /**
-   * Automatically closes unclosed markers in the text
-   * Appends closing markers for all unclosed markers
-   *
-   * @param text - The markdown text to fix
-   * @param matches - Array of detected marker matches
-   * @returns The text with unclosed markers closed
-   */
-  closeMarkers(text: string, matches: MarkerMatch[]): string {
-    if (matches.length === 0) {
-      return text;
-    }
-
-    // Group unclosed markers by type and add closings in reverse order
-    // to maintain proper nesting
-    const unclosedByType = new Map<string, number>();
-
-    // Process matches to find which markers need closing
-    for (const match of matches) {
-      if (!match.isClosed) {
-        // Find the rule for this marker
-        const rule = MARKER_RULES.find(r => r.opening === match.marker);
-        if (rule) {
-          unclosedByType.set(rule.type, match.startIndex);
-        }
-      }
-    }
-
-    // Sort by position (latest first) to maintain proper nesting when closing
-    const sortedUnclosed = Array.from(unclosedByType.entries())
-      .sort(([, posA], [, posB]) => posB - posA);
-
-    // Build the closing string with proper formatting
-    let closingString = '';
-    const textEndsWithNewline = text.endsWith('\n');
-
-    // Add newline before closing block-level markers if text doesn't end with one
-    const needsLeadingNewline = !textEndsWithNewline &&
-      Array.from(unclosedByType.keys()).some(type =>
-        type === 'code_block' || type === 'math_block'
-      );
-
-    if (needsLeadingNewline) {
-      closingString += '\n';
-    }
-
-    // Add closing markers
-    for (const [type] of sortedUnclosed) {
-      const rule = MARKER_RULES.find(r => r.type === type);
-      if (rule) {
-        closingString += rule.closing;
-      }
-    }
-
-    // Append closing markers to the text
-    return text + closingString;
-  }
+/** A single preprocessing handler with a priority */
+interface PreprocessorHandler {
+  name: string;
+  priority: number;
+  handle: (text: string) => string;
 }
+
+/**
+ * Finds all code block ranges (``` ... ```) in text.
+ * Returns array of [start, end] index pairs.
+ */
+function findCodeBlockRanges(text: string): [number, number][] {
+  const ranges: [number, number][] = [];
+  const fence = '```';
+  let pos = 0;
+  while (pos < text.length) {
+    const openIdx = text.indexOf(fence, pos);
+    if (openIdx === -1) break;
+    // Find end of opening fence line
+    const lineEnd = text.indexOf('\n', openIdx);
+    const searchFrom = lineEnd === -1 ? openIdx + fence.length : lineEnd + 1;
+    const closeIdx = text.indexOf(fence, searchFrom);
+    if (closeIdx === -1) {
+      // Unclosed code block — everything from openIdx to end is "inside"
+      ranges.push([openIdx, text.length]);
+      break;
+    }
+    ranges.push([openIdx, closeIdx + fence.length]);
+    pos = closeIdx + fence.length;
+  }
+  return ranges;
+}
+
+/** Check if a position is inside any code block range */
+function isWithinCodeBlock(pos: number, ranges: [number, number][]): boolean {
+  for (const [start, end] of ranges) {
+    if (pos >= start && pos < end) return true;
+  }
+  return false;
+}
+
+// ─── Handlers ────────────────────────────────────────────────
+
+/** Priority 0: Prevent setext heading misparse — `---` after a paragraph line */
+function sextetHeadingHandler(text: string): string {
+  // If text ends with a line that is only dashes (potential setext heading marker)
+  // and the previous line has content, the parser may interpret it as an h2.
+  // We only intervene if the `---` line is at the very end and looks incomplete.
+  // This is a lightweight guard — only triggers on trailing `---` without a blank line before.
+  const lines = text.split('\n');
+  if (lines.length < 2) return text;
+  const lastLine = lines[lines.length - 1];
+  if (/^-{3,}\s*$/.test(lastLine)) {
+    const prevLine = lines[lines.length - 2];
+    // If previous line is non-empty text (not a heading, not blank), this could be
+    // misinterpreted as setext heading. Insert a blank line to force thematic break.
+    if (prevLine.trim().length > 0 && !/^#{1,6}\s/.test(prevLine) && !/^[-*_]{3,}\s*$/.test(prevLine)) {
+      lines.splice(lines.length - 1, 0, '');
+      return lines.join('\n');
+    }
+  }
+  return text;
+}
+
+/** Priority 10: Fix incomplete links — `[text](url` → `[text](url)` */
+function incompleteLinkHandler(text: string): string {
+  const codeRanges = findCodeBlockRanges(text);
+  // Match `[...](url` where url is not closed with `)`
+  return text.replace(/\[([^\]]*)\]\(([^)\s]*?)$/gm, (match, linkText, url, offset) => {
+    if (isWithinCodeBlock(offset, codeRanges)) return match;
+    return `[${linkText}](${url})`;
+  });
+}
+
+/** Priority 11: Fix incomplete images — `![alt](url` → remove or close */
+function incompleteImageHandler(text: string): string {
+  const codeRanges = findCodeBlockRanges(text);
+  return text.replace(/!\[([^\]]*)\]\(([^)\s]*?)$/gm, (match, alt, url, offset) => {
+    if (isWithinCodeBlock(offset, codeRanges)) return match;
+    if (url.length > 0) {
+      return `![${alt}](${url})`;
+    }
+    // No URL yet — remove the incomplete image syntax
+    return '';
+  });
+}
+
+/** Priority 20: Fix unclosed bold-italic `***text` → `***text***` */
+function boldItalicHandler(text: string): string {
+  const codeRanges = findCodeBlockRanges(text);
+  const marker = '***';
+  let pos = 0;
+  let result = text;
+  while (pos < result.length) {
+    const openIdx = result.indexOf(marker, pos);
+    if (openIdx === -1) break;
+    if (isWithinCodeBlock(openIdx, codeRanges)) {
+      pos = openIdx + marker.length;
+      continue;
+    }
+    const closeIdx = result.indexOf(marker, openIdx + marker.length);
+    if (closeIdx === -1) {
+      // Unclosed bold-italic at end
+      result = result + marker;
+      break;
+    }
+    pos = closeIdx + marker.length;
+  }
+  return result;
+}
+
+/** Priority 30: Fix unclosed bold `**text` → `**text**` */
+function boldHandler(text: string): string {
+  const codeRanges = findCodeBlockRanges(text);
+  const marker = '**';
+  let pos = 0;
+  let result = text;
+  while (pos < result.length) {
+    const openIdx = result.indexOf(marker, pos);
+    if (openIdx === -1) break;
+    // Skip if this is actually *** (bold-italic)
+    if (result[openIdx + 2] === '*' || (openIdx > 0 && result[openIdx - 1] === '*')) {
+      pos = openIdx + marker.length;
+      continue;
+    }
+    if (isWithinCodeBlock(openIdx, codeRanges)) {
+      pos = openIdx + marker.length;
+      continue;
+    }
+    const closeIdx = result.indexOf(marker, openIdx + marker.length);
+    if (closeIdx === -1) {
+      result = result + marker;
+      break;
+    }
+    pos = closeIdx + marker.length;
+  }
+  return result;
+}
+
+/** Priority 40: Fix unclosed italic with `__text` → `__text__` */
+function italicUnderscoreDoubleHandler(text: string): string {
+  const codeRanges = findCodeBlockRanges(text);
+  const marker = '__';
+  let pos = 0;
+  let result = text;
+  while (pos < result.length) {
+    const openIdx = result.indexOf(marker, pos);
+    if (openIdx === -1) break;
+    if (isWithinCodeBlock(openIdx, codeRanges)) {
+      pos = openIdx + marker.length;
+      continue;
+    }
+    const closeIdx = result.indexOf(marker, openIdx + marker.length);
+    if (closeIdx === -1) {
+      result = result + marker;
+      break;
+    }
+    pos = closeIdx + marker.length;
+  }
+  return result;
+}
+
+/** Priority 41: Fix unclosed italic with `*text` → `*text*` */
+function italicAsteriskHandler(text: string): string {
+  const codeRanges = findCodeBlockRanges(text);
+  const marker = '*';
+  let pos = 0;
+  let result = text;
+  while (pos < result.length) {
+    const openIdx = result.indexOf(marker, pos);
+    if (openIdx === -1) break;
+    // Skip ** and ***
+    if (result[openIdx + 1] === '*') {
+      pos = openIdx + 2;
+      if (result[openIdx + 2] === '*') pos++;
+      continue;
+    }
+    if (openIdx > 0 && result[openIdx - 1] === '*') {
+      pos = openIdx + 1;
+      continue;
+    }
+    if (isWithinCodeBlock(openIdx, codeRanges)) {
+      pos = openIdx + marker.length;
+      continue;
+    }
+    const closeIdx = result.indexOf(marker, openIdx + marker.length);
+    if (closeIdx === -1) {
+      result = result + marker;
+      break;
+    }
+    // Skip if close is part of ** or ***
+    if (result[closeIdx + 1] === '*' || (closeIdx > 0 && result[closeIdx - 1] === '*')) {
+      pos = closeIdx + 1;
+      continue;
+    }
+    pos = closeIdx + marker.length;
+  }
+  return result;
+}
+
+/** Priority 42: Fix unclosed italic with `_text` → `_text_` */
+function italicUnderscoreHandler(text: string): string {
+  const codeRanges = findCodeBlockRanges(text);
+  const marker = '_';
+  let pos = 0;
+  let result = text;
+  while (pos < result.length) {
+    const openIdx = result.indexOf(marker, pos);
+    if (openIdx === -1) break;
+    // Skip __
+    if (result[openIdx + 1] === '_') {
+      pos = openIdx + 2;
+      continue;
+    }
+    if (openIdx > 0 && result[openIdx - 1] === '_') {
+      pos = openIdx + 1;
+      continue;
+    }
+    if (isWithinCodeBlock(openIdx, codeRanges)) {
+      pos = openIdx + marker.length;
+      continue;
+    }
+    const closeIdx = result.indexOf(marker, openIdx + marker.length);
+    if (closeIdx === -1) {
+      result = result + marker;
+      break;
+    }
+    if (result[closeIdx + 1] === '_' || (closeIdx > 0 && result[closeIdx - 1] === '_')) {
+      pos = closeIdx + 1;
+      continue;
+    }
+    pos = closeIdx + marker.length;
+  }
+  return result;
+}
+
+/** Priority 50: Fix unclosed inline code `` `code `` → `` `code` `` */
+function inlineCodeHandler(text: string): string {
+  const codeRanges = findCodeBlockRanges(text);
+  let pos = 0;
+  let result = text;
+  while (pos < result.length) {
+    const openIdx = result.indexOf('`', pos);
+    if (openIdx === -1) break;
+    // Skip ``` (code block fences)
+    if (result[openIdx + 1] === '`' && result[openIdx + 2] === '`') {
+      pos = openIdx + 3;
+      continue;
+    }
+    if (isWithinCodeBlock(openIdx, codeRanges)) {
+      pos = openIdx + 1;
+      continue;
+    }
+    const closeIdx = result.indexOf('`', openIdx + 1);
+    if (closeIdx === -1) {
+      result = result + '`';
+      break;
+    }
+    // Skip ``` at close
+    if (result[closeIdx + 1] === '`' && result[closeIdx + 2] === '`') {
+      pos = closeIdx + 3;
+      continue;
+    }
+    pos = closeIdx + 1;
+  }
+  return result;
+}
+
+/** Priority 60: Fix unclosed strikethrough `~~text` → `~~text~~` */
+function strikethroughHandler(text: string): string {
+  const codeRanges = findCodeBlockRanges(text);
+  const marker = '~~';
+  let pos = 0;
+  let result = text;
+  while (pos < result.length) {
+    const openIdx = result.indexOf(marker, pos);
+    if (openIdx === -1) break;
+    if (isWithinCodeBlock(openIdx, codeRanges)) {
+      pos = openIdx + marker.length;
+      continue;
+    }
+    const closeIdx = result.indexOf(marker, openIdx + marker.length);
+    if (closeIdx === -1) {
+      result = result + marker;
+      break;
+    }
+    pos = closeIdx + marker.length;
+  }
+  return result;
+}
+
+/** Priority 70: Fix unclosed block math `$$equation` → `$$equation$$` */
+function blockMathHandler(text: string): string {
+  const codeRanges = findCodeBlockRanges(text);
+  const marker = '$$';
+  let pos = 0;
+  let result = text;
+  while (pos < result.length) {
+    const openIdx = result.indexOf(marker, pos);
+    if (openIdx === -1) break;
+    if (isWithinCodeBlock(openIdx, codeRanges)) {
+      pos = openIdx + marker.length;
+      continue;
+    }
+    const closeIdx = result.indexOf(marker, openIdx + marker.length);
+    if (closeIdx === -1) {
+      const needsNewline = !result.endsWith('\n');
+      result = result + (needsNewline ? '\n' : '') + marker;
+      break;
+    }
+    pos = closeIdx + marker.length;
+  }
+  return result;
+}
+
+/** Priority 80: Fix unclosed code blocks ``` → close with newline + ``` */
+function codeBlockHandler(text: string): string {
+  const fence = '```';
+  let count = 0;
+  let pos = 0;
+  while (pos < text.length) {
+    const idx = text.indexOf(fence, pos);
+    if (idx === -1) break;
+    count++;
+    pos = idx + fence.length;
+  }
+  if (count % 2 !== 0) {
+    const needsNewline = !text.endsWith('\n');
+    return text + (needsNewline ? '\n' : '') + fence;
+  }
+  return text;
+}
+
+// ─── Built-in handlers sorted by priority ────────────────────
+
+const BUILTIN_HANDLERS: PreprocessorHandler[] = [
+  { name: 'setext-heading', priority: 0, handle: sextetHeadingHandler },
+  { name: 'incomplete-link', priority: 10, handle: incompleteLinkHandler },
+  { name: 'incomplete-image', priority: 11, handle: incompleteImageHandler },
+  { name: 'bold-italic', priority: 20, handle: boldItalicHandler },
+  { name: 'bold', priority: 30, handle: boldHandler },
+  { name: 'italic-underscore-double', priority: 40, handle: italicUnderscoreDoubleHandler },
+  { name: 'italic-asterisk', priority: 41, handle: italicAsteriskHandler },
+  { name: 'italic-underscore', priority: 42, handle: italicUnderscoreHandler },
+  { name: 'inline-code', priority: 50, handle: inlineCodeHandler },
+  { name: 'strikethrough', priority: 60, handle: strikethroughHandler },
+  { name: 'block-math', priority: 70, handle: blockMathHandler },
+  { name: 'code-block', priority: 80, handle: codeBlockHandler },
+].sort((a, b) => a.priority - b.priority);
 
 /**
  * Implementation of the Markdown Preprocessor Service
  *
- * Provides full self-healing syntax correction for streaming markdown.
- * Detects and fixes unclosed markers to prevent rendering issues.
+ * Uses a handler-based pipeline aligned with remend.
+ * Each handler runs in priority order, with code-block awareness.
  */
 @Injectable({ providedIn: 'root' })
 export class MarkdownPreprocessor implements IMarkdownPreprocessor {
-  /**
-   * Detector instance for finding unclosed markers
-   */
-  private detector = new MarkerDetector();
+  private handlers: PreprocessorHandler[] = [...BUILTIN_HANDLERS];
 
-  /**
-   * Processes markdown text with self-healing syntax correction
-   *
-   * Algorithm:
-   * 1. Detect all unclosed markers in priority order
-   * 2. Automatically close unclosed markers
-   * 3. Return corrected text
-   *
-   * @param text - The raw markdown text to process
-   * @returns Preprocessed markdown text with corrected syntax
-   *
-   * @example
-   * ```typescript
-   * const preprocessor = new MarkdownPreprocessor();
-   *
-   * // Fixes unclosed bold
-   * preprocessor.process('This is **bold text');
-   * // Returns: 'This is **bold text**'
-   *
-   * // Fixes nested unclosed markers
-   * preprocessor.process('```javascript\nconsole.log("hello")');
-   * // Returns: '```javascript\nconsole.log("hello")\n```'
-   * ```
-   */
   process(text: string): string {
-    // Handle empty input
     if (!text || text.length === 0) {
       return text;
     }
 
-    // Detect unclosed markers
-    const matches = this.detector.detectUnclosedMarkers(text);
-
-    // If no unclosed markers, return original text
-    if (matches.length === 0) {
-      return text;
+    let result = text;
+    for (const handler of this.handlers) {
+      result = handler.handle(result);
     }
-
-    // Close unclosed markers
-    const corrected = this.detector.closeMarkers(text, matches);
-
-    return corrected;
+    return result;
   }
 }
