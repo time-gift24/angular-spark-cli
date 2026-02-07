@@ -108,6 +108,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'liquid-glass-v2',
+        loadComponent: () =>
+          import('./demo/liquid-glass-new/demo-liquid-glass-new-page.component').then(
+            (m) => m.DemoLiquidGlassNewPageComponent,
+          ),
+      },
+      {
         path: 'context-menu',
         loadComponent: () =>
           import('./demo/context-menu/context-menu-demo.component').then(
