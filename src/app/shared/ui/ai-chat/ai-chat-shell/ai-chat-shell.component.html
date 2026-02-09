@@ -3,7 +3,7 @@
   <main
     #mainContent
     class="main-content flex-1 transition-all duration-300 ease-out"
-    [style.padding-right.px]="panelOpen() ? effectivePanelWidth() + 24 : 0">
+    [style.padding-right.px]="panelOpen() ? effectivePanelWidth() + 12 : 0">
     <router-outlet />
   </main>
 
@@ -23,7 +23,8 @@
   <!-- Session Chat Container (fixed, always floating at bottom) -->
   <!-- Width is 40% of main content area, positioned accordingly -->
   <div
-    class="fixed bottom-6 z-40 flex justify-center"
+    class="fixed z-40 flex justify-center"
+    [class]="panelOpen() ? 'bottom-3' : 'bottom-6'"
     [style.width.px]="sessionContainerWidthPx()"
     [style.left.px]="sessionContainerLeftPx()"
     [style.transform]="'translateX(-50%)'">

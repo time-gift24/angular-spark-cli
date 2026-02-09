@@ -550,18 +550,6 @@
   scrollbar-color: var(--border) transparent;
 }
 
-/* === AI Chat Panel Header === */
-
-/* Panel header - darker solid background than message area */
-.ai-panel-header {
-  background: oklch(from var(--card) calc(l - 0.03) c h);
-}
-
-/* Dark mode panel header */
-.dark .ai-panel-header {
-  background: oklch(from var(--card) calc(l - 0.02) c h);
-}
-
 /* === AI Chat Panel Edge Glow === */
 
 /* Subtle left edge glow using primary color */

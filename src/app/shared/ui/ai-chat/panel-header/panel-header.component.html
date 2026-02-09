@@ -1,5 +1,4 @@
-<div
-  class="flex items-center justify-between px-3 py-2 border-b border-border/50 ai-panel-header">
+<div class="flex items-center justify-between px-4 py-3 border-b border-border/50">
   <div class="flex items-center gap-2 flex-1 min-w-0">
     @if (isEditingName()) {
       <input
@@ -8,18 +7,22 @@
         (input)="editValue.set($any($event.target).value)"
         (keydown)="onKeydown($event)"
         (blur)="onNameEditComplete(editValue())"
-        class="flex-1 px-2 py-1 text-sm bg-background border border-input rounded focus:outline-none focus:ring-2 focus:ring-ring"
+        class="flex-1 px-2 py-1.5 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+        placeholder="输入会话名称..."
         autofocus
       />
     } @else {
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-1 min-w-0 group">
         @if (isNewMessageIndicatorVisible()) {
-          <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+          <span class="w-2 h-2 rounded-full bg-accent animate-pulse flex-shrink-0"></span>
         }
         <button
           (click)="startEditing()"
-          class="session-name text-sm font-medium text-foreground hover:text-accent transition-colors cursor-pointer truncate">
-          {{ sessionName() }}
+          class="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors cursor-pointer truncate group-hover:bg-accent/50 group-hover:px-2 group-hover:py-1 group-hover:rounded-md">
+          <span class="truncate">{{ sessionName() || '未命名会话' }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 opacity-0 group-hover:opacity-50 transition-opacity flex-shrink-0">
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+          </svg>
         </button>
       </div>
     }
@@ -29,18 +32,18 @@
     @if (!isEditingName()) {
       <button
         (click)="delete.emit()"
-        class="p-1.5 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
+        class="p-2 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
         title="删除会话">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
           <polyline points="3 6 5 6 21 6"></polyline>
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
         </svg>
       </button>
       <button
         (click)="close.emit()"
-        class="p-1.5 rounded-full hover:bg-muted transition-colors"
+        class="p-2 rounded-full hover:bg-muted hover:text-foreground transition-colors text-muted-foreground"
         title="关闭面板">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
