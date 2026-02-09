@@ -1,0 +1,23 @@
+@switch (message.role) {
+  @case ('user') {
+    <div class="flex justify-end animate-[message-bubble-in_0.2s_var(--ease-spring-snappy)]">
+      <div class="max-w-[80%] px-4 py-2 rounded-lg bg-primary text-primary-foreground rounded-tr-sm">
+        <p class="text-sm whitespace-pre-wrap break-words">{{ message.content }}</p>
+      </div>
+    </div>
+  }
+
+  @case ('assistant') {
+    <div class="flex justify-start animate-[message-bubble-in_0.2s_var(--ease-spring-snappy)]">
+      <div
+        liquidGlass
+        lgTheme="mineral-dark"
+        [lgBlurAmount]="0.08"
+        [lgSaturation]="100"
+        [lgDisableAnimation]="true"
+        class="max-w-[80%] px-4 py-2 rounded-lg rounded-tl-sm bg-card/80 backdrop-blur-sm">
+        <p class="text-sm text-card-foreground whitespace-pre-wrap break-words">{{ message.content }}</p>
+      </div>
+    </div>
+  }
+}

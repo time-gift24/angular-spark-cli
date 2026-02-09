@@ -17,7 +17,7 @@ import { SessionData } from '@app/shared/models';
  * All state is managed by parent component, this component only forwards events.
  *
  * Key Features:
- * - Displays session tabs with input below (when open)
+ * - Displays session tabs with input below (always visible)
  * - Forwards all core events without modification
  * - Supports Tailwind class overrides for full customization
  * - Two-way binding support for inputValue
@@ -29,7 +29,6 @@ import { SessionData } from '@app/shared/models';
  *     <app-session-chat-container
  *       [sessions]="sessions"
  *       [activeSessionId]="activeSessionId()"
- *       [isOpen]="isOpen()"
  *       [inputValue]="inputValue()"
  *       (newChat)="onNewChat()"
  *       (sessionSelect)="onSessionSelect($event)"
@@ -63,10 +62,10 @@ export class SessionChatContainerComponent {
 
   /**
    * Whether the input panel is open
-   * @required
+   * @deprecated Input is always visible now, this property is kept for backward compatibility
    */
-  @Input({ required: true })
-  isOpen!: Signal<boolean>;
+  @Input()
+  isOpen?: Signal<boolean>;
 
   /**
    * Current input value (two-way binding)

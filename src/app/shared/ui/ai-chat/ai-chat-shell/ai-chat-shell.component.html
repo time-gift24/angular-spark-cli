@@ -1,0 +1,44 @@
+<div class="app-shell flex min-h-screen bg-background relative">
+  <!-- Main Content Area (compressible when panel opens) -->
+  <main
+    class="main-content flex-1 transition-all duration-300 ease-out"
+    [style.flex-basis]="panelOpen() ? 'calc(100% - ' + panelWidth() + 'px)' : '100%'">
+    <router-outlet />
+  </main>
+
+  <!-- AI Chat Panel (compresses main content) -->
+  @if (panelOpen()) {
+    <ai-chat-panel
+      [activeSession]="activeSession"
+      [panelWidth]="panelWidth()"
+      (rename)="onRename($event)"
+      (delete)="onDelete($event)"
+      (close)="onClosePanel()"
+      (resizeCommit)="onResizeCommit($event)" />
+  }
+
+  <!-- Session Chat Container (fixed, always floating at bottom) -->
+  <!-- Width is 40% of main content area, positioned accordingly -->
+  <div
+    class="fixed bottom-6 z-40 flex justify-center"
+    [style.width.px]="sessionContainerWidthPx()"
+    [style.left.px]="sessionContainerLeftPx()"
+    [style.transform]="'translateX(-50%)'">
+    <app-session-chat-container
+      [sessions]="sessions"
+      [activeSessionId]="activeSessionId"
+      [inputValue]="currentInputValue"
+      (newChat)="onNewChat()"
+      (sessionSelect)="onSessionSelect($event)"
+      (sessionToggle)="onSessionToggle()"
+      (send)="onSend($event)"
+      (inputValueChange)="onInputChange($event)" />
+  </div>
+
+  <!-- Delete Confirmation Dialog -->
+  <ai-delete-confirm-dialog
+    [isOpen]="deleteDialogOpen()"
+    [sessionName]="sessionToDeleteName()"
+    (confirm)="onConfirmDelete()"
+    (cancel)="onCancelDelete()" />
+</div>

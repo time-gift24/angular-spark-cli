@@ -1,0 +1,20 @@
+<div
+  class="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:w-2 transition-all group/resize z-10"
+  (mousedown)="onMousedown($event)">
+  <!-- Visual indicator -->
+  <div
+    class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-1 h-8 bg-border/50 rounded-full
+           group-hover/resize:bg-accent/50 group-hover/resize:h-12 transition-all"></div>
+
+  <!-- Preview indicator (shown during drag) -->
+  @if (isDragging) {
+    <div
+      class="fixed top-0 bottom-0 w-px bg-accent z-50 pointer-events-none"
+      [style.left.px]="startX - (startWidth - (previewX() || 0))">
+      <div
+        class="absolute top-1/2 left-2 -translate-y-1/2 px-2 py-1 text-xs bg-accent text-accent-foreground rounded shadow">
+        {{ resizePreview | async }}px
+      </div>
+    </div>
+  }
+</div>

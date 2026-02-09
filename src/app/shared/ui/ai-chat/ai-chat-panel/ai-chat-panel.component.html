@@ -1,0 +1,57 @@
+<aside
+  class="h-full bg-card/95 backdrop-blur-sm border-l border-border/50 shadow-xl overflow-hidden flex flex-col shrink-0"
+  [style.width.px]="previewWidth || panelWidth"
+  [style.opacity]="previewWidth !== null ? '0.8' : '1'"
+  [style.transform]="previewWidth !== null ? 'scale(0.98)' : 'scale(1)'"
+  style="transform-origin: right center; transition: width 0.3s var(--ease-spring-smooth);">
+  <!-- Resize Handle -->
+  <ai-resize-handle
+    (resizePreview)="$event"
+    (resizeCommit)="resizeCommit.emit($event)" />
+
+  <!-- Panel Header -->
+  <ai-panel-header
+    [sessionName]="sessionName"
+    [hasNewMessages]="false"
+    (rename)="onRename($event)"
+    (delete)="onDelete()"
+    (close)="close.emit()" />
+
+  <!-- Messages Container -->
+  <div class="flex-1 overflow-y-auto" style="max-height: calc(100vh - 120px);">
+    <div class="p-4 space-y-4">
+      @for (message of messages(); track message.id) {
+        @if (message.role === 'user') {
+          <ai-message-bubble [message]="message" />
+        } @else {
+          <!-- AI messages use streaming-markdown -->
+          <div class="flex justify-start animate-[message-bubble-in_0.2s_var(--ease-spring-snappy)]">
+            <div class="max-w-[80%]">
+              <app-streaming-markdown
+                [stream$]="of(message.content)"
+                [maxHeight]="'none'"
+                [virtualScroll]="false" />
+            </div>
+          </div>
+        }
+      }
+
+      @if (streamingContent) {
+        <div class="flex justify-start">
+          <div class="max-w-[80%]">
+            <app-streaming-markdown
+              [stream$]="of(streamingContent)"
+              [maxHeight]="'none'"
+              [virtualScroll]="false" />
+          </div>
+        </div>
+      }
+
+      @if (messages().length === 0 && !streamingContent) {
+        <div class="empty-state flex items-center justify-center h-64 text-muted-foreground">
+          <p class="text-sm">开始一个新的对话...</p>
+        </div>
+      }
+    </div>
+  </div>
+</aside>

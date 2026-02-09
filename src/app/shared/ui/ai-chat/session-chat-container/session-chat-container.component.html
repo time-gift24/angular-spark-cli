@@ -12,16 +12,14 @@
     />
   </div>
 
-  <!-- Chat Input - conditional rendering based on isOpen -->
-  @if (isOpen()) {
-    <div [class]="getInputWrapperClass()">
-      <ai-chat-input
-        [value]="inputValue()"
-        (valueChange)="onInputChange($event)"
-        [placeholder]="placeholder"
-        [disabled]="disabled"
-        (send)="onSend($event)"
-      />
-    </div>
-  }
+  <!-- Chat Input - always visible -->
+  <div [class]="getInputWrapperClass()">
+    <ai-chat-input
+      [value]="inputValue()"
+      (valueChange)="onInputChange($event)"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      (send)="onSend($event)"
+    />
+  </div>
 </div>

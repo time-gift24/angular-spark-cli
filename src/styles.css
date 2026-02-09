@@ -471,3 +471,54 @@
     transform: scaleY(1);
   }
 }
+
+/* === AI Chat Panel Animations === */
+
+/* Panel slide in from right */
+@keyframes panel-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Panel slide out to right */
+@keyframes panel-slide-out {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%) scale(0.98);
+  }
+}
+
+/* Message bubble entrance */
+@keyframes message-bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Apply animations */
+.ai-chat-panel-enter {
+  animation: panel-slide-in 0.3s var(--ease-spring-smooth) forwards;
+}
+
+.ai-chat-panel-exit {
+  animation: panel-slide-out 0.2s var(--ease-spring-smooth) forwards;
+}
+
+.message-bubble-enter {
+  animation: message-bubble-in 0.2s var(--ease-spring-snappy) forwards;
+}

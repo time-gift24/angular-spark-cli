@@ -1,0 +1,53 @@
+<div
+  liquidGlass
+  lgTheme="mineral-dark"
+  [lgBlurAmount]="0.12"
+  class="flex items-center justify-between px-4 py-3 border-b border-border/50">
+  <div class="flex items-center gap-2 flex-1 min-w-0">
+    @if (isEditingName()) {
+      <input
+        type="text"
+        [value]="editValue()"
+        (input)="editValue.set($any($event.target).value)"
+        (keydown)="onKeydown($event)"
+        (blur)="onNameEditComplete(editValue())"
+        class="flex-1 px-2 py-1 text-sm bg-background border border-input rounded focus:outline-none focus:ring-2 focus:ring-ring"
+        autofocus
+      />
+    } @else {
+      <div class="flex items-center gap-2">
+        @if (isNewMessageIndicatorVisible()) {
+          <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+        }
+        <button
+          (click)="startEditing()"
+          class="session-name text-sm font-medium text-foreground hover:text-accent transition-colors cursor-pointer truncate">
+          {{ sessionName() }}
+        </button>
+      </div>
+    }
+  </div>
+
+  <div class="flex items-center gap-1">
+    @if (!isEditingName()) {
+      <button
+        (click)="delete.emit()"
+        class="p-1.5 rounded hover:bg-destructive/10 hover:text-destructive transition-colors"
+        title="删除会话">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+      </button>
+      <button
+        (click)="close.emit()"
+        class="p-1.5 rounded hover:bg-muted transition-colors"
+        title="关闭面板">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    }
+  </div>
+</div>

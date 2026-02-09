@@ -146,6 +146,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./demo/llm-chat/llm-chat.component').then((m) => m.LlmChatComponent),
       },
+      {
+        path: 'ai-chat-panel',
+        loadComponent: () =>
+          import('./demo/ai-chat-panel/demo-ai-chat-panel.component').then(
+            (m) => m.DemoAiChatPanelComponent
+          ),
+      },
     ],
   },
 ];
