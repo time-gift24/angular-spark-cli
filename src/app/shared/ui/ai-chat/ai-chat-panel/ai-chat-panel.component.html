@@ -20,14 +20,14 @@
 
   <!-- Messages Container -->
   <div class="ai-messages flex-1 overflow-y-auto" style="max-height: calc(100vh - 120px);">
-    <div class="p-4 space-y-4">
+    <div class="p-3 space-y-3">
       @for (message of messages(); track message.id) {
         @if (message.role === 'user') {
           <ai-message-bubble [message]="message" />
         } @else {
           <!-- AI messages use solid color background -->
           <div class="flex justify-start animate-[message-bubble-in_0.2s_var(--ease-spring-snappy)]">
-            <div class="max-w-[80%] rounded-lg rounded-tl-sm bg-muted/50 border border-border/50 px-4 py-2">
+            <div class="max-w-[85%] rounded-lg rounded-tl-sm bg-muted/50 border border-border/50 px-3 py-1.5">
               <app-streaming-markdown
                 [stream$]="of(message.content)"
                 [maxHeight]="'none'"
@@ -39,7 +39,7 @@
 
       @if (streamingContent) {
         <div class="flex justify-start">
-          <div class="max-w-[80%] rounded-lg rounded-tl-sm bg-muted/50 border border-border/50 px-4 py-2">
+          <div class="max-w-[85%] rounded-lg rounded-tl-sm bg-muted/50 border border-border/50 px-3 py-1.5">
             <app-streaming-markdown
               [stream$]="of(streamingContent)"
               [maxHeight]="'none'"
