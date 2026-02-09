@@ -1,5 +1,5 @@
 <div
-  class="flex items-center justify-between px-4 py-3 border-b border-border/50 ai-panel-header">
+  class="flex items-center justify-between px-3 py-2 border-b border-border/50 ai-panel-header">
   <div class="flex items-center gap-2 flex-1 min-w-0">
     @if (isEditingName()) {
       <input
@@ -29,18 +29,18 @@
     @if (!isEditingName()) {
       <button
         (click)="delete.emit()"
-        class="p-2 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
+        class="p-1.5 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
         title="删除会话">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
           <polyline points="3 6 5 6 21 6"></polyline>
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
         </svg>
       </button>
       <button
         (click)="close.emit()"
-        class="p-2 rounded-full hover:bg-muted transition-colors"
+        class="p-1.5 rounded-full hover:bg-muted transition-colors"
         title="关闭面板">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
