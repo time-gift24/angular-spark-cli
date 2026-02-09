@@ -20,7 +20,7 @@ const DEFAULT_SIZE: PanelSize = { width: 600, height: 400 };
 /**
  * Default name for new sessions.
  */
-const DEFAULT_SESSION_NAME = 'New Chat';
+const DEFAULT_SESSION_NAME = '请输入';
 
 /**
  * Central state management service for AI chat panel sessions.
