@@ -2,12 +2,11 @@ import { Component, Input, ViewChild, ElementRef, AfterViewChecked, output, inje
 import { ChatMessage } from '@app/shared/models';
 import { MessageBubbleComponent } from '../message-bubble';
 import { CommonModule } from '@angular/common';
-import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
 
 @Component({
   selector: 'ai-message-list',
   standalone: true,
-  imports: [CommonModule, MessageBubbleComponent, LiquidGlassDirective],
+  imports: [CommonModule, MessageBubbleComponent],
   templateUrl: './message-list.component.html',
 })
 export class MessageListComponent implements AfterViewChecked {

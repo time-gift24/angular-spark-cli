@@ -5,7 +5,6 @@ import { PanelHeaderComponent } from '../panel-header';
 import { MessageBubbleComponent } from '../message-bubble';
 import { ResizeHandleComponent } from '../resize-handle';
 import { StreamingMarkdownComponent } from '@app/shared/components/streaming-markdown';
-import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
 import { of } from 'rxjs';
 
 @Component({
@@ -17,7 +16,6 @@ import { of } from 'rxjs';
     MessageBubbleComponent,
     ResizeHandleComponent,
     StreamingMarkdownComponent,
-    LiquidGlassDirective,
   ],
   templateUrl: './ai-chat-panel.component.html',
 })

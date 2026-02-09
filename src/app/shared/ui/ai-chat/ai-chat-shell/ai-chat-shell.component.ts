@@ -197,4 +197,8 @@ export class AiChatShellComponent implements AfterViewInit {
   private clampPanelWidth(width: number): number {
     return Math.max(PANEL_MIN_WIDTH, Math.min(PANEL_MAX_WIDTH, width));
   }
+
+  onSessionColorChange(event: { sessionId: string; color: string }): void {
+    this.sessionState.updateSessionColor(event.sessionId, event.color);
+  }
 }

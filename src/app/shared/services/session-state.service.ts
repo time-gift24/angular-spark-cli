@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, Signal, effect, inject } from '@angular/core';
-import { SessionData, ChatMessage, PanelPosition, PanelSize, SessionStatus } from '../models';
+import { SessionData, ChatMessage, PanelPosition, PanelSize, SessionStatus, SessionColor } from '../models';
 import { IdGenerator } from '../utils';
 import { SessionStorageService } from './session-storage.service';
 
@@ -599,6 +599,47 @@ export class SessionStateService {
     updatedSessions.set(sessionId, {
       ...session,
       name: newName,
+      lastUpdated: Date.now(),
+    });
+
+    // Update the sessions signal with the new Map
+    (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(
+      updatedSessions,
+    );
+  }
+
+  /**
+   * Updates the color of a session.
+   *
+   * Changes the visual color identifier for a session while preserving
+   * all other session data.
+   *
+   * @param sessionId - The ID of the session to update
+   * @param color - The new color value
+   *
+   * @example
+   * ```typescript
+   * // Update session color
+   * this.sessionState.updateSessionColor('sess-123', 'blue');
+   * ```
+   */
+  updateSessionColor(sessionId: string, color: string): void {
+    const sessionMap = this.sessions();
+    const session = sessionMap.get(sessionId);
+
+    if (!session) {
+      return;
+    }
+
+    // Validate color is a valid SessionColor
+    const validColors: SessionColor[] = ['default', 'blue', 'purple', 'pink', 'orange', 'yellow'];
+    const validatedColor = validColors.includes(color as SessionColor) ? (color as SessionColor) : 'default';
+
+    // Create an updated sessions map with the new color
+    const updatedSessions = new Map(sessionMap);
+    updatedSessions.set(sessionId, {
+      ...session,
+      color: validatedColor,
       lastUpdated: Date.now(),
     });
 
