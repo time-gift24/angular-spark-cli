@@ -6,7 +6,8 @@ import {
   inject,
   DestroyRef,
   afterNextRender,
-  input,
+  signal,
+  Input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -17,6 +18,9 @@ import { CommonModule } from '@angular/common';
   templateUrl: './resize-handle.component.html',
 })
 export class ResizeHandleComponent {
+  @Input() minWidth = 300;
+  @Input() maxWidth = 800;
+
   @Output() resizePreview = new EventEmitter<number>();
   @Output() resizeCommit = new EventEmitter<number>();
 
@@ -27,7 +31,8 @@ export class ResizeHandleComponent {
   startX = 0;
   startWidth = 0;
 
-  previewX = input(0);
+  readonly previewWidth = signal<number | null>(null);
+  readonly dragX = signal<number | null>(null);
 
   constructor() {
     afterNextRender(() => {
@@ -57,6 +62,8 @@ export class ResizeHandleComponent {
     this.isDragging = true;
     this.startX = event.clientX;
     this.startWidth = this.getWidth();
+    this.previewWidth.set(this.startWidth);
+    this.dragX.set(event.clientX);
 
     window.addEventListener('mousemove', this.windowMouseMove);
     window.addEventListener('mouseup', this.windowMouseUp);
@@ -66,9 +73,11 @@ export class ResizeHandleComponent {
     if (!this.isDragging) return;
 
     const deltaX = this.startX - event.clientX;
-    const newWidth = this.startWidth + deltaX;
+    const newWidth = this.clampWidth(this.startWidth + deltaX);
 
-    // Emit preview (can show outside range temporarily)
+    // Emit preview (clamped to valid range)
+    this.previewWidth.set(newWidth);
+    this.dragX.set(event.clientX);
     this.resizePreview.emit(newWidth);
   }
 
@@ -76,9 +85,11 @@ export class ResizeHandleComponent {
     if (!this.isDragging) return;
 
     const deltaX = this.startX - event.clientX;
-    const newWidth = this.startWidth + deltaX;
+    const newWidth = this.clampWidth(this.startWidth + deltaX);
 
     this.isDragging = false;
+    this.previewWidth.set(null);
+    this.dragX.set(null);
     window.removeEventListener('mousemove', this.windowMouseMove);
     window.removeEventListener('mouseup', this.windowMouseUp);
 
@@ -87,6 +98,10 @@ export class ResizeHandleComponent {
 
   private getWidth(): number {
     return this.el.nativeElement.parentElement?.offsetWidth || 500;
+  }
+
+  private clampWidth(width: number): number {
+    return Math.max(this.minWidth, Math.min(this.maxWidth, width));
   }
 
   protected onMousedown(event: MouseEvent): void {

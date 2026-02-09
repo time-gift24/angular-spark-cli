@@ -14,12 +14,7 @@
 
       @if (streamingContent) {
         <div class="flex justify-start">
-          <div
-            liquidGlass
-            lgTheme="mineral-dark"
-            [lgBlurAmount]="0.08"
-            [lgDisableAnimation]="true"
-            class="max-w-[80%] px-4 py-2 rounded-lg rounded-tl-sm bg-card/80 backdrop-blur-sm">
+          <div class="max-w-[80%] px-4 py-2 rounded-lg rounded-tl-sm bg-muted/50 border border-border/50">
             <p class="text-sm text-card-foreground whitespace-pre-wrap break-words">{{ streamingContent }}</p>
             <span class="inline-block w-2 h-4 bg-foreground/50 animate-pulse ml-1"></span>
           </div>

@@ -474,27 +474,27 @@
 
 /* === AI Chat Panel Animations === */
 
-/* Panel slide in from right */
+/* Panel slide in from right - width + opacity only, no scale */
 @keyframes panel-slide-in {
   from {
     opacity: 0;
-    transform: translateX(100%) scale(0.98);
+    width: 0;
   }
   to {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    /* width controlled by inline style */
   }
 }
 
-/* Panel slide out to right */
+/* Panel slide out to right - width + opacity only, no scale */
 @keyframes panel-slide-out {
   from {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    /* width controlled by inline style */
   }
   to {
     opacity: 0;
-    transform: translateX(100%) scale(0.98);
+    width: 0;
   }
 }
 
@@ -521,4 +521,115 @@
 
 .message-bubble-enter {
   animation: message-bubble-in 0.2s var(--ease-spring-snappy) forwards;
+}
+
+/* === AI Chat Panel Scrollbar === */
+
+/* Thin scrollbar for panel messages area */
+.ai-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ai-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ai-messages::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.ai-messages::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Firefox scrollbar support */
+.ai-messages {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* === AI Chat Panel Header === */
+
+/* Panel header - darker solid background than message area */
+.ai-panel-header {
+  background: oklch(from var(--card) calc(l - 0.03) c h);
+}
+
+/* Dark mode panel header */
+.dark .ai-panel-header {
+  background: oklch(from var(--card) calc(l - 0.02) c h);
+}
+
+/* === AI Chat Panel Edge Glow === */
+
+/* Subtle left edge glow using primary color */
+.ai-chat-panel-glow {
+  box-shadow:
+    /* Ambient shadow for depth */
+    0 1px 2px oklch(0 0 0 / 8%),
+    0 4px 8px oklch(0 0 0 / 6%),
+    0 12px 24px oklch(0 0 0 / 4%),
+    /* Left edge glow - subtle primary color tint */
+    -2px 0 3px -1px oklch(from var(--primary) l c h / 0.12);
+}
+
+/* Dark mode: brighter glow for visibility against dark background */
+.dark .ai-chat-panel-glow {
+  box-shadow:
+    /* Darker ambient shadows */
+    0 1px 2px oklch(0 0 0 / 20%),
+    0 4px 8px oklch(0 0 0 / 14%),
+    0 12px 24px oklch(0 0 0 / 8%),
+    /* Brighter left edge glow for dark mode */
+    -2px 0 3px -1px oklch(from var(--primary) l c h / 0.25);
+}
+
+/* === AI Chat Panel Glossy Glassmorphism === */
+
+/* Enhanced glassmorphism: multi-layer gradient, stronger blur, inner glow */
+.ai-chat-panel-glossy {
+  background:
+    /* Inner top highlight */
+    linear-gradient(to bottom, oklch(from var(--card) l c h / 0.6) 0%, transparent 30%),
+    /* Inner bottom shadow for depth */
+    linear-gradient(to top, oklch(0 0 0 / 0.03) 0%, transparent 50%),
+    /* Base transparent card color */
+    oklch(from var(--card) l c h / 0.85);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  box-shadow:
+    /* Inner glow for depth */
+    inset 0 1px 0 oklch(from var(--foreground) l c h / 0.05),
+    inset 0 -1px 0 oklch(0 0 0 / 0.02),
+    /* Ambient shadow layers */
+    0 1px 2px oklch(0 0 0 / 8%),
+    0 4px 8px oklch(0 0 0 / 6%),
+    0 12px 24px oklch(0 0 0 / 4%),
+    /* Left edge glow - subtle primary color tint */
+    -2px 0 3px -1px oklch(from var(--primary) l c h / 0.12);
+}
+
+/* Dark mode: enhanced glass with different opacity values */
+.dark .ai-chat-panel-glossy {
+  background:
+    /* Inner top highlight (brighter in dark mode) */
+    linear-gradient(to bottom, oklch(from var(--card) l c h / 0.7) 0%, transparent 30%),
+    /* Inner bottom shadow for depth */
+    linear-gradient(to top, oklch(0 0 0 / 0.08) 0%, transparent 50%),
+    /* Base transparent card color (more transparent in dark mode) */
+    oklch(from var(--card) l c h / 0.75);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  box-shadow:
+    /* Inner glow for depth */
+    inset 0 1px 0 oklch(from var(--foreground) l c h / 0.08),
+    inset 0 -1px 0 oklch(0 0 0 / 0.06),
+    /* Darker ambient shadows */
+    0 1px 2px oklch(0 0 0 / 20%),
+    0 4px 8px oklch(0 0 0 / 14%),
+    0 12px 24px oklch(0 0 0 / 8%),
+    /* Brighter left edge glow for dark mode */
+    -2px 0 3px -1px oklch(from var(--primary) l c h / 0.25);
 }

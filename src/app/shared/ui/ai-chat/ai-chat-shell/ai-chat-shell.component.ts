@@ -1,4 +1,14 @@
-import { Component, computed, inject, signal, Signal, computed as computedFn } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  signal,
+  computed as computedFn,
+  ElementRef,
+  ViewChild,
+  AfterViewInit,
+  DestroyRef,
+} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AiChatStateService } from '../services';
@@ -6,6 +16,9 @@ import { SessionStateService } from '@app/shared/services';
 import { AiChatPanelComponent } from '../ai-chat-panel';
 import { SessionChatContainerComponent } from '../session-chat-container';
 import { DeleteConfirmDialogComponent } from '../delete-confirm-dialog';
+
+const PANEL_MIN_WIDTH = 300;
+const PANEL_MAX_WIDTH = 800;
 
 @Component({
   selector: 'ai-chat-shell',
@@ -19,47 +32,65 @@ import { DeleteConfirmDialogComponent } from '../delete-confirm-dialog';
   ],
   templateUrl: './ai-chat-shell.component.html',
 })
-export class AiChatShellComponent {
+export class AiChatShellComponent implements AfterViewInit {
   private chatState = inject(AiChatStateService);
   private sessionState = inject(SessionStateService);
+  private destroyRef = inject(DestroyRef);
 
-  // Track window width for responsive calculations
-  readonly windowWidth = signal(typeof window !== 'undefined' ? window.innerWidth : 1920);
+  @ViewChild('mainContent', { static: true })
+  private mainContentRef!: ElementRef<HTMLElement>;
+
+  private resizeObserver: ResizeObserver | null = null;
+
+  // Track main content bounds for positioning calculations
+  readonly mainContentRect = signal<{ left: number; width: number }>({
+    left: 0,
+    width: typeof window !== 'undefined' ? window.innerWidth : 1920,
+  });
 
   // Wrap ComputedSignal as Signal for compatibility
   readonly panelOpen = computedFn(() => this.chatState.panelOpen());
   readonly panelWidth = computedFn(() => this.chatState.panelWidth());
+  readonly panelPreviewWidth = signal<number | null>(null);
+
+  // Effective panel width (preview takes precedence)
+  readonly effectivePanelWidth = computed(() => {
+    const width = this.panelPreviewWidth() ?? this.panelWidth();
+    return this.clampPanelWidth(width);
+  });
 
   // Calculate session container position in pixels (center of main content area)
   readonly sessionContainerLeftPx = computed(() => {
-    const viewportWidth = this.windowWidth();
-    if (!this.panelOpen()) {
-      return viewportWidth / 2; // Center of viewport
-    }
-    const panelW = this.panelWidth();
-    // Main content is from 0 to (viewportWidth - panelWidth)
-    // Center of main content = (viewportWidth - panelWidth) / 2
-    return (viewportWidth - panelW) / 2;
+    const rect = this.mainContentRect();
+    const width = rect.width || (typeof window !== 'undefined' ? window.innerWidth : 1920);
+    const left = rect.width ? rect.left : 0;
+    return left + width / 2;
   });
 
   // Calculate session container width in pixels (40% of main content area)
   readonly sessionContainerWidthPx = computed(() => {
-    const viewportWidth = this.windowWidth();
-    if (!this.panelOpen()) {
-      return viewportWidth * 0.4; // 40% of viewport
-    }
-    const panelW = this.panelWidth();
-    const mainContentWidth = viewportWidth - panelW;
-    return mainContentWidth * 0.4;
+    const rect = this.mainContentRect();
+    const width = rect.width || (typeof window !== 'undefined' ? window.innerWidth : 1920);
+    return width * 0.4;
   });
 
-  constructor() {
-    // Update window width on resize
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', () => {
-        this.windowWidth.set(window.innerWidth);
-      });
+  ngAfterViewInit(): void {
+    if (typeof window === 'undefined') return;
+
+    const updateBounds = () => this.updateMainBounds();
+    updateBounds();
+
+    window.addEventListener('resize', updateBounds);
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => updateBounds());
+      this.resizeObserver.observe(this.mainContentRef.nativeElement);
     }
+
+    this.destroyRef.onDestroy(() => {
+      window.removeEventListener('resize', updateBounds);
+      this.resizeObserver?.disconnect();
+      this.resizeObserver = null;
+    });
   }
 
   // Connect SessionState to AiChatState
@@ -90,6 +121,7 @@ export class AiChatShellComponent {
   }
 
   onSessionToggle(): void {
+    this.panelPreviewWidth.set(null);
     this.chatState.togglePanel();
   }
 
@@ -140,10 +172,29 @@ export class AiChatShellComponent {
   }
 
   onClosePanel(): void {
+    this.panelPreviewWidth.set(null);
     this.chatState.closePanel();
   }
 
+  onResizePreview(width: number): void {
+    if (!Number.isFinite(width)) return;
+    this.panelPreviewWidth.set(this.clampPanelWidth(width));
+  }
+
   onResizeCommit(width: number): void {
+    if (!Number.isFinite(width)) return;
+    this.panelPreviewWidth.set(null);
     this.chatState.setPanelWidth(width);
+  }
+
+  private updateMainBounds(): void {
+    const el = this.mainContentRef?.nativeElement;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    this.mainContentRect.set({ left: rect.left, width: rect.width });
+  }
+
+  private clampPanelWidth(width: number): number {
+    return Math.max(PANEL_MIN_WIDTH, Math.min(PANEL_MAX_WIDTH, width));
   }
 }

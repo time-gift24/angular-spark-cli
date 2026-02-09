@@ -1,13 +1,14 @@
 <aside
-  class="h-full bg-card/95 backdrop-blur-sm border-l border-border/50 shadow-xl overflow-hidden flex flex-col shrink-0"
+  class="relative h-full overflow-hidden flex flex-col shrink-0 ai-chat-panel-enter bg-gradient-to-b from-card to-card via-muted/20 shadow-[-4px_0_16px_rgba(0,0,0,0.1)]"
   [style.width.px]="previewWidth || panelWidth"
   [style.opacity]="previewWidth !== null ? '0.8' : '1'"
-  [style.transform]="previewWidth !== null ? 'scale(0.98)' : 'scale(1)'"
   style="transform-origin: right center; transition: width 0.3s var(--ease-spring-smooth);">
   <!-- Resize Handle -->
   <ai-resize-handle
-    (resizePreview)="$event"
-    (resizeCommit)="resizeCommit.emit($event)" />
+    [minWidth]="300"
+    [maxWidth]="800"
+    (resizePreview)="onResizePreview($event)"
+    (resizeCommit)="onResizeCommit($event)" />
 
   <!-- Panel Header -->
   <ai-panel-header
@@ -18,15 +19,15 @@
     (close)="close.emit()" />
 
   <!-- Messages Container -->
-  <div class="flex-1 overflow-y-auto" style="max-height: calc(100vh - 120px);">
+  <div class="ai-messages flex-1 overflow-y-auto" style="max-height: calc(100vh - 120px);">
     <div class="p-4 space-y-4">
       @for (message of messages(); track message.id) {
         @if (message.role === 'user') {
           <ai-message-bubble [message]="message" />
         } @else {
-          <!-- AI messages use streaming-markdown -->
+          <!-- AI messages use solid color background -->
           <div class="flex justify-start animate-[message-bubble-in_0.2s_var(--ease-spring-snappy)]">
-            <div class="max-w-[80%]">
+            <div class="max-w-[80%] rounded-lg rounded-tl-sm bg-muted/50 border border-border/50 px-4 py-2">
               <app-streaming-markdown
                 [stream$]="of(message.content)"
                 [maxHeight]="'none'"
@@ -38,7 +39,7 @@
 
       @if (streamingContent) {
         <div class="flex justify-start">
-          <div class="max-w-[80%]">
+          <div class="max-w-[80%] rounded-lg rounded-tl-sm bg-muted/50 border border-border/50 px-4 py-2">
             <app-streaming-markdown
               [stream$]="of(streamingContent)"
               [maxHeight]="'none'"

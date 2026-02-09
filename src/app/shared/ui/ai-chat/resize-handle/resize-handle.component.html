@@ -10,10 +10,10 @@
   @if (isDragging) {
     <div
       class="fixed top-0 bottom-0 w-px bg-accent z-50 pointer-events-none"
-      [style.left.px]="startX - (startWidth - (previewX() || 0))">
+      [style.left.px]="dragX() ?? startX">
       <div
         class="absolute top-1/2 left-2 -translate-y-1/2 px-2 py-1 text-xs bg-accent text-accent-foreground rounded shadow">
-        {{ resizePreview | async }}px
+        {{ (previewWidth() ?? startWidth) | number:'1.0-0' }}px
       </div>
     </div>
   }

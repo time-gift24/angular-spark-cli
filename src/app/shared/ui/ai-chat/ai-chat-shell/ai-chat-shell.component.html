@@ -1,8 +1,9 @@
 <div class="app-shell flex min-h-screen bg-background relative">
   <!-- Main Content Area (compressible when panel opens) -->
   <main
+    #mainContent
     class="main-content flex-1 transition-all duration-300 ease-out"
-    [style.flex-basis]="panelOpen() ? 'calc(100% - ' + panelWidth() + 'px)' : '100%'">
+    [style.flex-basis]="panelOpen() ? 'calc(100% - ' + effectivePanelWidth() + 'px)' : '100%'">
     <router-outlet />
   </main>
 
@@ -11,9 +12,11 @@
     <ai-chat-panel
       [activeSession]="activeSession"
       [panelWidth]="panelWidth()"
+      [previewWidth]="panelPreviewWidth()"
       (rename)="onRename($event)"
       (delete)="onDelete($event)"
       (close)="onClosePanel()"
+      (resizePreview)="onResizePreview($event)"
       (resizeCommit)="onResizeCommit($event)" />
   }
 

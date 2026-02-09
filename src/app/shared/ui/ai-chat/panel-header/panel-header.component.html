@@ -1,8 +1,5 @@
 <div
-  liquidGlass
-  lgTheme="mineral-dark"
-  [lgBlurAmount]="0.12"
-  class="flex items-center justify-between px-4 py-3 border-b border-border/50">
+  class="flex items-center justify-between px-4 py-3 border-b border-border/50 ai-panel-header">
   <div class="flex items-center gap-2 flex-1 min-w-0">
     @if (isEditingName()) {
       <input
@@ -32,7 +29,7 @@
     @if (!isEditingName()) {
       <button
         (click)="delete.emit()"
-        class="p-1.5 rounded hover:bg-destructive/10 hover:text-destructive transition-colors"
+        class="p-2 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
         title="删除会话">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
           <polyline points="3 6 5 6 21 6"></polyline>
@@ -41,7 +38,7 @@
       </button>
       <button
         (click)="close.emit()"
-        class="p-1.5 rounded hover:bg-muted transition-colors"
+        class="p-2 rounded-full hover:bg-muted transition-colors"
         title="关闭面板">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
           <line x1="18" y1="6" x2="6" y2="18"></line>

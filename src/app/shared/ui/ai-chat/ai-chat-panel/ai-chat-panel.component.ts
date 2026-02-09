@@ -1,10 +1,11 @@
 import { Component, Input, Signal, computed, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SessionData, ChatMessage } from '@app/shared/models';
+import { SessionData } from '@app/shared/models';
 import { PanelHeaderComponent } from '../panel-header';
 import { MessageBubbleComponent } from '../message-bubble';
 import { ResizeHandleComponent } from '../resize-handle';
 import { StreamingMarkdownComponent } from '@app/shared/components/streaming-markdown';
+import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
 import { of } from 'rxjs';
 
 @Component({
@@ -16,6 +17,7 @@ import { of } from 'rxjs';
     MessageBubbleComponent,
     ResizeHandleComponent,
     StreamingMarkdownComponent,
+    LiquidGlassDirective,
   ],
   templateUrl: './ai-chat-panel.component.html',
 })
@@ -28,6 +30,7 @@ export class AiChatPanelComponent {
   @Output() rename = new EventEmitter<{ sessionId: string; name: string }>();
   @Output() delete = new EventEmitter<string>();
   @Output() close = new EventEmitter<void>();
+  @Output() resizePreview = new EventEmitter<number>();
   @Output() resizeCommit = new EventEmitter<number>();
 
   protected readonly sessionName = computed(() => this.activeSession()?.name ?? '');
@@ -47,5 +50,13 @@ export class AiChatPanelComponent {
     if (id) {
       this.delete.emit(id);
     }
+  }
+
+  onResizePreview(width: number): void {
+    this.resizePreview.emit(width);
+  }
+
+  onResizeCommit(width: number): void {
+    this.resizeCommit.emit(width);
   }
 }

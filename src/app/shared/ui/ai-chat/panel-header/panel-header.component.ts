@@ -1,11 +1,10 @@
 import { Component, Input, Output, EventEmitter, signal, computed, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
 
 @Component({
   selector: 'ai-panel-header',
   standalone: true,
-  imports: [CommonModule, LiquidGlassDirective],
+  imports: [CommonModule],
   templateUrl: './panel-header.component.html',
 })
 export class PanelHeaderComponent {
