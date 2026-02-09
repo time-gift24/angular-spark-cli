@@ -9,14 +9,8 @@
 
   @case ('assistant') {
     <div class="flex justify-start animate-[message-bubble-in_0.2s_var(--ease-spring-snappy)]">
-      <div
-        liquidGlass
-        lgTheme="mineral-dark"
-        [lgBlurAmount]="0.08"
-        [lgSaturation]="100"
-        [lgDisableAnimation]="true"
-        class="max-w-[85%] px-3 py-1.5 rounded-lg rounded-tl-sm bg-card/80 backdrop-blur-sm">
-        <p class="text-sm text-card-foreground whitespace-pre-wrap break-words">{{ message.content }}</p>
+      <div class="w-full rounded-lg rounded-tl-sm bg-muted/50 border border-border/50 px-3 py-1.5">
+        <static-markdown [content]="message.content" />
       </div>
     </div>
   }

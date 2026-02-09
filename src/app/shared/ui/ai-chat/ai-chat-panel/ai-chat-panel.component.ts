@@ -5,7 +5,7 @@ import { PanelHeaderComponent } from '../panel-header';
 import { MessageBubbleComponent } from '../message-bubble';
 import { ResizeHandleComponent } from '../resize-handle';
 import { StreamingMarkdownComponent } from '@app/shared/components/streaming-markdown';
-import { of } from 'rxjs';
+import { of, Observable } from 'rxjs';
 
 @Component({
   selector: 'ai-chat-panel',
@@ -21,7 +21,7 @@ import { of } from 'rxjs';
 })
 export class AiChatPanelComponent {
   @Input({ required: true }) activeSession!: Signal<SessionData | null | undefined>;
-  @Input() streamingContent = '';
+  @Input() streamingContent: Observable<string> | string | null = null;
   @Input() previewWidth: number | null = null;
   @Input() panelWidth = 500;
 
@@ -35,6 +35,18 @@ export class AiChatPanelComponent {
   protected readonly messages = computed(() => this.activeSession()?.messages ?? []);
   protected readonly sessionId = computed(() => this.activeSession()?.id ?? '');
   protected readonly of = of;
+
+  /** Get the streaming observable for the streaming-content section */
+  protected getStreamingStream(): Observable<string> | undefined {
+    const content = this.streamingContent;
+    if (content instanceof Observable) {
+      return content;
+    }
+    if (typeof content === 'string') {
+      return of(content);
+    }
+    return undefined;
+  }
 
   onRename(newName: string): void {
     const id = this.sessionId();

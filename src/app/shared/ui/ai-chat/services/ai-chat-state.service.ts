@@ -60,7 +60,12 @@ export class AiChatStateService {
   }
 
   openPanel(): void {
-    this.state.update((s) => ({ ...s, panelOpen: true }));
+    console.log('[AiChatState] openPanel called, current panelOpen:', this.state().panelOpen);
+    this.state.update((s) => {
+      const newState = { ...s, panelOpen: true };
+      console.log('[AiChatState] New state panelOpen:', newState.panelOpen);
+      return newState;
+    });
   }
 
   closePanel(): void {

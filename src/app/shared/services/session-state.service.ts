@@ -1,4 +1,5 @@
 import { Injectable, signal, computed, Signal, effect, inject } from '@angular/core';
+import { Observable } from 'rxjs';
 import { SessionData, ChatMessage, PanelPosition, PanelSize, SessionStatus, SessionColor } from '../models';
 import { IdGenerator } from '../utils';
 import { SessionStorageService } from './session-storage.service';
@@ -20,7 +21,7 @@ const DEFAULT_SIZE: PanelSize = { width: 600, height: 400 };
 /**
  * Default name for new sessions.
  */
-const DEFAULT_SESSION_NAME = '请输入';
+const DEFAULT_SESSION_NAME = '未命名';
 
 /**
  * Central state management service for AI chat panel sessions.
@@ -166,6 +167,18 @@ export class SessionStateService {
     const inputValue = this.activeInputValue();
     return inputValue.trim().length > 0;
   });
+
+  /**
+   * Streaming AI response state for the active session.
+   *
+   * Holds an RxJS Observable that streams AI response content character by character.
+   * When null, no streaming is in progress.
+   *
+   * This state is session-aware and automatically clears when switching sessions.
+   *
+   * @readonly
+   */
+  readonly streamingResponse: Signal<Observable<string> | null> = signal<Observable<string> | null>(null);
 
   /**
    * Debounce timer for storage sync operations.
@@ -647,5 +660,30 @@ export class SessionStateService {
     (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(
       updatedSessions,
     );
+  }
+
+  /**
+   * Sets the streaming response observable for the active session.
+   *
+   * This is used to display real-time streaming AI responses in the chat panel.
+   * When the stream completes, the caller should add the complete message
+   * to the session using addMessage() and clear the stream by calling setStreamingResponse(null).
+   *
+   * @param stream$ - The RxJS Observable that streams response content, or null to clear
+   *
+   * @example
+   * ```typescript
+   * // Start streaming
+   * const stream$ = new Observable<string>(subscriber => {
+   *   // Stream content...
+   * });
+   * this.sessionState.setStreamingResponse(stream$);
+   *
+   * // Clear stream when complete
+   * this.sessionState.setStreamingResponse(null);
+   * ```
+   */
+  setStreamingResponse(stream$: Observable<string> | null): void {
+    (this.streamingResponse as unknown as ReturnType<typeof signal<Observable<string> | null>>).set(stream$);
   }
 }

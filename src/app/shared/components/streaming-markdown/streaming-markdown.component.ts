@@ -287,6 +287,11 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
    * reducing parse + change detection frequency.
    */
   private subscribeToStream(): void {
+    // Guard against null/undefined stream$
+    if (!this.stream$) {
+      return;
+    }
+
     // Reset parser cache for new stream
     this.parser.reset();
 

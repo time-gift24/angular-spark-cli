@@ -13,6 +13,7 @@
       [activeSession]="activeSession"
       [panelWidth]="panelWidth()"
       [previewWidth]="panelPreviewWidth()"
+      [streamingContent]="streamingResponse()"
       (rename)="onRename($event)"
       (delete)="onDelete($event)"
       (close)="onClosePanel()"
@@ -37,7 +38,9 @@
       (sessionToggle)="onSessionToggle()"
       (send)="onSend($event)"
       (inputValueChange)="onInputChange($event)"
-      (sessionColorChange)="onSessionColorChange($event)" />
+      (sessionColorChange)="onSessionColorChange($event)"
+      (sessionRename)="onSessionRenameFromTabs($event)"
+      (sessionClose)="onDelete($event)" />
   </div>
 
   <!-- Delete Confirmation Dialog -->

@@ -158,6 +158,20 @@ export class SessionChatContainerComponent {
   readonly sessionColorChange = new EventEmitter<{ sessionId: string; color: string }>();
 
   /**
+   * Event emitted when user renames a session
+   * Emits sessionId and newName
+   */
+  @Output()
+  readonly sessionRename = new EventEmitter<{ sessionId: string; newName: string }>();
+
+  /**
+   * Event emitted when user closes a session
+   * Emits sessionId
+   */
+  @Output()
+  readonly sessionClose = new EventEmitter<string>();
+
+  /**
    * Default Tailwind classes for main container
    */
   protected readonly defaultContainerClass = 'flex flex-col w-full gap-2';
@@ -234,5 +248,19 @@ export class SessionChatContainerComponent {
    */
   protected onSessionColorChange(event: { sessionId: string; color: string }): void {
     this.sessionColorChange.emit(event);
+  }
+
+  /**
+   * Forward session rename event
+   */
+  protected onSessionRename(event: { sessionId: string; newName: string }): void {
+    this.sessionRename.emit(event);
+  }
+
+  /**
+   * Forward session close event
+   */
+  protected onSessionClose(sessionId: string): void {
+    this.sessionClose.emit(sessionId);
   }
 }
