@@ -43,14 +43,21 @@ export class AiChatShellComponent {
     return this.clampPanelWidth(width);
   });
 
-  // Calculate session container position in pixels (center of viewport)
+  // Calculate session container position in pixels (center of main content area)
   readonly sessionContainerLeftPx = computed(() => {
-    return typeof window !== 'undefined' ? window.innerWidth / 2 : 960;
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
+    const panelW = this.panelOpen() ? this.effectivePanelWidth() : 0;
+    // Main content area is from 0 to (viewportWidth - panelWidth - 24px margin)
+    const mainContentWidth = viewportWidth - panelW - (this.panelOpen() ? 24 : 0);
+    return mainContentWidth / 2;
   });
 
-  // Calculate session container width in pixels (40% of viewport)
+  // Calculate session container width in pixels (40% of main content area)
   readonly sessionContainerWidthPx = computed(() => {
-    return typeof window !== 'undefined' ? window.innerWidth * 0.4 : 768;
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
+    const panelW = this.panelOpen() ? this.effectivePanelWidth() : 0;
+    const mainContentWidth = viewportWidth - panelW - (this.panelOpen() ? 24 : 0);
+    return mainContentWidth * 0.4;
   });
 
   // Connect SessionState to AiChatState
