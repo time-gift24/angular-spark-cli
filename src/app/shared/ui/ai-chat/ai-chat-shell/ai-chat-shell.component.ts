@@ -37,6 +37,12 @@ export class AiChatShellComponent {
   readonly panelWidth = computedFn(() => this.chatState.panelWidth());
   readonly panelPreviewWidth = signal<number | null>(null);
 
+  // Effective panel width (preview takes precedence)
+  readonly effectivePanelWidth = computed(() => {
+    const width = this.panelPreviewWidth() ?? this.panelWidth();
+    return this.clampPanelWidth(width);
+  });
+
   // Calculate session container position in pixels (center of viewport)
   readonly sessionContainerLeftPx = computed(() => {
     return typeof window !== 'undefined' ? window.innerWidth / 2 : 960;
