@@ -1,6 +1,5 @@
 import { Component, signal, computed, Signal } from '@angular/core';
-import { SessionTabsBarComponent } from '@app/shared/ui/session-tabs-bar';
-import { ChatInputComponent } from '@app/shared/ui/ai-chat';
+import { SessionTabsBarComponent, ChatInputComponent } from '@app/shared/ui/ai-chat';
 import { SessionData, SessionColor, SessionStatus } from '@app/shared/models';
 
 /**

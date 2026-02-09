@@ -1,5 +1,5 @@
 import { Component, signal, computed } from '@angular/core';
-import { SessionChatContainerComponent } from '@app/shared/ui/session-chat-container';
+import { SessionChatContainerComponent } from '@app/shared/ui/ai-chat';
 import { SessionStatus, type SessionData } from '@app/shared/models';
 import { initialState } from './examples';
 

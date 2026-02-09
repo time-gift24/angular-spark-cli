@@ -6,9 +6,6 @@ export * from './button';
 export * from './card/card.component';
 export * from './checkbox';
 export * from './context-menu';
-export * from './docked-messages-area/docked-messages-area.component';
-export * from './enhanced-chat-messages-card';
-export * from './floating-session-renderer/floating-session-renderer.component';
 export * from './input';
 export * from './label/label.component';
 export * from './liquid-glass';
@@ -23,8 +20,6 @@ export type { GlassFilterMode, Vec2, DisplacementResult } from './liquid-glass/n
 export { displacementMap, polarDisplacementMap, prominentDisplacementMap } from './liquid-glass/new';
 export * from './progress/progress';
 export * from './separator/separator.component';
-export * from './session-chat-container';
-export * from './session-tabs-bar';
 export * from './sheet';
 export * from './skeleton/skeleton';
 export * from './slider/slider';

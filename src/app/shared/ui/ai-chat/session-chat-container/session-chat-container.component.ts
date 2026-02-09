@@ -6,8 +6,8 @@ import {
   Signal,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { SessionTabsBarComponent } from '@app/shared/ui/session-tabs-bar';
-import { ChatInputComponent } from '@app/shared/ui/ai-chat';
+import { SessionTabsBarComponent } from '../session-tabs-bar/session-tabs-bar.component';
+import { ChatInputComponent } from '../chat-input/chat-input.component';
 import { SessionData } from '@app/shared/models';
 
 /**

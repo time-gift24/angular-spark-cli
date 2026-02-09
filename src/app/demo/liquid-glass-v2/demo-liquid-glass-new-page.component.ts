@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import {
   LiquidGlassComponentV2,
   LiquidGlassDirectiveV2,
@@ -14,7 +13,7 @@ import {
 @Component({
   selector: 'app-demo-liquid-glass-new-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, LiquidGlassComponentV2, LiquidGlassDirectiveV2],
+  imports: [CommonModule, LiquidGlassComponentV2, LiquidGlassDirectiveV2],
   template: `
     <div class="demo-page">
       <div class="demo-header">

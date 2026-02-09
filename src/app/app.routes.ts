@@ -7,14 +7,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./landing/landing-page.component').then((m) => m.LandingPageComponent),
   },
-  // Multi-Session Chat Page
-  {
-    path: 'multi-session-chat',
-    loadComponent: () =>
-      import('./features/multi-session-chat/multi-session-chat-page.component').then(
-        (m) => m.MultiSessionChatPageComponent
-      ),
-  },
   // Demo routes with MainLayout as parent
   {
     path: 'demo',
@@ -129,13 +121,6 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'ai-chat-messages-card',
-        loadComponent: () =>
-          import('./demo/ai-chat-messages-card/demo-ai-chat-messages-card.component').then(
-            (m) => m.DemoAiChatMessagesCardComponent,
-          ),
-      },
-      {
         path: 'session-tabs-and-input',
         loadComponent: () =>
           import('./demo/session-tabs-and-input/demo-session-tabs-and-input.component').then(
@@ -150,24 +135,10 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'ai-chat-panel',
-        loadComponent: () =>
-          import('./demo/ai-chat-panel/demo-ai-chat-panel.component').then(
-            (m) => m.DemoAiChatPanelComponent,
-          ),
-      },
-      {
         path: 'streaming-markdown',
         loadComponent: () =>
           import('./demo/streaming-markdown/demo-streaming-markdown.component').then(
             (m) => m.DemoStreamingMarkdownComponent,
-          ),
-      },
-      {
-        path: 'multi-session-chat',
-        loadComponent: () =>
-          import('./demo/multi-session-chat/demo-multi-session-chat.component').then(
-            (m) => m.DemoMultiSessionChatComponent,
           ),
       },
       {

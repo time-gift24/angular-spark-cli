@@ -15,7 +15,7 @@ Pure presentational component that composes `SessionTabsBar` and `ChatInput` wit
 ## Installation
 
 ```typescript
-import { SessionChatContainerComponent } from '@app/shared/ui/session-chat-container';
+import { SessionChatContainerComponent } from '@app/shared/ui/ai-chat';
 ```
 
 ## Usage

@@ -1,9 +1,7 @@
 /**
- * AI Chat Panel Type Definitions
+ * AI Chat Type Definitions
  * Mineral & Time Theme - Angular 20+
  */
-
-import { ModelSignal } from '@angular/core';
 
 /**
  * Message role
@@ -44,101 +42,3 @@ export interface StatusBadge {
   type: BadgeType;
   text?: string;
 }
-
-/**
- * Panel position
- */
-export interface PanelPosition {
-  x: number;
-  y: number;
-}
-
-/**
- * Panel size
- */
-export interface PanelSize {
-  width: number;
-  height: number;
-}
-
-/**
- * User preferences for AI chat panel
- */
-export interface AiChatPanelPreferences {
-  position: PanelPosition;
-  size: PanelSize;
-  isCollapsed: boolean;
-  sessionId: string;
-}
-
-/**
- * Panel state interface
- */
-export interface AiChatPanelState {
-  isCollapsed: boolean;
-  isDragging: boolean;
-  isResizing: boolean;
-  position: PanelPosition;
-  size: PanelSize;
-  messages: ChatMessage[];
-  currentBadge: StatusBadge | null;
-  inputValue: string;
-  isInputFocused: boolean;
-}
-
-/**
- * Drag state
- */
-export interface DragState {
-  isDragging: boolean;
-  startX: number;
-  startY: number;
-  initialPosition: PanelPosition;
-}
-
-/**
- * Resize state
- */
-export interface ResizeState {
-  isResizing: boolean;
-  startX: number;
-  startY: number;
-  initialSize: PanelSize;
-}
-
-/**
- * Local storage key
- */
-export const AI_CHAT_STORAGE_KEY = 'ai-chat-panel-preferences';
-
-/**
- * Default panel position (bottom center)
- */
-export const DEFAULT_PANEL_POSITION: PanelPosition = {
-  x: window.innerWidth / 2 - 300, // Center horizontally
-  y: window.innerHeight - 500, // 500px from bottom
-};
-
-/**
- * Default panel size
- */
-export const DEFAULT_PANEL_SIZE: PanelSize = {
-  width: 900,
-  height: 500,
-};
-
-/**
- * Minimum panel size
- */
-export const MIN_PANEL_SIZE: PanelSize = {
-  width: 400,
-  height: 300,
-};
-
-/**
- * Maximum panel size (responsive)
- */
-export const MAX_PANEL_SIZE: PanelSize = {
-  width: Math.min(1200, window.innerWidth * 0.95),
-  height: Math.min(900, window.innerHeight * 0.9),
-};
