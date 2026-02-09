@@ -4,10 +4,6 @@ import {
   inject,
   signal,
   computed as computedFn,
-  ElementRef,
-  ViewChild,
-  AfterViewInit,
-  DestroyRef,
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -32,66 +28,24 @@ const PANEL_MAX_WIDTH = 800;
   ],
   templateUrl: './ai-chat-shell.component.html',
 })
-export class AiChatShellComponent implements AfterViewInit {
+export class AiChatShellComponent {
   private chatState = inject(AiChatStateService);
   private sessionState = inject(SessionStateService);
-  private destroyRef = inject(DestroyRef);
-
-  @ViewChild('mainContent', { static: true })
-  private mainContentRef!: ElementRef<HTMLElement>;
-
-  private resizeObserver: ResizeObserver | null = null;
-
-  // Track main content bounds for positioning calculations
-  readonly mainContentRect = signal<{ left: number; width: number }>({
-    left: 0,
-    width: typeof window !== 'undefined' ? window.innerWidth : 1920,
-  });
 
   // Wrap ComputedSignal as Signal for compatibility
   readonly panelOpen = computedFn(() => this.chatState.panelOpen());
   readonly panelWidth = computedFn(() => this.chatState.panelWidth());
   readonly panelPreviewWidth = signal<number | null>(null);
 
-  // Effective panel width (preview takes precedence)
-  readonly effectivePanelWidth = computed(() => {
-    const width = this.panelPreviewWidth() ?? this.panelWidth();
-    return this.clampPanelWidth(width);
-  });
-
-  // Calculate session container position in pixels (center of main content area)
+  // Calculate session container position in pixels (center of viewport)
   readonly sessionContainerLeftPx = computed(() => {
-    const rect = this.mainContentRect();
-    const width = rect.width || (typeof window !== 'undefined' ? window.innerWidth : 1920);
-    const left = rect.width ? rect.left : 0;
-    return left + width / 2;
+    return typeof window !== 'undefined' ? window.innerWidth / 2 : 960;
   });
 
-  // Calculate session container width in pixels (40% of main content area)
+  // Calculate session container width in pixels (40% of viewport)
   readonly sessionContainerWidthPx = computed(() => {
-    const rect = this.mainContentRect();
-    const width = rect.width || (typeof window !== 'undefined' ? window.innerWidth : 1920);
-    return width * 0.4;
+    return typeof window !== 'undefined' ? window.innerWidth * 0.4 : 768;
   });
-
-  ngAfterViewInit(): void {
-    if (typeof window === 'undefined') return;
-
-    const updateBounds = () => this.updateMainBounds();
-    updateBounds();
-
-    window.addEventListener('resize', updateBounds);
-    if (typeof ResizeObserver !== 'undefined') {
-      this.resizeObserver = new ResizeObserver(() => updateBounds());
-      this.resizeObserver.observe(this.mainContentRef.nativeElement);
-    }
-
-    this.destroyRef.onDestroy(() => {
-      window.removeEventListener('resize', updateBounds);
-      this.resizeObserver?.disconnect();
-      this.resizeObserver = null;
-    });
-  }
 
   // Connect SessionState to AiChatState
   readonly sessions = this.sessionState.sessions;
@@ -185,13 +139,6 @@ export class AiChatShellComponent implements AfterViewInit {
     if (!Number.isFinite(width)) return;
     this.panelPreviewWidth.set(null);
     this.chatState.setPanelWidth(width);
-  }
-
-  private updateMainBounds(): void {
-    const el = this.mainContentRef?.nativeElement;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    this.mainContentRect.set({ left: rect.left, width: rect.width });
   }
 
   private clampPanelWidth(width: number): number {

@@ -1,13 +1,10 @@
-<div class="app-shell flex min-h-screen bg-background relative">
-  <!-- Main Content Area (compressible when panel opens) -->
-  <main
-    #mainContent
-    class="main-content flex-1 transition-all duration-300 ease-out"
-    [style.flex-basis]="panelOpen() ? 'calc(100% - ' + effectivePanelWidth() + 'px)' : '100%'">
+<div class="app-shell min-h-screen bg-background relative">
+  <!-- Main Content Area -->
+  <main #mainContent class="main-content w-full">
     <router-outlet />
   </main>
 
-  <!-- AI Chat Panel (compresses main content) -->
+  <!-- AI Chat Panel (fixed floating panel) -->
   @if (panelOpen()) {
     <ai-chat-panel
       [activeSession]="activeSession"
