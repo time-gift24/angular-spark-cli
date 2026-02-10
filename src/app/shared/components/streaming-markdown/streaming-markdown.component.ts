@@ -60,6 +60,17 @@ import { ShiniHighlighter } from './core/shini-highlighter';
 import { HighlightSchedulerService } from './core/highlight-scheduler.service';
 import { BlockType } from './core/models';
 
+/**
+ * Configuration for the RxJS streaming pipeline.
+ * Controls buffering and change detection behavior.
+ */
+interface PipelineConfig {
+  /** Debounce time in milliseconds for stream chunks (default: 50ms) */
+  debounceTime?: number;
+  /** Enable manual change detection optimization (default: true) */
+  enableChangeDetectionOptimization: boolean;
+}
+
 @Component({
   selector: 'app-streaming-markdown',
   standalone: true,

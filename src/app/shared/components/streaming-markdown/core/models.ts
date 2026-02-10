@@ -399,6 +399,20 @@ export interface MarkdownBlock {
 
   /** Footnote definitions map (for FOOTNOTE_DEF blocks) */
   footnoteDefs?: Map<string, string>;
+
+  // === Highlighting fields (for CODE_BLOCK type) ===
+
+  /** Highlighted HTML output (for code blocks with syntax highlighting) */
+  highlightedHTML?: string;
+
+  /** Signal-based highlight result (for reactive highlighting) */
+  highlightResult?: import('@angular/core').Signal<HighlightResult | null>;
+
+  /** Whether this block has been syntax-highlighted (for code blocks) */
+  isHighlighted?: boolean;
+
+  /** Whether this block is eligible for lazy highlighting (code blocks only) */
+  canLazyHighlight?: boolean;
 }
 
 /**

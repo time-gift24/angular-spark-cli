@@ -17,7 +17,7 @@ export interface IBlockFactory {
    * Create a heading block
    * @param content - The heading text content
    * @param level - Heading level (1-6)
-   * @param streaming - Whether the block is still streaming
+   * @param streaming - Whether the block is still streaming (affects isComplete)
    * @returns A new MarkdownBlock of type HEADING
    */
   createHeading(content: string, level: number, streaming?: boolean): MarkdownBlock;
@@ -25,7 +25,7 @@ export interface IBlockFactory {
   /**
    * Create a paragraph block
    * @param content - The paragraph text content
-   * @param streaming - Whether the block is still streaming
+   * @param streaming - Whether the block is still streaming (affects isComplete)
    * @returns A new MarkdownBlock of type PARAGRAPH
    */
   createParagraph(content: string, streaming?: boolean): MarkdownBlock;
@@ -34,7 +34,7 @@ export interface IBlockFactory {
    * Create a code block
    * @param code - The code content
    * @param language - Programming language identifier
-   * @param streaming - Whether the block is still streaming
+   * @param streaming - Whether the block is still streaming (affects isComplete)
    * @returns A new MarkdownBlock of type CODE
    */
   createCode(code: string, language?: string, streaming?: boolean): MarkdownBlock;
@@ -43,7 +43,7 @@ export interface IBlockFactory {
    * Create a list block
    * @param items - Array of list item strings
    * @param ordered - Whether the list is ordered (true) or unordered (false)
-   * @param streaming - Whether the block is still streaming
+   * @param streaming - Whether the block is still streaming (affects isComplete)
    * @returns A new MarkdownBlock of type LIST
    */
   createList(items: string[], ordered?: boolean, streaming?: boolean): MarkdownBlock;
@@ -51,7 +51,7 @@ export interface IBlockFactory {
   /**
    * Create a blockquote block
    * @param content - The quoted text content
-   * @param streaming - Whether the block is still streaming
+   * @param streaming - Whether the block is still streaming (affects isComplete)
    * @returns A new MarkdownBlock of type BLOCKQUOTE
    */
   createBlockquote(content: string, streaming?: boolean): MarkdownBlock;
@@ -111,7 +111,6 @@ export class BlockFactory implements IBlockFactory {
       type: BlockType.HEADING,
       content,
       level,
-      streaming,
       isComplete: !streaming,
       position: 0 // Will be set by the parser
     };
@@ -122,7 +121,6 @@ export class BlockFactory implements IBlockFactory {
       id: this.idGenerator.generate(),
       type: BlockType.PARAGRAPH,
       content,
-      streaming,
       isComplete: !streaming,
       position: 0 // Will be set by the parser
     };
@@ -135,7 +133,6 @@ export class BlockFactory implements IBlockFactory {
       content: code,
       language,
       rawContent: code,
-      streaming,
       isComplete: !streaming,
       position: 0 // Will be set by the parser
     };
@@ -148,7 +145,6 @@ export class BlockFactory implements IBlockFactory {
       content: '',
       items: [], // TODO: Will be populated by list parser in Task 3.4
       subtype: ordered ? 'ordered' : 'unordered',
-      streaming,
       isComplete: !streaming,
       position: 0 // Will be set by the parser
     };
@@ -159,7 +155,6 @@ export class BlockFactory implements IBlockFactory {
       id: this.idGenerator.generate(),
       type: BlockType.BLOCKQUOTE,
       content,
-      streaming,
       isComplete: !streaming,
       position: 0 // Will be set by the parser
     };
@@ -170,7 +165,6 @@ export class BlockFactory implements IBlockFactory {
       id: this.idGenerator.generate(),
       type: BlockType.UNKNOWN,
       content,
-      streaming: false,
       isComplete: true,
       position: 0
     };
