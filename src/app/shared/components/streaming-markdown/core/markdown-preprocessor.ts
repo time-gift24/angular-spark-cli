@@ -57,7 +57,7 @@ export interface IMarkdownPreprocessor {
 interface PreprocessorHandler {
   name: string;
   priority: number;
-  handle: (text: string) => string;
+  handle: (text: string, codeBlockRanges: [number, number][]) => string;
 }
 
 /**
@@ -97,11 +97,12 @@ function isWithinCodeBlock(pos: number, ranges: [number, number][]): boolean {
 // ─── Handlers ────────────────────────────────────────────────
 
 /** Priority 0: Prevent setext heading misparse — `---` after a paragraph line */
-function sextetHeadingHandler(text: string): string {
+function sextetHeadingHandler(text: string, _ranges: [number, number][]): string {
   // If text ends with a line that is only dashes (potential setext heading marker)
   // and the previous line has content, the parser may interpret it as an h2.
   // We only intervene if the `---` line is at the very end and looks incomplete.
   // This is a lightweight guard — only triggers on trailing `---` without a blank line before.
+  // Note: ranges parameter is unused but kept for interface consistency
   const lines = text.split('\n');
   if (lines.length < 2) return text;
   const lastLine = lines[lines.length - 1];
@@ -118,20 +119,18 @@ function sextetHeadingHandler(text: string): string {
 }
 
 /** Priority 10: Fix incomplete links — `[text](url` → `[text](url)` */
-function incompleteLinkHandler(text: string): string {
-  const codeRanges = findCodeBlockRanges(text);
+function incompleteLinkHandler(text: string, ranges: [number, number][]): string {
   // Match `[...](url` where url is not closed with `)`
   return text.replace(/\[([^\]]*)\]\(([^)\s]*?)$/gm, (match, linkText, url, offset) => {
-    if (isWithinCodeBlock(offset, codeRanges)) return match;
+    if (isWithinCodeBlock(offset, ranges)) return match;
     return `[${linkText}](${url})`;
   });
 }
 
 /** Priority 11: Fix incomplete images — `![alt](url` → remove or close */
-function incompleteImageHandler(text: string): string {
-  const codeRanges = findCodeBlockRanges(text);
+function incompleteImageHandler(text: string, ranges: [number, number][]): string {
   return text.replace(/!\[([^\]]*)\]\(([^)\s]*?)$/gm, (match, alt, url, offset) => {
-    if (isWithinCodeBlock(offset, codeRanges)) return match;
+    if (isWithinCodeBlock(offset, ranges)) return match;
     if (url.length > 0) {
       return `![${alt}](${url})`;
     }
@@ -141,15 +140,14 @@ function incompleteImageHandler(text: string): string {
 }
 
 /** Priority 20: Fix unclosed bold-italic `***text` → `***text***` */
-function boldItalicHandler(text: string): string {
-  const codeRanges = findCodeBlockRanges(text);
+function boldItalicHandler(text: string, ranges: [number, number][]): string {
   const marker = '***';
   let pos = 0;
   let result = text;
   while (pos < result.length) {
     const openIdx = result.indexOf(marker, pos);
     if (openIdx === -1) break;
-    if (isWithinCodeBlock(openIdx, codeRanges)) {
+    if (isWithinCodeBlock(openIdx, ranges)) {
       pos = openIdx + marker.length;
       continue;
     }
@@ -165,8 +163,7 @@ function boldItalicHandler(text: string): string {
 }
 
 /** Priority 30: Fix unclosed bold `**text` → `**text**` */
-function boldHandler(text: string): string {
-  const codeRanges = findCodeBlockRanges(text);
+function boldHandler(text: string, ranges: [number, number][]): string {
   const marker = '**';
   let pos = 0;
   let result = text;
@@ -178,7 +175,7 @@ function boldHandler(text: string): string {
       pos = openIdx + marker.length;
       continue;
     }
-    if (isWithinCodeBlock(openIdx, codeRanges)) {
+    if (isWithinCodeBlock(openIdx, ranges)) {
       pos = openIdx + marker.length;
       continue;
     }
@@ -193,15 +190,14 @@ function boldHandler(text: string): string {
 }
 
 /** Priority 40: Fix unclosed italic with `__text` → `__text__` */
-function italicUnderscoreDoubleHandler(text: string): string {
-  const codeRanges = findCodeBlockRanges(text);
+function italicUnderscoreDoubleHandler(text: string, ranges: [number, number][]): string {
   const marker = '__';
   let pos = 0;
   let result = text;
   while (pos < result.length) {
     const openIdx = result.indexOf(marker, pos);
     if (openIdx === -1) break;
-    if (isWithinCodeBlock(openIdx, codeRanges)) {
+    if (isWithinCodeBlock(openIdx, ranges)) {
       pos = openIdx + marker.length;
       continue;
     }
@@ -216,8 +212,7 @@ function italicUnderscoreDoubleHandler(text: string): string {
 }
 
 /** Priority 41: Fix unclosed italic with `*text` → `*text*` */
-function italicAsteriskHandler(text: string): string {
-  const codeRanges = findCodeBlockRanges(text);
+function italicAsteriskHandler(text: string, ranges: [number, number][]): string {
   const marker = '*';
   let pos = 0;
   let result = text;
@@ -234,7 +229,7 @@ function italicAsteriskHandler(text: string): string {
       pos = openIdx + 1;
       continue;
     }
-    if (isWithinCodeBlock(openIdx, codeRanges)) {
+    if (isWithinCodeBlock(openIdx, ranges)) {
       pos = openIdx + marker.length;
       continue;
     }
@@ -254,8 +249,7 @@ function italicAsteriskHandler(text: string): string {
 }
 
 /** Priority 42: Fix unclosed italic with `_text` → `_text_` */
-function italicUnderscoreHandler(text: string): string {
-  const codeRanges = findCodeBlockRanges(text);
+function italicUnderscoreHandler(text: string, ranges: [number, number][]): string {
   const marker = '_';
   let pos = 0;
   let result = text;
@@ -271,7 +265,7 @@ function italicUnderscoreHandler(text: string): string {
       pos = openIdx + 1;
       continue;
     }
-    if (isWithinCodeBlock(openIdx, codeRanges)) {
+    if (isWithinCodeBlock(openIdx, ranges)) {
       pos = openIdx + marker.length;
       continue;
     }
@@ -290,8 +284,7 @@ function italicUnderscoreHandler(text: string): string {
 }
 
 /** Priority 50: Fix unclosed inline code `` `code `` → `` `code` `` */
-function inlineCodeHandler(text: string): string {
-  const codeRanges = findCodeBlockRanges(text);
+function inlineCodeHandler(text: string, ranges: [number, number][]): string {
   let pos = 0;
   let result = text;
   while (pos < result.length) {
@@ -302,7 +295,7 @@ function inlineCodeHandler(text: string): string {
       pos = openIdx + 3;
       continue;
     }
-    if (isWithinCodeBlock(openIdx, codeRanges)) {
+    if (isWithinCodeBlock(openIdx, ranges)) {
       pos = openIdx + 1;
       continue;
     }
@@ -322,15 +315,14 @@ function inlineCodeHandler(text: string): string {
 }
 
 /** Priority 60: Fix unclosed strikethrough `~~text` → `~~text~~` */
-function strikethroughHandler(text: string): string {
-  const codeRanges = findCodeBlockRanges(text);
+function strikethroughHandler(text: string, ranges: [number, number][]): string {
   const marker = '~~';
   let pos = 0;
   let result = text;
   while (pos < result.length) {
     const openIdx = result.indexOf(marker, pos);
     if (openIdx === -1) break;
-    if (isWithinCodeBlock(openIdx, codeRanges)) {
+    if (isWithinCodeBlock(openIdx, ranges)) {
       pos = openIdx + marker.length;
       continue;
     }
@@ -345,15 +337,14 @@ function strikethroughHandler(text: string): string {
 }
 
 /** Priority 70: Fix unclosed block math `$$equation` → `$$equation$$` */
-function blockMathHandler(text: string): string {
-  const codeRanges = findCodeBlockRanges(text);
+function blockMathHandler(text: string, ranges: [number, number][]): string {
   const marker = '$$';
   let pos = 0;
   let result = text;
   while (pos < result.length) {
     const openIdx = result.indexOf(marker, pos);
     if (openIdx === -1) break;
-    if (isWithinCodeBlock(openIdx, codeRanges)) {
+    if (isWithinCodeBlock(openIdx, ranges)) {
       pos = openIdx + marker.length;
       continue;
     }
@@ -369,7 +360,8 @@ function blockMathHandler(text: string): string {
 }
 
 /** Priority 80: Fix unclosed code blocks ``` → close with newline + ``` */
-function codeBlockHandler(text: string): string {
+function codeBlockHandler(text: string, _ranges: [number, number][]): string {
+  // Note: ranges parameter is unused because this handler counts fences independently
   const fence = '```';
   let count = 0;
   let pos = 0;
@@ -418,9 +410,12 @@ export class MarkdownPreprocessor implements IMarkdownPreprocessor {
       return text;
     }
 
+    // Compute ranges ONCE before the handler loop
+    const ranges = findCodeBlockRanges(text);
+
     let result = text;
     for (const handler of this.handlers) {
-      result = handler.handle(result);
+      result = handler.handle(result, ranges);
     }
     return result;
   }

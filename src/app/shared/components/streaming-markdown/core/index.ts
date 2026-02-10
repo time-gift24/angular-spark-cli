@@ -69,6 +69,9 @@ export {
 
 export { provideStreamingMarkdown } from './provide-streaming-markdown';
 
+// Preprocessor
+export { MarkdownPreprocessor, type IMarkdownPreprocessor } from './markdown-preprocessor';
+
 // Domain models
 export {
   type SyntaxToken,
@@ -88,6 +91,12 @@ export {
 
 // Virtual scroll service
 export { VirtualScrollService } from './virtual-scroll.service';
+
+// Highlight coordinator
+export { HighlightCoordinator } from './highlight-coordinator.service';
+
+// Streaming pipeline service
+export { StreamingPipelineService, type PipelineConfig } from './streaming-pipeline.service';
 
 // Stream adapters
 export {
