@@ -45,7 +45,9 @@ import {
   VirtualWindow,
   DEFAULT_VIRTUAL_SCROLL_CONFIG,
   HighlightResult,
-  CodeLine
+  CodeLine,
+  isCodeBlock,
+  CodeBlock
 } from './core/models';
 import { MarkdownBlockRouterComponent } from './blocks/block-router/block-router.component';
 import { ScrollEvent, VirtualScrollViewportComponent } from './blocks/virtual-scroll-viewport.component';
@@ -514,29 +516,35 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     this.state.update((currentState) => {
       let changed = false;
 
-      const updatedBlocks = currentState.blocks.map((block) => {
+      const updatedBlocks = currentState.blocks.map((block): MarkdownBlock => {
         if (block.id !== blockId) {
           return block;
         }
 
         changed = true;
-        return {
-          ...block,
-          isHighlighted: true,
-          canLazyHighlight: this.enableLazyHighlight,
-          highlightResult: blockSignal
-        };
+        // Only code blocks should have highlight properties
+        if (isCodeBlock(block)) {
+          return {
+            ...block,
+            isHighlighted: true,
+            canLazyHighlight: this.enableLazyHighlight,
+            highlightResult: blockSignal
+          } as CodeBlock;
+        }
+        return block;
       });
 
       let updatedCurrentBlock = currentState.currentBlock;
       if (updatedCurrentBlock?.id === blockId) {
         changed = true;
-        updatedCurrentBlock = {
-          ...updatedCurrentBlock,
-          isHighlighted: true,
-          canLazyHighlight: this.enableLazyHighlight,
-          highlightResult: blockSignal
-        };
+        if (isCodeBlock(updatedCurrentBlock)) {
+          updatedCurrentBlock = {
+            ...updatedCurrentBlock,
+            isHighlighted: true,
+            canLazyHighlight: this.enableLazyHighlight,
+            highlightResult: blockSignal
+          } as CodeBlock;
+        }
       }
 
       if (!changed) {

@@ -1,481 +1,306 @@
-# Topology Visualization - Design Document
+# Topology Visualization Frontend Design (V2)
 
-**Date:** 2025-02-09
-**Status:** MVP Design Complete
-**Related Project:** topo-cli (https://github.com/wanyaozhong/topo-cli)
-
----
-
-## Executive Summary
-
-Design a frontend topology visualization component for Angular Spark CLI that displays infrastructure topology data from the topo-cli backend. The visualization targets DevOps/SRE users for monitoring and debugging microservices and their dependencies.
-
-### Goals
-- Display nodes (services, databases, repos) and their relationships
-- Support interactive exploration (pan, zoom, click for details)
-- Use orthogonal (grid) layout for clean infrastructure maps
-- Integrate with Angular Spark's existing theme system
+**Version:** 2.0  
+**Date:** 2026-02-09  
+**Status:** Ready for Implementation
 
 ---
 
-## 1. Understanding & Requirements
+## 1. Scope and Constraints
 
-### 1.1 Use Case
-**Infrastructure Dashboard** - DevOps/SRE view of microservices, databases, and their dependencies for monitoring and debugging.
+### 1.1 Goal (Current Phase)
+构建一个仅用于**拓扑图渲染与检视**的前端页面，服务 DevOps/SRE 场景：
+- 展示节点（service/database/repo/microservice）
+- 展示关系边（depends_on/calls/...）
+- 提供交互查看（缩放、平移、选中、详情）
 
-### 1.2 Scope (MVP)
+### 1.2 Non-Goals (Must Exclude)
+当前阶段明确不做：
+- Chat UI
+- LLM 相关功能
+- 自然语言解析
+- 前端发起拓扑编辑（CRUD）
 
-| Feature | Included |
-|---------|----------|
-| View + Inspect | ✅ Click node/edge for details, hover for quick info, pan/zoom |
-| View + Inspect + Path Tracing | ❌ (Future) |
-| Actions from UI | ❌ (Future) |
-| Filtering | ❌ Handled by backend |
+> 结论：本阶段是**只读拓扑可视化**，不引入任何模型能力。
 
-### 1.3 Backend Analysis (topo-cli)
+---
 
-#### Data Models
+## 2. Backend API Contract (for Frontend Agent)
 
-**Node:**
-```go
+Base URL:
+
+```text
+http://localhost:9999/api/v1
+```
+
+### 2.1 Node APIs
+
+- `GET /nodes?type=&cursor=&limit=`
+  - Query:
+    - `type` optional
+    - `cursor` optional
+    - `limit` optional (建议 100)
+  - Response:
+
+```json
 {
-  id: int64              // Technical key (internal)
-  type: string          // Business key: "service", "database", "repo", etc.
-  name: string          // Business key: unique within type
-  props: JSONB          // Flexible properties
-  created_at, updated_at: timestamps
+  "items": [
+    {
+      "id": 1,
+      "type": "service",
+      "name": "api-gateway",
+      "props": { "team": "backend" },
+      "created_at": "2026-02-09T00:00:00Z",
+      "updated_at": "2026-02-09T00:00:00Z"
+    }
+  ],
+  "next_cursor": "..."
 }
 ```
 
-**Edge:**
-```go
+### 2.2 Edge APIs
+
+- `GET /edges?src_type=&dst_type=&kind=&cursor=&limit=`
+  - Query:
+    - `src_type` optional
+    - `dst_type` optional
+    - `kind` optional
+    - `cursor` optional
+    - `limit` optional
+  - Response:
+
+```json
 {
-  id: int64
-  src_type, src_name: string  // Source node reference
-  kind: string                // Relationship type
-  dst_type, dst_name: string  // Destination node reference
-  props: JSONB
-  created_at, updated_at: timestamps
+  "items": [
+    {
+      "id": 10,
+      "src_type": "service",
+      "src_name": "api-gateway",
+      "kind": "depends_on",
+      "dst_type": "database",
+      "dst_name": "user-db",
+      "props": {},
+      "created_at": "2026-02-09T00:00:00Z",
+      "updated_at": "2026-02-09T00:00:00Z"
+    }
+  ],
+  "next_cursor": null
 }
 ```
 
-**Discovered Node Types:**
-- `service` - API, web, cache services
-- `database` - Database nodes
-- `repo` - Code repositories
-- `microservice` - Microservice instances
-
-#### API Endpoints
-- `GET /api/v1/nodes` - List nodes
-- `GET /api/v1/edges` - List edges
-- Backend handles all filtering logic
+### 2.3 Important Note
+- 后端没有 `GET /topology` 聚合接口。
+- 前端必须分别拉 `nodes` + `edges`，然后本地组装图。
 
 ---
 
-## 2. Architecture Design
+## 3. Data Loading Strategy
 
-### 2.1 Page Structure
+### 3.1 Cursor Pagination (Required)
+前端必须循环拉取直到 `next_cursor` 为空。
 
-```
-/topology (独立路由)
-├── 顶部工具栏 (Toolbar)
-│   ├── 标题: "Topology Map"
-│   ├── 缩放控制: [-] [+] [Reset]
-│   └── 适配按钮: [Fit]
-│
-├── 主画布区域 (X6 Graph Canvas)
-│   ├── 节点渲染 (矩形 + 文本)
-│   ├── 边渲染 (正交连线 + 箭头 + 标签)
-│   └── 交互 (拖拽平移、滚轮缩放、点击选中)
-│
-└── 浮动详情卡片 (NodeDetailCardComponent)
-    ├── 节点类型
-    ├── 节点名称
-    ├── 属性表格 (props key-value)
-    └── 关闭按钮
+Pseudo flow:
+
+```text
+fetchAllNodes(type?)
+  cursor = ""
+  loop:
+    GET /nodes?cursor=...&limit=100
+    append items
+    if no next_cursor -> break
+    cursor = next_cursor
+
+fetchAllEdges(filters?)
+  same logic
 ```
 
-### 2.2 Data Flow
+### 3.2 Graph Identity
+- Node key: `${type}/${name}`
+- Edge key: `${src_type}/${src_name}/${kind}/${dst_type}/${dst_name}`
 
-```
-TopologyComponent
-    ↓
-TopoService.getTopology(params)
-    ↓
-HTTP GET /api/v1/topology
-    ↓
-{ nodes: [...], edges: [...] }
-    ↓
-Transform to X6 format
-    ↓
-X6 Graph.fromJSON()
-    ↓
-Apply dagre layout
+### 3.3 Orphan Edge Handling
+若 edge 引用的 src/dst 节点不在当前节点集：
+- 不中断渲染
+- 记录到 `orphanEdges`
+- 在 UI 顶部提示数量（warning）
+
+---
+
+## 4. Frontend Architecture (Angular 20)
+
+Target workspace:
+
+```text
+/Users/wanyaozhong/Projects/angular-spark-cli
 ```
 
-### 2.3 Component Architecture
+Suggested structure:
 
-```
+```text
 src/app/features/topology/
-├── topology.routes.ts           # 路由配置
+├── topology.routes.ts
 ├── pages/
-│   └── topology-page.component.ts   # 主页面容器
+│   └── topology-page.component.ts
 ├── services/
-│   └── topology.service.ts          # HTTP 服务
+│   └── topology.service.ts
+├── state/
+│   └── topology.store.ts
 ├── components/
-│   ├── topology-canvas/
-│   │   └── topology-canvas.component.ts    # X6 画布封装
 │   ├── topology-toolbar/
-│   │   └── topology-toolbar.component.ts   # 工具栏
-│   └── node-detail-card/
-│       └── node-detail-card.component.ts   # 浮动详情卡片
+│   │   └── topology-toolbar.component.ts
+│   ├── topology-canvas/
+│   │   └── topology-canvas.component.ts
+│   └── topology-inspector/
+│       └── topology-inspector.component.ts
 └── graph/
-    ├── node-renderer.ts          # 节点渲染配置
-    ├── edge-renderer.ts          # 边渲染配置
-    └── layout.config.ts          # 布局配置
+    ├── transform.ts
+    ├── layout.config.ts
+    └── styles.config.ts
 ```
+
+### 4.1 State Model (Signals)
+- `nodes: Signal<Node[]>`
+- `edges: Signal<Edge[]>`
+- `selectedNodeKey: Signal<string | null>`
+- `selectedEdgeKey: Signal<string | null>`
+- `loading: Signal<boolean>`
+- `error: Signal<string | null>`
+- `orphanEdges: Signal<Edge[]>`
 
 ---
 
-## 3. Visual Design
+## 5. Visualization Design
 
-### 3.1 Node Rendering
+### 5.1 Graph Engine
+- X6 + dagre
+- Edge router: orthogonal (`orth`)
 
-**Structure:**
-```
-┌─────────────────────────────────────┐
-│  ┌─┐                               │
-│  │●│  {type}                       │  ← Type (muted color)
-│  │ │                               │
-│  └─┘  {name}                       │  ← Name (primary color)
-└─────────────────────────────────────┘
-   ↑                    ↑
-   width: 180px         height: 60px
-```
-
-**Style Specification (Tailwind + CSS Variables):**
-
-| Element | Value |
-|---------|-------|
-| Background | `bg-background` |
-| Border | `border border-border` |
-| Radius | `rounded-md` |
-| Shadow | `shadow-sm` |
-| Type text | `text-muted-foreground text-xs` |
-| Name text | `text-foreground text-sm font-medium` |
-| Selected | `ring-2 ring-primary ring-offset-2` |
-
-**Icons (MVP):** All nodes use the same circle icon (●)
-
-### 3.2 Edge Rendering
-
-**Structure:**
-```
-       {kind}
-   ╔═══════════════════════════╗
-   ║                           ║
-   ║                           ║
-   └─ → ─ ─ ─ ─ ─ ─ ─ ─ ─ → ─┘
-   ↑                   ↑
-   Orthogonal lines   Arrow
-```
-
-**Style Specification:**
-
-| Element | Value |
-|---------|-------|
-| Line color | `stroke: var(--border)` |
-| Line width | `1.5px` (selected: `2.5px`) |
-| Selected color | `var(--primary)` |
-| Label background | `bg-muted rounded px-1` |
-| Label text | `text-xs text-muted-foreground` |
-
-### 3.3 Detail Card (Floating)
-
-**Position:** Near clicked node, auto-adjusts to avoid overflow
-
-**Style Specification:**
-
-| Element | Value |
-|---------|-------|
-| Background | `bg-background` |
-| Border | `border border-border` |
-| Radius | `rounded-lg` |
-| Shadow | `shadow-lg` |
-| Padding | `p-4` |
-| Max width | `w-80` (320px) |
-
-**Content Display:**
-```
-┌────────────────────────────────┐
-│  ×                             │ ← Close button
-│                                │
-│  Type: service                 │
-│  Name: api-gateway             │
-│                                │
-│  ┌──────────────────────────┐  │
-│  │ Properties               │  │
-│  ├──────────┬───────────────┤  │
-│  │ port     │ 8080          │  │
-│  │ env      │ production    │  │
-│  │ team     │ backend       │  │
-│  └──────────┴───────────────┘  │
-└────────────────────────────────┘
-```
-
----
-
-## 4. Interactions
-
-### 4.1 Canvas Operations
-
-| Operation | Trigger | Behavior |
-|-----------|---------|----------|
-| Pan | Drag empty area | Move canvas |
-| Zoom | Mouse wheel | Zoom at cursor position |
-| Zoom | +/- buttons | Zoom at center |
-| Select | Click node/edge | Highlight + show detail card |
-| Deselect | Click empty area | Remove highlight + hide card |
-| Fit | Fit button | Auto-zoom to show all |
-
-### 4.2 Zoom Configuration
-
-```
-min: 0.1 (10%)
-max: 2.0 (200%)
-default: 1.0 (100%)
-```
-
-### 4.3 Selection States
-
-**Node Selected:**
-- Add `ring-2 ring-primary ring-offset-2`
-- Show detail card
-
-**Edge Selected:**
-- Line color changes to `var(--primary)`
-- Line width increases to `2.5px`
-- Show detail card with edge info
-
-### 4.4 Keyboard Shortcuts (Optional, Post-MVP)
-
-| Key | Action |
-|-----|--------|
-| ESC | Deselect + hide card |
-| +/- | Zoom |
-| 0 | Reset zoom to 100% |
-
----
-
-## 5. Layout
-
-### 5.1 Layout Algorithm
-
-Use **X6 with dagre layout** configured for orthogonal routing:
+### 5.2 Layout Config
 
 ```typescript
-const layoutConfig = {
-  type: 'dagre',
-  rankdir: 'TB',        // Top-Bottom direction
-  align: 'UL',          // Upper-Left alignment
-  nodesep: 50,          // Horizontal spacing between nodes
-  ranksep: 80,          // Vertical spacing between ranks
-}
-
-const edgeRouter = {
-  name: 'orth',         // Orthogonal routing
-  args: {
-    padding: 20,
-  }
+{
+  rankdir: 'TB',
+  align: 'UL',
+  nodesep: 50,
+  ranksep: 80
 }
 ```
 
-### 5.2 Layout Trigger
+### 5.3 Node Style
+- Width: `180`
+- Height: `60`
+- Border: `var(--border)`
+- Background: `var(--background)`
+- Name text: `var(--foreground)`
+- Type text: `var(--muted-foreground)`
+- Selected: primary ring
 
-1. **Initial load** → Auto apply layout
-2. **User drags node** → Keep user position (no re-layout)
-3. **Fit button** → Re-apply layout + auto-zoom
+### 5.4 Edge Style
+- Stroke: `var(--border)`
+- Width: `1.5`
+- Selected: `var(--primary)` + width `2.5`
+- Label: edge `kind`
 
-### 5.3 Data Transformation
+---
+
+## 6. Interaction Design (MVP)
+
+### 6.1 Supported Interactions
+- Pan: drag blank canvas
+- Zoom: mouse wheel / toolbar +/-
+- Reset zoom: toolbar
+- Fit to viewport: toolbar
+- Select node/edge: click
+- Deselect: click blank area
+
+### 6.2 Detail Panel
+右侧 Inspector 显示：
+- Node: type/name/props/timestamps
+- Edge: src/kind/dst/props/timestamps
+
+> 本阶段不做浮动弹层，统一右侧面板，降低复杂度。
+
+---
+
+## 7. Error and Empty States
+
+### 7.1 Network / API Errors
+- Request failure: error banner + retry button
+- Timeout: error banner + retry button
+
+### 7.2 Empty State
+当 `nodes` 和 `edges` 都为空时显示：
+- icon
+- title: "No topology data"
+- text: "No nodes or edges found for current query"
+
+### 7.3 Large Dataset
+- `>100` nodes: show performance warning
+- `>500` nodes: allow render but default collapse labels and disable edge animations
+
+---
+
+## 8. API Mapping Examples
+
+### 8.1 Service Function Contracts
 
 ```typescript
-// Backend format → X6 format
-function transformToX6(data: { nodes: Node[], edges: Edge[] }) {
-  return {
-    nodes: data.nodes.map(n => ({
-      id: `${n.type}/${n.name}`,
-      shape: 'custom-node',
-      data: n,
-    })),
-    edges: data.edges.map(e => ({
-      source: `${e.src_type}/${e.src_name}`,
-      target: `${e.dst_type}/${e.dst_name}`,
-      label: e.kind,
-      data: e,
-    })),
-  };
+getAllNodes(params?: { type?: string }): Observable<Node[]>
+getAllEdges(params?: { srcType?: string; dstType?: string; kind?: string }): Observable<Edge[]>
+loadTopology(params): Observable<{ nodes: Node[]; edges: Edge[]; orphanEdges: Edge[] }>
+```
+
+### 8.2 Transform Function Contract
+
+```typescript
+transformToX6(nodes: Node[], edges: Edge[]): {
+  nodes: X6Node[];
+  edges: X6Edge[];
+  orphanEdges: Edge[];
 }
 ```
 
 ---
 
-## 6. Error Handling & Edge Cases
-
-### 6.1 Network Errors
-
-| Scenario | Handling |
-|----------|----------|
-| Request failed | Toast + empty state |
-| Timeout | Toast + empty state |
-| Empty data | "No topology data" message |
-
-### 6.2 Empty State Design
-
-```
-┌─────────────────────────────────────────────┐
-│                                             │
-│              📊                              │
-│                                             │
-│          暂无拓扑数据                        │
-│                                             │
-│     当前条件下没有找到任何节点或边            │
-│                                             │
-└─────────────────────────────────────────────┘
-```
-
-### 6.3 Detail Card Boundary Detection
-
-- If card overflows right edge → Flip to left of node
-- If card overflows bottom edge → Flip to top of node
-
-### 6.4 Props Display
-
-| Scenario | Handling |
-|----------|----------|
-| Empty props `{}` | Display "No properties" |
-| Object/Array value | JSON.stringify + truncate |
-| Long value (>50 chars) | Truncate with `...` |
-
-### 6.5 Large Data Handling
-
-| Node Count | Action |
-|------------|--------|
-| > 100 | Warning toast: "Large dataset, rendering may be slow" |
-| > 500 | Block render, error: "Dataset too large, please narrow your query" |
-
----
-
-## 7. UI/UX Design System Integration
-
-Based on UI/UX Pro Max recommendations for infrastructure dashboards:
-
-### 7.1 Color System (using Angular Spark theme)
-
-| Purpose | CSS Variable |
-|---------|--------------|
-| Status: Critical | `var(--destructive)` |
-| Status: Warning | `var(--accent)` |
-| Status: Healthy | `var(--primary)` |
-| Status: Inactive | `var(--muted-foreground)` |
-| Background | `var(--background)` |
-| Border | `var(--border)` |
-
-### 7.2 Animation Guidelines
-
-| Transition | Duration |
-|------------|----------|
-| Hover effects | 150ms |
-| Modal/Card open | 200ms |
-| Node position | 200ms |
-
-### 7.3 Accessibility
-
-- Keyboard navigation support
-- Focus indicators on interactive elements
-- ARIA labels for nodes and edges
-- Color contrast WCAG AA compliant
-
----
-
-## 8. Technology Stack
-
-| Category | Selection |
-|----------|----------|
-| **Graph Engine** | X6 (AntV) |
-| **Layout Algorithm** | dagre (X6 built-in) |
-| **Styling** | Tailwind CSS + CSS Variables |
-| **State Management** | Angular Signals |
-| **HTTP Client** | Angular HttpClient |
-
-### Why X6?
-
-- Professional graph editor engine
-- Built-in orthogonal routing
-- Comprehensive interaction support
-- Good documentation
-- Framework-agnostic (works with Angular)
-
----
-
-## 9. Implementation Checklist
+## 9. Implementation Plan (Executable)
 
 ### Phase 1: Foundation
-- [ ] Set up `/topology` route
-- [ ] Install and configure X6
-- [ ] Create TopologyService with HTTP client
-- [ ] Create basic page layout (toolbar + canvas container)
+- [ ] Add `/topology` standalone route and page shell
+- [ ] Implement `TopologyService` for nodes/edges pagination
+- [ ] Implement `TopologyStore` with signals
 
-### Phase 2: Core Visualization
-- [ ] Implement node renderer with Angular Spark theme
-- [ ] Implement edge renderer with labels
-- [ ] Configure dagre layout with orthogonal routing
-- [ ] Connect to backend API
+### Phase 2: Rendering
+- [ ] Build `topology-canvas` and render nodes/edges
+- [ ] Apply dagre + orth routing
+- [ ] Add toolbar zoom/reset/fit
 
-### Phase 3: Interactions
-- [ ] Implement pan and zoom
-- [ ] Implement node/edge selection
-- [ ] Create floating detail card component
-- [ ] Add toolbar controls (+, -, Reset, Fit)
+### Phase 3: Inspect
+- [ ] Add selection logic (node/edge)
+- [ ] Add right-side inspector panel
+- [ ] Handle orphan edges warning
 
-### Phase 4: Polish
-- [ ] Add loading states
-- [ ] Add empty state
-- [ ] Add error handling
-- [ ] Add boundary detection for detail card
-- [ ] Test with real data
+### Phase 4: Robustness
+- [ ] Loading / error / empty state
+- [ ] Large dataset behavior
+- [ ] Basic unit tests for pagination + transform + store selection
 
 ---
 
-## 10. Future Ideas (Parking Lot)
+## 10. Acceptance Criteria
 
-Features intentionally excluded from MVP:
-
-| Feature | Rationale |
-|---------|-----------|
-| **Node type icons** | MVP uses unified rendering; can add per-type icons later |
-| **Path tracing** | Advanced feature; not needed for basic inspection |
-| **UI-based CRUD** | MVP is read-only; edit operations can be added later |
-| **Real-time updates** | Requires WebSocket backend integration |
-| **Performance optimization** | Only needed if data scales beyond MVP scope |
-| **Export (PNG/SVG)** | Nice-to-have, not critical for dashboard use |
-| **Minimap** | Only needed for very large topologies |
-| **Search within graph** | Backend handles filtering; search is redundant for MVP |
+- 页面可打开 `/topology` 并显示图
+- 使用真实后端接口（`/nodes` + `/edges`），无假接口依赖
+- 游标分页正确，数据完整
+- 支持 pan/zoom/fit/select/inspect
+- 无 chat/LLM 相关代码或文案
+- 出现 API 错误时页面不崩溃
 
 ---
 
 ## 11. References
 
-- **Backend Project:** https://github.com/wanyaozhong/topo-cli
-- **X6 Documentation:** https://x6.antv.antgroup.com/
-- **Angular Spark CLI:** Current project
-- **UI/UX Pro Max:** Infrastructure dashboard design patterns
-
----
-
-**Design Status:** ✅ Ready for Implementation
-
-**Next Steps:**
-1. Review and approve this design
-2. Create git worktree for isolated development
-3. Generate detailed implementation plan
-4. Begin Phase 1 implementation
+- topo-cli backend routes:
+  - `/Users/wanyaozhong/Projects/topo-cli/internal/graph/node/handler.go`
+  - `/Users/wanyaozhong/Projects/topo-cli/internal/graph/edge/handler.go`
+- topo-cli shared model:
+  - `/Users/wanyaozhong/Projects/topo-cli/internal/graph/model.go`

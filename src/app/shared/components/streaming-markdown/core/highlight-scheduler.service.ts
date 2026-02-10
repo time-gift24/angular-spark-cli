@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, inject, DestroyRef, effect, EffectRef } from '@angular/core';
-import { MarkdownBlock, BlockType, CodeLine } from './models';
+import { MarkdownBlock, BlockType, CodeLine, isCodeBlock } from './models';
 import { VirtualScrollService } from './virtual-scroll.service';
 import { ShiniHighlighter } from './shini-highlighter';
 
@@ -160,13 +160,13 @@ export class HighlightSchedulerService {
   }
 
   async highlightNow(block: MarkdownBlock, index: number): Promise<CodeLine[]> {
-    if (block.type !== BlockType.CODE_BLOCK) {
+    if (!isCodeBlock(block)) {
       return [];
     }
 
     const cached = this.getHighlightedLines(block.id);
     if (cached) {
-      block.isHighlighted = true;
+      (block as any).isHighlighted = true;
       this.markHighlighted(block.id);
       return cached;
     }
@@ -263,6 +263,9 @@ export class HighlightSchedulerService {
   }
 
   private async highlightInternal(block: MarkdownBlock, index: number): Promise<CodeLine[]> {
+    if (!isCodeBlock(block)) {
+      return [];
+    }
     const startTime = performance.now();
     const code = block.rawContent || block.content;
     const language = block.language || 'text';
@@ -294,7 +297,10 @@ export class HighlightSchedulerService {
       return next;
     });
 
-    block.isHighlighted = true;
+    // Only code blocks have isHighlighted property
+    if (isCodeBlock(block)) {
+      (block as any).isHighlighted = true;
+    }
     this.markHighlighted(block.id);
     this.notifyHighlightResult({ blockId: block.id, lines, success });
 

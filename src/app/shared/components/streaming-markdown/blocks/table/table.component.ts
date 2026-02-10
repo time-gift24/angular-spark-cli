@@ -8,7 +8,7 @@
  */
 
 import { Component, Input, signal, ChangeDetectionStrategy } from '@angular/core';
-import { MarkdownBlock } from '../../core/models';
+import { MarkdownBlock, TableBlock } from '../../core/models';
 
 @Component({
   selector: 'app-markdown-table',
@@ -72,7 +72,7 @@ import { MarkdownBlock } from '../../core/models';
   styleUrls: ['./table.component.css']
 })
 export class MarkdownTableComponent {
-  @Input({ required: true }) block!: MarkdownBlock;
+  @Input({ required: true }) block!: TableBlock;
   @Input() isComplete: boolean = true;
 
   csvCopied = signal<boolean>(false);

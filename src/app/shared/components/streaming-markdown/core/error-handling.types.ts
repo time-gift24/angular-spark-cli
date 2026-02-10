@@ -4,7 +4,7 @@
  * Single source of truth for all error-related types.
  */
 
-import { MarkdownBlock } from './models';
+import type { MarkdownBlock } from './models';
 
 export type ErrorSeverity = 'critical' | 'high' | 'medium' | 'low';
 

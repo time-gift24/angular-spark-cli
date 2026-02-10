@@ -1,15 +1,7 @@
 import { Injectable, signal, computed, Signal, inject, DestroyRef, effect, EffectRef, OnDestroy } from '@angular/core';
-import { MarkdownBlock, BlockType, HighlightResult, VirtualWindow } from './models';
+import { MarkdownBlock, BlockType, HighlightResult, VirtualWindow, isCodeBlock } from './models';
 import { HighlightSchedulerService } from './highlight-scheduler.service';
 import { ShiniHighlighter } from './shini-highlighter';
-
-/**
- * Simple type guard for code blocks.
- * Can be replaced with discriminated union version from Phase 1 when available.
- */
-function isCodeBlock(block: MarkdownBlock): block is MarkdownBlock & { type: BlockType.CODE_BLOCK } {
-  return block.type === BlockType.CODE_BLOCK;
-}
 
 /**
  * HighlightCoordinator - Single Source of Truth for Code Highlighting State

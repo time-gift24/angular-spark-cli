@@ -9,7 +9,7 @@
 
 import { Component, Input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MarkdownBlock } from '../../core/models';
+import { MarkdownBlock, ListBlock } from '../../core/models';
 
 @Component({
   selector: 'app-markdown-list',
@@ -18,30 +18,18 @@ import { MarkdownBlock } from '../../core/models';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ul [class]="listClasses()" *ngIf="!ordered; else orderedList">
-      @for (item of items; track item.id) {
+      @for (item of items; track $index) {
         <li [class]="getItemClass()">
-          {{ item.content }}
-          @if (item.items && item.items.length > 0) {
-            <app-markdown-list
-              [block]="item"
-              [isComplete]="isComplete"
-              [depth]="depth + 1" />
-          }
+          {{ item }}
         </li>
       }
     </ul>
 
     <ng-template #orderedList>
       <ol [class]="listClasses()">
-        @for (item of items; track item.id) {
+        @for (item of items; track $index) {
           <li [class]="getItemClass()">
-            {{ item.content }}
-            @if (item.items && item.items.length > 0) {
-              <app-markdown-list
-                [block]="item"
-                [isComplete]="isComplete"
-                [depth]="depth + 1" />
-            }
+            {{ item }}
           </li>
         }
       </ol>
@@ -50,14 +38,14 @@ import { MarkdownBlock } from '../../core/models';
   styleUrls: ['./list.component.css']
 })
 export class MarkdownListComponent {
-  @Input({ required: true }) block!: MarkdownBlock;
+  @Input({ required: true }) block!: ListBlock;
   @Input() isComplete: boolean = true;
   @Input() depth: number = 0;
 
   listClasses = signal<string>('markdown-list block-list');
   itemClass = 'list-item';
 
-  get items(): MarkdownBlock[] {
+  get items(): string[] {
     return this.block.items || [];
   }
 

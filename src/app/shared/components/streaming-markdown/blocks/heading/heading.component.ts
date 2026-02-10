@@ -10,7 +10,7 @@
 
 import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MarkdownBlock, MarkdownInline } from '../../core/models';
+import { MarkdownBlock, HeadingBlock, MarkdownInline } from '../../core/models';
 
 @Component({
   selector: 'app-markdown-heading',
@@ -56,7 +56,7 @@ import { MarkdownBlock, MarkdownInline } from '../../core/models';
   styleUrls: ['./heading.component.css']
 })
 export class MarkdownHeadingComponent implements OnChanges {
-  @Input({ required: true }) block!: MarkdownBlock;
+  @Input({ required: true }) block!: HeadingBlock;
   @Input() isComplete: boolean = true;
 
   headingClasses = signal<string>('markdown-heading');

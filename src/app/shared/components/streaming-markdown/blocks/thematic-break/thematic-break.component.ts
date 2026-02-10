@@ -7,7 +7,7 @@
  */
 
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { MarkdownBlock } from '../../core/models';
+import { MarkdownBlock, ThematicBreakBlock } from '../../core/models';
 
 @Component({
   selector: 'app-markdown-thematic-break',
@@ -17,6 +17,6 @@ import { MarkdownBlock } from '../../core/models';
   styleUrls: ['./thematic-break.component.css']
 })
 export class MarkdownThematicBreakComponent {
-  @Input({ required: true }) block!: MarkdownBlock;
+  @Input({ required: true }) block!: ThematicBreakBlock;
   @Input() isComplete: boolean = true;
 }

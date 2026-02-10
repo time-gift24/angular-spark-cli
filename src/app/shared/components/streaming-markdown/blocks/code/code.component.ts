@@ -9,7 +9,7 @@ import {
   inject
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MarkdownBlock, CodeLine } from '../../core/models';
+import { MarkdownBlock, CodeBlock, CodeLine, isCodeBlock } from '../../core/models';
 import { LANGUAGE_DISPLAY_NAMES } from '../../core/shini-types';
 import { HighlightSchedulerService } from '../../core/highlight-scheduler.service';
 
@@ -60,7 +60,7 @@ import { HighlightSchedulerService } from '../../core/highlight-scheduler.servic
   styleUrls: ['./code.component.css']
 })
 export class MarkdownCodeComponent implements OnChanges, OnDestroy {
-  @Input({ required: true }) block!: MarkdownBlock;
+  @Input({ required: true }) block!: CodeBlock;
   @Input() isComplete: boolean = true;
   @Input() blockIndex: number = -1;
   @Input() enableLazyHighlight: boolean = false;

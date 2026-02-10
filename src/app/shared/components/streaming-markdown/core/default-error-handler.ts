@@ -11,7 +11,8 @@ import {
   ErrorInput,
   ComponentErrorType
 } from './error-handling.types';
-import { MarkdownBlock, BlockType } from './models';
+import type { MarkdownBlock } from './models';
+import { BlockType } from './models';
 
 /**
  * Default implementation of IErrorHandler

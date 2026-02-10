@@ -9,15 +9,10 @@
 import { Signal } from '@angular/core';
 
 // ============================================================================
-// DISCRIMINATED UNION DOMAIN MODELS (Phase 1)
+// DOMAIN MODELS - Discriminated Union Types
 //
-// The new type-safe domain model using discriminated unions.
-// Each block type has only its relevant fields, eliminating the optional field
-// sprawl of the legacy MarkdownBlock interface.
-//
-// NOTE: The legacy MarkdownBlock interface is kept temporarily for backward
-// compatibility during migration. It will be removed once all consumers are
-// migrated to the new types.
+// Type-safe domain model using discriminated unions.
+// Each block type has only its relevant fields.
 // ============================================================================
 
 /**
@@ -66,9 +61,6 @@ export interface HeadingBlock extends MarkdownBlockBase {
 /**
  * Code block type.
  * Contains language and raw content for syntax highlighting.
- *
- * NOTE: highlightResult, isHighlighted, canLazyHighlight are intentionally
- * excluded from the domain model. These are managed by HighlightCoordinator.
  */
 export interface CodeBlock extends MarkdownBlockBase {
   type: BlockType.CODE_BLOCK;
@@ -76,28 +68,42 @@ export interface CodeBlock extends MarkdownBlockBase {
   language?: string;
   /** Original raw content (before highlighting) */
   rawContent?: string;
+  /** Highlighted HTML output (for code blocks with syntax highlighting) */
+  highlightedHTML?: string;
+  /** Signal-based highlight result (for reactive highlighting) */
+  highlightResult?: import('@angular/core').Signal<HighlightResult | null>;
+  /** Whether this block has been syntax-highlighted */
+  isHighlighted?: boolean;
+  /** Whether this block is eligible for lazy highlighting */
+  canLazyHighlight?: boolean;
 }
 
 /**
  * List block type.
  * Has a required subtype and nested items.
+ *
+ * NOTE: items is typed as string[] to avoid circular type reference.
+ * The parser will populate this with actual MarkdownBlock objects at runtime.
  */
 export interface ListBlock extends MarkdownBlockBase {
   type: BlockType.LIST;
   /** List subtype distinction */
   subtype: 'ordered' | 'unordered';
-  /** Nested list items (can contain nested blocks) */
-  items: MarkdownBlock[];
+  /** Nested list items (contains markdown content strings) */
+  items: string[];
 }
 
 /**
  * Blockquote block type.
  * Contains nested blocks.
+ *
+ * NOTE: blocks is typed as string[] to avoid circular type reference.
+ * The parser will populate this with actual MarkdownBlock objects at runtime.
  */
 export interface BlockquoteBlock extends MarkdownBlockBase {
   type: BlockType.BLOCKQUOTE;
-  /** Nested blocks (paragraphs, lists, etc.) */
-  blocks: MarkdownBlock[];
+  /** Nested blocks (contains markdown content strings) */
+  blocks: string[];
 }
 
 /**
@@ -168,7 +174,7 @@ export interface RawBlock extends MarkdownBlockBase {
  * Use the type guard functions (isCodeBlock, isHeadingBlock, etc.) for
  * runtime narrowing.
  */
-export type MarkdownBlockNew =
+export type MarkdownBlock =
   | ParagraphBlock
   | HeadingBlock
   | CodeBlock
@@ -192,7 +198,7 @@ export type MarkdownBlockNew =
  * Type guard for CodeBlock.
  * Use this to safely access language and rawContent fields.
  */
-export function isCodeBlock(block: MarkdownBlockNew): block is CodeBlock {
+export function isCodeBlock(block: MarkdownBlock): block is CodeBlock {
   return block.type === BlockType.CODE_BLOCK;
 }
 
@@ -200,7 +206,7 @@ export function isCodeBlock(block: MarkdownBlockNew): block is CodeBlock {
  * Type guard for HeadingBlock.
  * Use this to safely access level field.
  */
-export function isHeadingBlock(block: MarkdownBlockNew): block is HeadingBlock {
+export function isHeadingBlock(block: MarkdownBlock): block is HeadingBlock {
   return block.type === BlockType.HEADING;
 }
 
@@ -208,7 +214,7 @@ export function isHeadingBlock(block: MarkdownBlockNew): block is HeadingBlock {
  * Type guard for ListBlock.
  * Use this to safely access subtype and items fields.
  */
-export function isListBlock(block: MarkdownBlockNew): block is ListBlock {
+export function isListBlock(block: MarkdownBlock): block is ListBlock {
   return block.type === BlockType.LIST;
 }
 
@@ -216,7 +222,7 @@ export function isListBlock(block: MarkdownBlockNew): block is ListBlock {
  * Type guard for BlockquoteBlock.
  * Use this to safely access blocks field.
  */
-export function isBlockquoteBlock(block: MarkdownBlockNew): block is BlockquoteBlock {
+export function isBlockquoteBlock(block: MarkdownBlock): block is BlockquoteBlock {
   return block.type === BlockType.BLOCKQUOTE;
 }
 
@@ -224,54 +230,52 @@ export function isBlockquoteBlock(block: MarkdownBlockNew): block is BlockquoteB
  * Type guard for TableBlock.
  * Use this to safely access tableData field.
  */
-export function isTableBlock(block: MarkdownBlockNew): block is TableBlock {
+export function isTableBlock(block: MarkdownBlock): block is TableBlock {
   return block.type === BlockType.TABLE;
 }
 
 /**
  * Type guard for ParagraphBlock.
  */
-export function isParagraphBlock(block: MarkdownBlockNew): block is ParagraphBlock {
+export function isParagraphBlock(block: MarkdownBlock): block is ParagraphBlock {
   return block.type === BlockType.PARAGRAPH;
 }
 
 /**
  * Type guard for ThematicBreakBlock.
  */
-export function isThematicBreakBlock(block: MarkdownBlockNew): block is ThematicBreakBlock {
+export function isThematicBreakBlock(block: MarkdownBlock): block is ThematicBreakBlock {
   return block.type === BlockType.THEMATIC_BREAK;
 }
 
 /**
  * Type guard for HtmlBlock.
  */
-export function isHtmlBlock(block: MarkdownBlockNew): block is HtmlBlock {
+export function isHtmlBlock(block: MarkdownBlock): block is HtmlBlock {
   return block.type === BlockType.HTML;
 }
 
 /**
  * Type guard for FootnoteDefBlock.
  */
-export function isFootnoteDefBlock(block: MarkdownBlockNew): block is FootnoteDefBlock {
+export function isFootnoteDefBlock(block: MarkdownBlock): block is FootnoteDefBlock {
   return block.type === BlockType.FOOTNOTE_DEF;
 }
 
 /**
  * Type guard for UnknownBlock.
  */
-export function isUnknownBlock(block: MarkdownBlockNew): block is UnknownBlock {
+export function isUnknownBlock(block: MarkdownBlock): block is UnknownBlock {
   return block.type === BlockType.UNKNOWN;
 }
 
 /**
  * Type guard for RawBlock.
  */
-export function isRawBlock(block: MarkdownBlockNew): block is RawBlock {
+export function isRawBlock(block: MarkdownBlock): block is RawBlock {
   return block.type === BlockType.RAW;
 }
 
-// ============================================================================
-// LEGACY MODELS (to be removed after migration)
 // ============================================================================
 
 /**
@@ -338,81 +342,6 @@ export interface CodeLine {
 export interface HighlightResult {
   lines: CodeLine[];
   fallback: boolean;
-}
-
-/**
- * Represents a single markdown block in the document.
- * Each block has a unique identifier and contains all necessary metadata
- * for rendering and state management.
- *
- * @deprecated Use MarkdownBlockNew instead. This interface will be removed
- *             after all consumers are migrated to the discriminated union types.
- */
-export interface MarkdownBlock {
-  /** Unique identifier (UUID) for this block */
-  id: string;
-
-  /** Block type from the BlockType enumeration */
-  type: BlockType;
-
-  /** Raw markdown content of this block */
-  content: string;
-
-  /** Indicates whether the block is fully received or still streaming */
-  isComplete: boolean;
-
-  /** Position of this block in the document (0-indexed) */
-  position: number;
-
-  /** Heading level (1-6), only applicable for HEADING type blocks */
-  level?: number;
-
-  /** Programming language, only applicable for CODE_BLOCK type */
-  language?: string;
-
-  // === New fields for structured rendering ===
-
-  /** Subtype distinction (e.g., for lists: 'ordered' | 'unordered') */
-  subtype?: 'heading' | 'ordered' | 'unordered';
-
-  /** Original raw content (for code blocks, before highlighting) */
-  rawContent?: string;
-
-  /** Structured inline elements (for rich text paragraphs) */
-  children?: MarkdownInline[];
-
-  /** Nested list items (for list blocks) */
-  items?: MarkdownBlock[];
-
-  /** Table data, only for TABLE type blocks */
-  tableData?: {
-    headers: string[];
-    rows: string[][];
-    align?: (string | null)[];
-  };
-
-  /** Nested blocks (for blockquote containing paragraphs, lists, etc.) */
-  blocks?: MarkdownBlock[];
-
-  /** Footnote identifier (for FOOTNOTE_DEF blocks) */
-  footnoteId?: string;
-
-  /** Footnote definitions map (for FOOTNOTE_DEF blocks) */
-  footnoteDefs?: Map<string, string>;
-
-  // === Highlighting fields (for CODE_BLOCK type) ===
-
-  /** Highlighted HTML output (for code blocks with syntax highlighting) */
-  highlightedHTML?: string;
-
-  /** Signal-based highlight result (for reactive highlighting) */
-  highlightResult?: import('@angular/core').Signal<HighlightResult | null>;
-
-  /** Whether this block has been syntax-highlighted (for code blocks) */
-  isHighlighted?: boolean;
-
-  /** Whether this block is eligible for lazy highlighting (code blocks only) */
-  canLazyHighlight?: boolean;
 }
 
 /**

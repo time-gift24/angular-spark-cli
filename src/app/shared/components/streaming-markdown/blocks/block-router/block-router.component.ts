@@ -12,7 +12,7 @@
 
 import { Component, Input, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgComponentOutlet } from '@angular/common';
-import { MarkdownBlock, BlockType } from '../../core/models';
+import { MarkdownBlock, BlockType, isCodeBlock, isBlockquoteBlock } from '../../core/models';
 import { BLOCK_COMPONENT_REGISTRY, BlockComponentRegistry } from '../../core/plugin';
 
 @Component({
@@ -41,7 +41,7 @@ export class MarkdownBlockRouterComponent {
   resolvedComponent = computed(() => this.lookupComponent(this.block));
 
   resolvedInputs = computed(() => {
-    if (this.block?.type === BlockType.CODE_BLOCK) {
+    if (isCodeBlock(this.block)) {
       return {
         block: this.block,
         isComplete: this.isComplete,
@@ -51,7 +51,7 @@ export class MarkdownBlockRouterComponent {
       };
     }
 
-    if (this.block?.type === BlockType.BLOCKQUOTE) {
+    if (isBlockquoteBlock(this.block)) {
       return {
         block: this.block,
         isComplete: this.isComplete,

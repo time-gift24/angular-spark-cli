@@ -7,7 +7,7 @@
  */
 
 import { InjectionToken, Type } from '@angular/core';
-import { MarkdownBlock, MarkdownInline } from './models';
+import { MarkdownBlock, MarkdownInline, BlockType } from './models';
 
 export interface BlockParserContext {
   parseInlineTokens(tokens: any[] | undefined): MarkdownInline[];

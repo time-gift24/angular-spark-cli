@@ -365,33 +365,7 @@ export class BlockParser implements IBlockParser {
         const listToken = token as any;
         const items = listToken.items || [];
         const subtype = listToken.ordered ? 'ordered' : 'unordered';
-        const parsedItems: MarkdownBlock[] = items.map((item: any, i: number) => {
-          const itemId = `${baseBlock.id}-item-${i}`;
-          const itemBlock: MarkdownBlock = {
-            id: itemId,
-            type: BlockType.PARAGRAPH,
-            content: item.text || '',
-            isComplete: true,
-            position: i
-          };
-          // Handle nested lists
-          if (item.tokens) {
-            const nestedLists = item.tokens.filter((t: any) => t.type === 'list');
-            if (nestedLists.length > 0) {
-              const nestedList = nestedLists[0];
-              const nestedItems = (nestedList.items || []).map((ni: any, j: number) => ({
-                id: `${itemId}-nested-${j}`,
-                type: BlockType.PARAGRAPH,
-                content: ni.text || '',
-                isComplete: true,
-                position: j
-              }));
-              itemBlock.items = nestedItems;
-              itemBlock.subtype = nestedList.ordered ? 'ordered' : 'unordered';
-            }
-          }
-          return itemBlock;
-        });
+        const parsedItems: string[] = items.map((item: any) => item.text || '');
         return {
           ...baseBlock,
           type: BlockType.LIST,
@@ -403,14 +377,12 @@ export class BlockParser implements IBlockParser {
 
       case 'blockquote': {
         const bqToken = token as any;
-        const nestedBlocks: MarkdownBlock[] = [];
+        const nestedBlocks: string[] = [];
         if (bqToken.tokens && Array.isArray(bqToken.tokens)) {
-          let nestedPos = 0;
           for (const nestedToken of bqToken.tokens) {
-            const nestedBlock = this.tokenToBlock(nestedToken, nestedPos);
-            if (nestedBlock) {
-              nestedBlocks.push(nestedBlock);
-              nestedPos++;
+            const text = this.extractText(nestedToken);
+            if (text) {
+              nestedBlocks.push(text);
             }
           }
         }
@@ -418,7 +390,7 @@ export class BlockParser implements IBlockParser {
           ...baseBlock,
           type: BlockType.BLOCKQUOTE,
           content: this.extractText(token),
-          blocks: nestedBlocks.length > 0 ? nestedBlocks : undefined
+          blocks: nestedBlocks
         };
       }
 

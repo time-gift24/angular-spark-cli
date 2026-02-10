@@ -5,7 +5,8 @@
  * Implementation will be provided in Phase 2 (Task 2.3).
  */
 
-import { MarkdownBlock, BlockType } from './models';
+import type { MarkdownBlock } from './models';
+import { BlockType } from './models';
 
 /**
  * Block Factory interface
@@ -110,7 +111,7 @@ export class BlockFactory implements IBlockFactory {
       id: this.idGenerator.generate(),
       type: BlockType.HEADING,
       content,
-      level,
+      level: level as 1 | 2 | 3 | 4 | 5 | 6,
       isComplete: !streaming,
       position: 0 // Will be set by the parser
     };
@@ -155,6 +156,7 @@ export class BlockFactory implements IBlockFactory {
       id: this.idGenerator.generate(),
       type: BlockType.BLOCKQUOTE,
       content,
+      blocks: [],
       isComplete: !streaming,
       position: 0 // Will be set by the parser
     };

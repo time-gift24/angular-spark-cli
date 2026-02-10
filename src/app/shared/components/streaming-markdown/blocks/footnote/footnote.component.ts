@@ -8,7 +8,7 @@
  */
 
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { MarkdownBlock } from '../../core/models';
+import { MarkdownBlock, FootnoteDefBlock } from '../../core/models';
 
 @Component({
   selector: 'app-markdown-footnote',
@@ -30,7 +30,7 @@ import { MarkdownBlock } from '../../core/models';
   styleUrls: ['./footnote.component.css']
 })
 export class MarkdownFootnoteComponent {
-  @Input({ required: true }) block!: MarkdownBlock;
+  @Input({ required: true }) block!: FootnoteDefBlock;
   @Input() isComplete: boolean = true;
 
   get entries(): { id: string; text: string }[] {

@@ -20,7 +20,17 @@ export { StreamingMarkdownComponent } from './streaming-markdown.component';
 // Core types and models
 export {
   type MarkdownBlock,
-  type MarkdownBlockNew,
+  type ParagraphBlock,
+  type HeadingBlock,
+  type CodeBlock,
+  type ListBlock,
+  type BlockquoteBlock,
+  type TableBlock,
+  type ThematicBreakBlock,
+  type HtmlBlock,
+  type FootnoteDefBlock,
+  type UnknownBlock,
+  type RawBlock,
   type MarkdownInline,
   type StreamingState,
   type ParserResult,

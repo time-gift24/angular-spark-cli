@@ -10,7 +10,7 @@
 
 import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MarkdownBlock, MarkdownInline } from '../../core/models';
+import { MarkdownBlock, ParagraphBlock, MarkdownInline } from '../../core/models';
 
 @Component({
   selector: 'app-markdown-paragraph',
@@ -56,7 +56,7 @@ import { MarkdownBlock, MarkdownInline } from '../../core/models';
   styleUrls: ['./paragraph.component.css']
 })
 export class MarkdownParagraphComponent implements OnChanges {
-  @Input({ required: true }) block!: MarkdownBlock;
+  @Input({ required: true }) block!: ParagraphBlock;
   @Input() isComplete: boolean = true;
 
   paragraphClasses = signal<string>('markdown-paragraph block-paragraph');
