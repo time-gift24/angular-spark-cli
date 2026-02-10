@@ -364,14 +364,19 @@ registry.register(chartPlugin);
 
 ## MVP Scope
 
-### Must Have (Phase 1)
+### Phase 1 (本次实现)
 - ✅ BlockType → Component mapping registry
 - ✅ Depth limit (maxDepth = 1)
-- ✅ List and Blockquote 1-level nesting
+- ✅ List and Blockquote 1-level nesting (static, after stream complete)
 - ✅ Unknown type degradation to fallback
 - ✅ Basic test coverage
 
-### Nice to Have (Future)
+### Phase 2 (后续迭代)
+- 🔄 Streaming nested detection
+- 🔄 Partial nested rendering with cursor
+- 🔄 NestContext state machine
+
+### Phase 3 (未来)
 - 🔄 Circular reference detection
 - 🔄 Dynamic plugin hot-reload
 - 🔄 Configurable nesting depth
@@ -388,8 +393,197 @@ registry.register(chartPlugin);
 
 ---
 
+## Streaming + Nested Rendering Integration
+
+### Challenge
+
+Current streaming uses incremental parsing, but nested blocks require complete structures.
+
+### Solution: Partial Rendering Mode
+
+**Strategy**: Already-closed parent items render immediately, unclosed nested content stays in `currentBlock` with cursor.
+
+### State Machine Extension
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Nested Streaming State                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │              NestContext (栈结构)                        │   │
+│  │  ┌─────────────────────────────────────────────────┐    │   │
+│  │  │ depth: number                                    │    │   │
+│  │  │ expectedIndent: number  (下一行期望的缩进)        │    │   │
+│  │  │ blockType: 'list' | 'blockquote'                 │    │   │
+│  │  │ isComplete: boolean                              │    │   │
+│  │  └─────────────────────────────────────────────────┘    │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  currentContext: NestContext | null                             │
+│  contextStack: NestContext[]  ← 用于多层嵌套检测                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### State Transitions
+
+```
+┌─────────┐    缩进增加     ┌──────────────┐
+│  FLAT   │ ──────────────> │ NEST_ENTERED │
+│ (平铺)  │                 │ (进入嵌套)    │
+└─────────┘                 └──────┬───────┘
+     ▲                            │
+     │                            │ 缩进减少 且 有父项继续
+     │                            │
+     │                    ┌───────▼─────────┐
+     │                    │ NEST_SIBLING    │
+     │                    │ (同级项继续)     │
+     │                    └───────┬─────────┘
+     │                            │
+     │                            │ 缩进减少 且 无父项继续
+     │                            │
+     │                    ┌───────▼─────────┐
+     │                    │ NEST_EXITED     │
+     └────────────────────┘                │
+                                          │
+                                          ▼
+                                    ┌─────────┐
+                                    │  FLAT   │
+                                    └─────────┘
+```
+
+### Nested Completeness Detection
+
+```typescript
+// 伪代码：检测 List 嵌套是否完整
+interface ListContext {
+  depth: number;
+  expectedIndent: number;
+  parentItems: string[];
+  nestedList?: ListBlock;
+}
+
+function detectListNestingComplete(lines: string[], context: ListContext): boolean {
+  const currentLine = lines[lines.length - 1];
+  const indent = getIndent(currentLine);
+
+  // 缩进减少 = 子列表可能闭合
+  if (indent < context.expectedIndent) {
+    const hasParentContinuation = currentLine.matches(/^[*\-\+]\s/);
+    return hasParentContinuation;
+  }
+
+  return false;
+}
+
+// 检测 Blockquote 嵌套是否完整
+function detectBlockquoteNestingComplete(lines: string[]): boolean {
+  const lastLine = lines[lines.length - 1];
+  // 空行或非 `>` 开头表示引用结束
+  return !lastLine.trim().startsWith('>');
+}
+```
+
+### Streaming Render Strategy
+
+```
+incoming chunk
+       │
+       ▼
+  ┌─────────────────┐
+  │ 有嵌套结构？      │
+  └────┬────────────┘
+       │
+   ┌───┴────┐
+   │        │
+  No       Yes
+   │        │
+   ▼        ▼
+ 平铺    ┌─────────────────┐
+ 处理    │ 嵌套完整？        │
+         └────┬────────────┘
+              │
+          ┌───┴────┐
+          │        │
+        Yes       No
+          │        │
+          ▼        ▼
+    递归解析   保持 currentBlock
+    加入 blocks   (带嵌套光标)
+```
+
+### Data Structure Extensions
+
+```typescript
+// 扩展的流式状态
+interface StreamingState {
+  blocks: MarkdownBlock[];
+  currentBlock: MarkdownBlock | null;
+  rawContent: string;
+
+  // 新增：嵌套上下文
+  nestContext?: {
+    type: 'list' | 'blockquote';
+    depth: number;
+    expectedIndent?: number;
+    incompletePath: string[];
+  };
+}
+
+// 部分嵌套块（用于 currentBlock）
+interface PartialListBlock extends ListBlock {
+  isPartial: true;
+  nestedPartial?: PartialListBlock;
+}
+
+interface PartialBlockquoteBlock extends BlockquoteBlock {
+  isPartial: true;
+  nestedPartial?: MarkdownBlock;
+}
+```
+
+### Component Handling
+
+```angular
+<!-- BlockRouter 处理部分块 -->
+@Component({
+  template: `
+    @if (block.isPartial) {
+      <app-partial-block-renderer [block]="block" />
+    } @else {
+      <!-- 正常渲染 -->
+      <ng-container [ngSwitch]="block.type">...</ng-container>
+    }
+  `
+})
+export class MarkdownBlockRouterComponent {
+  @Input() block!: MarkdownBlock;
+
+  isPartial(): boolean {
+    return 'isPartial' in block && (block as any).isPartial === true;
+  }
+}
+```
+
+### Performance Optimizations
+
+1. **缓存嵌套解析结果** - 已解析的嵌套块不重新解析
+2. **延迟递归解析** - streaming 期间只构建结构树
+3. **增量 ID 生成** - 嵌套块使用 "parent-id.child-index" 格式
+4. **浅拷贝优化** - blocks[] 更新时只替换变化部分
+
+### Test Scenarios
+
+| Category | Cases |
+|----------|-------|
+| **基础嵌套** | `- a\n  - b` → a 渲染, b 在 currentBlock |
+| **深度限制** | `- a\n  - b\n    - c` → c 不渲染 (depth=2) |
+| **边界情况** | 缩进忽多忽少、空行打断、代码块内的列表样式 |
+| **性能测试** | 1000 行平铺列表、100 层嵌套限制触发 |
+
+---
+
 ## Open Questions
 
-1. **Streaming Integration**: How does nested block rendering work with incremental parsing?
-   - Needs investigation into current streaming mechanism
+None
 
