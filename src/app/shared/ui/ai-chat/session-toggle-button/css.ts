@@ -1,6 +1,6 @@
 /**
  * Session Toggle Button Component - Tailwind CSS Utilities
- * Mineral & Time Theme - shadcn-inspired
+ * Using CSS variables for theme support
  */
 
 /**
@@ -14,25 +14,25 @@ export const fixedPosition = ['fixed top-6 right-6'].join(' ');
 export const relativePosition = ['relative'].join(' ');
 
 /**
- * Session toggle button base
+ * Session toggle button base - using theme CSS variables
  */
 export const sessionToggleBase = [
   'w-14 h-14 rounded-7',
-  'bg-[oklch(0.48_0.07_195_/98%)]',
+  'bg-primary/98',
   'backdrop-blur-[20px]',
   '-webkit-backdrop-blur-[20px]',
   'border-0',
-  'shadow-[0_6px_20px_oklch(0.28_0.03_185_/25%),0_0_0_3px_oklch(0.48_0.07_195_/30%)]',
+  'shadow-[0_6px_20px_oklch(0_0_0/25%),0_0_0_3px_var(--primary)/30]',
   'cursor-pointer',
   'flex items-center justify-center',
   'transition-transform duration-[350ms] ease-[var(--ease-spring-snappy)]',
   'z-[1000]',
-  'p-0 text-white',
-  'hover:bg-[oklch(0.48_0.07_195)]',
+  'p-0 text-primary-foreground',
+  'hover:bg-primary',
   'hover:scale-[1.08]',
-  'hover:shadow-[0_8px_24px_oklch(0.28_0.03_185_/30%),0_0_0_4px_oklch(0.48_0.07_195_/40%)]',
+  'hover:shadow-[0_8px_24px_oklch(0_0_0/30%),0_0_0_4px_var(--primary)/40]',
   'active:scale-[0.95]',
-  'focus-visible:outline-2 focus-visible:outline-[oklch(0.48_0.07_195)] focus-visible:outline-offset-2',
+  'focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2',
 ].join(' ');
 
 /**
@@ -41,14 +41,14 @@ export const sessionToggleBase = [
 export const hasBadgePulse = ['animate-pulse'].join(' ');
 
 /**
- * Notification badge
+ * Notification badge - using theme CSS variables
  */
 export const notificationBadge = [
   'absolute top-0.5 right-0.5',
   'w-[14px] h-[14px] rounded-[7px]',
-  'bg-[oklch(0.50_0.20_25)]',
-  'border-2 border-[oklch(0.48_0.07_195_/98%)]',
-  'shadow-[0_2px_6px_oklch(0.28_0.03_185_/40%)]',
+  'bg-destructive',
+  'border-2 border-primary/98',
+  'shadow-[0_2px_6px_oklch(0_0_0/40%)]',
 ].join(' ');
 
 /**

@@ -9,24 +9,24 @@
   min-height: var(--input-min-height) !important;
   box-sizing: border-box !important;
 
-  /* 背景色 - 使用卡片背景色 */
-  background-color: var(--card) !important;
+  /* 背景色 - 使用 input 背景色变量 */
+  background-color: var(--input) !important;
   color: var(--foreground) !important;
 
-  /* 浅石绿边框 - 矿物主题 */
-  border: 1px solid oklch(0.7 0.045 195) !important;
+  /* 边框 - 使用主题边框色变量 */
+  border: 1px solid var(--border) !important;
 }
 
-/* Hover State - 矿物质感悬停效果 */
+/* Hover State - 悬停效果 */
 :host(:hover:not(:disabled):not(:focus)) {
-  border-color: oklch(0.6 0.06 195) !important;
+  border-color: var(--ring) !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-/* Focus State - 石绿焦点环 */
+/* Focus State - 主题色焦点环 */
 :host(:focus-visible) {
-  border-color: var(--primary) !important;
-  box-shadow: 0 0 0 3px oklch(from var(--primary) calc(l + 0.15) c h / 0.25) !important;
+  border-color: var(--ring) !important;
+  box-shadow: 0 0 0 3px oklch(from var(--ring) calc(l + 0.15) c h / 0.25) !important;
   outline: none;
 }
 

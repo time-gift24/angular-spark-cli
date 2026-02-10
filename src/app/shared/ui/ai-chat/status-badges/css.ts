@@ -1,6 +1,6 @@
 /**
  * Status Badges Component - Tailwind CSS Utilities
- * Mineral & Time Theme - shadcn-inspired
+ * Using CSS variables for theme support
  */
 
 /**
@@ -25,39 +25,39 @@ export const badgeBase = [
 ].join(' ');
 
 /**
- * Badge - Thinking (primary green)
+ * Badge - Thinking (using primary color)
  */
 export const badgeThinking = [
-  'bg-[oklch(0.48_0.07_195_/15%)]',
-  'border border-[oklch(0.48_0.07_195_/40%)]',
-  'text-[oklch(0.48_0.07_195)]',
+  'bg-primary/15',
+  'border border-primary/40',
+  'text-primary',
 ].join(' ');
 
 /**
- * Badge - Typing (cyan/azurite)
+ * Badge - Typing (using accent color)
  */
 export const badgeTyping = [
-  'bg-[oklch(0.60_0.08_210_/15%)]',
-  'border border-[oklch(0.60_0.08_210_/40%)]',
-  'text-[oklch(0.60_0.08_210)]',
+  'bg-accent/15',
+  'border border-accent/40',
+  'text-accent',
 ].join(' ');
 
 /**
- * Badge - Done (light green)
+ * Badge - Done (using secondary color)
  */
 export const badgeDone = [
-  'bg-[oklch(0.55_0.06_195_/15%)]',
-  'border border-[oklch(0.55_0.06_195_/40%)]',
-  'text-[oklch(0.55_0.06_195)]',
+  'bg-secondary/30',
+  'border border-secondary/50',
+  'text-foreground',
 ].join(' ');
 
 /**
- * Badge - Error (red/cinnabar)
+ * Badge - Error (using destructive color)
  */
 export const badgeError = [
-  'bg-[oklch(0.50_0.20_25_/15%)]',
-  'border border-[oklch(0.50_0.20_25_/40%)]',
-  'text-[oklch(0.50_0.20_25)]',
+  'bg-destructive/15',
+  'border border-destructive/40',
+  'text-destructive',
 ].join(' ');
 
 /**
@@ -65,8 +65,8 @@ export const badgeError = [
  */
 export const pulsingDot = [
   'w-2 h-2 rounded-full',
-  'bg-[oklch(0.48_0.07_195)]',
-  'shadow-[0_0_6px_oklch(0.48_0.07_195_/60%)]',
+  'bg-primary',
+  'shadow-[0_0_6px_var(--primary)/60]',
 ].join(' ');
 
 /**
@@ -77,7 +77,7 @@ export const typingIndicator = ['flex gap-0.5 items-center', 'w-4 h-2.5'].join('
 /**
  * Typing dot
  */
-export const typingDot = ['w-[3px] h-[3px] rounded-full', 'bg-[oklch(0.60_0.08_210)]'].join(' ');
+export const typingDot = ['w-[3px] h-[3px] rounded-full', 'bg-accent'].join(' ');
 
 /**
  * Icon (Done/Error)

@@ -297,6 +297,120 @@
     --sidebar-ring: oklch(0.48 0.07 195);
   }
 
+  .theme-tiny3 {
+    /* Light mode - Tiny3 Theme: 蓝色主色 + 红色强调 */
+    /* 背景色 - 纯白 */
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.1 0 0);
+
+    /* Card - 纯白 */
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.1 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.1 0 0);
+
+    /* Primary - 主题蓝色: 鲜明的主色 */
+    --primary: oklch(0.55 0.15 250);
+    --primary-foreground: oklch(1 0 0);
+
+    /* Secondary - 次要灰色 */
+    --secondary: oklch(0.96 0 0);
+    --secondary-foreground: oklch(0.2 0 0);
+
+    /* Muted - 浅灰背景 */
+    --muted: oklch(0.96 0 0);
+    --muted-foreground: oklch(0.45 0 0);
+
+    /* Accent - 浅蓝色变体: 用于悬停、高亮等辅助效果 */
+    --accent: oklch(0.75 0.08 250);
+    --accent-foreground: oklch(0.1 0 0);
+    --accent-hover: oklch(0.7 0.1 250);
+    --accent-active: oklch(0.6 0.12 250);
+
+    /* Destructive - 强调红: 用于危险/删除操作 */
+    --destructive: oklch(0.55 0.15 20);
+    --destructive-foreground: oklch(1 0 0);
+
+    /* Borders and inputs - 浅灰边框 */
+    --border: oklch(0.92 0 0);
+    --input: oklch(0.98 0 0);
+    --ring: oklch(0.55 0.15 250);
+
+    /* Chart colors - 蓝色系 + 强调红 */
+    --chart-1: oklch(0.55 0.15 250); /* 主题蓝 */
+    --chart-2: oklch(0.65 0.12 250); /* 浅蓝 */
+    --chart-3: oklch(0.7 0.1 250);   /* 更浅蓝 */
+    --chart-4: oklch(0.55 0.15 20);  /* 强调红 */
+    --chart-5: oklch(0.6 0.08 280);  /* 紫蓝 */
+
+    /* Sidebar colors - light mode */
+    --sidebar: oklch(0.98 0 0);
+    --sidebar-foreground: oklch(0.1 0 0);
+    --sidebar-primary: oklch(0.55 0.15 250);
+    --sidebar-primary-foreground: oklch(1 0 0);
+    --sidebar-accent: oklch(0.75 0.08 250);
+    --sidebar-accent-foreground: oklch(0.1 0 0);
+    --sidebar-border: oklch(0.92 0 0);
+    --sidebar-ring: oklch(0.55 0.15 250);
+  }
+
+  .theme-tiny3.dark {
+    /* Dark mode - Tiny3 Theme */
+    /* 背景色 - 深灰黑 */
+    --background: oklch(0.15 0 0);
+    --foreground: oklch(0.95 0 0);
+
+    /* Card - 深灰 */
+    --card: oklch(0.18 0 0);
+    --card-foreground: oklch(0.95 0 0);
+    --popover: oklch(0.18 0 0);
+    --popover-foreground: oklch(0.95 0 0);
+
+    /* Primary - 亮蓝色 */
+    --primary: oklch(0.65 0.15 250);
+    --primary-foreground: oklch(0.15 0 0);
+
+    /* Secondary - 深灰 */
+    --secondary: oklch(0.25 0 0);
+    --secondary-foreground: oklch(0.95 0 0);
+
+    /* Muted - 深灰 */
+    --muted: oklch(0.22 0 0);
+    --muted-foreground: oklch(0.6 0 0);
+
+    /* Accent - 亮蓝色变体: 用于悬停、高亮 */
+    --accent: oklch(0.8 0.08 250);
+    --accent-foreground: oklch(0.1 0 0);
+    --accent-hover: oklch(0.75 0.1 250);
+    --accent-active: oklch(0.65 0.12 250);
+
+    /* Destructive - 亮红 */
+    --destructive: oklch(0.65 0.15 20);
+    --destructive-foreground: oklch(1 0 0);
+
+    /* Borders and inputs - 半透明边框 */
+    --border: oklch(0.3 0 0 / 60%);
+    --input: oklch(0.25 0 0 / 80%);
+    --ring: oklch(0.65 0.15 250);
+
+    /* Chart colors - 暗色版本 */
+    --chart-1: oklch(0.65 0.15 250);
+    --chart-2: oklch(0.7 0.12 250);
+    --chart-3: oklch(0.75 0.1 250);
+    --chart-4: oklch(0.65 0.15 20);
+    --chart-5: oklch(0.7 0.08 280);
+
+    /* Sidebar colors - dark mode */
+    --sidebar: oklch(0.18 0 0);
+    --sidebar-foreground: oklch(0.95 0 0);
+    --sidebar-primary: oklch(0.65 0.15 250);
+    --sidebar-primary-foreground: oklch(0.15 0 0);
+    --sidebar-accent: oklch(0.8 0.08 250);
+    --sidebar-accent-foreground: oklch(0.15 0 0);
+    --sidebar-border: oklch(0.3 0 0 / 60%);
+    --sidebar-ring: oklch(0.65 0.15 250);
+  }
+
   .dark {
     /* Dark mode - 矿物与时光 (Mineral & Time) 岩彩主题 */
     /* 背景色 - 深石青: 夜晚山峦的深邃 */

@@ -32,7 +32,7 @@
   box-shadow: 0 2px 4px oklch(0 0 0 /0.15);
 }
 .session-tab.active {
-  border-color: oklch(0.48 0.07 195);
+  border-color: var(--primary);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px oklch(0 0 0 /0.2);
 }
@@ -48,7 +48,7 @@
   outline-offset: 2px;
 }
 .session-tab.active:focus-visible {
-  outline-color: oklch(0.48 0.07 195);
+  outline-color: var(--primary);
 }
 .session-tab.session-color-default {
   background: oklch(0.48 0.07 195 /0.2);
@@ -133,7 +133,7 @@
   box-shadow: 0 2px 4px oklch(0 0 0 /30%);
 }
 .dark .session-tab.active {
-  border-color: oklch(0.62 0.08 195);
+  border-color: var(--primary);
   box-shadow: 0 2px 4px oklch(0 0 0 /35%);
 }
 @media (max-width: 640px) {

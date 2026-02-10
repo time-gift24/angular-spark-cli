@@ -68,7 +68,7 @@
   min-width: 8px;
   min-height: 8px;
   border-radius: 50%;
-  background-color: oklch(0.6 0.15 145); /* Green - online */
+  background-color: var(--accent); /* Using theme accent color */
   border: 2px solid var(--background);
 }
 
