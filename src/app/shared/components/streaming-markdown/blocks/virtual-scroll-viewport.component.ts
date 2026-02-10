@@ -20,6 +20,7 @@ import {
   EventEmitter,
   ViewChild,
   ElementRef,
+  AfterViewInit,
   OnDestroy,
   ChangeDetectionStrategy,
   computed,
@@ -72,7 +73,7 @@ export interface ScrollEvent {
     </div>
   `
 })
-export class VirtualScrollViewportComponent implements OnDestroy {
+export class VirtualScrollViewportComponent implements AfterViewInit, OnDestroy {
   /** Reference to the viewport element */
   @ViewChild('viewport', { static: true }) viewport!: ElementRef<HTMLDivElement>;
 
@@ -131,6 +132,14 @@ export class VirtualScrollViewportComponent implements OnDestroy {
   /** Target scroll position for RAF */
   private targetScrollTop = 0;
 
+  /** Whether viewport has been initialized */
+  private isViewReady = false;
+
+  ngAfterViewInit(): void {
+    this.isViewReady = true;
+    requestAnimationFrame(() => this.emitViewportState());
+  }
+
   ngOnDestroy(): void {
     if (this.rafId !== null) {
       cancelAnimationFrame(this.rafId);
@@ -144,11 +153,7 @@ export class VirtualScrollViewportComponent implements OnDestroy {
   onScroll(event: Event): void {
     const target = event.target as HTMLElement;
     this.targetScrollTop = target.scrollTop;
-
-    // Only request RAF if not already pending and scroll position changed
-    if (this.rafId === null && this.targetScrollTop !== this.lastScrollTop) {
-      this.rafId = requestAnimationFrame(() => this.processScroll());
-    }
+    this.scheduleScrollProcessing();
   }
 
   /**
@@ -157,27 +162,51 @@ export class VirtualScrollViewportComponent implements OnDestroy {
   private processScroll(): void {
     this.rafId = null;
 
-    if (this.targetScrollTop === this.lastScrollTop) {
+    if (!this.viewport?.nativeElement) {
       return;
     }
 
-    this.lastScrollTop = this.targetScrollTop;
-    this.scrollTop.set(this.targetScrollTop);
+    const element = this.viewport.nativeElement;
+    const maxScrollTop = Math.max(0, element.scrollHeight - element.clientHeight);
+    const nextScrollTop = Math.max(0, Math.min(this.targetScrollTop, maxScrollTop));
 
-    // Update viewport height
-    if (this.viewport?.nativeElement) {
-      this.viewportHeight.set(this.viewport.nativeElement.clientHeight);
+    if (nextScrollTop !== this.lastScrollTop) {
+      this.lastScrollTop = nextScrollTop;
+      this.scrollTop.set(nextScrollTop);
     }
 
-    // Emit scroll event
+    this.viewportHeight.set(element.clientHeight);
+
     this.scroll.emit({
-      scrollTop: this.targetScrollTop,
-      scrollHeight: this.viewport.nativeElement.scrollHeight,
-      clientHeight: this.viewport.nativeElement.clientHeight
+      scrollTop: this.scrollTop(),
+      scrollHeight: element.scrollHeight,
+      clientHeight: element.clientHeight
     });
 
-    // Emit visible range change
     this.visibleRangeChange.emit(this.windowSignal());
+  }
+
+  /**
+   * Schedule scroll processing on next animation frame
+   */
+  private scheduleScrollProcessing(): void {
+    if (this.rafId !== null || !this.isViewReady) {
+      return;
+    }
+
+    this.rafId = requestAnimationFrame(() => this.processScroll());
+  }
+
+  /**
+   * Emit the latest viewport metrics immediately
+   */
+  private emitViewportState(): void {
+    if (!this.viewport?.nativeElement) {
+      return;
+    }
+
+    this.targetScrollTop = this.viewport.nativeElement.scrollTop;
+    this.processScroll();
   }
 
   /**
@@ -186,6 +215,8 @@ export class VirtualScrollViewportComponent implements OnDestroy {
   scrollTo(scrollTop: number): void {
     if (this.viewport?.nativeElement) {
       this.viewport.nativeElement.scrollTop = scrollTop;
+      this.targetScrollTop = this.viewport.nativeElement.scrollTop;
+      this.scheduleScrollProcessing();
     }
   }
 
@@ -196,6 +227,8 @@ export class VirtualScrollViewportComponent implements OnDestroy {
     if (this.viewport?.nativeElement) {
       const el = this.viewport.nativeElement;
       el.scrollTop = el.scrollHeight;
+      this.targetScrollTop = el.scrollTop;
+      this.scheduleScrollProcessing();
     }
   }
 

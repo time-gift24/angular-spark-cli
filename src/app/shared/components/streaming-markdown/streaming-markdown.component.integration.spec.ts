@@ -6,8 +6,9 @@ import { StreamingMarkdownComponent } from './streaming-markdown.component';
 import { MarkdownPreprocessor } from './core/markdown-preprocessor';
 import { BlockParser } from './core/block-parser';
 import { ShiniHighlighter } from './core/shini-highlighter';
-import { MarkdownBlock, StreamingState, createEmptyState } from './core/models';
+import { MarkdownBlock, StreamingState, createEmptyState, CodeLine } from './core/models';
 import { BlockType } from './core/models';
+import { HighlightSchedulerService } from './core/highlight-scheduler.service';
 
 // Vitest imports
 import { beforeEach, describe, it, expect, vi, afterEach } from 'vitest';
@@ -1119,6 +1120,8 @@ Escaped: \\*not italic\\*
 // =============================================================================
 
 describe('Progressive Highlighting Integration', () => {
+  let scheduler: HighlightSchedulerService;
+
   beforeEach(async () => {
     vi.clearAllMocks();
 
@@ -1156,6 +1159,7 @@ describe('Progressive Highlighting Integration', () => {
 
     fixture = TestBed.createComponent(StreamingMarkdownComponent);
     component = fixture.componentInstance;
+    scheduler = fixture.debugElement.injector.get(HighlightSchedulerService);
   });
 
   /**
@@ -1195,6 +1199,93 @@ describe('Progressive Highlighting Integration', () => {
       const blocks = (component as any).blocks();
       const codeBlocks = blocks.filter((b: MarkdownBlock) => b.type === BlockType.CODE_BLOCK);
       expect(codeBlocks.length).toBeGreaterThan(0);
+    });
+
+    it('should highlight top-level fenced block when lazyHighlight is off', async () => {
+      const markdown = '```typescript\nconst top = 1;\n```\n';
+      component.stream$ = of(markdown);
+      component.enableLazyHighlight = false;
+
+      component.ngOnInit();
+      await waitFor(180);
+      fixture.detectChanges();
+
+      const blocks = (component as any).blocks() as MarkdownBlock[];
+      const codeBlock = blocks.find((b) => b.type === BlockType.CODE_BLOCK);
+      expect(codeBlock).toBeTruthy();
+      expect(codeBlock?.id).toBeTruthy();
+
+      const highlighted = scheduler.getHighlightedLines(codeBlock!.id);
+      expect(highlighted?.length).toBeGreaterThan(0);
+    });
+
+    it('should highlight top-level fenced block when lazyHighlight is on', async () => {
+      const markdown = '```typescript\nconst lazyTop = 2;\n```\n';
+      component.stream$ = of(markdown);
+      component.enableLazyHighlight = true;
+
+      component.ngOnInit();
+      await waitFor(220);
+      fixture.detectChanges();
+
+      const blocks = (component as any).blocks() as MarkdownBlock[];
+      const codeBlock = blocks.find((b) => b.type === BlockType.CODE_BLOCK);
+      expect(codeBlock).toBeTruthy();
+
+      const highlighted = scheduler.getHighlightedLines(codeBlock!.id);
+      expect(highlighted?.length).toBeGreaterThan(0);
+    });
+
+    it('should highlight blockquote fenced block when lazyHighlight is on', async () => {
+      const markdown = [
+        '> quoted block',
+        '>',
+        '> ```typescript',
+        '> const nested = true;',
+        '> ```'
+      ].join('\n');
+
+      component.stream$ = of(markdown);
+      component.enableLazyHighlight = true;
+
+      component.ngOnInit();
+      await waitFor(220);
+      fixture.detectChanges();
+
+      const blocks = (component as any).blocks() as MarkdownBlock[];
+      const blockquote = blocks.find((b) => b.type === BlockType.BLOCKQUOTE);
+      expect(blockquote).toBeTruthy();
+
+      const nestedCode = blockquote?.blocks?.find((b) => b.type === BlockType.CODE_BLOCK);
+      expect(nestedCode).toBeTruthy();
+
+      const highlighted = scheduler.getHighlightedLines(nestedCode!.id);
+      expect(highlighted?.length).toBeGreaterThan(0);
+    });
+
+    it('should highlight blockquote fenced block when lazyHighlight is off', async () => {
+      const markdown = [
+        '> quoted block',
+        '>',
+        '> ```typescript',
+        '> const nestedOff = true;',
+        '> ```'
+      ].join('\n');
+
+      component.stream$ = of(markdown);
+      component.enableLazyHighlight = false;
+
+      component.ngOnInit();
+      await waitFor(220);
+      fixture.detectChanges();
+
+      const blocks = (component as any).blocks() as MarkdownBlock[];
+      const blockquote = blocks.find((b) => b.type === BlockType.BLOCKQUOTE);
+      const nestedCode = blockquote?.blocks?.find((b) => b.type === BlockType.CODE_BLOCK);
+      expect(nestedCode).toBeTruthy();
+
+      const highlighted = scheduler.getHighlightedLines(nestedCode!.id);
+      expect(highlighted?.length).toBeGreaterThan(0);
     });
   });
 

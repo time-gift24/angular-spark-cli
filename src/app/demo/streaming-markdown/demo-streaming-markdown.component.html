@@ -1,111 +1,46 @@
-<div class="test-container">
-  <!-- Page Header -->
-  <header class="test-header">
-    <h1 class="test-title">Streaming Markdown Demo</h1>
-    <p class="test-description">
-      Test harness for real-time markdown streaming with Angular Signals and RxJS
-    </p>
+<div class="demo-page">
+  <header class="demo-header">
+    <h1>Streaming Markdown Demo</h1>
+    <p>同一份 Markdown：左侧静态渲染，右侧流式渲染。</p>
   </header>
 
-  <!-- Status Indicator -->
-  <div class="status-indicator" [class.active]="isStreaming">
-    <span class="status-dot"></span>
-    <span class="status-text">
-      {{ isStreaming ? 'Streaming Active' : 'Ready to Stream' }}
+  <section class="controls">
+    <button type="button" class="btn primary" (click)="startStreaming()" [disabled]="isStreaming">
+      开始 Streaming
+    </button>
+    <button type="button" class="btn" (click)="stopStreaming()" [disabled]="!isStreaming">
+      停止
+    </button>
+    <button type="button" class="btn" (click)="replayStreaming()">
+      重播
+    </button>
+
+    <label class="toggle">
+      <input
+        type="checkbox"
+        [checked]="enableLazyHighlight"
+        (change)="enableLazyHighlight = !enableLazyHighlight" />
+      lazyHighlight
+    </label>
+
+    <span class="status" [class.active]="isStreaming">
+      {{ isStreaming ? 'Streaming中' : '已停止' }}
     </span>
-  </div>
-
-  <!-- Controls Section -->
-  <section class="controls-section">
-    <div class="controls-header">
-      <h2>Controls</h2>
-    </div>
-    <div class="controls-buttons">
-      <button
-        class="control-button primary"
-        (click)="startStreaming()"
-        [disabled]="isStreaming">
-        Start Streaming
-      </button>
-      <button
-        class="control-button secondary"
-        (click)="stopStreaming()"
-        [disabled]="!isStreaming">
-        Stop
-      </button>
-      <button
-        class="control-button outline"
-        (click)="reset()">
-        Reset
-      </button>
-    </div>
   </section>
 
-  <!-- Streaming Output Section -->
-  <section class="output-section">
-    <div class="output-header">
-      <h2>Markdown Output</h2>
-      <span class="output-badge" *ngIf="isStreaming">Live</span>
-    </div>
-    <div class="output-container-wrapper">
-      <div class="output-container">
-        <app-streaming-markdown
-          [stream$]="aiStream$"
-          [maxHeight]="'540px'"
-          (rawContentChange)="onRawContentChange($event)">
-        </app-streaming-markdown>
-      </div>
+  <section class="compare-grid">
+    <article class="panel">
+      <h2>静态渲染（一次性）</h2>
+      <static-markdown [content]="markdownContent"></static-markdown>
+    </article>
 
-      <!-- Copy button - bottom right, outside container -->
-      @if (rawMarkdown.length > 0) {
-        <button
-          class="copy-button-external"
-          (click)="copyToClipboard()"
-          [title]="copied() ? 'Copied!' : 'Copy markdown'"
-          [attr.aria-label]="copied() ? 'Copied to clipboard' : 'Copy markdown to clipboard'">
-          @if (copied()) {
-            <!-- Check icon (✓) -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          } @else {
-            <!-- Copy clipboard icon (📋) -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
-            </svg>
-          }
-        </button>
-      }
-    </div>
-  </section>
-
-  <!-- Rendering Showcase Section -->
-  <section class="output-section">
-    <div class="output-header">
-      <h2>Rendering Showcase</h2>
-      <span class="showcase-badge">Phase 3</span>
-    </div>
-    <div class="output-container">
+    <article class="panel">
+      <h2>流式渲染（分块输入）</h2>
       <app-streaming-markdown
-        [stream$]="showcaseStream$">
+        [stream$]="stream$"
+        [maxHeight]="'680px'"
+        [enableLazyHighlight]="enableLazyHighlight">
       </app-streaming-markdown>
-    </div>
-  </section>
-
-  <!-- Info Section -->
-  <section class="info-section">
-    <div class="info-header">
-      <h2>Features</h2>
-    </div>
-    <ul class="info-list">
-      <li>Nested inline formatting (bold+italic, strikethrough)</li>
-      <li>Image rendering with responsive sizing</li>
-      <li>Blockquote with nested blocks (paragraphs, lists, code)</li>
-      <li>Code block: syntax highlighting, copy & download</li>
-      <li>Table with CSV copy & download toolbar</li>
-      <li>Footnotes with back-references</li>
-      <li>Superscript & subscript support</li>
-      <li>Self-healing preprocessor (12 handlers)</li>
-    </ul>
+    </article>
   </section>
 </div>

@@ -11,7 +11,7 @@
  * - No UUID dependency
  */
 
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, Optional } from '@angular/core';
 import { marked } from 'marked';
 import { Token } from 'marked';
 import {
@@ -20,6 +20,13 @@ import {
   ParserResult,
   BlockType
 } from './models';
+import {
+  BLOCK_COMPONENT_REGISTRY,
+  BlockComponentRegistry,
+  BlockParseBase,
+  BlockParserContext,
+  TokenHandlerInput
+} from './plugin';
 
 // Type alias for Marked.js tokens
 type MarkedToken = Token;
@@ -52,6 +59,18 @@ export interface IBlockParser {
 @Injectable()
 export class BlockParser implements IBlockParser {
   private cache: IncrementalCache = { parsedText: '', stableBlocks: [], stableTextEnd: 0 };
+
+  private readonly parserContext: BlockParserContext = {
+    parseInlineTokens: (tokens) => this.parseInlineTokens(tokens),
+    extractText: (token) => this.extractText(token),
+    tokenToBlock: (token, position) => this.tokenToBlock(token, position),
+    generateStableId: (type, position) => this.generateStableId(type, position)
+  };
+
+  constructor(
+    @Optional() @Inject(BLOCK_COMPONENT_REGISTRY)
+    private readonly registry?: BlockComponentRegistry
+  ) {}
 
   /**
    * Generate deterministic ID from block type + position.
@@ -297,11 +316,16 @@ export class BlockParser implements IBlockParser {
    * Converts a marked.js token to a MarkdownBlock.
    */
   private tokenToBlock(token: MarkedToken, position: number): MarkdownBlock | null {
-    const baseBlock = {
+    const baseBlock: BlockParseBase = {
       id: this.generateStableId(token.type, position),
       position,
       isComplete: true
     };
+
+    const extensionBlock = this.tryExtensionHandlers(token, position, baseBlock);
+    if (extensionBlock !== undefined) {
+      return extensionBlock;
+    }
 
     switch (token.type) {
       case 'heading': {
@@ -328,12 +352,13 @@ export class BlockParser implements IBlockParser {
       }
 
       case 'code':
+        const normalizedLanguage = this.normalizeCodeFenceLanguage((token as any).lang);
         return {
           ...baseBlock,
           type: BlockType.CODE_BLOCK,
           content: (token as any).text || '',
           rawContent: (token as any).text || '',
-          language: (token as any).lang || undefined
+          language: normalizedLanguage
         };
 
       case 'list': {
@@ -436,13 +461,66 @@ export class BlockParser implements IBlockParser {
     }
   }
 
+  private tryExtensionHandlers(
+    token: MarkedToken,
+    position: number,
+    baseBlock: BlockParseBase
+  ): MarkdownBlock | null | undefined {
+    const extensions = this.registry?.parserExtensions;
+    if (!extensions || extensions.length === 0) {
+      return undefined;
+    }
+
+    for (const { extension } of extensions) {
+      if (extension.type && extension.type !== token.type) {
+        continue;
+      }
+
+      if (extension.match && !extension.match(token)) {
+        continue;
+      }
+
+      const input: TokenHandlerInput = {
+        token,
+        position,
+        baseBlock,
+        context: this.parserContext
+      };
+
+      return extension.handler(input);
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Normalize fenced-code language for streaming safety.
+   * Markdown streaming may temporarily produce malformed language strings
+   * such as "Value |"; sanitize to a safe identifier or undefined.
+   */
+  private normalizeCodeFenceLanguage(rawLanguage: unknown): string | undefined {
+    if (typeof rawLanguage !== 'string') {
+      return undefined;
+    }
+
+    const trimmed = rawLanguage.trim().toLowerCase();
+    if (!trimmed) {
+      return undefined;
+    }
+
+    const firstToken = trimmed.split(/[\s|,:;]+/)[0] || '';
+    const cleaned = firstToken.replace(/[^a-z0-9+#._-]/g, '');
+
+    return cleaned || undefined;
+  }
+
   /**
    * Parse marked.js inline tokens into MarkdownInline array.
    * Recursively handles nested tokens (e.g. bold containing italic).
    * Maps: strong→bold, em→italic, del→strikethrough, codespan→code,
    *       link→link, image→image, br→hard-break, html→sup/sub/footnote-ref
    */
-  private parseInlineTokens(tokens: any[]): MarkdownInline[] {
+  private parseInlineTokens(tokens: any[] | undefined): MarkdownInline[] {
     if (!tokens || !Array.isArray(tokens)) return [];
 
     const result: MarkdownInline[] = [];

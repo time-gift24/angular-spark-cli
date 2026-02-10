@@ -7,7 +7,61 @@
  */
 
 import { InjectionToken, Type } from '@angular/core';
-import { MarkdownBlock } from './models';
+import { MarkdownBlock, MarkdownInline } from './models';
+
+export interface BlockParserContext {
+  parseInlineTokens(tokens: any[] | undefined): MarkdownInline[];
+  extractText(token: any): string;
+  tokenToBlock(token: any, position: number): MarkdownBlock | null;
+  generateStableId(type: string, position: number): string;
+}
+
+export interface BlockParseBase {
+  id: string;
+  position: number;
+  isComplete: boolean;
+}
+
+export interface TokenHandlerInput {
+  token: any;
+  position: number;
+  baseBlock: BlockParseBase;
+  context: BlockParserContext;
+}
+
+export type BlockTokenHandler = (input: TokenHandlerInput) => MarkdownBlock | null;
+
+export interface BlockParserExtension {
+  type?: string;
+  match?: (token: any) => boolean;
+  handler: BlockTokenHandler;
+}
+
+export function defineBlockParserExtension(extension: BlockParserExtension): BlockParserExtension {
+  return extension;
+}
+
+export interface StreamdownPluginInput extends Omit<StreamdownPlugin, 'components'> {
+  components?: Record<string, Type<any>>;
+}
+
+export function createStreamdownPlugin(input: StreamdownPluginInput): StreamdownPlugin {
+  return {
+    components: {},
+    ...input
+  };
+}
+
+export function createParserExtensionPlugin(
+  name: string,
+  ...parserExtensions: BlockParserExtension[]
+): StreamdownPlugin {
+  return {
+    name,
+    components: {},
+    parserExtensions
+  };
+}
 
 /**
  * Interface that all block renderer components must satisfy.
@@ -45,6 +99,9 @@ export interface StreamdownPlugin {
 
   /** Optional custom matcher for blocks that don't match by type string alone */
   blockMatcher?: BlockMatcher;
+
+  /** Optional parser extensions for custom marked tokens */
+  parserExtensions?: BlockParserExtension[];
 }
 
 /**
@@ -60,6 +117,11 @@ export interface BlockComponentRegistry {
     pluginName: string;
     matcher: BlockMatcher;
     components: Record<string, Type<any>>;
+  }[];
+
+  parserExtensions: {
+    pluginName: string;
+    extension: BlockParserExtension;
   }[];
 }
 

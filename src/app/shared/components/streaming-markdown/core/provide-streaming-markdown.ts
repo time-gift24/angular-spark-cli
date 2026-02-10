@@ -20,6 +20,7 @@ import {
 function buildRegistry(plugins: StreamdownPlugin[]): BlockComponentRegistry {
   const componentMap = new Map<string, any>();
   const matchers: BlockComponentRegistry['matchers'] = [];
+  const parserExtensions: BlockComponentRegistry['parserExtensions'] = [];
 
   for (const plugin of plugins) {
     for (const [type, comp] of Object.entries(plugin.components)) {
@@ -32,9 +33,16 @@ function buildRegistry(plugins: StreamdownPlugin[]): BlockComponentRegistry {
         components: plugin.components
       });
     }
+
+    for (const extension of plugin.parserExtensions || []) {
+      parserExtensions.push({
+        pluginName: plugin.name,
+        extension
+      });
+    }
   }
 
-  return { componentMap, matchers };
+  return { componentMap, matchers, parserExtensions };
 }
 
 /**

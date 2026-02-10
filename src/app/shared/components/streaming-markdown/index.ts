@@ -5,6 +5,15 @@
  * Exports the main component, services, and types for public use.
  */
 
+import { EnvironmentProviders } from '@angular/core';
+import { builtinPlugin } from './plugins/builtin-plugin';
+import { provideStreamingMarkdown } from './core/provide-streaming-markdown';
+import type { StreamdownPlugin } from './core/plugin';
+
+export function provideDefaultStreamingMarkdown(...plugins: StreamdownPlugin[]): EnvironmentProviders {
+  return provideStreamingMarkdown(builtinPlugin(), ...plugins);
+}
+
 // Main component
 export { StreamingMarkdownComponent } from './streaming-markdown.component';
 
@@ -61,9 +70,43 @@ export type { HighlightSchedulerConfig, HighlightPriority } from './core/highlig
 export {
   type BlockRenderer,
   type BlockMatcher,
+  type BlockParserContext,
+  type BlockParseBase,
+  type TokenHandlerInput,
+  type BlockTokenHandler,
+  type BlockParserExtension,
   type StreamdownPlugin,
-  type BlockComponentRegistry
+  type BlockComponentRegistry,
+  createStreamdownPlugin,
+  createParserExtensionPlugin,
+  defineBlockParserExtension
 } from './core/plugin';
 
 // Provider function
 export { provideStreamingMarkdown } from './core/provide-streaming-markdown';
+export { builtinPlugin } from './plugins/builtin-plugin';
+
+// Stream adapters
+export {
+  sseToMarkdownStream$,
+  fetchStreamToMarkdownStream$,
+  type SseAdapterOptions,
+  type FetchStreamAdapterOptions
+} from './core/stream-adapters';
+
+// Error handling
+export {
+  ComponentErrorType,
+  type ErrorSeverity,
+  type ErrorCode,
+  type ErrorCategory,
+  type StreamingMarkdownError,
+  type HighlightingError,
+  type ComponentError,
+  type ErrorInput,
+  type ErrorHandlerResult,
+  type IErrorHandler,
+  type ErrorBoundaryState,
+  type RetryConfig,
+  type IErrorFactory
+} from './core/error-handling';

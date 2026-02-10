@@ -1,21 +1,15 @@
-/**
- * Markdown Code Component
- *
- * Renders code blocks with syntax highlighting using Shiki token-based rendering.
- * Includes language label, copy button, and line numbers.
- * Falls back to plain text if highlighting fails.
- * Skips highlighting during streaming for performance.
- *
- * Implements BlockRenderer interface for plugin architecture.
- * Uses token-based rendering (no innerHTML / DomSanitizer).
- */
-
-import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy, inject, computed } from '@angular/core';
+import {
+  Component,
+  Input,
+  signal,
+  OnChanges,
+  OnDestroy,
+  SimpleChanges,
+  ChangeDetectionStrategy,
+  inject
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { from, switchMap, timeout, catchError, of } from 'rxjs';
 import { MarkdownBlock, CodeLine } from '../../core/models';
-import { ShiniHighlighter } from '../../core/shini-highlighter';
-import { IErrorHandler, ComponentErrorType } from '../../core/error-handling';
 import { LANGUAGE_DISPLAY_NAMES } from '../../core/shini-types';
 import { HighlightSchedulerService } from '../../core/highlight-scheduler.service';
 
@@ -27,7 +21,6 @@ import { HighlightSchedulerService } from '../../core/highlight-scheduler.servic
   template: `
     <div class="code-block-wrapper">
       @if (isComplete) {
-        <!-- Header bar with language label and copy button -->
         <div class="code-header">
           <span class="code-language">{{ displayLanguage }}</span>
           <div class="code-actions">
@@ -61,33 +54,35 @@ import { HighlightSchedulerService } from '../../core/highlight-scheduler.servic
         </div>
       }
 
-      <!-- Code block with line numbers -->
       <pre [class]="codeWrapperClasses()" class="markdown-code">@if (!isComplete) {<code class="code-streaming">{{ code }}</code>} @else if (highlightedLines().length > 0) {<code>@for (line of highlightedLines(); track line.lineNumber) {<span class="code-line"><span class="line-number">{{ line.lineNumber }}</span><span class="line-content">@for (token of line.tokens; track $index) {<span [style.color]="token.color" [class.italic]="token.fontStyle === 1" [class.bold]="token.fontStyle === 2" [class.underline]="token.fontStyle === 4">{{ token.content }}</span>}</span></span>}</code>} @else {<code>{{ code }}</code>}</pre>
     </div>
   `,
   styleUrls: ['./code.component.css']
 })
-export class MarkdownCodeComponent implements OnChanges {
+export class MarkdownCodeComponent implements OnChanges, OnDestroy {
   @Input({ required: true }) block!: MarkdownBlock;
   @Input() isComplete: boolean = true;
   @Input() blockIndex: number = -1;
   @Input() enableLazyHighlight: boolean = false;
+  @Input() allowHighlight: boolean = true;
 
   highlightedLines = signal<CodeLine[]>([]);
   codeWrapperClasses = signal<string>('markdown-code block-code');
   copied = signal<boolean>(false);
 
-  /** Whether this block is eligible for lazy highlighting */
-  readonly canLazyHighlight = computed(() =>
-    this.enableLazyHighlight &&
-    this.block.type === 'code' &&
-    this.isComplete &&
-    !this.block.isHighlighted
-  );
-
-  private shiniHighlighter = inject(ShiniHighlighter);
   private highlightScheduler = inject(HighlightSchedulerService);
-  private errorHandler?: IErrorHandler;
+  private unsubscribeHighlightResult: (() => void) | null = null;
+
+  constructor() {
+    this.unsubscribeHighlightResult = this.highlightScheduler.onHighlightResult((result) => {
+      if (!this.block || result.blockId !== this.block.id) {
+        return;
+      }
+
+      this.highlightedLines.set(result.lines);
+      this.block.isHighlighted = true;
+    });
+  }
 
   get code(): string {
     return this.block.rawContent || this.block.content;
@@ -104,69 +99,60 @@ export class MarkdownCodeComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['block'] || changes['isComplete']) {
-      // If lazy highlighting is enabled and block is complete, queue it
-      if (this.canLazyHighlight() && this.blockIndex >= 0) {
-        this.queueForHighlighting();
-      } else {
-        // Otherwise highlight immediately
-        this.highlightCode();
-      }
+    if (changes['block'] || changes['isComplete'] || changes['enableLazyHighlight'] || changes['allowHighlight'] || changes['blockIndex']) {
+      void this.syncHighlightState();
     }
   }
 
-  private getCurrentTheme(): 'light' | 'dark' {
-    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-  }
-
-  /**
-   * Queue this block for lazy highlighting via scheduler
-   */
-  private queueForHighlighting(): void {
-    if (!this.isComplete || this.block.isHighlighted) {
-      return;
+  ngOnDestroy(): void {
+    if (this.unsubscribeHighlightResult) {
+      this.unsubscribeHighlightResult();
+      this.unsubscribeHighlightResult = null;
     }
-
-    // Add block to highlight queue
-    this.highlightScheduler.queueBlock(this.block, this.blockIndex);
-
-    // Subscribe to highlight results via the scheduler's state
-    // The component will receive updated highlighted data through the block reference
   }
 
-  /**
-   * Immediate highlighting (non-lazy path)
-   */
-  private highlightCode(): void {
-    if (!this.isComplete) {
+  private async syncHighlightState(): Promise<void> {
+    if (!this.isComplete || !this.allowHighlight) {
       this.highlightedLines.set([]);
       return;
     }
 
-    const theme = this.getCurrentTheme();
+    const externalHighlight = this.block.highlightResult?.();
+    if (externalHighlight?.lines?.length) {
+      this.highlightedLines.set(externalHighlight.lines);
+      this.block.isHighlighted = true;
+      return;
+    }
 
-    from(this.shiniHighlighter.whenReady())
-      .pipe(
-        switchMap(() =>
-          from(this.shiniHighlighter.highlightToTokens(this.code, this.language, theme))
-        ),
-        timeout(5000),
-        catchError((error) => {
-          if (this.errorHandler) {
-            this.errorHandler.handle({
-              type: ComponentErrorType.HIGHLIGHT_FAILED,
-              message: `Failed to highlight ${this.language} code`,
-              originalError: error
-            });
-          } else {
-            console.error('[MarkdownCodeComponent] Highlight failed:', error);
-          }
-          return of(this.shiniHighlighter.plainTextFallback(this.code));
-        })
-      )
-      .subscribe((lines: CodeLine[]) => {
-        this.highlightedLines.set(lines);
-      });
+    const cached = this.highlightScheduler.getHighlightedLines(this.block.id);
+    if (cached?.length) {
+      this.highlightedLines.set(cached);
+      this.block.isHighlighted = true;
+      return;
+    }
+
+    const index = this.resolveBlockIndex();
+
+    if (this.enableLazyHighlight) {
+      this.highlightScheduler.queueBlock(this.block, index);
+      return;
+    }
+
+    const lines = await this.highlightScheduler.highlightNow(this.block, index);
+    this.highlightedLines.set(lines);
+    this.block.isHighlighted = true;
+  }
+
+  private resolveBlockIndex(): number {
+    if (this.blockIndex >= 0) {
+      return this.blockIndex;
+    }
+
+    if (typeof this.block.position === 'number' && this.block.position >= 0) {
+      return this.block.position;
+    }
+
+    return 0;
   }
 
   async copyToClipboard(): Promise<void> {

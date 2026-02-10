@@ -188,7 +188,7 @@ describe('MarkdownBlockquoteComponent', () => {
       component.isComplete = false;
       fixture.detectChanges();
 
-      const indicator = fixture.nativeElement.querySelector('.streaming-indicator');
+      const indicator = fixture.nativeElement.querySelector('.streaming-cursor');
       expect(indicator).toBeTruthy();
     });
 
@@ -197,7 +197,7 @@ describe('MarkdownBlockquoteComponent', () => {
       component.isComplete = true;
       fixture.detectChanges();
 
-      const indicator = fixture.nativeElement.querySelector('.streaming-indicator');
+      const indicator = fixture.nativeElement.querySelector('.streaming-cursor');
       expect(indicator).toBeFalsy();
     });
 
@@ -206,13 +206,13 @@ describe('MarkdownBlockquoteComponent', () => {
       component.isComplete = false;
       fixture.detectChanges();
 
-      let indicator = fixture.nativeElement.querySelector('.streaming-indicator');
+      let indicator = fixture.nativeElement.querySelector('.streaming-cursor');
       expect(indicator).toBeTruthy();
 
       component.isComplete = true;
       fixture.detectChanges();
 
-      indicator = fixture.nativeElement.querySelector('.streaming-indicator');
+      indicator = fixture.nativeElement.querySelector('.streaming-cursor');
       expect(indicator).toBeFalsy();
     });
 
@@ -221,7 +221,7 @@ describe('MarkdownBlockquoteComponent', () => {
       component.isComplete = false;
       fixture.detectChanges();
 
-      const indicator = fixture.nativeElement.querySelector('.streaming-indicator');
+      const indicator = fixture.nativeElement.querySelector('.streaming-cursor');
       expect(indicator.tagName).toBe('SPAN');
     });
   });
@@ -340,6 +340,28 @@ describe('MarkdownBlockquoteComponent', () => {
       // Content should be direct text node, not wrapped in another element
       expect(blockquote.children.length).toBe(0); // No child elements when not streaming
       expect(blockquote.childNodes.length).toBeGreaterThan(0); // Has text nodes
+    });
+
+    it('should pass block index and lazy flag to nested router', () => {
+      component.blockIndex = 10;
+      component.enableLazyHighlight = true;
+      component.block = createMockBlock(BlockType.BLOCKQUOTE, 'quote', {
+        blocks: [
+          createMockBlock(BlockType.CODE_BLOCK, 'const nested = true;', {
+            id: 'nested-code',
+            position: 0,
+            rawContent: 'const nested = true;',
+            language: 'typescript'
+          })
+        ]
+      });
+
+      fixture.detectChanges();
+
+      const router = fixture.componentInstance as any;
+      expect(router.resolveChildBlockIndex(component.block.blocks![0], 0)).toBe(0);
+      const nestedRouterEl = fixture.nativeElement.querySelector('app-markdown-block-router');
+      expect(nestedRouterEl).toBeTruthy();
     });
   });
 

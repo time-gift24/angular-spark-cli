@@ -15,6 +15,25 @@ const THEME_MAP: Record<string, string> = {
 }
 
 /**
+ * Map common aliases and normalize unknown streaming language values.
+ */
+const LANGUAGE_ALIAS_MAP: Record<string, string> = {
+  js: 'javascript',
+  cjs: 'javascript',
+  mjs: 'javascript',
+  ts: 'typescript',
+  mts: 'typescript',
+  cts: 'typescript',
+  py: 'python',
+  yml: 'yaml',
+  shell: 'bash',
+  sh: 'bash',
+  zsh: 'bash',
+  csharp: 'c#',
+  'c++': 'cpp',
+}
+
+/**
  * Shini highlighter service implementation
  * Manages Shini WASM instance for code highlighting
  */
@@ -100,8 +119,9 @@ export class ShiniHighlighter implements IShiniHighlighter {
 
     try {
       const shikiTheme = THEME_MAP[theme] || THEME_MAP['light']
+      const shikiLanguage = this.normalizeLanguage(language)
       const tokenLines: ThemedToken[][] = await codeToTokensBase(code, {
-        lang: language as any,
+        lang: shikiLanguage as any,
         theme: shikiTheme as any
       })
 
@@ -114,9 +134,25 @@ export class ShiniHighlighter implements IShiniHighlighter {
         }))
       }))
     } catch (error) {
-      console.error('[ShiniHighlighter] Token highlighting failed:', error)
+      // Streaming can temporarily produce malformed/unknown language identifiers.
+      // Fallback to plain text without noisy error logs.
       return this.plainTextFallback(code)
     }
+  }
+
+  private normalizeLanguage(language: string): string {
+    const normalized = (language || '').trim().toLowerCase()
+    if (!normalized) {
+      return 'text'
+    }
+
+    const firstToken = normalized.split(/[\s|,:;]+/)[0] || ''
+    const cleaned = firstToken.replace(/[^a-z0-9+#._-]/g, '')
+    if (!cleaned) {
+      return 'text'
+    }
+
+    return LANGUAGE_ALIAS_MAP[cleaned] || cleaned
   }
 
   /**

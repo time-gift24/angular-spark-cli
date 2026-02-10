@@ -6,7 +6,7 @@
  * height caching, and scroll position tracking.
  */
 
-import { inject, Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import {
   VirtualScrollConfig,
   VirtualWindow,
@@ -114,35 +114,58 @@ export class VirtualScrollService {
    * @returns The visible window with start, end, totalHeight, and offsetTop
    */
   calculateWindow(scrollTop: number, viewportHeight: number, totalBlocks: number): VirtualWindow {
+    if (totalBlocks <= 0) {
+      return {
+        start: 0,
+        end: 0,
+        totalHeight: 0,
+        offsetTop: 0
+      };
+    }
+
     const overscan = this.config.overscan ?? DEFAULT_VIRTUAL_SCROLL_CONFIG.overscan!;
     const estimatedHeight = this.heightCache.estimatedHeight;
+    const normalizedViewportHeight = Math.max(viewportHeight, estimatedHeight);
+    const totalHeight = this.calculateTotalHeight(totalBlocks);
+    const maxScrollTop = Math.max(0, totalHeight - normalizedViewportHeight);
+    const normalizedScrollTop = Math.min(Math.max(0, scrollTop), maxScrollTop);
 
     // Find start index by accumulating heights from top
     let accumulatedHeight = 0;
-    let startIndex = 0;
+    let firstVisibleIndex = 0;
 
     for (let i = 0; i < totalBlocks; i++) {
       const blockHeight = this.heightCache.heights.get(i) ?? estimatedHeight;
-      if (accumulatedHeight + blockHeight > scrollTop) {
-        startIndex = Math.max(0, i - overscan);
+      if (accumulatedHeight + blockHeight > normalizedScrollTop) {
+        firstVisibleIndex = i;
         break;
       }
       accumulatedHeight += blockHeight;
+
+      if (i === totalBlocks - 1) {
+        firstVisibleIndex = i;
+      }
     }
+
+    const startIndex = Math.max(0, firstVisibleIndex - overscan);
 
     // Find end index by accumulating from start
     let visibleHeight = 0;
-    let endIndex = startIndex;
+    let endIndex = firstVisibleIndex;
 
-    for (let i = startIndex; i < totalBlocks; i++) {
+    for (let i = firstVisibleIndex; i < totalBlocks; i++) {
       const blockHeight = this.heightCache.heights.get(i) ?? estimatedHeight;
       visibleHeight += blockHeight;
       endIndex = i;
 
-      if (visibleHeight >= viewportHeight) {
+      if (visibleHeight >= normalizedViewportHeight) {
         endIndex = Math.min(totalBlocks - 1, i + overscan);
         break;
       }
+    }
+
+    if (endIndex < startIndex) {
+      endIndex = startIndex;
     }
 
     // Calculate offset for positioning the first visible block
@@ -154,7 +177,7 @@ export class VirtualScrollService {
     return {
       start: startIndex,
       end: endIndex,
-      totalHeight: this.calculateTotalHeight(totalBlocks),
+      totalHeight,
       offsetTop
     };
   }
@@ -167,7 +190,7 @@ export class VirtualScrollService {
    * @param height - Measured height in pixels
    */
   updateBlockHeight(index: number, height: number): void {
-    if (height > 0) {
+    if (index >= 0 && height > 0) {
       this.heightCache.heights.set(index, height);
     }
   }

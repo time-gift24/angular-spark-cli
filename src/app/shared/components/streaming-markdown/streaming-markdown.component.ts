@@ -21,34 +21,39 @@ import {
   SimpleChanges,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
+  Injector,
+  inject,
   computed,
+  effect,
   signal,
   Signal,
+  WritableSignal,
   ViewChild,
   ElementRef,
   AfterViewChecked
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, Subject, Subscription, of } from 'rxjs';
-import { takeUntil, catchError, bufferTime, filter, map } from 'rxjs/operators';
+import { Observable, Subject, Subscription } from 'rxjs';
+import { takeUntil, bufferTime, filter, map } from 'rxjs/operators';
 import {
   MarkdownBlock,
   StreamingState,
+  StreamingStatus,
   ParserResult,
   createEmptyState,
   VirtualScrollConfig,
   VirtualWindow,
-  DEFAULT_VIRTUAL_SCROLL_CONFIG
+  DEFAULT_VIRTUAL_SCROLL_CONFIG,
+  HighlightResult,
+  CodeLine
 } from './core/models';
 import { MarkdownBlockRouterComponent } from './blocks/block-router/block-router.component';
-import { VirtualScrollViewportComponent } from './blocks/virtual-scroll-viewport.component';
+import { ScrollEvent, VirtualScrollViewportComponent } from './blocks/virtual-scroll-viewport.component';
 import { VirtualScrollService } from './core/virtual-scroll.service';
 import {
-  IMarkdownPreprocessor,
   MarkdownPreprocessor
 } from './core/markdown-preprocessor';
 import {
-  IBlockParser,
   BlockParser
 } from './core/block-parser';
 import { ShiniHighlighter } from './core/shini-highlighter';
@@ -145,6 +150,7 @@ export interface IChangeDetector {
           [blocks]="blocks"
           [config]="virtualScrollConfig()"
           [window]="visibleWindow()"
+          (scroll)="onViewportScroll($event)"
           (visibleRangeChange)="onVisibleRangeChange($event)"
           class="overflow-auto"
           [style.max-height]="maxHeight">
@@ -152,7 +158,10 @@ export interface IChangeDetector {
           @for (block of visibleBlocks(); track trackById(block)) {
             <app-markdown-block-router
               [block]="block"
-              [isComplete]="true" />
+              [isComplete]="true"
+              [blockIndex]="block.position"
+              [enableLazyHighlight]="enableLazyHighlight"
+              [allowHighlight]="true" />
           }
         </app-virtual-scroll-viewport>
       } @else {
@@ -165,14 +174,20 @@ export interface IChangeDetector {
           @for (block of blocks(); track trackById(block)) {
             <app-markdown-block-router
               [block]="block"
-              [isComplete]="true" />
+              [isComplete]="true"
+              [blockIndex]="block.position"
+              [enableLazyHighlight]="enableLazyHighlight"
+              [allowHighlight]="true" />
           }
 
           <!-- Render currently streaming block (if any) -->
           @if (currentBlock()) {
             <app-markdown-block-router
               [block]="currentBlock()!"
-              [isComplete]="false" />
+              [isComplete]="false"
+              [blockIndex]="-1"
+              [enableLazyHighlight]="false"
+              [allowHighlight]="false" />
           }
         </div>
       }
@@ -182,14 +197,26 @@ export interface IChangeDetector {
 export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy, AfterViewChecked {
   @Input() stream$!: Observable<string>;
   @Input() maxHeight: string | undefined;
-  @Input() virtualScroll: VirtualScrollConfig | boolean = true;
+  @Input() set virtualScroll(value: VirtualScrollConfig | boolean) {
+    this.virtualScrollInput.set(value);
+  }
+  get virtualScroll(): VirtualScrollConfig | boolean {
+    return this.virtualScrollInput();
+  }
   @Input() enableLazyHighlight: boolean = true;
   @Output() rawContentChange = new EventEmitter<string>();
+  @Output() statusChange = new EventEmitter<'streaming' | 'completed' | 'error'>();
+  @Output() completed = new EventEmitter<string>();
+  @Output() error = new EventEmitter<Error>();
 
   @ViewChild('container', { static: false }) container!: ElementRef<HTMLDivElement>;
   @ViewChild(VirtualScrollViewportComponent, { static: false }) virtualViewport?: VirtualScrollViewportComponent;
 
   private needsScroll = false;
+  private readonly injector = inject(Injector);
+  private virtualScrollInput = signal<VirtualScrollConfig | boolean>(true);
+  private highlightSignals = new Map<string, WritableSignal<HighlightResult | null>>();
+  private streamStatus = signal<StreamingStatus>('idle');
 
   protected blocks = computed(() => this.state().blocks);
   protected currentBlock = computed(() => this.state().currentBlock);
@@ -198,13 +225,15 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
 
   /** Virtual scroll configuration - computed from input */
   protected virtualScrollConfig = computed<VirtualScrollConfig>(() => {
-    if (typeof this.virtualScroll === 'boolean') {
+    const virtualScrollInput = this.virtualScrollInput();
+
+    if (typeof virtualScrollInput === 'boolean') {
       return {
         ...DEFAULT_VIRTUAL_SCROLL_CONFIG,
-        enabled: this.virtualScroll
+        enabled: virtualScrollInput
       };
     }
-    return { ...DEFAULT_VIRTUAL_SCROLL_CONFIG, ...this.virtualScroll };
+    return { ...DEFAULT_VIRTUAL_SCROLL_CONFIG, ...virtualScrollInput };
   });
 
   /** Whether virtual scrolling should be active */
@@ -216,12 +245,19 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     return config.enabled && !isStreaming && blockCount >= (config.minBlocksForVirtual ?? 100);
   });
 
-  /** Current visible window for virtual scrolling */
-  protected visibleWindow = signal<VirtualWindow>({
-    start: 0,
-    end: 0,
-    totalHeight: 0,
-    offsetTop: 0
+  /** Current visible window computed by virtual scroll service */
+  protected visibleWindow = computed<VirtualWindow>(() => {
+    if (!this.shouldUseVirtualScroll()) {
+      const totalBlocks = this.blocks().length;
+      return {
+        start: 0,
+        end: Math.max(0, totalBlocks - 1),
+        totalHeight: 0,
+        offsetTop: 0
+      };
+    }
+
+    return this.virtualScrollService.window();
   });
 
   /** Currently visible blocks based on virtual window */
@@ -251,7 +287,12 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     private shini: ShiniHighlighter,
     private virtualScrollService: VirtualScrollService,
     private highlightScheduler: HighlightSchedulerService
-  ) {}
+  ) {
+    effect(() => {
+      this.virtualScrollService.setConfig(this.virtualScrollConfig());
+      this.virtualScrollService.setTotalBlocks(this.blocks().length);
+    }, { injector: this.injector });
+  }
 
   ngOnInit(): void {
     // Initialize Shini highlighter asynchronously (don't block streaming)
@@ -265,9 +306,9 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['stream$'] && !changes['stream$'].isFirstChange()) {
-      // Clean up previous subscription and reset parser cache
+      // Clean up previous subscription and reset full component state
       this.unsubscribeFromStream();
-      this.parser.reset();
+      this.resetStreamingState();
 
       // Subscribe to new stream
       this.subscribeToStream();
@@ -294,6 +335,7 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
 
     // Reset parser cache for new stream
     this.parser.reset();
+    this.emitStatus('streaming');
 
     this.streamSubscription = this.stream$.pipe(
       // Buffer chunks for ~2 frames at 60fps to reduce parse frequency
@@ -302,11 +344,6 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
       filter((chunks: string[]) => chunks.length > 0),
       // Merge buffered chunks into a single string
       map((chunks: string[]) => chunks.join('')),
-      // Handle errors gracefully
-      catchError((error: Error) => {
-        console.error('[StreamingMarkdownComponent] Stream error:', error);
-        return of('');
-      }),
       // Complete when component is destroyed
       takeUntil(this.destroy$)
     ).subscribe({
@@ -325,14 +362,17 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
           this.cdr.markForCheck();
         }
 
-        // If stream completes (no current block), initialize lazy highlighting
-        if (!updatedState.currentBlock && this.enableLazyHighlight) {
-          // Use setTimeout to defer until after rendering
-          setTimeout(() => this.initializeLazyHighlighting(), 0);
-        }
       },
       error: (error: Error) => {
-        console.error('[StreamingMarkdownComponent] Subscription error:', error);
+        this.handleStreamError(error);
+      },
+      complete: () => {
+        this.emitStatus('completed');
+        this.completed.emit(this.rawContent());
+
+        if (this.enableLazyHighlight) {
+          setTimeout(() => this.initializeLazyHighlighting(), 0);
+        }
       }
     });
   }
@@ -342,25 +382,30 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
    * Uses incremental parsing to avoid re-tokenizing stable blocks.
    */
   private processChunk(chunk: string): StreamingState {
-    // Step 1: Preprocess the chunk for syntax correction
-    const processedChunk = this.preprocessor.process(chunk);
-
-    // Step 2: Accumulate to existing raw content
+    // Step 1: Accumulate raw content exactly as received
     const currentState = this.state();
-    const updatedRawContent = currentState.rawContent + processedChunk;
+    const updatedRawContent = currentState.rawContent + chunk;
+
+    // Step 2: Preprocess only for parser input (do not mutate raw content)
+    const previousParseInput = this.preprocessor.process(currentState.rawContent);
+    const nextParseInput = this.preprocessor.process(updatedRawContent);
 
     // Step 3: Parse incrementally — only re-tokenize the tail
     const parserResult: ParserResult = this.parser.parseIncremental(
-      currentState.rawContent,
-      updatedRawContent
+      previousParseInput,
+      nextParseInput
     );
 
     // Step 4: Extract current block if parser detected incomplete block
     let currentBlock: MarkdownBlock | null = null;
-    let completedBlocks: MarkdownBlock[] = [...parserResult.blocks];
+    let completedBlocks: MarkdownBlock[] = parserResult.blocks.map((block) => this.decorateBlock(block));
 
     if (parserResult.hasIncompleteBlock && completedBlocks.length > 0) {
       currentBlock = completedBlocks.pop() || null;
+    }
+
+    if (currentBlock) {
+      currentBlock = this.decorateBlock(currentBlock);
     }
 
     // Step 5: Return updated state
@@ -380,12 +425,22 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
    * Queues code blocks for highlighting based on visibility
    */
   onVisibleRangeChange(window: VirtualWindow): void {
-    this.visibleWindow.set(window);
+    const effectiveWindow = this.shouldUseVirtualScroll()
+      ? this.visibleWindow()
+      : window;
 
     // Queue visible code blocks for lazy highlighting
     if (this.enableLazyHighlight && this.shouldUseVirtualScroll()) {
-      this.queueVisibleCodeBlocks(window);
+      this.queueVisibleCodeBlocks(effectiveWindow);
     }
+  }
+
+  /**
+   * Handle viewport scroll metrics and update virtual scroll service state
+   */
+  onViewportScroll(event: ScrollEvent): void {
+    this.virtualScrollService.setScrollTop(event.scrollTop);
+    this.virtualScrollService.setViewportHeight(event.clientHeight);
   }
 
   /**
@@ -394,11 +449,11 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
   private queueVisibleCodeBlocks(window: VirtualWindow): void {
     const allBlocks = this.blocks();
     const start = Math.max(0, window.start - 5); // Include some overscan
-    const end = Math.min(allBlocks.length, window.end + 5);
+    const end = Math.min(allBlocks.length, window.end + 6);
 
     for (let i = start; i < end; i++) {
       const block = allBlocks[i];
-      if (block.type === BlockType.CODE_BLOCK && !block.isHighlighted) {
+      if (block.type === BlockType.CODE_BLOCK && !this.hasHighlightResult(block.id) && !block.isHighlighted) {
         this.highlightScheduler.queueBlock(block, i);
       }
     }
@@ -416,10 +471,152 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     const allBlocks = this.blocks();
     for (let i = 0; i < allBlocks.length; i++) {
       const block = allBlocks[i];
-      if (block.type === BlockType.CODE_BLOCK && !block.isHighlighted) {
+      if (block.type === BlockType.CODE_BLOCK && !this.hasHighlightResult(block.id) && !block.isHighlighted) {
         this.highlightScheduler.queueBlock(block, i);
       }
     }
+  }
+
+  /**
+   * Attach lazy-highlight metadata for code blocks
+   */
+  private decorateBlock(block: MarkdownBlock): MarkdownBlock {
+    if (block.type !== BlockType.CODE_BLOCK) {
+      return block;
+    }
+
+    const highlightSignal = this.ensureHighlightSignal(block.id);
+    const highlighted = !!highlightSignal() || block.isHighlighted === true;
+
+    return {
+      ...block,
+      canLazyHighlight: this.enableLazyHighlight,
+      isHighlighted: highlighted,
+      highlightResult: highlightSignal
+    };
+  }
+
+  /**
+   * Lazily create and return highlight result signal for block id
+   */
+  private ensureHighlightSignal(blockId: string): WritableSignal<HighlightResult | null> {
+    const existing = this.highlightSignals.get(blockId);
+    if (existing) {
+      return existing;
+    }
+
+    const created = signal<HighlightResult | null>(null);
+    this.highlightSignals.set(blockId, created);
+    return created;
+  }
+
+  /**
+   * Check if a code block already has highlighted output
+   */
+  private hasHighlightResult(blockId: string): boolean {
+    if (this.highlightScheduler.getHighlightedLines(blockId)?.length) {
+      return true;
+    }
+
+    const signalResult = this.highlightSignals.get(blockId);
+    if (!signalResult) {
+      return false;
+    }
+
+    const result = signalResult();
+    return !!result && result.lines.length > 0;
+  }
+
+  /**
+   * Apply async highlight output to current state so UI receives it.
+   * Kept for compatibility with existing tests.
+   */
+  private applyHighlightResult(blockId: string, lines: CodeLine[]): void {
+    const blockSignal = this.ensureHighlightSignal(blockId);
+    blockSignal.set({ lines, fallback: false });
+
+    this.state.update((currentState) => {
+      let changed = false;
+
+      const updatedBlocks = currentState.blocks.map((block) => {
+        if (block.id !== blockId) {
+          return block;
+        }
+
+        changed = true;
+        return {
+          ...block,
+          isHighlighted: true,
+          canLazyHighlight: this.enableLazyHighlight,
+          highlightResult: blockSignal
+        };
+      });
+
+      let updatedCurrentBlock = currentState.currentBlock;
+      if (updatedCurrentBlock?.id === blockId) {
+        changed = true;
+        updatedCurrentBlock = {
+          ...updatedCurrentBlock,
+          isHighlighted: true,
+          canLazyHighlight: this.enableLazyHighlight,
+          highlightResult: blockSignal
+        };
+      }
+
+      if (!changed) {
+        return currentState;
+      }
+
+      return {
+        ...currentState,
+        blocks: updatedBlocks,
+        currentBlock: updatedCurrentBlock
+      };
+    });
+
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Handle stream errors and emit observability events
+   */
+  private handleStreamError(error: Error): void {
+    console.error('[StreamingMarkdownComponent] Stream error:', error);
+    this.emitStatus('error');
+    this.error.emit(error);
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Emit stream status transitions to host components
+   */
+  private emitStatus(status: 'streaming' | 'completed' | 'error'): void {
+    if (this.streamStatus() === status) {
+      return;
+    }
+
+    this.streamStatus.set(status);
+    this.statusChange.emit(status);
+  }
+
+  /**
+   * Reset mutable state before subscribing to a new stream
+   */
+  private resetStreamingState(): void {
+    this.parser.reset();
+    this.highlightScheduler.reset();
+    this.highlightSignals.clear();
+    this.virtualScrollService.clearHeightCache();
+    this.virtualScrollService.setScrollTop(0);
+    this.virtualScrollService.setViewportHeight(0);
+    this.virtualScrollService.setTotalBlocks(0);
+    this.streamStatus.set('idle');
+    this.needsScroll = false;
+
+    this.state.set(createEmptyState());
+    this.rawContentChange.emit('');
+
+    this.cdr.markForCheck();
   }
 
   ngAfterViewChecked(): void {
@@ -443,6 +640,12 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     else if (this.shouldUseVirtualScroll() && this.virtualViewport) {
       requestAnimationFrame(() => {
         this.virtualViewport?.scrollToBottom();
+
+        const dimensions = this.virtualViewport?.getViewportDimensions();
+        if (dimensions) {
+          this.onViewportScroll(dimensions);
+        }
+
         this.needsScroll = false;
       });
     }
@@ -516,6 +719,6 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     this.virtualScrollService.clearHeightCache();
 
     // Clear highlight scheduler queue
-    this.highlightScheduler.clearQueue();
+    this.highlightScheduler.reset();
   }
 }

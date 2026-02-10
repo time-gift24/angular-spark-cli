@@ -21,8 +21,13 @@ import { MarkdownBlockRouterComponent } from '../block-router/block-router.compo
   template: `
     <blockquote [class]="blockquoteClasses()">
       @if (block.blocks?.length) {
-        @for (child of block.blocks; track child.id) {
-          <app-markdown-block-router [block]="child" [isComplete]="isComplete" />
+        @for (child of block.blocks; track child.id; let childIndex = $index) {
+          <app-markdown-block-router
+            [block]="child"
+            [isComplete]="isComplete"
+            [blockIndex]="resolveChildBlockIndex(child, childIndex)"
+            [enableLazyHighlight]="enableLazyHighlight"
+            [allowHighlight]="allowHighlight" />
         }
       } @else {
         {{ block.content }}
@@ -37,6 +42,9 @@ import { MarkdownBlockRouterComponent } from '../block-router/block-router.compo
 export class MarkdownBlockquoteComponent implements OnChanges {
   @Input({ required: true }) block!: MarkdownBlock;
   @Input() isComplete: boolean = true;
+  @Input() blockIndex: number = -1;
+  @Input() enableLazyHighlight: boolean = false;
+  @Input() allowHighlight: boolean = true;
 
   blockquoteClasses = signal<string>('markdown-blockquote block-blockquote');
 
@@ -50,5 +58,17 @@ export class MarkdownBlockquoteComponent implements OnChanges {
     const baseClass = 'markdown-blockquote block-blockquote';
     const streamingClass = !this.isComplete ? ' streaming' : '';
     this.blockquoteClasses.set(`${baseClass}${streamingClass}`);
+  }
+
+  resolveChildBlockIndex(child: MarkdownBlock, childIndex: number): number {
+    if (typeof child.position === 'number' && child.position >= 0) {
+      return child.position;
+    }
+
+    if (this.blockIndex < 0) {
+      return childIndex;
+    }
+
+    return this.blockIndex + childIndex + 1;
   }
 }

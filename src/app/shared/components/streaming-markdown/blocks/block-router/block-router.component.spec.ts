@@ -58,7 +58,8 @@ describe('MarkdownBlockRouterComponent', () => {
     const plugin = builtinPlugin();
     const registry: BlockComponentRegistry = {
       componentMap: new Map(Object.entries(plugin.components)),
-      matchers: []
+      matchers: [],
+      parserExtensions: []
     };
 
     await TestBed.configureTestingModule({
@@ -180,6 +181,18 @@ describe('MarkdownBlockRouterComponent', () => {
       const inputs = component.resolvedInputs();
       expect(inputs.block.language).toBe('typescript');
     });
+
+    it('should pass allowHighlight to code component', () => {
+      const block = createMockBlock(BlockType.CODE_BLOCK, 'const x = 1;');
+      component.block = block;
+      component.allowHighlight = false;
+      component.enableLazyHighlight = true;
+      fixture.detectChanges();
+
+      const inputs = component.resolvedInputs() as any;
+      expect(inputs.allowHighlight).toBe(false);
+      expect(inputs.enableLazyHighlight).toBe(true);
+    });
   });
 
   describe('Routing - List Blocks', () => {
@@ -249,6 +262,20 @@ describe('MarkdownBlockRouterComponent', () => {
       expect(blockquote).toBeTruthy();
       const inputs = component.resolvedInputs();
       expect(inputs.block).toBe(block);
+    });
+
+    it('should pass blockIndex and lazy flag to blockquote component', () => {
+      const block = createMockBlock(BlockType.BLOCKQUOTE, 'This is a quote');
+      component.block = block;
+      component.blockIndex = 9;
+      component.enableLazyHighlight = true;
+      component.allowHighlight = false;
+      fixture.detectChanges();
+
+      const inputs = component.resolvedInputs() as any;
+      expect(inputs.blockIndex).toBe(9);
+      expect(inputs.enableLazyHighlight).toBe(true);
+      expect(inputs.allowHighlight).toBe(false);
     });
   });
 

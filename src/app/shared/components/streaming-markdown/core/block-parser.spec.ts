@@ -9,6 +9,8 @@
 
 import { BlockParser, IBlockParser } from './block-parser';
 import { ParserResult, MarkdownBlock, BlockType } from './models';
+import { BlockComponentRegistry } from './plugin';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 /**
  * Test case interface for basic parsing tests.
@@ -516,6 +518,71 @@ describe('BlockParser', () => {
         current += chunk;
         expect(result).toBeDefined();
       });
+    });
+  });
+
+  describe('Parser Extensions', () => {
+    it('should support custom token handler without changing parser switch', () => {
+      const registry: BlockComponentRegistry = {
+        componentMap: new Map(),
+        matchers: [],
+        parserExtensions: [
+          {
+            pluginName: 'callout-parser',
+            extension: {
+              type: 'paragraph',
+              match: (token: any) => typeof token.text === 'string' && token.text.startsWith(':::callout'),
+              handler: ({ token, baseBlock }) => {
+                const lines = String(token.text || '').split('\n');
+                const firstLine = lines[0] || '';
+                const calloutType = firstLine.replace(':::callout', '').trim() || 'note';
+                const body = lines.slice(1).join('\n').replace(/\n?:::\s*$/, '').trim();
+
+                return {
+                  ...baseBlock,
+                  id: `${baseBlock.id}-${calloutType}`,
+                  type: BlockType.CALLOUT,
+                  content: body || calloutType
+                };
+              }
+            }
+          }
+        ]
+      };
+
+      const parserWithExtension = new BlockParser(registry);
+      const result = parserWithExtension.parse(':::callout warning\nWatch out\n:::');
+
+      expect(result.blocks).toHaveLength(1);
+      expect(result.blocks[0].type).toBe(BlockType.CALLOUT);
+      expect(result.blocks[0].content).toBe('Watch out');
+    });
+
+    it('should allow extensions to override built-in token mapping', () => {
+      const registry: BlockComponentRegistry = {
+        componentMap: new Map(),
+        matchers: [],
+        parserExtensions: [
+          {
+            pluginName: 'heading-override',
+            extension: {
+              type: 'heading',
+              handler: ({ token, baseBlock, context }) => ({
+                ...baseBlock,
+                type: BlockType.PARAGRAPH,
+                content: `[custom] ${context.extractText(token)}`
+              })
+            }
+          }
+        ]
+      };
+
+      const parserWithExtension = new BlockParser(registry);
+      const result = parserWithExtension.parse('# Title');
+
+      expect(result.blocks).toHaveLength(1);
+      expect(result.blocks[0].type).toBe(BlockType.PARAGRAPH);
+      expect(result.blocks[0].content).toContain('[custom] Title');
     });
   });
 });

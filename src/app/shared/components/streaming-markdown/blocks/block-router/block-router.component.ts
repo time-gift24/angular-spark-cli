@@ -32,15 +32,40 @@ import { BLOCK_COMPONENT_REGISTRY, BlockComponentRegistry } from '../../core/plu
 export class MarkdownBlockRouterComponent {
   @Input({ required: true }) block!: MarkdownBlock;
   @Input() isComplete: boolean = true;
+  @Input() blockIndex: number = -1;
+  @Input() enableLazyHighlight: boolean = false;
+  @Input() allowHighlight: boolean = true;
 
   private registry = inject(BLOCK_COMPONENT_REGISTRY);
 
   resolvedComponent = computed(() => this.lookupComponent(this.block));
 
-  resolvedInputs = computed(() => ({
-    block: this.block,
-    isComplete: this.isComplete
-  }));
+  resolvedInputs = computed(() => {
+    if (this.block?.type === BlockType.CODE_BLOCK) {
+      return {
+        block: this.block,
+        isComplete: this.isComplete,
+        blockIndex: this.blockIndex,
+        enableLazyHighlight: this.enableLazyHighlight,
+        allowHighlight: this.allowHighlight
+      };
+    }
+
+    if (this.block?.type === BlockType.BLOCKQUOTE) {
+      return {
+        block: this.block,
+        isComplete: this.isComplete,
+        blockIndex: this.blockIndex,
+        enableLazyHighlight: this.enableLazyHighlight,
+        allowHighlight: this.allowHighlight
+      };
+    }
+
+    return {
+      block: this.block,
+      isComplete: this.isComplete
+    };
+  });
 
   private lookupComponent(block: MarkdownBlock): any {
     if (!block) return null;

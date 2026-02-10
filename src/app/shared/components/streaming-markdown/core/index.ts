@@ -53,8 +53,16 @@ export {
 export {
   type BlockRenderer,
   type BlockMatcher,
+  type BlockParserContext,
+  type BlockParseBase,
+  type TokenHandlerInput,
+  type BlockTokenHandler,
+  type BlockParserExtension,
   type StreamdownPlugin,
   type BlockComponentRegistry,
+  createStreamdownPlugin,
+  createParserExtensionPlugin,
+  defineBlockParserExtension,
   STREAMDOWN_PLUGINS,
   BLOCK_COMPONENT_REGISTRY
 } from './plugin';
@@ -81,20 +89,35 @@ export {
 // Virtual scroll service
 export { VirtualScrollService } from './virtual-scroll.service';
 
+// Stream adapters
+export {
+  sseToMarkdownStream$,
+  fetchStreamToMarkdownStream$,
+  type SseAdapterOptions,
+  type FetchStreamAdapterOptions
+} from './stream-adapters';
+
 // Error handling types
 export {
+  ComponentErrorType,
   type ErrorSeverity,
+  type ErrorCode,
   type ErrorCategory,
+  type StreamingMarkdownError,
   type HighlightingError,
+  type ComponentError,
+  type ErrorInput,
   type InitializationError,
   type HighlightingExecutionError,
   type UnsupportedLanguageError,
   type ThemeError,
   type ErrorHandlerResult,
   type IErrorHandler,
+  type ErrorBoundaryState,
+  type RetryConfig,
   type ErrorLogEntry,
   type ErrorLoggerConfig,
   type RecoveryStrategy,
   type RecoveryResult,
   type IErrorFactory
-} from './error-handling.types';
+} from './error-handling';

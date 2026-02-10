@@ -594,6 +594,16 @@ describe('ShiniHighlighter Service Skeleton', () => {
         expect(Array.isArray(result)).toBe(true);
       }
     });
+
+    it('should gracefully fallback for malformed streaming language string', async () => {
+      await service.initialize();
+
+      const malformedLanguage = 'Value |';
+      const result = await service.highlightToTokens('const x = 1;', malformedLanguage, testTheme);
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBeGreaterThan(0);
+    });
   });
 
   describe('isReady() Method', () => {
