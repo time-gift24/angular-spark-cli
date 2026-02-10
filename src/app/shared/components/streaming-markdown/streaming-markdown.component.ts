@@ -367,6 +367,7 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
         this.handleStreamError(error);
       },
       complete: () => {
+        this.finalizeCompletedState();
         this.emitStatus('completed');
         this.completed.emit(this.rawContent());
 
@@ -379,41 +380,79 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
 
   /**
    * Processes a single (possibly merged) chunk of markdown text.
-   * Uses incremental parsing to avoid re-tokenizing stable blocks.
+   * Streaming path stays conservative: parse raw text without auto-closing fixes.
    */
   private processChunk(chunk: string): StreamingState {
-    // Step 1: Accumulate raw content exactly as received
     const currentState = this.state();
     const updatedRawContent = currentState.rawContent + chunk;
 
-    // Step 2: Preprocess only for parser input (do not mutate raw content)
-    const previousParseInput = this.preprocessor.process(currentState.rawContent);
-    const nextParseInput = this.preprocessor.process(updatedRawContent);
+    const parserResult: ParserResult = this.parser.parse(updatedRawContent);
 
-    // Step 3: Parse incrementally — only re-tokenize the tail
-    const parserResult: ParserResult = this.parser.parseIncremental(
-      previousParseInput,
-      nextParseInput
-    );
+    return this.buildStreamingState(updatedRawContent, parserResult);
+  }
 
-    // Step 4: Extract current block if parser detected incomplete block
-    let currentBlock: MarkdownBlock | null = null;
-    let completedBlocks: MarkdownBlock[] = parserResult.blocks.map((block) => this.decorateBlock(block));
+  /**
+   * Finalize state after stream completion with full preprocessor repairs.
+   */
+  private finalizeCompletedState(): void {
+    const raw = this.rawContent();
+    const repairedInput = this.preprocessor.process(raw);
+    const parserResult = this.parser.parse(repairedInput);
 
-    if (parserResult.hasIncompleteBlock && completedBlocks.length > 0) {
-      currentBlock = completedBlocks.pop() || null;
+    this.state.set(this.buildStreamingState(raw, parserResult));
+    this.needsScroll = true;
+
+    if (this.pipelineConfig.enableChangeDetectionOptimization) {
+      this.cdr.markForCheck();
+    }
+  }
+
+  private buildStreamingState(rawContent: string, parserResult: ParserResult): StreamingState {
+    const renderedBlocks = parserResult.blocks.map((block) => this.decorateBlock(block));
+    const hasOpenFence = this.hasUnclosedTopLevelFence(rawContent);
+
+    if (!parserResult.hasIncompleteBlock || !hasOpenFence || renderedBlocks.length === 0) {
+      return {
+        blocks: renderedBlocks,
+        currentBlock: null,
+        rawContent
+      };
     }
 
-    if (currentBlock) {
-      currentBlock = this.decorateBlock(currentBlock);
-    }
+    const completedBlocks = [...renderedBlocks];
+    const currentBlock = completedBlocks.pop() || null;
 
-    // Step 5: Return updated state
     return {
       blocks: completedBlocks,
-      currentBlock: currentBlock,
-      rawContent: updatedRawContent
+      currentBlock: currentBlock ? this.decorateBlock(currentBlock) : null,
+      rawContent
     };
+  }
+
+  /**
+   * Detect unclosed top-level fenced code block in raw streaming text.
+   * Ignores fences inside blockquote lines.
+   */
+  private hasUnclosedTopLevelFence(text: string): boolean {
+    if (!text) {
+      return false;
+    }
+
+    let fenceCount = 0;
+    const lines = text.split('\n');
+
+    for (const line of lines) {
+      const trimmed = line.trimStart();
+      if (trimmed.startsWith('>')) {
+        continue;
+      }
+
+      if (/^(```|~~~)/.test(trimmed)) {
+        fenceCount++;
+      }
+    }
+
+    return fenceCount % 2 !== 0;
   }
 
   trackById(block: MarkdownBlock): string {
