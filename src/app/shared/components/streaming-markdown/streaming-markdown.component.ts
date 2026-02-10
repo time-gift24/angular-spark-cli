@@ -409,9 +409,8 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
 
   private buildStreamingState(rawContent: string, parserResult: ParserResult): StreamingState {
     const renderedBlocks = parserResult.blocks.map((block) => this.decorateBlock(block));
-    const hasOpenFence = this.hasUnclosedTopLevelFence(rawContent);
 
-    if (!parserResult.hasIncompleteBlock || !hasOpenFence || renderedBlocks.length === 0) {
+    if (!parserResult.hasIncompleteBlock || renderedBlocks.length === 0) {
       return {
         blocks: renderedBlocks,
         currentBlock: null,
@@ -427,32 +426,6 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
       currentBlock: currentBlock ? this.decorateBlock(currentBlock) : null,
       rawContent
     };
-  }
-
-  /**
-   * Detect unclosed top-level fenced code block in raw streaming text.
-   * Ignores fences inside blockquote lines.
-   */
-  private hasUnclosedTopLevelFence(text: string): boolean {
-    if (!text) {
-      return false;
-    }
-
-    let fenceCount = 0;
-    const lines = text.split('\n');
-
-    for (const line of lines) {
-      const trimmed = line.trimStart();
-      if (trimmed.startsWith('>')) {
-        continue;
-      }
-
-      if (/^(```|~~~)/.test(trimmed)) {
-        fenceCount++;
-      }
-    }
-
-    return fenceCount % 2 !== 0;
   }
 
   trackById(block: MarkdownBlock): string {
