@@ -60,53 +60,6 @@ import { ShiniHighlighter } from './core/shini-highlighter';
 import { HighlightSchedulerService } from './core/highlight-scheduler.service';
 import { BlockType } from './core/models';
 
-/**
- * Configuration for the RxJS streaming pipeline.
- * Controls buffering and change detection behavior.
- */
-export interface PipelineConfig {
-  /** Debounce time in milliseconds for stream chunks (default: 50ms) */
-  debounceTime?: number;
-
-  /** Enable manual change detection optimization (default: true) */
-  enableChangeDetectionOptimization: boolean;
-}
-
-/**
- * Represents the complete streaming pipeline with state and lifecycle.
- * Encapsulates the reactive stream processing machinery.
- */
-export interface StreamingPipeline {
-  /** Computed signal exposing the current streaming state */
-  processedState$: Signal<StreamingState>;
-
-  /** Subject for triggering pipeline cleanup */
-  destroy$: Subject<void>;
-}
-
-/**
- * Represents the difference between two parser results.
- * Used for optimized change detection and minimal DOM updates.
- */
-export interface BlockDiff {
-  /** Blocks added since last state */
-  added: MarkdownBlock[];
-
-  /** Blocks updated since last state */
-  updated: MarkdownBlock[];
-
-  /** IDs of blocks removed since last state */
-  removed: string[];
-}
-
-/**
- * Interface for change detection strategy implementation.
- * Defines how to compute diffs between parser states.
- */
-export interface IChangeDetector {
-  detectChanges(previous: ParserResult, current: ParserResult): BlockDiff;
-}
-
 @Component({
   selector: 'app-streaming-markdown',
   standalone: true,

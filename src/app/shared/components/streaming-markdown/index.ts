@@ -20,6 +20,7 @@ export { StreamingMarkdownComponent } from './streaming-markdown.component';
 // Core types and models
 export {
   type MarkdownBlock,
+  type MarkdownBlockNew,
   type MarkdownInline,
   type StreamingState,
   type ParserResult,
@@ -30,11 +31,25 @@ export {
   createEmptyState
 } from './core/models';
 
+// Type guard functions for discriminated unions
+export {
+  isCodeBlock,
+  isHeadingBlock,
+  isListBlock,
+  isBlockquoteBlock,
+  isTableBlock,
+  isParagraphBlock,
+  isThematicBreakBlock,
+  isHtmlBlock,
+  isFootnoteDefBlock,
+  isUnknownBlock,
+  isRawBlock
+} from './core/models';
+
 // Virtual scroll types
 export {
   type VirtualScrollConfig,
   type VirtualWindow,
-  type BlockRenderState,
   DEFAULT_VIRTUAL_SCROLL_CONFIG
 } from './core/models';
 
@@ -64,7 +79,10 @@ export type { HeightMeasurement } from './blocks/block-height-tracker.directive'
 export { ShiniHighlighter } from './core/shini-highlighter';
 export { ThemeService } from './core/theme.service';
 export { HighlightSchedulerService } from './core/highlight-scheduler.service';
+export { HighlightCoordinator } from './core/highlight-coordinator.service';
+export { StreamingPipelineService } from './core/streaming-pipeline.service';
 export type { HighlightSchedulerConfig, HighlightPriority } from './core/highlight-scheduler.service';
+export type { PipelineConfig } from './core/streaming-pipeline.service';
 
 // Plugin types
 export {

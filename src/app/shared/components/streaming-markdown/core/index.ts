@@ -85,7 +85,6 @@ export {
   createEmptyState,
   type VirtualScrollConfig,
   type VirtualWindow,
-  type BlockRenderState,
   DEFAULT_VIRTUAL_SCROLL_CONFIG
 } from './models';
 
