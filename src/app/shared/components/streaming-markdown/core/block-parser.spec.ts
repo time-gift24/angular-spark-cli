@@ -65,6 +65,21 @@ describe('BlockParser incremental fence-aware boundary', () => {
     expect(nestedCode!.rawContent || nestedCode!.content).toContain('const a = 1;');
     expect(nestedCode!.rawContent || nestedCode!.content).toContain('const b = 2;');
   });
+
+  it('parses continuously when no stable boundary is present yet', () => {
+    const parser = new BlockParser();
+    const chunk1 = '```typescript\nconst value = 1;';
+    const chunk2 = `${chunk1}\nconst next = value + 1;`;
+
+    const first = parser.parseIncremental('', chunk1);
+    const second = parser.parseIncremental(chunk1, chunk2);
+
+    expect(first.blocks.length).toBe(1);
+    expect(second.blocks.length).toBe(1);
+    const code = second.blocks[0] as CodeBlock;
+    expect(code.type).toBe(BlockType.CODE_BLOCK);
+    expect(code.rawContent || code.content).toContain('const next = value + 1;');
+  });
 });
 
 function findFirstCodeBlock(blocks: MarkdownBlock[]): CodeBlock | undefined {

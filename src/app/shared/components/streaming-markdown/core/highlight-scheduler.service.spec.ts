@@ -115,6 +115,14 @@ describe('HighlightSchedulerService content-aware cache', () => {
     expect(queue[0].block.id).toBe('near');
     expect(queue[1].block.id).toBe('far');
   });
+
+  it('exposes highlighted result presence via hasHighlightedResult', async () => {
+    const block = createCodeBlock('presence', 'const present = true;');
+
+    expect(scheduler.hasHighlightedResult(block.id)).toBe(false);
+    await scheduler.highlightNow(block, 0);
+    expect(scheduler.hasHighlightedResult(block.id)).toBe(true);
+  });
 });
 
 class FakeShiniHighlighter {

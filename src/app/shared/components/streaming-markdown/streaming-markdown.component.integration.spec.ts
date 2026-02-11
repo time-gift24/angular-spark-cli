@@ -26,12 +26,14 @@ Tail paragraph.
     <app-streaming-markdown
       [stream$]="stream$"
       [enableLazyHighlight]="false"
+      (statusChange)="statuses.push($event)"
       (completed)="completed = $event" />
   `
 })
 class StreamingMarkdownHostComponent {
   stream$: Observable<string> = EMPTY;
   completed = '';
+  statuses: Array<'streaming' | 'completed' | 'error'> = [];
 
   startStream(content: string, chunkSize: number = 24, delayMs: number = 70): void {
     const chunks: string[] = [];
@@ -101,6 +103,28 @@ describe('StreamingMarkdownComponent integration', () => {
     expect(rendered).toContain('console.log(nextValue);');
     expect(host.completed).toBe(STREAMING_MARKDOWN);
   });
+
+  it('emits completed status and empty payload for empty stream', async () => {
+    await TestBed.configureTestingModule({
+      imports: [StreamingMarkdownHostComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideStreamingMarkdown(builtinPlugin()),
+        { provide: ShiniHighlighter, useClass: FakeShiniHighlighter }
+      ]
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(StreamingMarkdownHostComponent);
+    const host = fixture.componentInstance;
+
+    host.stream$ = EMPTY;
+    fixture.detectChanges();
+
+    await waitFor(() => host.statuses.includes('completed'), 1500);
+    expect(host.completed).toBe('');
+    expect(host.statuses).toContain('streaming');
+    expect(host.statuses).toContain('completed');
+  });
 });
 
 async function waitFor(predicate: () => boolean, timeoutMs: number): Promise<void> {
@@ -114,4 +138,3 @@ async function waitFor(predicate: () => boolean, timeoutMs: number): Promise<voi
     await new Promise((resolve) => setTimeout(resolve, 20));
   }
 }
-
