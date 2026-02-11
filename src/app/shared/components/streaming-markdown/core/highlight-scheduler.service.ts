@@ -75,6 +75,7 @@ export class HighlightSchedulerService {
   private blockResultSubscribers = new Map<string, Set<(result: HighlightCallback) => void>>();
   private inFlight = new Map<string, Promise<CodeLine[]>>();
   private queuedBlockIds = new Set<string>();
+  private blockSignatureCache = new WeakMap<MarkdownBlock, string>();
 
   constructor() {
     this.queueWatcher = effect(() => {
@@ -350,6 +351,7 @@ export class HighlightSchedulerService {
     this.clearQueue();
     this.inFlight.clear();
     this.queuedBlockIds.clear();
+    this.blockSignatureCache = new WeakMap<MarkdownBlock, string>();
     this.highlightedBlockIds.set(new Set());
     this.highlightResults.set(new Map());
     this.highlightSignatures.set(new Map());
@@ -590,10 +592,17 @@ export class HighlightSchedulerService {
       return '';
     }
 
+    const cached = this.blockSignatureCache.get(block);
+    if (cached !== undefined) {
+      return cached;
+    }
+
     const code = block.rawContent || block.content;
     const head = code.slice(0, 120);
     const tail = code.length > 120 ? code.slice(-120) : '';
-    return `${code.length}:${head}:${tail}`;
+    const signature = `${code.length}:${head}:${tail}`;
+    this.blockSignatureCache.set(block, signature);
+    return signature;
   }
 
   private calculatePriority(index: number): HighlightPriority {
