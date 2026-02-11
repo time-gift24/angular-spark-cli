@@ -276,6 +276,8 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
   private destroy$ = new Subject<void>();
   private streamInput$ = new ReplaySubject<Observable<string>>(1);
   private streamVersion = 0;
+  private lastStreamSource: Observable<string> | null = null;
+  private lastAppliedVirtualScrollConfig: VirtualScrollConfig | null = null;
   private copyResetTimeout: ReturnType<typeof setTimeout> | null = null;
   private lastQueuedVisibleRange: { start: number; end: number } | null = null;
   private lastVisibleSliceSource: MarkdownBlock[] | null = null;
@@ -290,12 +292,21 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
   constructor() {
     effect(() => {
       const source = this.streamInput() ?? EMPTY;
+      if (source === this.lastStreamSource) {
+        return;
+      }
+      this.lastStreamSource = source;
       this.currentStream$ = source;
       this.streamInput$.next(source);
     }, { injector: this.injector });
 
     effect(() => {
-      this.virtualScrollService.setConfig(this.virtualScrollConfig());
+      const config = this.virtualScrollConfig();
+      if (!this.shouldApplyVirtualScrollConfig(config)) {
+        return;
+      }
+      this.lastAppliedVirtualScrollConfig = config;
+      this.virtualScrollService.setConfig(config);
     }, { injector: this.injector });
 
     effect(() => {
@@ -714,6 +725,18 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
 
     this.streamStatus.set(status);
     this.statusChange.emit(status);
+  }
+
+  private shouldApplyVirtualScrollConfig(config: VirtualScrollConfig): boolean {
+    const previous = this.lastAppliedVirtualScrollConfig;
+    if (!previous) {
+      return true;
+    }
+
+    return previous.enabled !== config.enabled
+      || previous.overscan !== config.overscan
+      || previous.estimatedBlockHeight !== config.estimatedBlockHeight
+      || previous.minBlocksForVirtual !== config.minBlocksForVirtual;
   }
 
   /**
