@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   LiquidGlassComponentV2,
@@ -12,8 +12,8 @@ import {
  */
 @Component({
   selector: 'app-demo-liquid-glass-new-page',
-  standalone: true,
   imports: [CommonModule, LiquidGlassComponentV2, LiquidGlassDirectiveV2],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="demo-page">
       <div class="demo-header">
@@ -221,9 +221,9 @@ import {
       </section>
 
       <!-- Click Feedback -->
-      <div *ngIf="lastClick" class="click-feedback">
-       Clicked: {{ lastClick }}
-      </div>
+      @if (lastClick()) {
+        <div class="click-feedback">Clicked: {{ lastClick() }}</div>
+      }
     </div>
   `,
   styles: `
@@ -247,7 +247,12 @@ import {
       font-size: 2.5rem;
       font-weight: 600;
       margin-bottom: 0.5rem;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      background: linear-gradient(
+        135deg,
+        var(--primary) 0%,
+        var(--chart-2) 50%,
+        var(--accent) 100%
+      );
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -323,19 +328,19 @@ import {
     }
 
     .button-text {
-      color: #fff;
+      color: var(--primary-foreground);
       font-weight: 500;
       font-size: 0.9rem;
     }
 
     .button-text-small {
-      color: #fff;
+      color: var(--primary-foreground);
       font-weight: 500;
       font-size: 0.85rem;
     }
 
     .button-text-large {
-      color: #fff;
+      color: var(--primary-foreground);
       font-weight: 500;
       font-size: 1rem;
     }
@@ -351,7 +356,7 @@ import {
     }
 
     .card-content {
-      color: #fff;
+      color: var(--primary-foreground);
       text-align: center;
     }
 
@@ -369,8 +374,9 @@ import {
     .card-text {
       margin: 0;
       font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.8);
+      color: var(--primary-foreground);
       line-height: 1.4;
+      opacity: 0.8;
     }
 
     .directive-demo {
@@ -387,13 +393,13 @@ import {
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--chart-2));
+      color: var(--primary-foreground);
       padding: 12px 24px;
       border-radius: 12px;
       font-size: 0.9rem;
       font-weight: 500;
-      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+      box-shadow: var(--shadow-control-hover);
       animation: fadeIn 0.3s ease-out;
       z-index: 1000;
     }
@@ -411,10 +417,10 @@ import {
   `,
 })
 export class DemoLiquidGlassNewPageComponent {
-  lastClick = '';
+  readonly lastClick = signal('');
 
   onButtonClick(name: string): void {
-    this.lastClick = name;
+    this.lastClick.set(name);
     console.log('[Liquid Glass Demo] Clicked:', name);
   }
 }

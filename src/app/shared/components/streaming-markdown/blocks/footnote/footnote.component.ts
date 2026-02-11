@@ -7,18 +7,17 @@
  * Implements BlockRenderer interface for plugin architecture.
  */
 
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { MarkdownBlock, FootnoteDefBlock } from '../../core/models';
+import { Component, ChangeDetectionStrategy, computed, input } from '@angular/core';
+import { FootnoteDefBlock } from '../../core/models';
 
 @Component({
   selector: 'app-markdown-footnote',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="footnotes-section">
       <hr class="footnotes-separator" />
       <ol class="footnotes-list">
-        @for (entry of entries; track entry.id) {
+        @for (entry of entries(); track entry.id) {
           <li [id]="'fn-' + entry.id" class="footnote-item">
             <span class="footnote-content">{{ entry.text }}</span>
             <a [href]="'#fnref-' + entry.id" class="footnote-backref" title="Back to reference">\u21A9</a>
@@ -30,15 +29,18 @@ import { MarkdownBlock, FootnoteDefBlock } from '../../core/models';
   styleUrls: ['./footnote.component.css']
 })
 export class MarkdownFootnoteComponent {
-  @Input({ required: true }) block!: FootnoteDefBlock;
-  @Input() isComplete: boolean = true;
+  readonly block = input.required<FootnoteDefBlock>();
+  readonly isComplete = input(true);
 
-  get entries(): { id: string; text: string }[] {
-    if (!this.block.footnoteDefs) return [];
+  protected readonly entries = computed(() => {
+    const footnoteDefs = this.block().footnoteDefs;
+    if (!footnoteDefs) {
+      return [];
+    }
     const result: { id: string; text: string }[] = [];
-    this.block.footnoteDefs.forEach((text, id) => {
+    footnoteDefs.forEach((text, id) => {
       result.push({ id, text });
     });
     return result;
-  }
+  });
 }

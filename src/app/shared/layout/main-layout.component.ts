@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavComponent } from './nav.component';
 
@@ -14,8 +14,8 @@ import { NavComponent } from './nav.component';
  */
 @Component({
   selector: 'app-main-layout',
-  standalone: true,
   imports: [RouterOutlet, NavComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="min-h-screen bg-background flex flex-col md:flex-row">
       @if (showHeader()) {

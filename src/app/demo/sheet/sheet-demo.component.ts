@@ -1,11 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@app/shared/ui/button';
 import * as Sheet from '@app/shared/ui/sheet';
 
 @Component({
   selector: 'app-sheet-demo',
-  standalone: true,
   imports: [
     CommonModule,
     ButtonComponent,
@@ -23,6 +22,7 @@ import * as Sheet from '@app/shared/ui/sheet';
   host: {
     style: 'display: block; width: 100%;',
   },
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SheetDemoComponent {
   readonly side = signal<Sheet.SheetSide>('right');

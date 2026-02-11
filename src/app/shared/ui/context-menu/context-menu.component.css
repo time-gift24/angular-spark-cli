@@ -5,9 +5,7 @@
   background: var(--popover);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  box-shadow:
-    0 4px 6px -1px rgb(0 0 0 / 0.1),
-    0 2px 4px -2px rgb(0 0 0 / 0.1);
+  box-shadow: var(--shadow-popover);
   padding: var(--spacing-xs) 0;
   min-width: var(--context-menu-min-width);
   max-width: var(--context-menu-max-width);
@@ -39,7 +37,7 @@
 }
 
 .menu-item.disabled {
-  opacity: var(--opacity-disabled, 0.5);
+  color: color-mix(in oklch, var(--popover-foreground) 85%, var(--popover) 15%);
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -75,7 +73,7 @@
 .menu-shortcut {
   margin-left: auto;
   font-size: var(--font-size-xs, 0.75rem);
-  color: var(--muted-foreground);
+  color: color-mix(in oklch, var(--popover-foreground) 88%, var(--popover) 12%);
 }
 
 .menu-item:hover .menu-shortcut {

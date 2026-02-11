@@ -15,9 +15,8 @@
 
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
+  input,
+  output,
   ViewChild,
   ElementRef,
   AfterViewInit,
@@ -50,7 +49,6 @@ export interface ScrollEvent {
  */
 @Component({
   selector: 'app-virtual-scroll-viewport',
-  standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -78,38 +76,30 @@ export class VirtualScrollViewportComponent implements AfterViewInit, OnDestroy 
   @ViewChild('viewport', { static: true }) viewport!: ElementRef<HTMLDivElement>;
 
   /** All blocks (for computing total height) */
-  @Input({ required: true }) set blocks(value: Signal<MarkdownBlock[]> | MarkdownBlock[]) {
-    this.blocksSignal.set(Array.isArray(value) ? value : value());
-  }
+  readonly blocks = input.required<Signal<MarkdownBlock[]> | MarkdownBlock[]>({ alias: 'blocks' });
 
   /** Virtual scroll configuration */
-  @Input({ required: true }) set config(value: VirtualScrollConfig) {
-    this.configSignal.set(value);
-  }
+  readonly configInput = input.required<VirtualScrollConfig>({ alias: 'config' });
   get config(): VirtualScrollConfig {
     return this.configSignal();
   }
 
   /** Current visible window (for positioning content) */
-  @Input({ required: true }) set window(value: VirtualWindow) {
-    this.windowSignal.set(value);
-  }
+  readonly windowInput = input.required<VirtualWindow>({ alias: 'window' });
 
   /** Emitted when the visible block range changes */
-  @Output() readonly visibleRangeChange = new EventEmitter<VirtualWindow>();
+  readonly visibleRangeChange = output<VirtualWindow>();
 
   /** Emitted on scroll events (throttled) */
-  @Output() readonly scroll = new EventEmitter<ScrollEvent>();
+  readonly scroll = output<ScrollEvent>();
 
   /** Internal signals for reactive state */
-  private blocksSignal = signal<MarkdownBlock[]>([]);
-  private configSignal = signal<VirtualScrollConfig>(DEFAULT_VIRTUAL_SCROLL_CONFIG);
-  private windowSignal = signal<VirtualWindow>({
-    start: 0,
-    end: 0,
-    totalHeight: 0,
-    offsetTop: 0
+  private blocksSignal = computed(() => {
+    const value = this.blocks();
+    return Array.isArray(value) ? value : value();
   });
+  private configSignal = computed(() => ({ ...DEFAULT_VIRTUAL_SCROLL_CONFIG, ...this.configInput() }));
+  private windowSignal = computed(() => this.windowInput());
 
   /** Scroll position signal */
   readonly scrollTop = signal(0);

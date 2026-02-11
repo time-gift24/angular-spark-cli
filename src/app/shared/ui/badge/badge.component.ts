@@ -5,7 +5,6 @@ export type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline' |
 
 @Component({
   selector: 'span[spark-badge], div[spark-badge]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',

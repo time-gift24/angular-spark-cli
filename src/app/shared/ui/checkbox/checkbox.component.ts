@@ -19,7 +19,6 @@ export type CheckboxVariant = VariantProps<typeof checkboxVariants>;
 
 @Component({
   selector: 'ui-checkbox',
-  standalone: true,
   template: `
     <input
       #input

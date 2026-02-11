@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 /**
@@ -14,9 +14,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
  */
 @Component({
   selector: 'app-nav',
-  standalone: true,
   imports: [RouterLink, RouterLinkActive],
   styleUrls: ['./nav.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nav class="flex flex-col h-full">
       <!-- Logo/Header Section -->

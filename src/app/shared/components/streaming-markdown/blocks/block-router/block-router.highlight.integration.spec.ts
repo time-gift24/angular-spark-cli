@@ -85,7 +85,6 @@ class FakeHighlightSchedulerService {
 
 @Component({
   selector: 'app-test-host',
-  standalone: true,
   imports: [MarkdownBlockRouterComponent],
   template: `
     <app-markdown-block-router

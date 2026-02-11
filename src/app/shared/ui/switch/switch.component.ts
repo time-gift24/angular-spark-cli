@@ -1,18 +1,10 @@
-import {
-  Component,
-  input,
-  computed,
-  output,
-  EventEmitter,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, input, computed, output, ChangeDetectionStrategy } from '@angular/core';
 import { cn } from '@app/shared';
 
 export type SwitchSize = 'sm' | 'default';
 
 @Component({
   selector: 'button[spark-switch]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
@@ -76,13 +68,7 @@ export class SwitchComponent {
    * Size and state styles using CSS variables
    */
   private getSizeAndStateClasses(): string {
-    const checked = this.checked();
-
-    const stateClasses = checked
-      ? 'data-[state=checked]:bg-primary data-[state=unchecked]:bg-input dark:data-[state=unchecked]:bg-input/80'
-      : 'data-[state=checked]:bg-primary data-[state=unchecked]:bg-input dark:data-[state=unchecked]:bg-input/80';
-
-    return stateClasses;
+    return 'data-[state=checked]:bg-primary data-[state=unchecked]:bg-input dark:data-[state=unchecked]:bg-input/80';
   }
 
   /**

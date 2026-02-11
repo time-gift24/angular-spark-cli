@@ -81,7 +81,7 @@ export interface IBlockIdGenerator {
  * Block Factory Implementation - Phase 2 (Task 2.3)
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 /**
  * Block ID Generator implementation
@@ -102,9 +102,7 @@ export class BlockIdGenerator implements IBlockIdGenerator {
  */
 @Injectable({ providedIn: 'root' })
 export class BlockFactory implements IBlockFactory {
-  constructor(private idGenerator: BlockIdGenerator) {
-    // Dependency injection will provide BlockIdGenerator instance
-  }
+  private readonly idGenerator = inject(BlockIdGenerator);
 
   createHeading(content: string, level: number, streaming = false): MarkdownBlock {
     return {
@@ -172,4 +170,3 @@ export class BlockFactory implements IBlockFactory {
     };
   }
 }
-

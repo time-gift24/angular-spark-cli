@@ -4,7 +4,7 @@
  * Mineral & Time Theme - Angular 20+
  */
 
-import { Component, input, output, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { BadgeType } from '@app/shared/ui/ai-chat/types/chat.types';
 import {
   statusBadgesContainer,
@@ -27,7 +27,7 @@ import { cn } from '@app/shared/utils';
  */
 @Component({
   selector: 'ai-status-badges',
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div [class]="containerClasses()">
       @if (badge(); as badgeValue) {

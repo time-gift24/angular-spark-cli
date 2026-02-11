@@ -8,15 +8,13 @@
 
 import {
   Directive,
-  Input,
-  Output,
-  EventEmitter,
+  input,
+  output,
   inject,
   OnInit,
   OnDestroy,
   ElementRef,
-  DestroyRef,
-  signal
+  DestroyRef
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -46,26 +44,19 @@ interface HeightTrackerConfig {
 
 @Directive({
   selector: '[appBlockHeightTracker]',
-  standalone: true
 })
 export class BlockHeightTrackerDirective implements OnInit, OnDestroy {
   /** The block to measure (for template readability, not used directly) */
-  @Input({ required: true, alias: 'appBlockHeightTracker' }) set block(_value: unknown) {}
+  readonly block = input.required<unknown>({ alias: 'appBlockHeightTracker' });
 
   /** Index of the block in the blocks array */
-  @Input({ required: true, alias: 'appBlockHeightTrackerIndex' }) set index(value: number) {
-    this.blockIndex.set(value);
-  }
-  readonly blockIndex = signal<number>(0);
+  readonly blockIndex = input.required<number>({ alias: 'appBlockHeightTrackerIndex' });
 
   /** Unique block identifier */
-  @Input({ required: true, alias: 'appBlockHeightTrackerId' }) set id(value: string) {
-    this.blockId.set(value);
-  }
-  readonly blockId = signal<string>('');
+  readonly blockId = input.required<string>({ alias: 'appBlockHeightTrackerId' });
 
   /** Emitted when a new height is measured */
-  @Output() readonly heightMeasured = new EventEmitter<HeightMeasurement>();
+  readonly heightMeasured = output<HeightMeasurement>();
 
   private config: HeightTrackerConfig = {
     debounceMs: 32,

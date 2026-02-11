@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   AvatarComponent,
@@ -32,10 +32,10 @@ const examples: AvatarExample[] = [
 
 @Component({
   selector: 'app-avatar-demo',
-  standalone: true,
   imports: [CommonModule, AvatarComponent, AvatarImageComponent, AvatarFallbackComponent],
   templateUrl: './avatar-demo.html',
   styleUrl: '../../shared/demo-page-styles.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AvatarDemoComponent {
   readonly examples = examples;

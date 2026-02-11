@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
 import { basicExamples } from './examples/basic-examples';
 import { themeExamples } from './examples/theme-examples';
@@ -11,9 +11,9 @@ import { animationExamples } from './examples/animation-examples';
  */
 @Component({
   selector: 'app-liquid-glass-demo',
-  standalone: true,
   imports: [LiquidGlassDirective],
   templateUrl: './liquid-glass-demo.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LiquidGlassDemoComponent {
   readonly basicExamples = basicExamples;

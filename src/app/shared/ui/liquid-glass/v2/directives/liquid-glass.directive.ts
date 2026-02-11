@@ -25,7 +25,6 @@ import {
   ElementRef,
   Renderer2,
   NgZone,
-  HostListener,
   PLATFORM_ID,
   afterNextRender,
 } from '@angular/core';
@@ -65,10 +64,14 @@ function getDisplacementMapUrl(mode: GlassFilterMode): string {
  */
 @Directive({
   selector: '[liquidGlass]',
-  standalone: true,
   host: {
     '[class.liquid-glass]': 'isEnabled',
     '[class.lg-host]': 'isEnabled',
+    '(mouseenter)': 'onMouseEnter()',
+    '(mouseleave)': 'onMouseLeave()',
+    '(mousedown)': 'onMouseDown()',
+    '(mouseup)': 'onMouseUp()',
+    '(click)': 'onClick()',
   },
 })
 export class LiquidGlassDirective implements OnInit, OnDestroy {
@@ -175,7 +178,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     // Don't set transition - it interferes with cdkDrag
     // transition is only needed for the elastic effect, which we handle in animation loop
     this.renderer.setStyle(this.host, 'padding', this.liquidGlassPadding());
-    this.renderer.setStyle(this.host, 'box-shadow', '0px 12px 40px rgba(0, 0, 0, 0.25)');
+    this.renderer.setStyle(this.host, 'box-shadow', 'var(--shadow-control-hover)');
     this.renderer.setStyle(this.host, 'overflow', 'hidden');
   }
 
@@ -204,12 +207,12 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
       'background',
       `radial-gradient(
         140px 140px at 50% 50%,
-        rgba(255,255,255,0.15),
-        rgba(255,255,255,0.08) 35%,
-        rgba(255,255,255,0) 70%
+        color-mix(in oklch, var(--card) 15%, transparent),
+        color-mix(in oklch, var(--card) 8%, transparent) 35%,
+        transparent 70%
       ),
-      linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 65%),
-      rgba(0,0,0,0.12)`
+      linear-gradient(180deg, color-mix(in oklch, var(--card) 12%, transparent), transparent 65%),
+      color-mix(in oklch, var(--foreground) 12%, transparent))`
     );
 
     // Backdrop filter and SVG filter
@@ -429,9 +432,13 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     this.renderer.setStyle(
       borderLayer,
       'box-shadow',
-      '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)'
+      'var(--shadow-control-active), inset 0 1px 0 color-mix(in oklch, var(--card) 15%, transparent)'
     );
-    this.renderer.setStyle(borderLayer, 'border', '1px solid rgba(255,255,255,0.2)');
+    this.renderer.setStyle(
+      borderLayer,
+      'border',
+      '1px solid color-mix(in oklch, var(--card) 20%, transparent)'
+    );
 
     this.renderer.appendChild(this.host, borderLayer);
 
@@ -582,29 +589,24 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
 
   // ========== Event Handlers ==========
 
-  @HostListener('mouseenter')
   onMouseEnter(): void {
     this.isHovered = true;
   }
 
-  @HostListener('mouseleave')
   onMouseLeave(): void {
     this.isHovered = false;
     this.targetX = 0.5;
     this.targetY = 0.5;
   }
 
-  @HostListener('mousedown')
   onMouseDown(): void {
     this.isActive = true;
   }
 
-  @HostListener('mouseup')
   onMouseUp(): void {
     this.isActive = false;
   }
 
-  @HostListener('click')
   onClick(): void {
     this.liquidGlassClick.emit();
   }

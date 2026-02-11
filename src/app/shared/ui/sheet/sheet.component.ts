@@ -1,23 +1,32 @@
-import { Component, input, output, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  Directive,
+  input,
+  output,
+  computed,
+  ChangeDetectionStrategy,
+  ElementRef,
+  OnDestroy,
+  effect,
+  inject,
+} from '@angular/core';
 import { cn } from '@app/shared';
 
 export type SheetSide = 'top' | 'right' | 'bottom' | 'left';
 
-@Component({
-  selector: 'ng-container[spark-sheet-trigger]',
-  standalone: true,
-  template: '<ng-content />',
+@Directive({
+  selector: '[spark-sheet-trigger]',
 })
 export class SheetTriggerComponent {}
 
 @Component({
   selector: 'div[spark-sheet-overlay]',
-  standalone: true,
   host: {
     '[class]': 'computedClass()',
     '[style]': 'overlayStyles()',
     '(click)': 'close.emit()',
   },
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: '',
 })
 export class SheetOverlayComponent {
@@ -38,16 +47,48 @@ export class SheetOverlayComponent {
 
 @Component({
   selector: 'div[spark-sheet-content]',
-  standalone: true,
   host: {
     '[class]': 'computedClass()',
     '[style]': 'sheetStyles()',
+    role: 'dialog',
+    '[attr.aria-modal]': 'open() ? "true" : null',
+    '[attr.aria-hidden]': 'open() ? null : "true"',
+    '[attr.aria-label]': 'ariaLabel()',
+    '[attr.aria-labelledby]': 'ariaLabelledby()',
+    '[attr.aria-describedby]': 'ariaDescribedby()',
+    '[attr.tabindex]': '-1',
+    '(keydown.escape)': 'onEscape($event)',
+    '(keydown)': 'onKeydown($event)',
   },
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: '<ng-content />',
 })
-export class SheetContentComponent {
+export class SheetContentComponent implements OnDestroy {
   readonly open = input<boolean>(false);
   readonly side = input<SheetSide>('right');
+  readonly ariaLabel = input<string | null>('Sheet dialog');
+  readonly ariaLabelledby = input<string | null>(null);
+  readonly ariaDescribedby = input<string | null>(null);
+  readonly close = output<void>();
+
+  private readonly host = inject(ElementRef<HTMLElement>);
+  private wasOpen = false;
+  private previousActiveElement: HTMLElement | null = null;
+
+  constructor() {
+    effect(() => {
+      const open = this.open();
+      if (open && !this.wasOpen) {
+        this.wasOpen = true;
+        this.previousActiveElement =
+          document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        queueMicrotask(() => this.focusInitialElement());
+      } else if (!open && this.wasOpen) {
+        this.wasOpen = false;
+        this.restoreFocus();
+      }
+    });
+  }
 
   protected computedClass = computed(() => {
     const side = this.side();
@@ -81,14 +122,90 @@ export class SheetContentComponent {
 
     return `transform: ${transform}; transition: transform var(--sheet-transition-duration) var(--sheet-transition-easing), opacity var(--sheet-transition-duration) var(--sheet-transition-easing); opacity: ${opacity}; pointer-events: ${pointerEvents}; z-index: var(--sheet-z-content); padding: var(--sheet-padding);`;
   });
+
+  protected onEscape(event: KeyboardEvent): void {
+    event.stopPropagation();
+    this.close.emit();
+  }
+
+  protected onKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    if (!this.open()) {
+      return;
+    }
+
+    const focusables = this.getFocusableElements();
+    if (focusables.length === 0) {
+      event.preventDefault();
+      this.host.nativeElement.focus();
+      return;
+    }
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const active = document.activeElement as HTMLElement | null;
+
+    if (event.shiftKey && active === first) {
+      event.preventDefault();
+      last.focus();
+      return;
+    }
+
+    if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.restoreFocus();
+  }
+
+  private focusInitialElement(): void {
+    const focusables = this.getFocusableElements();
+    if (focusables.length > 0) {
+      focusables[0].focus();
+      return;
+    }
+    this.host.nativeElement.focus();
+  }
+
+  private getFocusableElements(): HTMLElement[] {
+    const root = this.host.nativeElement;
+    const focusableSelector = [
+      'button:not([disabled])',
+      '[href]',
+      'input:not([disabled])',
+      'select:not([disabled])',
+      'textarea:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])',
+    ].join(',');
+
+    const elements = Array.from(root.querySelectorAll(focusableSelector));
+    return elements.filter(
+      (el): el is HTMLElement =>
+        el instanceof HTMLElement && !el.hasAttribute('hidden') && !el.getAttribute('aria-hidden'),
+    );
+  }
+
+  private restoreFocus(): void {
+    if (!this.previousActiveElement) {
+      return;
+    }
+    this.previousActiveElement.focus();
+    this.previousActiveElement = null;
+  }
 }
 
 @Component({
   selector: 'div[spark-sheet-header]',
-  standalone: true,
   host: {
     '[class]': 'computedClass()',
   },
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: '<ng-content />',
 })
 export class SheetHeaderComponent {
@@ -99,10 +216,10 @@ export class SheetHeaderComponent {
 
 @Component({
   selector: 'h3[spark-sheet-title]',
-  standalone: true,
   host: {
     '[class]': 'computedClass()',
   },
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: '<ng-content />',
 })
 export class SheetTitleComponent {
@@ -113,10 +230,10 @@ export class SheetTitleComponent {
 
 @Component({
   selector: 'p[spark-sheet-description]',
-  standalone: true,
   host: {
     '[class]': 'computedClass()',
   },
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: '<ng-content />',
 })
 export class SheetDescriptionComponent {
@@ -127,10 +244,10 @@ export class SheetDescriptionComponent {
 
 @Component({
   selector: 'div[spark-sheet-footer]',
-  standalone: true,
   host: {
     '[class]': 'computedClass()',
   },
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: '<ng-content />',
 })
 export class SheetFooterComponent {
@@ -139,13 +256,11 @@ export class SheetFooterComponent {
   });
 }
 
-@Component({
-  selector: 'button[spark-sheet-close]',
-  standalone: true,
+@Directive({
+  selector: '[spark-sheet-close]',
   host: {
     '(click)': 'close.emit()',
   },
-  template: '<ng-content />',
 })
 export class SheetCloseComponent {
   readonly close = output<void>();

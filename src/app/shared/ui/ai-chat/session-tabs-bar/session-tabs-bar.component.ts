@@ -1,8 +1,7 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
+  input,
+  output,
   Signal,
   computed,
   ChangeDetectionStrategy,
@@ -56,7 +55,6 @@ import { ContextMenuTriggerDirective, ContextMenuItem } from '@app/shared/ui/con
  */
 @Component({
   selector: 'spark-session-tabs-bar',
-  standalone: true,
   imports: [ContextMenuTriggerDirective],
   templateUrl: './session-tabs-bar.component.html',
   styleUrl: './session-tabs-bar.component.css',
@@ -71,8 +69,7 @@ export class SessionTabsBarComponent {
    *
    * @required
    */
-  @Input({ required: true })
-  sessions: Signal<Map<string, SessionData>>;
+  readonly sessions = input.required<Signal<Map<string, SessionData>>>();
 
   /**
    * Signal containing the ID of the currently active session.
@@ -82,8 +79,7 @@ export class SessionTabsBarComponent {
    *
    * @required
    */
-  @Input({ required: true })
-  activeSessionId: Signal<string>;
+  readonly activeSessionId = input.required<Signal<string>>();
 
   /**
    * Event emitted when a user selects a different session.
@@ -100,8 +96,7 @@ export class SessionTabsBarComponent {
    * }
    * ```
    */
-  @Output()
-  readonly sessionSelect = new EventEmitter<string>();
+  readonly sessionSelect = output<string>();
 
   /**
    * Event emitted when a user clicks the active session tab.
@@ -118,8 +113,7 @@ export class SessionTabsBarComponent {
    * }
    * ```
    */
-  @Output()
-  readonly sessionToggle = new EventEmitter<void>();
+  readonly sessionToggle = output<void>();
 
   /**
    * Event emitted when user clicks the "New Chat" button.
@@ -137,32 +131,28 @@ export class SessionTabsBarComponent {
    * }
    * ```
    */
-  @Output()
-  readonly newChat = new EventEmitter<void>();
+  readonly newChat = output<void>();
 
   /**
    * Event emitted when user wants to rename a session.
    *
    * Emits an object with sessionId and newName.
    */
-  @Output()
-  readonly sessionRename = new EventEmitter<{ sessionId: string; newName: string }>();
+  readonly sessionRename = output<{ sessionId: string; newName: string }>();
 
   /**
    * Event emitted when user wants to change session color.
    *
    * Emits an object with sessionId and color.
    */
-  @Output()
-  readonly sessionColorChange = new EventEmitter<{ sessionId: string; color: SessionColor }>();
+  readonly sessionColorChange = output<{ sessionId: string; color: SessionColor }>();
 
   /**
    * Event emitted when user wants to close a session.
    *
    * Emits the session ID to close.
    */
-  @Output()
-  readonly sessionClose = new EventEmitter<string>();
+  readonly sessionClose = output<string>();
 
   /**
    * Available colors for sessions (cached for performance)
@@ -172,12 +162,12 @@ export class SessionTabsBarComponent {
     label: string;
     color: string;
   }> = [
-    { value: 'default', label: '默认绿', color: 'oklch(0.48 0.07 195)' },
-    { value: 'blue', label: '蓝色', color: 'oklch(0.55 0.12 225)' },
-    { value: 'purple', label: '紫色', color: 'oklch(0.55 0.14 285)' },
-    { value: 'pink', label: '粉色', color: 'oklch(0.60 0.18 350)' },
-    { value: 'orange', label: '橙色', color: 'oklch(0.65 0.15 50)' },
-    { value: 'yellow', label: '黄色', color: 'oklch(0.75 0.12 85)' },
+    { value: 'default', label: '默认绿', color: 'var(--session-color-default)' },
+    { value: 'blue', label: '蓝色', color: 'var(--session-color-blue)' },
+    { value: 'purple', label: '紫色', color: 'var(--session-color-purple)' },
+    { value: 'pink', label: '粉色', color: 'var(--session-color-pink)' },
+    { value: 'orange', label: '橙色', color: 'var(--session-color-orange)' },
+    { value: 'yellow', label: '黄色', color: 'var(--session-color-yellow)' },
   ] as const;
 
   /**
@@ -194,7 +184,7 @@ export class SessionTabsBarComponent {
       return this.menuItemsCache.get(sessionId)!;
     }
 
-    const session = this.sessions().get(sessionId);
+    const session = this.sessions()().get(sessionId);
     if (!session) return [];
 
     // Build color menu items (flattened, not nested)
@@ -236,7 +226,7 @@ export class SessionTabsBarComponent {
    * @returns Array of SessionData objects sorted by recency
    */
   readonly sortedSessions: Signal<SessionData[]> = computed(() => {
-    const sessionMap = this.sessions();
+    const sessionMap = this.sessions()();
 
     // Convert Map to array and sort by lastUpdated (most recent first)
     return Array.from(sessionMap.values()).sort((a, b) => b.lastUpdated - a.lastUpdated);
@@ -262,7 +252,7 @@ export class SessionTabsBarComponent {
       return;
     }
 
-    const activeId = this.activeSessionId();
+    const activeId = this.activeSessionId()();
 
     if (sessionId === activeId) {
       // Clicking active session → toggle panel visibility
@@ -292,7 +282,7 @@ export class SessionTabsBarComponent {
    * @param sessionId - The ID of the session to rename
    */
   renameSession(sessionId: string): void {
-    const session = this.sessions().get(sessionId);
+    const session = this.sessions()().get(sessionId);
     if (!session) return;
 
     const newName = prompt('输入新的会话名称:', session.name);

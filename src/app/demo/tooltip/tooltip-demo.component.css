@@ -23,8 +23,14 @@
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   padding: 1.5rem;
-  background-color: oklch(0.2 0.04 230);
-  color: oklch(0.94 0.015 85);
+  background-color: var(--muted);
+  color: var(--foreground);
+}
+
+.dark-preview .demo-button {
+  background-color: var(--background);
+  color: var(--foreground);
+  border-color: var(--border);
 }
 
 .code-block {

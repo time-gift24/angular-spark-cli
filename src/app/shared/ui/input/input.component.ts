@@ -14,7 +14,7 @@ const inputVariants = cva(
       // Future variants can be added here (e.g., size, variant)
     },
     defaultVariants: {},
-  }
+  },
 );
 
 /**
@@ -24,7 +24,6 @@ export type InputVariant = VariantProps<typeof inputVariants>;
 
 @Component({
   selector: 'input[spark-input]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
@@ -53,7 +52,7 @@ export class InputComponent {
     return cn(
       inputVariants(),
       'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
-      this.class()
+      this.class(),
     );
   });
 }

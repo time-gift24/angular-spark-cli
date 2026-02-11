@@ -38,7 +38,7 @@ const buttonVariants = cva(
       variant: 'default',
       size: 'default',
     },
-  }
+  },
 );
 
 /**
@@ -49,7 +49,6 @@ export type ButtonSize = VariantProps<typeof buttonVariants>['size'];
 
 @Component({
   selector: 'button[spark-button], a[spark-button]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',

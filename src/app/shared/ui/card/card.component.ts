@@ -3,7 +3,6 @@ import { cn } from '@app/shared';
 
 @Component({
   selector: 'div[spark-card]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
@@ -20,7 +19,6 @@ export class CardComponent {
 
 @Component({
   selector: 'div[spark-card-header]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
@@ -40,7 +38,6 @@ export class CardHeaderComponent {
 
 @Component({
   selector: 'div[spark-card-title]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
@@ -57,7 +54,6 @@ export class CardTitleComponent {
 
 @Component({
   selector: 'p[spark-card-description]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
@@ -74,7 +70,6 @@ export class CardDescriptionComponent {
 
 @Component({
   selector: 'div[spark-card-content]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
@@ -96,7 +91,6 @@ export class CardContentComponent {
 
 @Component({
   selector: 'div[spark-card-footer]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',

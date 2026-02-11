@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EMPTY, Observable, concatMap, delay, from, of, tap } from 'rxjs';
 import { StreamingMarkdownComponent } from '@app/shared/components/streaming-markdown/streaming-markdown.component';
@@ -60,10 +60,10 @@ console.log(users.map((u) => u.name).join(', '));
 
 @Component({
   selector: 'app-demo-streaming-markdown',
-  standalone: true,
   imports: [CommonModule, StreamingMarkdownComponent, StaticMarkdownComponent],
   templateUrl: './demo-streaming-markdown.component.html',
   styleUrl: './demo-streaming-markdown.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DemoStreamingMarkdownComponent {
   protected readonly markdownContent = DEMO_MARKDOWN;

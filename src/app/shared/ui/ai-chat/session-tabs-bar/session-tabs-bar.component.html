@@ -25,7 +25,7 @@
   <!-- Session Tabs -->
   @for (session of sortedSessions(); track session.id) {
     <button
-      [class.active]="session.id === activeSessionId()"
+      [class.active]="session.id === activeSessionId()()"
       [class.status-processing]="session.status === 'processing'"
       [class.status-disconnected]="session.status === 'disconnected'"
       [class]="getSessionColorClass(session)"
@@ -34,7 +34,7 @@
       [title]="session.name"
       class="session-tab"
       [attr.aria-label]="'Switch to ' + session.name"
-      [attr.aria-selected]="session.id === activeSessionId()"
+      [attr.aria-selected]="session.id === activeSessionId()()"
       type="button"
     >
       @if (session.status === 'processing') {

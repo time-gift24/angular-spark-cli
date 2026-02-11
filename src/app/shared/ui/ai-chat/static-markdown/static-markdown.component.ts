@@ -6,7 +6,14 @@
  * but without the streaming overhead.
  */
 
-import { Component, Input, OnChanges, SimpleChanges, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MarkdownBlockRouterComponent } from '@app/shared/components/streaming-markdown/blocks/block-router/block-router.component';
 import { MarkdownBlock } from '@app/shared/components/streaming-markdown/core/models';
@@ -15,7 +22,6 @@ import { BlockParser } from '@app/shared/components/streaming-markdown/core/bloc
 
 @Component({
   selector: 'static-markdown',
-  standalone: true,
   imports: [CommonModule, MarkdownBlockRouterComponent],
   providers: [
     MarkdownPreprocessor,
@@ -30,33 +36,32 @@ import { BlockParser } from '@app/shared/components/streaming-markdown/core/bloc
   `,
   host: {
     class: 'block text-sm'
-  }
+  },
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StaticMarkdownComponent implements OnChanges {
-  @Input({ required: true }) content!: string;
+export class StaticMarkdownComponent {
+  readonly content = input.required<string>();
 
-  constructor(
-    private preprocessor: MarkdownPreprocessor,
-    private parser: BlockParser
-  ) {}
+  private readonly preprocessor = inject(MarkdownPreprocessor);
+  private readonly parser = inject(BlockParser);
+
+  constructor() {
+    effect(() => {
+      this.parseContent(this.content());
+    });
+  }
 
   protected blocks = signal<MarkdownBlock[]>([]);
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['content']) {
-      this.parseContent();
-    }
-  }
-
-  private parseContent(): void {
-    if (!this.content) {
+  private parseContent(content: string): void {
+    if (!content) {
       this.blocks.set([]);
       return;
     }
 
     try {
       // Preprocess the content
-      const processed = this.preprocessor.process(this.content);
+      const processed = this.preprocessor.process(content);
 
       // Parse into blocks
       const result = this.parser.parse(processed);

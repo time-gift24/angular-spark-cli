@@ -420,7 +420,7 @@
     <!-- Sheet Components -->
     @if (buttonSheetOpen()) {
       <div spark-sheet-overlay [open]="true" (close)="buttonSheetOpen.set(false)"></div>
-      <div spark-sheet-content [open]="true" side="right">
+      <div spark-sheet-content [open]="true" side="right" (close)="buttonSheetOpen.set(false)">
         <div spark-sheet-header>
           <h3 spark-sheet-title>Button 按钮</h3>
           <p spark-sheet-description>多功能的按钮组件，支持多种变体、尺寸和状态。</p>
@@ -558,7 +558,7 @@
 
     @if (inputSheetOpen()) {
       <div spark-sheet-overlay [open]="true" (close)="inputSheetOpen.set(false)"></div>
-      <div spark-sheet-content [open]="true" side="right">
+      <div spark-sheet-content [open]="true" side="right" (close)="inputSheetOpen.set(false)">
         <div spark-sheet-header>
           <h3 spark-sheet-title>Input 输入框</h3>
           <p spark-sheet-description>功能丰富的输入框组件，支持验证和多种状态。</p>
@@ -617,7 +617,7 @@
 
     @if (cardSheetOpen()) {
       <div spark-sheet-overlay [open]="true" (close)="cardSheetOpen.set(false)"></div>
-      <div spark-sheet-content [open]="true" side="right">
+      <div spark-sheet-content [open]="true" side="right" (close)="cardSheetOpen.set(false)">
         <div spark-sheet-header>
           <h3 spark-sheet-title>Card 卡片</h3>
           <p spark-sheet-description>多功能的卡片组件，用于组织和展示内容。</p>
@@ -685,7 +685,7 @@
 
     @if (badgeSheetOpen()) {
       <div spark-sheet-overlay [open]="true" (close)="badgeSheetOpen.set(false)"></div>
-      <div spark-sheet-content [open]="true" side="right">
+      <div spark-sheet-content [open]="true" side="right" (close)="badgeSheetOpen.set(false)">
         <div spark-sheet-header>
           <h3 spark-sheet-title>Badge 徽章</h3>
           <p spark-sheet-description>小型标签和状态指示器组件。</p>
@@ -818,7 +818,7 @@
 
     @if (separatorSheetOpen()) {
       <div spark-sheet-overlay [open]="true" (close)="separatorSheetOpen.set(false)"></div>
-      <div spark-sheet-content [open]="true" side="right">
+      <div spark-sheet-content [open]="true" side="right" (close)="separatorSheetOpen.set(false)">
         <div spark-sheet-header>
           <h3 spark-sheet-title>Separator 分隔线</h3>
           <p spark-sheet-description>视觉分隔线组件，用于内容分组。</p>
@@ -877,7 +877,7 @@
 
     @if (switchSheetOpen()) {
       <div spark-sheet-overlay [open]="true" (close)="switchSheetOpen.set(false)"></div>
-      <div spark-sheet-content [open]="true" side="right">
+      <div spark-sheet-content [open]="true" side="right" (close)="switchSheetOpen.set(false)">
         <div spark-sheet-header>
           <h3 spark-sheet-title>Switch 开关</h3>
           <p spark-sheet-description>切换开关组件，用于二选一的场景。</p>

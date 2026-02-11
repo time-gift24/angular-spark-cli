@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { InputComponent } from '@app/shared/ui';
 import { basicInputs, stateInputs, specialInputs, formFields } from './examples/input-examples';
@@ -11,10 +11,10 @@ import type { InputStats } from './types/input-demo.types';
  */
 @Component({
   selector: 'app-input-demo',
-  standalone: true,
   imports: [InputComponent, DatePipe],
   templateUrl: './input-demo.component.html',
   styleUrl: './input-demo.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     style: 'display: block; width: 100%;',
   },

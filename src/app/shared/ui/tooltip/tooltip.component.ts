@@ -10,7 +10,6 @@ import { cn } from '@app/shared';
 
 @Component({
   selector: '[ui-tooltip-trigger]',
-  standalone: true,
   template: ` <ng-content /> `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -18,7 +17,6 @@ export class TooltipTriggerComponent {}
 
 @Component({
   selector: '[ui-tooltip-content]',
-  standalone: true,
   template: `
     <div
       [class]="computedClass()"
@@ -68,12 +66,14 @@ export class TooltipContentComponent {
 
 @Component({
   selector: 'ui-tooltip',
-  standalone: true,
   template: `
     <div
       [class]="'relative inline-flex ' + computedClass()"
       (mouseenter)="onMouseEnter()"
       (mouseleave)="onMouseLeave()"
+      (focusin)="onFocusIn()"
+      (focusout)="onFocusOut($event)"
+      (keydown.escape)="onEscape($event)"
     >
       <ng-content />
     </div>
@@ -107,6 +107,27 @@ export class TooltipComponent {
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
     }
+    const contentComponent = this.content()?.[0] as TooltipContentComponent | undefined;
+    contentComponent?.isVisible.set(false);
+  }
+
+  onFocusIn(): void {
+    const contentComponent = this.content()?.[0] as TooltipContentComponent | undefined;
+    contentComponent?.isVisible.set(true);
+  }
+
+  onFocusOut(event: FocusEvent): void {
+    const currentTarget = event.currentTarget as HTMLElement | null;
+    const relatedTarget = event.relatedTarget as Node | null;
+    if (currentTarget?.contains(relatedTarget)) {
+      return;
+    }
+    const contentComponent = this.content()?.[0] as TooltipContentComponent | undefined;
+    contentComponent?.isVisible.set(false);
+  }
+
+  onEscape(event: Event): void {
+    event.stopPropagation();
     const contentComponent = this.content()?.[0] as TooltipContentComponent | undefined;
     contentComponent?.isVisible.set(false);
   }

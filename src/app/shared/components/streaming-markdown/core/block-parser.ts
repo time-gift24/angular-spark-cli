@@ -11,7 +11,7 @@
  * - No UUID dependency
  */
 
-import { Inject, Injectable, Optional } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { marked } from 'marked';
 import { Token } from 'marked';
 import {
@@ -72,11 +72,18 @@ export interface IBlockParser {
 @Injectable()
 export class BlockParser implements IBlockParser {
   private cache: IncrementalCache = { parsedText: '', stableBlocks: [], stableTextEnd: 0 };
+  private readonly registry = inject(BLOCK_COMPONENT_REGISTRY, {
+    optional: true,
+  }) as BlockComponentRegistry | null;
   private extractTextCache: WeakMap<object, string> | null = null;
-  private readonly securityPolicy: StreamdownSecurityPolicy;
-  private readonly observability: StreamdownPluginObservability | null;
-  private readonly hasBlockExtensions: boolean;
-  private readonly hasInlineExtensions: boolean;
+  private readonly securityPolicy: StreamdownSecurityPolicy =
+    this.registry?.securityPolicy ?? DEFAULT_STREAMDOWN_SECURITY_POLICY;
+  private readonly observability: StreamdownPluginObservability | null =
+    this.registry?.observability ?? null;
+  private readonly hasBlockExtensions =
+    !!this.registry?.parserExtensions && this.registry.parserExtensions.length > 0;
+  private readonly hasInlineExtensions =
+    !!this.registry?.inlineParserExtensions && this.registry.inlineParserExtensions.length > 0;
 
   private readonly parserContext: BlockParserContext = {
     parseInlineTokens: (tokens) => this.parseInlineTokens(tokens),
@@ -91,16 +98,6 @@ export class BlockParser implements IBlockParser {
     extractText: (token) => this.extractText(token),
     sanitizeInline: (inline) => this.sanitizeInline(inline)
   };
-
-  constructor(
-    @Optional() @Inject(BLOCK_COMPONENT_REGISTRY)
-    private readonly registry?: BlockComponentRegistry
-  ) {
-    this.securityPolicy = this.registry?.securityPolicy ?? DEFAULT_STREAMDOWN_SECURITY_POLICY;
-    this.observability = this.registry?.observability ?? null;
-    this.hasBlockExtensions = !!this.registry?.parserExtensions && this.registry.parserExtensions.length > 0;
-    this.hasInlineExtensions = !!this.registry?.inlineParserExtensions && this.registry.inlineParserExtensions.length > 0;
-  }
 
   /**
    * Generate deterministic ID from block type + position.

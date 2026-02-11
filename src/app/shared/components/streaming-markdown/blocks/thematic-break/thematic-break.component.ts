@@ -6,17 +6,16 @@
  * Implements BlockRenderer interface for plugin architecture.
  */
 
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { MarkdownBlock, ThematicBreakBlock } from '../../core/models';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { ThematicBreakBlock } from '../../core/models';
 
 @Component({
   selector: 'app-markdown-thematic-break',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<hr class="markdown-hr" />`,
   styleUrls: ['./thematic-break.component.css']
 })
 export class MarkdownThematicBreakComponent {
-  @Input({ required: true }) block!: ThematicBreakBlock;
-  @Input() isComplete: boolean = true;
+  readonly block = input.required<ThematicBreakBlock>();
+  readonly isComplete = input(true);
 }

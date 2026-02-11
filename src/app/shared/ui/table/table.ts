@@ -10,7 +10,6 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
  */
 @Component({
   selector: 'table[spark-table]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-content />`,
   styles: `
@@ -32,7 +31,6 @@ export class TableComponent {}
  */
 @Component({
   selector: 'thead[spark-table-header]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-content />`,
   styles: `
@@ -40,7 +38,7 @@ export class TableComponent {}
       display: table-header-group;
     }
 
-    :host ::ng-deep tr {
+    :host > tr {
       border-bottom: var(--table-border-width) solid var(--border);
     }
   `,
@@ -55,7 +53,6 @@ export class TableHeaderComponent {}
  */
 @Component({
   selector: 'tbody[spark-table-body]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-content />`,
   styles: `
@@ -63,7 +60,7 @@ export class TableHeaderComponent {}
       display: table-row-group;
     }
 
-    :host ::ng-deep tr:last-child {
+    :host > tr:last-child {
       border-bottom: 0;
     }
   `,
@@ -78,7 +75,6 @@ export class TableBodyComponent {}
  */
 @Component({
   selector: 'tfoot[spark-table-footer]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-content />`,
   styles: `
@@ -89,7 +85,7 @@ export class TableBodyComponent {}
       font-weight: 500; /* font-medium */
     }
 
-    :host ::ng-deep tr:last-child {
+    :host > tr:last-child {
       border-bottom: 0;
     }
   `,
@@ -106,7 +102,6 @@ export class TableFooterComponent {}
  */
 @Component({
   selector: 'tr[spark-table-row]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-content />`,
   styles: `
@@ -121,7 +116,10 @@ export class TableFooterComponent {}
     }
 
     :host[data-state='selected'] {
-      background-color: color-mix(in srgb, var(--muted) calc(var(--table-selected-bg-opacity) * 100%));
+      background-color: color-mix(
+        in srgb,
+        var(--muted) calc(var(--table-selected-bg-opacity) * 100%)
+      );
     }
   `,
 })
@@ -135,7 +133,6 @@ export class TableRowComponent {}
  */
 @Component({
   selector: 'th[spark-table-head]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-content />`,
   styles: `
@@ -165,7 +162,6 @@ export class TableHeadComponent {}
  */
 @Component({
   selector: 'td[spark-table-cell]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-content />`,
   styles: `
@@ -191,7 +187,6 @@ export class TableCellComponent {}
  */
 @Component({
   selector: 'caption[spark-table-caption]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-content />`,
   styles: `

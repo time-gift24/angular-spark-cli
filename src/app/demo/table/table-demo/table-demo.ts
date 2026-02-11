@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   TableComponent,
@@ -33,7 +33,6 @@ interface SortState {
  */
 @Component({
   selector: 'app-table-demo',
-  standalone: true,
   imports: [
     CommonModule,
     TableComponent,
@@ -47,6 +46,7 @@ interface SortState {
   ],
   templateUrl: './table-demo.html',
   styleUrl: '../../shared/demo-page-styles.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableDemoComponent {
   /**

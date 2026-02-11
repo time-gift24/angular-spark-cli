@@ -3,11 +3,7 @@
 :host {
   display: inline-block;
   position: relative;
-}
-
-/* Switch Track */
-.switch-track {
-  display: inline-block;
+  box-sizing: border-box;
   border-radius: 9999px;
   border: 1px solid var(--border);
   background-color: var(--input);
@@ -17,12 +13,12 @@
   cursor: pointer;
 }
 
-:host([data-state='checked']) .switch-track {
+:host([data-state='checked']) {
   background-color: var(--primary);
   border-color: var(--primary);
 }
 
-:host([data-disabled]) .switch-track {
+:host([disabled]) {
   opacity: var(--opacity-disabled);
   cursor: not-allowed;
 }
@@ -33,7 +29,7 @@
   display: block;
   border-radius: 9999px;
   background-color: var(--background);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-control);
   transition:
     transform var(--duration-normal) var(--ease-out),
     background-color var(--duration-normal) var(--ease-out);
@@ -49,7 +45,7 @@
 }
 
 /* Size variants */
-:host([data-size='default']) .switch-track {
+:host([data-size='default']) {
   width: var(--switch-width-md);
   height: var(--switch-height-md);
 }
@@ -59,7 +55,7 @@
   height: var(--switch-thumb-size-md);
 }
 
-:host([data-size='sm']) .switch-track {
+:host([data-size='sm']) {
   width: var(--switch-width-sm);
   height: var(--switch-height-sm);
 }
@@ -87,7 +83,7 @@
 }
 
 /* Focus visible ring */
-.switch-track:focus-visible {
+:host(:focus-visible) {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }

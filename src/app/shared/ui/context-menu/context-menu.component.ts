@@ -1,7 +1,10 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   Directive,
+  SecurityContext,
   input,
+  output,
   signal,
   computed,
   inject,
@@ -10,6 +13,7 @@ import {
   ElementRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer } from '@angular/platform-browser';
 
 /**
  * ContextMenuItem - Interface for menu items
@@ -43,9 +47,9 @@ export interface ContextMenuItem {
  */
 @Component({
   selector: 'ui-context-menu',
-  standalone: true,
   imports: [CommonModule],
   template: ` <ng-content /> `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     :host {
       display: contents;
@@ -61,7 +65,6 @@ export class ContextMenuComponent {
  */
 @Component({
   selector: 'div[uiContextMenuContent]',
-  standalone: true,
   imports: [CommonModule],
   host: {
     '[class]': 'classes()',
@@ -69,6 +72,9 @@ export class ContextMenuComponent {
     '[style.position]': '"fixed"',
     '[style.minWidth]': 'minWidth()',
     '[style.maxWidth]': 'maxWidth()',
+    '[attr.role]': '"menu"',
+    '[attr.aria-label]': 'ariaLabel()',
+    '(keydown.escape)': 'onEscape($event)',
   },
   template: `
     <div class="context-menu-content" [class.submenu]="isSubmenu()">
@@ -78,11 +84,16 @@ export class ContextMenuComponent {
             class="menu-item submenu-trigger"
             [class.inset]="item.inset"
             [class.disabled]="item.disabled"
+            role="menuitem"
+            [attr.aria-disabled]="item.disabled ? 'true' : null"
+            [attr.tabindex]="item.disabled ? -1 : 0"
             (mouseenter)="onSubmenuEnter($event, item)"
             (click)="onItemClick(item, $event)"
+            (keydown.enter)="onItemKeyboardSelect(item, $event)"
+            (keydown.space)="onItemKeyboardSelect(item, $event)"
           >
             @if (item.icon) {
-              <span class="menu-icon" [innerHTML]="item.icon"></span>
+              <span class="menu-icon" [innerHTML]="sanitizeIcon(item.icon)"></span>
             }
             <span class="menu-label">{{ item.label }}</span>
             <svg
@@ -108,10 +119,15 @@ export class ContextMenuComponent {
             [class.inset]="item.inset"
             [class.disabled]="item.disabled"
             [class.destructive]="item.destructive"
+            role="menuitem"
+            [attr.aria-disabled]="item.disabled ? 'true' : null"
+            [attr.tabindex]="item.disabled ? -1 : 0"
             (click)="onItemClick(item, $event)"
+            (keydown.enter)="onItemKeyboardSelect(item, $event)"
+            (keydown.space)="onItemKeyboardSelect(item, $event)"
           >
             @if (item.icon) {
-              <span class="menu-icon" [innerHTML]="item.icon"></span>
+              <span class="menu-icon" [innerHTML]="sanitizeIcon(item.icon)"></span>
             }
             <span class="menu-label">{{ item.label }}</span>
             @if (item.shortcut) {
@@ -129,9 +145,7 @@ export class ContextMenuComponent {
         background: var(--popover);
         border: 1px solid var(--border);
         border-radius: var(--radius-md);
-        box-shadow:
-          0 4px 6px -1px rgb(0 0 0 / 0.1),
-          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        box-shadow: var(--shadow-popover);
         padding: var(--spacing-xs) 0;
         min-width: var(--context-menu-min-width);
         max-width: var(--context-menu-max-width);
@@ -158,6 +172,7 @@ export class ContextMenuComponent {
         user-select: none;
         transition: background-color var(--duration-fast, 150ms) var(--ease-out);
         position: relative;
+        outline: none;
       }
 
       .menu-item:hover:not(.disabled) {
@@ -170,7 +185,7 @@ export class ContextMenuComponent {
       }
 
       .menu-item.disabled {
-        opacity: var(--opacity-disabled, 0.5);
+        color: color-mix(in oklch, var(--popover-foreground) 85%, var(--popover) 15%);
         cursor: not-allowed;
         pointer-events: none;
       }
@@ -193,7 +208,7 @@ export class ContextMenuComponent {
         flex-shrink: 0;
       }
 
-      .menu-icon :deep(svg) {
+      .menu-icon svg {
         width: 100%;
         height: 100%;
       }
@@ -206,7 +221,7 @@ export class ContextMenuComponent {
       .menu-shortcut {
         margin-left: auto;
         font-size: var(--font-size-xs, 0.75rem);
-        color: var(--muted-foreground);
+        color: color-mix(in oklch, var(--popover-foreground) 88%, var(--popover) 12%);
       }
 
       .menu-item:hover .menu-shortcut {
@@ -227,26 +242,55 @@ export class ContextMenuComponent {
       .menu-item:hover .submenu-arrow {
         color: inherit;
       }
+
+      .menu-item:focus-visible {
+        background: var(--accent);
+        color: var(--accent-foreground);
+      }
     `,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContextMenuContentComponent {
   items = input<ContextMenuItem[]>([]);
   isSubmenu = input<boolean>(false);
+  ariaLabel = input<string>('Context menu');
   minWidth = computed(() => 'var(--context-menu-min-width)');
   maxWidth = computed(() => 'var(--context-menu-max-width)');
+  readonly close = output<void>();
+  private readonly sanitizer = inject(DomSanitizer);
 
-  onItemClick(item: ContextMenuItem, event: MouseEvent) {
+  sanitizeIcon(icon?: string): string {
+    if (!icon) {
+      return '';
+    }
+    return this.sanitizer.sanitize(SecurityContext.HTML, icon) ?? '';
+  }
+
+  onItemClick(item: ContextMenuItem, event: Event): void {
     event.stopPropagation();
-    if (item.disabled) return;
+    if (item.disabled) {
+      return;
+    }
     if (item.action) {
       item.action();
     }
+    this.close.emit();
   }
 
-  onSubmenuEnter(event: MouseEvent, item: ContextMenuItem) {
+  onItemKeyboardSelect(item: ContextMenuItem, event: Event): void {
+    event.preventDefault();
+    this.onItemClick(item, event);
+  }
+
+  onSubmenuEnter(event: MouseEvent, item: ContextMenuItem): void {
     // Submenu hover handling - could be expanded for full submenu support
     event.stopPropagation();
+  }
+
+  onEscape(event: KeyboardEvent): void {
+    event.preventDefault();
+    this.close.emit();
   }
 
   classes = computed(() => '');
@@ -258,11 +302,11 @@ export class ContextMenuContentComponent {
  */
 @Directive({
   selector: '[uiContextMenuTrigger]',
-  standalone: true,
 })
 export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
   readonly uiContextMenuTrigger = input<ContextMenuItem[]>([]);
-  private elementRef = inject(ElementRef);
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly sanitizer = inject(DomSanitizer);
   private menuContainer: HTMLElement | null = null;
   private activeMenu = signal<HTMLElement | null>(null);
   private activeSubmenu = signal<HTMLElement | null>(null);
@@ -300,6 +344,8 @@ export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
     // Create menu element
     const menuEl = document.createElement('div');
     menuEl.className = 'context-menu-wrapper';
+    menuEl.setAttribute('role', 'menu');
+    menuEl.setAttribute('aria-label', 'Context menu');
     this.activeMenu.set(menuEl);
     this.menuContainer.appendChild(menuEl);
 
@@ -312,6 +358,8 @@ export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
     // Close on click outside
     setTimeout(() => {
       document.addEventListener('click', this.closeMenuOnClick, true);
+      document.addEventListener('keydown', this.handleGlobalKeydown, true);
+      this.focusFirstMenuItem();
     }, 0);
   }
 
@@ -324,11 +372,12 @@ export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
       background: var(--popover);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      box-shadow: var(--shadow-popover);
       padding: var(--spacing-xs) 0;
       min-width: var(--context-menu-min-width);
       max-width: var(--context-menu-max-width);
     `;
+    container.setAttribute('role', 'menu');
 
     items.forEach((item) => {
       const itemEl = this.createMenuItem(item);
@@ -339,6 +388,11 @@ export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
   private createMenuItem(item: ContextMenuItem): HTMLElement {
     const div = document.createElement('div');
     div.className = 'menu-item';
+    div.setAttribute('role', 'menuitem');
+    div.tabIndex = item.disabled ? -1 : 0;
+    if (item.disabled) {
+      div.setAttribute('aria-disabled', 'true');
+    }
 
     // Apply base item styles
     div.style.cssText = `
@@ -359,7 +413,8 @@ export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
       div.style.paddingLeft = `calc(var(--context-menu-item-padding-x) + var(--context-menu-item-inset))`;
     }
     if (item.disabled) {
-      div.style.opacity = 'var(--opacity-disabled, 0.5)';
+      div.classList.add('disabled');
+      div.style.color = 'color-mix(in oklch, var(--popover-foreground) 85%, var(--popover) 15%)';
       div.style.cursor = 'not-allowed';
       div.style.pointerEvents = 'none';
     }
@@ -370,7 +425,7 @@ export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
     if (item.icon) {
       const icon = document.createElement('span');
       icon.className = 'menu-icon';
-      icon.innerHTML = item.icon;
+      icon.innerHTML = this.sanitizeIcon(item.icon);
       icon.style.cssText = `
         display: flex;
         align-items: center;
@@ -398,7 +453,7 @@ export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
       shortcut.style.cssText = `
         margin-left: auto;
         font-size: var(--font-size-xs, 0.75rem);
-        color: var(--muted-foreground);
+        color: color-mix(in oklch, var(--popover-foreground) 88%, var(--popover) 12%);
       `;
       div.appendChild(shortcut);
     }
@@ -422,6 +477,16 @@ export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
         e.stopPropagation();
         if (item.action) item.action();
         this.closeMenu();
+      });
+
+      div.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (item.action) {
+            item.action();
+          }
+          this.closeMenu();
+        }
       });
     }
 
@@ -455,13 +520,78 @@ export class ContextMenuTriggerDirective implements AfterViewInit, OnDestroy {
     this.closeMenu();
   };
 
+  private handleGlobalKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeMenu();
+      return;
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.focusByOffset(1);
+      return;
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.focusByOffset(-1);
+      return;
+    }
+
+    if (event.key === 'Home') {
+      event.preventDefault();
+      const items = this.getMenuItems();
+      items[0]?.focus();
+      return;
+    }
+
+    if (event.key === 'End') {
+      event.preventDefault();
+      const items = this.getMenuItems();
+      items[items.length - 1]?.focus();
+    }
+  };
+
   private closeMenu() {
     document.removeEventListener('click', this.closeMenuOnClick, true);
+    document.removeEventListener('keydown', this.handleGlobalKeydown, true);
     if (this.menuContainer) {
       this.menuContainer.remove();
       this.menuContainer = null;
     }
     this.activeMenu.set(null);
     this.activeSubmenu.set(null);
+  }
+
+  private sanitizeIcon(icon?: string): string {
+    if (!icon) {
+      return '';
+    }
+    return this.sanitizer.sanitize(SecurityContext.HTML, icon) ?? '';
+  }
+
+  private focusFirstMenuItem(): void {
+    const items = this.getMenuItems();
+    items[0]?.focus();
+  }
+
+  private focusByOffset(offset: number): void {
+    const items = this.getMenuItems();
+    if (items.length === 0) {
+      return;
+    }
+
+    const activeElement = document.activeElement as HTMLElement | null;
+    const activeIndex = items.findIndex((item) => item === activeElement);
+    const currentIndex = activeIndex < 0 ? 0 : activeIndex;
+    const nextIndex = (currentIndex + offset + items.length) % items.length;
+    items[nextIndex]?.focus();
+  }
+
+  private getMenuItems(): HTMLElement[] {
+    return Array.from(
+      this.menuContainer?.querySelectorAll<HTMLElement>('.menu-item:not(.disabled)') ?? [],
+    );
   }
 }

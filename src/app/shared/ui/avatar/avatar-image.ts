@@ -2,7 +2,6 @@ import { Component, input, output, ChangeDetectionStrategy } from '@angular/core
 
 @Component({
   selector: 'img[ui-avatar-image]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'aspect-square h-full w-full object-cover',

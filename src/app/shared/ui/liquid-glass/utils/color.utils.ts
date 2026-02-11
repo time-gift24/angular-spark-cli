@@ -16,7 +16,7 @@ import {
  * Resolve CSS variable to actual color value
  *
  * Handles both CSS variable references (e.g., 'var(--accent)') and direct
- * color values (e.g., 'rgba(255, 255, 255, 0.5)', 'oklch(...)').
+ * color values (e.g., 'color-mix(in oklch, var(--card) 50%, transparent)', 'oklch(...)').
  *
  * @param color - Color string or CSS variable reference
  * @param element - HTMLElement to compute styles from
@@ -56,7 +56,7 @@ export function resolveColorValue(color: string, element: HTMLElement): string {
  * ```ts
  * isOKLCHColor('oklch(0.48 0.07 195)'); // true
  * isOKLCHColor('#ffffff'); // false
- * isOKLCHColor('rgba(255, 255, 255, 0.5)'); // false
+ * isOKLCHColor('color-mix(in oklch, var(--card) 50%, transparent)'); // false
  * ```
  */
 export function isOKLCHColor(color: string): boolean {
@@ -79,9 +79,9 @@ export function isOKLCHColor(color: string): boolean {
  * ```ts
  * const gradient = buildGlassGradient(
  *   { x: 0.5, y: 0.5 },
- *   { hotspot: 'rgba(255, 255, 255, 0.22)', tint: 'rgba(0, 0, 0, 0.32)' }
+ *   { hotspot: 'color-mix(in oklch, var(--card) 22%, transparent)', tint: 'color-mix(in oklch, var(--foreground) 32%, transparent)' }
  * );
- * // Returns: 'radial-gradient(...), linear-gradient(...), rgba(0, 0, 0, 0.32)'
+ * // Returns: 'radial-gradient(...), linear-gradient(...), color-mix(...)'
  * ```
  */
 export function buildGlassGradient(
@@ -92,18 +92,19 @@ export function buildGlassGradient(
   const xPct = (position.x * 100).toFixed(2);
   const yPct = (position.y * 100).toFixed(2);
 
-  // Extract hotspot base color for gradient stops
+  // Derive gradient stops from hotspot without assuming rgba() input.
   const hotspotColor = colors.hotspot;
-  const hotspotFade = hotspotColor.replace(/[\d.]+\)$/, '0.08)');
+  const hotspotFade = `color-mix(in oklch, ${hotspotColor} 55%, transparent)`;
+  const linearTop = `color-mix(in oklch, ${hotspotColor} 80%, transparent)`;
 
   return `
     radial-gradient(
       140px 140px at ${xPct}% ${yPct}%,
       ${hotspotColor},
       ${hotspotFade} 35%,
-      rgba(255,255,255,0) 70%
+      transparent 70%
     ),
-    linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 65%),
+    linear-gradient(180deg, ${linearTop}, transparent 65%),
     ${colors.tint}
   `
     .replace(/\s+/g, ' ') // Collapse multiple spaces

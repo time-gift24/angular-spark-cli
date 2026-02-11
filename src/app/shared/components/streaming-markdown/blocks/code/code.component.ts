@@ -1,21 +1,21 @@
 import {
   Component,
-  Input,
-  signal,
-  OnChanges,
+  Injector,
+  OnInit,
   OnDestroy,
-  SimpleChanges,
   ChangeDetectionStrategy,
-  inject
+  effect,
+  inject,
+  input,
+  signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MarkdownBlock, CodeBlock, CodeLine, isCodeBlock } from '../../core/models';
+import { CodeBlock, CodeLine, isCodeBlock } from '../../core/models';
 import { LANGUAGE_DISPLAY_NAMES } from '../../core/shini-types';
 import { HighlightSchedulerService } from '../../core/highlight-scheduler.service';
 
 @Component({
   selector: 'app-markdown-code',
-  standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -59,24 +59,43 @@ import { HighlightSchedulerService } from '../../core/highlight-scheduler.servic
   `,
   styleUrls: ['./code.component.css']
 })
-export class MarkdownCodeComponent implements OnChanges, OnDestroy {
-  @Input({ required: true }) block!: CodeBlock;
-  @Input() isComplete: boolean = true;
-  @Input() blockIndex: number = -1;
-  @Input() enableLazyHighlight: boolean = false;
-  @Input() allowHighlight: boolean = true;
+export class MarkdownCodeComponent implements OnInit, OnDestroy {
+  readonly blockInput = input.required<CodeBlock>({ alias: 'block' });
+  readonly isCompleteInput = input(true, { alias: 'isComplete' });
+  readonly blockIndexInput = input(-1, { alias: 'blockIndex' });
+  readonly enableLazyHighlightInput = input(false, { alias: 'enableLazyHighlight' });
+  readonly allowHighlightInput = input(true, { alias: 'allowHighlight' });
+
+  get block(): CodeBlock {
+    return this.blockInput();
+  }
+
+  get isComplete(): boolean {
+    return this.isCompleteInput();
+  }
+
+  get blockIndex(): number {
+    return this.blockIndexInput();
+  }
+
+  get enableLazyHighlight(): boolean {
+    return this.enableLazyHighlightInput();
+  }
+
+  get allowHighlight(): boolean {
+    return this.allowHighlightInput();
+  }
 
   highlightedLines = signal<CodeLine[]>([]);
-  codeWrapperClasses = signal<string>('markdown-code block-code');
-  copied = signal<boolean>(false);
+  codeWrapperClasses = signal('markdown-code block-code');
+  copied = signal(false);
 
-  private highlightScheduler = inject(HighlightSchedulerService);
+  private readonly injector = inject(Injector);
+  private readonly highlightScheduler = inject(HighlightSchedulerService);
   private unsubscribeHighlightResult: (() => void) | null = null;
   private subscribedBlockId: string | null = null;
   private syncRequestId = 0;
   private copiedResetTimer: ReturnType<typeof setTimeout> | null = null;
-
-  constructor() {}
 
   get code(): string {
     return this.block.rawContent || this.block.content;
@@ -92,14 +111,19 @@ export class MarkdownCodeComponent implements OnChanges, OnDestroy {
     return displayName || lang.charAt(0).toUpperCase() + lang.slice(1);
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['block']) {
-      this.ensureHighlightSubscription();
-    }
-
-    if (changes['block'] || changes['isComplete'] || changes['enableLazyHighlight'] || changes['allowHighlight'] || changes['blockIndex']) {
-      void this.syncHighlightState();
-    }
+  ngOnInit(): void {
+    effect(
+      () => {
+        this.blockInput();
+        this.isCompleteInput();
+        this.enableLazyHighlightInput();
+        this.allowHighlightInput();
+        this.blockIndexInput();
+        this.ensureHighlightSubscription();
+        void this.syncHighlightState();
+      },
+      { injector: this.injector },
+    );
   }
 
   ngOnDestroy(): void {

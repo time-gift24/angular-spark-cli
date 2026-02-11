@@ -8,14 +8,13 @@
  * Implements BlockRenderer interface for plugin architecture.
  */
 
-import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MarkdownBlock, HeadingBlock, MarkdownInline } from '../../core/models';
+import { HeadingBlock } from '../../core/models';
 import { RenderMathPipe } from '../../core/math-render.pipe';
 
 @Component({
   selector: 'app-markdown-heading',
-  standalone: true,
   imports: [CommonModule, RenderMathPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -47,33 +46,25 @@ import { RenderMathPipe } from '../../core/math-render.pipe';
       }
     </ng-template>
 
-    @switch (block.level || 1) {
-      @case (1) { <h1 [class]="headingClasses()">@if (block.children?.length) { <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block.children }" /> } @else { {{ block.content }} }@if (!isComplete) { <span class="streaming-cursor"></span> }</h1> }
-      @case (2) { <h2 [class]="headingClasses()">@if (block.children?.length) { <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block.children }" /> } @else { {{ block.content }} }@if (!isComplete) { <span class="streaming-cursor"></span> }</h2> }
-      @case (3) { <h3 [class]="headingClasses()">@if (block.children?.length) { <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block.children }" /> } @else { {{ block.content }} }@if (!isComplete) { <span class="streaming-cursor"></span> }</h3> }
-      @case (4) { <h4 [class]="headingClasses()">@if (block.children?.length) { <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block.children }" /> } @else { {{ block.content }} }@if (!isComplete) { <span class="streaming-cursor"></span> }</h4> }
-      @case (5) { <h5 [class]="headingClasses()">@if (block.children?.length) { <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block.children }" /> } @else { {{ block.content }} }@if (!isComplete) { <span class="streaming-cursor"></span> }</h5> }
-      @case (6) { <h6 [class]="headingClasses()">@if (block.children?.length) { <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block.children }" /> } @else { {{ block.content }} }@if (!isComplete) { <span class="streaming-cursor"></span> }</h6> }
-      @default { <h6 class="markdown-heading fallback">{{ block.content }}@if (!isComplete) { <span class="streaming-cursor"></span> }</h6> }
+    @switch (block().level || 1) {
+      @case (1) { <h1 [class]="headingClasses()">@if (block().children?.length) { <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block().children }" /> } @else { {{ block().content }} }@if (!isComplete()) { <span class="streaming-cursor"></span> }</h1> }
+      @case (2) { <h2 [class]="headingClasses()">@if (block().children?.length) { <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block().children }" /> } @else { {{ block().content }} }@if (!isComplete()) { <span class="streaming-cursor"></span> }</h2> }
+      @case (3) { <h3 [class]="headingClasses()">@if (block().children?.length) { <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block().children }" /> } @else { {{ block().content }} }@if (!isComplete()) { <span class="streaming-cursor"></span> }</h3> }
+      @case (4) { <h4 [class]="headingClasses()">@if (block().children?.length) { <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block().children }" /> } @else { {{ block().content }} }@if (!isComplete()) { <span class="streaming-cursor"></span> }</h4> }
+      @case (5) { <h5 [class]="headingClasses()">@if (block().children?.length) { <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block().children }" /> } @else { {{ block().content }} }@if (!isComplete()) { <span class="streaming-cursor"></span> }</h5> }
+      @case (6) { <h6 [class]="headingClasses()">@if (block().children?.length) { <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block().children }" /> } @else { {{ block().content }} }@if (!isComplete()) { <span class="streaming-cursor"></span> }</h6> }
+      @default { <h6 class="markdown-heading fallback">{{ block().content }}@if (!isComplete()) { <span class="streaming-cursor"></span> }</h6> }
     }
   `,
   styleUrls: ['./heading.component.css']
 })
-export class MarkdownHeadingComponent implements OnChanges {
-  @Input({ required: true }) block!: HeadingBlock;
-  @Input() isComplete: boolean = true;
+export class MarkdownHeadingComponent {
+  readonly block = input.required<HeadingBlock>();
+  readonly isComplete = input(true);
 
-  headingClasses = signal<string>('markdown-heading');
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['isComplete']) {
-      this.updateClasses();
-    }
-  }
-
-  private updateClasses(): void {
+  protected readonly headingClasses = computed(() => {
     const baseClass = 'markdown-heading';
-    const streamingClass = !this.isComplete ? ' streaming' : '';
-    this.headingClasses.set(`${baseClass}${streamingClass}`);
-  }
+    const streamingClass = !this.isComplete() ? ' streaming' : '';
+    return `${baseClass}${streamingClass}`;
+  });
 }

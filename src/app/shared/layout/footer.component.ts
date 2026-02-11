@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 /**
  * FooterComponent - Reusable footer component
@@ -11,7 +11,6 @@ import { Component } from '@angular/core';
  */
 @Component({
   selector: 'app-footer',
-  standalone: true,
   template: `
     <footer class="w-full border-t border-border bg-background">
       <div class="container mx-auto px-4 py-6 md:py-8">
@@ -29,5 +28,6 @@ import { Component } from '@angular/core';
       </div>
     </footer>
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FooterComponent {}

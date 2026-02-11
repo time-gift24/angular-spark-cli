@@ -1,18 +1,26 @@
-import { Component, Input, ViewChild, ElementRef, AfterViewChecked, output, inject } from '@angular/core';
+import {
+  AfterViewChecked,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  ViewChild,
+  input,
+  output,
+} from '@angular/core';
 import { ChatMessage } from '@app/shared/models';
 import { MessageBubbleComponent } from '../message-bubble';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'ai-message-list',
-  standalone: true,
   imports: [CommonModule, MessageBubbleComponent],
   templateUrl: './message-list.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MessageListComponent implements AfterViewChecked {
-  @Input({ required: true }) messages!: ChatMessage[];
-  @Input() streamingContent = '';
-  @Input() maxHeight = 'calc(100vh - 200px)';
+  readonly messages = input.required<ChatMessage[]>();
+  readonly streamingContent = input('');
+  readonly maxHeight = input('calc(100vh - 200px)');
 
   readonly scrollChange = output<boolean>();
 

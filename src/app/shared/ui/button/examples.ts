@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ButtonComponent } from './button.component';
 
 @Component({
   selector: 'app-button-examples',
-  standalone: true,
   imports: [ButtonComponent, RouterLink],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="examples-container">
       <div class="header">
@@ -252,33 +252,33 @@ import { ButtonComponent } from './button.component';
       font-size: 2.5rem;
       font-weight: 700;
       margin: 0 0 0.5rem 0;
-      color: #1f2937;
+      color: var(--foreground);
     }
 
     .header p {
       font-size: 1.125rem;
-      color: #6b7280;
+      color: var(--muted-foreground);
       margin: 0;
     }
 
     .section {
       margin-bottom: 3rem;
       padding: 2rem;
-      background: #f9fafb;
+      background: var(--card);
       border-radius: 0.75rem;
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--border);
     }
 
     .section h2 {
       font-size: 1.5rem;
       font-weight: 600;
       margin: 0 0 0.5rem 0;
-      color: #111827;
+      color: var(--foreground);
     }
 
     .section-description {
       font-size: 0.875rem;
-      color: #6b7280;
+      color: var(--muted-foreground);
       margin: 0 0 1.5rem 0;
     }
 
@@ -297,9 +297,9 @@ import { ButtonComponent } from './button.component';
 
     .combination-group {
       padding: 1rem;
-      background: white;
+      background: var(--background);
       border-radius: 0.5rem;
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--border);
     }
 
     .combination-group h3 {
@@ -307,7 +307,7 @@ import { ButtonComponent } from './button.component';
       font-weight: 600;
       text-transform: capitalize;
       margin: 0 0 0.75rem 0;
-      color: #374151;
+      color: var(--muted-foreground);
     }
 
     .combination-group button {

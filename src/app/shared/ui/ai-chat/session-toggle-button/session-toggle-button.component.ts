@@ -4,7 +4,7 @@
  * Mineral & Time Theme - Angular 20+
  */
 
-import { Component, input, output, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import {
   fixedPosition,
   relativePosition,
@@ -21,7 +21,7 @@ import { cn } from '@app/shared/utils';
  */
 @Component({
   selector: 'ai-session-toggle',
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <button
       type="button"

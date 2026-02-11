@@ -20,7 +20,6 @@ Tail paragraph.
 
 @Component({
   selector: 'app-streaming-markdown-host',
-  standalone: true,
   imports: [StreamingMarkdownComponent],
   template: `
     <app-streaming-markdown

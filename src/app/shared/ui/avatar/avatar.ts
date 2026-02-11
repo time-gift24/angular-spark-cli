@@ -23,7 +23,6 @@ export type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
  */
 @Component({
   selector: 'ui-avatar',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   host: {
@@ -65,7 +64,7 @@ export class AvatarComponent {
       sm: 'var(--avatar-font-size-sm)',
       md: 'var(--avatar-font-size-md)',
       lg: 'var(--avatar-font-size-lg)',
-      xl: 'var(--avatar-font-size-lg)',
+      xl: 'var(--avatar-font-size-xl)',
     };
 
     return {

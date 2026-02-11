@@ -13,10 +13,10 @@ import {
  */
 export const MINERAL_LIGHT_THEME: LiquidGlassColorConfig = {
   border: 'var(--accent)', // 亮泥金
-  hotspot: 'rgba(255, 255, 255, 0.18)',
-  tint: 'rgba(0, 0, 0, 0.12)', // Lighter for light mode
-  aberration1: 'rgba(200, 80, 120, 0.15)',
-  aberration2: 'rgba(80, 140, 200, 0.12)',
+  hotspot: 'color-mix(in oklch, var(--card) 18%, transparent)',
+  tint: 'color-mix(in oklch, var(--foreground) 12%, transparent)', // Lighter for light mode
+  aberration1: 'color-mix(in oklch, var(--accent) 15%, transparent)',
+  aberration2: 'color-mix(in oklch, var(--primary) 12%, transparent)',
 };
 
 /**
@@ -27,10 +27,10 @@ export const MINERAL_LIGHT_THEME: LiquidGlassColorConfig = {
  */
 export const MINERAL_DARK_THEME: LiquidGlassColorConfig = {
   border: 'var(--accent)', // 亮泥金
-  hotspot: 'rgba(255, 255, 255, 0.22)',
-  tint: 'rgba(0, 0, 0, 0.32)', // Darker for dark mode
-  aberration1: 'rgba(255, 40, 120, 0.18)',
-  aberration2: 'rgba(40, 160, 255, 0.16)',
+  hotspot: 'color-mix(in oklch, var(--card) 22%, transparent)',
+  tint: 'color-mix(in oklch, var(--foreground) 32%, transparent)', // Darker for dark mode
+  aberration1: 'color-mix(in oklch, var(--accent) 18%, transparent)',
+  aberration2: 'color-mix(in oklch, var(--primary) 16%, transparent)',
 };
 
 /**

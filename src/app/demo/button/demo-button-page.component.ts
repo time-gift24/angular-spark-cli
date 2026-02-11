@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ButtonComponent } from '@app/shared/ui/button';
 import {
@@ -17,10 +17,10 @@ import type { ButtonClickStats } from './types/button-demo.types';
  */
 @Component({
   selector: 'app-demo-button-page',
-  standalone: true,
   imports: [ButtonComponent, DatePipe],
   templateUrl: './demo-button-page.component.html',
   styleUrl: './demo-button-page.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     style: 'display: block; width: 100%;',
   },

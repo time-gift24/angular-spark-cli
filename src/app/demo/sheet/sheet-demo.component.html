@@ -23,9 +23,9 @@
 
     <!-- Sheet Component -->
     @if (open()) {
-      <ng-container spark-sheet-trigger>
+      <div spark-sheet-trigger>
         <div spark-sheet-overlay [open]="open()" (close)="closeSheet()"></div>
-        <div spark-sheet-content [open]="open()" [side]="side()">
+        <div spark-sheet-content [open]="open()" [side]="side()" (close)="closeSheet()">
           <div spark-sheet-header>
             <h3 spark-sheet-title>Sheet Title</h3>
             <p spark-sheet-description>
@@ -47,7 +47,7 @@
             <button spark-sheet-close spark-button (click)="closeSheet()">Confirm</button>
           </div>
         </div>
-      </ng-container>
+      </div>
     }
 
     <!-- Features -->

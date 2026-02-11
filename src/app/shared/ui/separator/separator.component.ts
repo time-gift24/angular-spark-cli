@@ -5,7 +5,6 @@ export type SeparatorOrientation = 'horizontal' | 'vertical';
 
 @Component({
   selector: 'div[spark-separator]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',

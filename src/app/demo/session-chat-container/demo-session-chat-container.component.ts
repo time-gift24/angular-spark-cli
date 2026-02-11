@@ -1,14 +1,14 @@
-import { Component, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, computed } from '@angular/core';
 import { SessionChatContainerComponent } from '@app/shared/ui/ai-chat';
 import { SessionStatus, type SessionData } from '@app/shared/models';
 import { initialState } from './examples';
 
 @Component({
   selector: 'app-demo-session-chat-container',
-  standalone: true,
   imports: [SessionChatContainerComponent],
   templateUrl: './demo-session-chat-container.component.html',
   styleUrls: ['./demo-session-chat-container.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DemoSessionChatContainerComponent {
   // State

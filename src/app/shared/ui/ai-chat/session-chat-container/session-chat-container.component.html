@@ -3,8 +3,8 @@
   <!-- Session Tabs Bar -->
   <div [class]="getTabsWrapperClass()">
     <spark-session-tabs-bar
-      [sessions]="sessions"
-      [activeSessionId]="activeSessionId"
+      [sessions]="sessions()"
+      [activeSessionId]="activeSessionId()"
       (sessionSelect)="onSessionSelect($event)"
       (sessionToggle)="onSessionToggle()"
       (newChat)="onNewChat()"
@@ -17,10 +17,10 @@
   <!-- Chat Input - always visible -->
   <div [class]="getInputWrapperClass()">
     <ai-chat-input
-      [value]="inputValue()"
+      [value]="inputValue()()"
       (valueChange)="onInputChange($event)"
-      [placeholder]="placeholder"
-      [disabled]="disabled"
+      [placeholder]="placeholder()"
+      [disabled]="disabled()"
       (send)="onSend($event)"
     />
   </div>

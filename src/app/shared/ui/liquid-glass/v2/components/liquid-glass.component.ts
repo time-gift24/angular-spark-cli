@@ -12,6 +12,7 @@
  */
 
 import {
+  ChangeDetectionStrategy,
   Component,
   input,
   output,
@@ -62,8 +63,8 @@ interface MousePosition {
  */
 @Component({
   selector: 'spk-liquid-glass',
-  standalone: true,
   imports: [CommonModule, GlassContainerComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': '"spk-liquid-glass-host"',
     '[style.transform]': 'hostTransform()',
@@ -162,7 +163,7 @@ interface MousePosition {
       .spk-over-light-layer-2 {
         position: absolute;
         inset: 0;
-        background-color: black;
+        background-color: var(--background);
         transition: all 150ms ease-in-out;
       }
       .spk-border-layer-1 {
@@ -171,24 +172,26 @@ interface MousePosition {
         mix-blend-mode: screen;
         opacity: 0.2;
         padding: 1.5px;
-        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask: linear-gradient(var(--mask-solid) 0 0) content-box,
+          linear-gradient(var(--mask-solid) 0 0);
         -webkit-mask-composite: xor;
         mask-composite: exclude;
-        box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.5) inset,
-                    0 1px 3px rgba(255, 255, 255, 0.25) inset,
-                    0 1px 4px rgba(0, 0, 0, 0.35);
+        box-shadow: inset 0 0 0 0.5px color-mix(in oklch, var(--card) 50%, transparent),
+                    inset 0 1px 3px color-mix(in oklch, var(--card) 25%, transparent),
+                    0 1px 4px color-mix(in oklch, var(--foreground) 35%, transparent);
       }
       .spk-border-layer-2 {
         position: absolute;
         inset: 0;
         mix-blend-mode: overlay;
         padding: 1.5px;
-        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask: linear-gradient(var(--mask-solid) 0 0) content-box,
+          linear-gradient(var(--mask-solid) 0 0);
         -webkit-mask-composite: xor;
         mask-composite: exclude;
-        box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.5) inset,
-                    0 1px 3px rgba(255, 255, 255, 0.25) inset,
-                    0 1px 4px rgba(0, 0, 0, 0.35);
+        box-shadow: inset 0 0 0 0.5px color-mix(in oklch, var(--card) 50%, transparent),
+                    inset 0 1px 3px color-mix(in oklch, var(--card) 25%, transparent),
+                    0 1px 4px color-mix(in oklch, var(--foreground) 35%, transparent);
       }
       .spk-hover-effect,
       .spk-active-effect {
@@ -199,10 +202,10 @@ interface MousePosition {
         mix-blend-mode: overlay;
       }
       .spk-hover-effect {
-        background-image: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 50%);
+        background-image: radial-gradient(circle at 50% 0%, color-mix(in oklch, var(--card) 50%, transparent) 0%, transparent 50%);
       }
       .spk-active-effect {
-        background-image: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 80%);
+        background-image: radial-gradient(circle at 50% 0%, color-mix(in oklch, var(--card) 90%, transparent) 0%, transparent 80%);
       }
     `,
   ],

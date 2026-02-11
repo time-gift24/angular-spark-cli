@@ -7,16 +7,15 @@
  * Implements BlockRenderer interface for plugin architecture.
  */
 
-import { Component, Input, signal, ChangeDetectionStrategy } from '@angular/core';
-import { MarkdownBlock, TableBlock } from '../../core/models';
+import { Component, ChangeDetectionStrategy, computed, input, signal } from '@angular/core';
+import { TableBlock } from '../../core/models';
 
 @Component({
   selector: 'app-markdown-table',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="table-wrapper">
-      @if (isComplete) {
+      @if (isComplete()) {
         <div class="table-toolbar">
           <button
             class="table-action-button"
@@ -51,13 +50,13 @@ import { MarkdownBlock, TableBlock } from '../../core/models';
       <table class="markdown-table">
         <thead>
           <tr>
-            @for (header of headers; track $index) {
+            @for (header of headers(); track $index) {
               <th [style.text-align]="getAlign($index)">{{ header }}</th>
             }
           </tr>
         </thead>
         <tbody>
-          @for (row of rows; track $index) {
+          @for (row of rows(); track $index) {
             <tr>
               @for (cell of row; track $index) {
                 <td [style.text-align]="getAlign($index)">{{ cell }}</td>
@@ -66,31 +65,25 @@ import { MarkdownBlock, TableBlock } from '../../core/models';
           }
         </tbody>
       </table>
-      @if (!isComplete) { <span class="streaming-cursor"></span> }
+      @if (!isComplete()) { <span class="streaming-cursor"></span> }
     </div>
   `,
   styleUrls: ['./table.component.css']
 })
 export class MarkdownTableComponent {
-  @Input({ required: true }) block!: TableBlock;
-  @Input() isComplete: boolean = true;
+  readonly block = input.required<TableBlock>();
+  readonly isComplete = input(true);
 
-  csvCopied = signal<boolean>(false);
+  protected readonly csvCopied = signal(false);
 
-  get headers(): string[] {
-    return this.block.tableData?.headers || [];
-  }
+  protected readonly headers = computed(() => this.block().tableData?.headers || []);
 
-  get rows(): string[][] {
-    return this.block.tableData?.rows || [];
-  }
+  protected readonly rows = computed(() => this.block().tableData?.rows || []);
 
-  get align(): (string | null)[] {
-    return this.block.tableData?.align || [];
-  }
+  protected readonly align = computed(() => this.block().tableData?.align || []);
 
   getAlign(index: number): string {
-    const a = this.align[index];
+    const a = this.align()[index];
     return a || 'left';
   }
 
@@ -125,8 +118,8 @@ export class MarkdownTableComponent {
       }
       return cell;
     };
-    const headerLine = this.headers.map(escape).join(',');
-    const bodyLines = this.rows.map(row => row.map(escape).join(','));
+    const headerLine = this.headers().map(escape).join(',');
+    const bodyLines = this.rows().map((row) => row.map(escape).join(','));
     return [headerLine, ...bodyLines].join('\n');
   }
 }

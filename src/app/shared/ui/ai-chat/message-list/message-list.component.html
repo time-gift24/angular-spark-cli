@@ -1,21 +1,21 @@
 <div
   #scrollContainer
   class="overflow-y-auto"
-  [style.max-height]="maxHeight">
-  @if (messages.length === 0 && !streamingContent) {
+  [style.max-height]="maxHeight()">
+  @if (messages().length === 0 && !streamingContent()) {
     <div class="empty-state flex items-center justify-center h-full text-muted-foreground">
       <p class="text-sm">开始一个新的对话...</p>
     </div>
   } @else {
     <div class="space-y-4 p-4">
-      @for (message of messages; track message.id) {
+      @for (message of messages(); track message.id) {
         <ai-message-bubble [message]="message" />
       }
 
-      @if (streamingContent) {
+      @if (streamingContent()) {
         <div class="flex justify-start">
           <div class="max-w-[80%] px-4 py-2 rounded-lg rounded-tl-sm bg-muted/50 border border-border/50">
-            <p class="text-sm text-card-foreground whitespace-pre-wrap break-words">{{ streamingContent }}</p>
+            <p class="text-sm text-card-foreground whitespace-pre-wrap break-words">{{ streamingContent() }}</p>
             <span class="inline-block w-2 h-4 bg-foreground/50 animate-pulse ml-1"></span>
           </div>
         </div>

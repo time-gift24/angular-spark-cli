@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ContextMenuTriggerDirective } from '@app/shared/ui/context-menu/index';
 import * as examples from './examples/context-menu-examples';
@@ -13,12 +13,11 @@ import * as examples from './examples/context-menu-examples';
  * - Disabled items
  *
  * @selector app-context-menu-demo
- * @standalone true
  */
 @Component({
   selector: 'app-context-menu-demo',
-  standalone: true,
   imports: [CommonModule, ContextMenuTriggerDirective],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="demo-container">
       <!-- Header -->

@@ -1,3 +1,12 @@
+:host {
+  --session-color-default: var(--primary);
+  --session-color-blue: var(--chart-2);
+  --session-color-purple: var(--chart-5);
+  --session-color-pink: var(--destructive);
+  --session-color-orange: var(--accent);
+  --session-color-yellow: var(--accent-hover);
+}
+
 .session-tabs-container {
   position: relative;
   width: 100%;
@@ -7,7 +16,7 @@
   justify-content: flex-start;
 }
 .session-tab {
-  background: oklch(from var(--primary) l c h / 0.15);
+  background: color-mix(in oklch, var(--primary) 15%, transparent);
   color: var(--primary);
   padding: 2px var(--spacing-sm);
   border-radius: var(--radius-md);
@@ -20,7 +29,7 @@
   outline: none;
   user-select: none;
   transition: transform var(--duration-spring-fast) var(--ease-spring-snappy), box-shadow var(--duration-spring-fast) var(--ease-spring-snappy), border-color var(--duration-fast) ease, background var(--duration-fast) ease, filter var(--duration-fast) ease;
-  box-shadow: 0 1px 2px oklch(0 0 0 /5%);
+  box-shadow: var(--shadow-control);
   display: flex;
   align-items: center;
   gap: 2px;
@@ -29,19 +38,19 @@
 }
 .session-tab:hover {
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px oklch(0 0 0 /0.15);
+  box-shadow: var(--shadow-control-hover);
 }
 .session-tab.active {
   border-color: var(--primary);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px oklch(0 0 0 /0.2);
+  box-shadow: var(--shadow-control-active);
 }
 .session-tab:active {
   transform: scale(0.96);
   transition: transform 80ms var(--ease-spring-snappy);
 }
 .session-tab.active:hover {
-  box-shadow: 0 3px 6px oklch(0 0 0 /0.25);
+  box-shadow: var(--shadow-control-active);
 }
 .session-tab:focus-visible {
   outline: 2px solid var(--ring);
@@ -51,28 +60,28 @@
   outline-color: var(--primary);
 }
 .session-tab.session-color-default {
-  background: oklch(0.48 0.07 195 /0.2);
-  color: oklch(0.48 0.07 195);
+  background: color-mix(in oklch, var(--session-color-default) 20%, transparent);
+  color: var(--session-color-default);
 }
 .session-tab.session-color-blue {
-  background: oklch(0.55 0.12 225 /0.2);
-  color: oklch(0.55 0.12 225);
+  background: color-mix(in oklch, var(--session-color-blue) 20%, transparent);
+  color: var(--session-color-blue);
 }
 .session-tab.session-color-purple {
-  background: oklch(0.55 0.14 285 /0.2);
-  color: oklch(0.55 0.14 285);
+  background: color-mix(in oklch, var(--session-color-purple) 20%, transparent);
+  color: var(--session-color-purple);
 }
 .session-tab.session-color-pink {
-  background: oklch(0.6 0.18 350 /0.2);
-  color: oklch(0.6 0.18 350);
+  background: color-mix(in oklch, var(--session-color-pink) 20%, transparent);
+  color: var(--session-color-pink);
 }
 .session-tab.session-color-orange {
-  background: oklch(0.65 0.15 50 /0.2);
-  color: oklch(0.65 0.15 50);
+  background: color-mix(in oklch, var(--session-color-orange) 20%, transparent);
+  color: var(--session-color-orange);
 }
 .session-tab.session-color-yellow {
-  background: oklch(0.75 0.12 85 /0.2);
-  color: oklch(0.75 0.12 85);
+  background: color-mix(in oklch, var(--session-color-yellow) 20%, transparent);
+  color: var(--session-color-yellow);
 }
 .session-tab:not(.new-chat-tab)[class*='session-color-']:hover {
   filter: brightness(1.15);
@@ -92,10 +101,10 @@
   }
 }
 .disconnected-icon {
-  color: oklch(0.65 0.2 25);
+  color: var(--destructive);
 }
 .idle-icon {
-  color: oklch(0.55 0.12 225);
+  color: var(--chart-2);
 }
 .session-name {
   flex: 1;
@@ -111,11 +120,11 @@
   left: 0;
   top: 100%;
   padding: 1px 3px;
-  background: #000;
-  color: #fff;
+  background: var(--popover);
+  color: var(--popover-foreground);
 }
 .new-chat-tab {
-  background: oklch(from var(--primary) l c h / 0.08);
+  background: color-mix(in oklch, var(--primary) 8%, transparent);
   width: auto;
 }
 .new-chat-tab:hover {
@@ -127,14 +136,14 @@
   stroke-width: 2;
 }
 .dark .session-tab {
-  box-shadow: 0 1px 2px oklch(0 0 0 /20%);
+  box-shadow: var(--shadow-control);
 }
 .dark .session-tab:hover {
-  box-shadow: 0 2px 4px oklch(0 0 0 /30%);
+  box-shadow: var(--shadow-control-hover);
 }
 .dark .session-tab.active {
   border-color: var(--primary);
-  box-shadow: 0 2px 4px oklch(0 0 0 /35%);
+  box-shadow: var(--shadow-control-active);
 }
 @media (max-width: 640px) {
   .session-tabs-container {

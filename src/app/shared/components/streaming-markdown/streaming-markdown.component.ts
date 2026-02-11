@@ -12,9 +12,8 @@
 
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
+  input,
+  output,
   OnInit,
   OnDestroy,
   ChangeDetectionStrategy,
@@ -73,7 +72,6 @@ interface PipelineConfig {
 
 @Component({
   selector: 'app-streaming-markdown',
-  standalone: true,
   imports: [MarkdownBlockRouterComponent, BlockHeightTrackerDirective, VirtualScrollViewportComponent, CommonModule],
   providers: [
     MarkdownPreprocessor,
@@ -167,35 +165,42 @@ interface PipelineConfig {
 export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewChecked {
   private currentStream$: Observable<string> = EMPTY;
 
-  @Input()
-  set stream$(value: Observable<string> | null | undefined) {
-    this.currentStream$ = value ?? EMPTY;
-    this.streamInput$.next(this.currentStream$);
-  }
+  readonly streamInput = input<Observable<string> | null | undefined>(undefined, { alias: 'stream$' });
+  readonly maxHeightInput = input<string | undefined>(undefined, { alias: 'maxHeight' });
+  readonly virtualScrollInput = input<VirtualScrollConfig | boolean>(true, { alias: 'virtualScroll' });
+  readonly enableLazyHighlightInput = input(true, { alias: 'enableLazyHighlight' });
+  readonly rawContentChange = output<string>();
+  readonly statusChange = output<'streaming' | 'completed' | 'error'>();
+  readonly completed = output<string>();
+  readonly error = output<Error>();
 
   get stream$(): Observable<string> {
     return this.currentStream$;
   }
 
-  @Input() maxHeight: string | undefined;
-  @Input() set virtualScroll(value: VirtualScrollConfig | boolean) {
-    this.virtualScrollInput.set(value);
+  protected get maxHeight(): string | undefined {
+    return this.maxHeightInput();
   }
+
   get virtualScroll(): VirtualScrollConfig | boolean {
     return this.virtualScrollInput();
   }
-  @Input() enableLazyHighlight: boolean = true;
-  @Output() rawContentChange = new EventEmitter<string>();
-  @Output() statusChange = new EventEmitter<'streaming' | 'completed' | 'error'>();
-  @Output() completed = new EventEmitter<string>();
-  @Output() error = new EventEmitter<Error>();
+
+  protected get enableLazyHighlight(): boolean {
+    return this.enableLazyHighlightInput();
+  }
 
   @ViewChild('container', { static: false }) container!: ElementRef<HTMLDivElement>;
   @ViewChild(VirtualScrollViewportComponent, { static: false }) virtualViewport?: VirtualScrollViewportComponent;
 
   private needsScroll = false;
   private readonly injector = inject(Injector);
-  private virtualScrollInput = signal<VirtualScrollConfig | boolean>(true);
+  private readonly preprocessor = inject(MarkdownPreprocessor);
+  private readonly parser = inject(BlockParser);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly shini = inject(ShiniHighlighter);
+  private readonly virtualScrollService = inject(VirtualScrollService);
+  private readonly highlightScheduler = inject(HighlightSchedulerService);
   private highlightSignals = new Map<string, WritableSignal<HighlightResult | null>>();
   private streamStatus = signal<StreamingStatus>('idle');
 
@@ -282,15 +287,12 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
     enableChangeDetectionOptimization: true
   };
 
-  constructor(
-    private preprocessor: MarkdownPreprocessor,
-    private parser: BlockParser,
-    private cdr: ChangeDetectorRef,
-    private shini: ShiniHighlighter,
-    private virtualScrollService: VirtualScrollService,
-    private highlightScheduler: HighlightSchedulerService
-  ) {
-    this.streamInput$.next(this.currentStream$);
+  constructor() {
+    effect(() => {
+      const source = this.streamInput() ?? EMPTY;
+      this.currentStream$ = source;
+      this.streamInput$.next(source);
+    }, { injector: this.injector });
 
     effect(() => {
       this.virtualScrollService.setConfig(this.virtualScrollConfig());

@@ -17,7 +17,6 @@ import { CommonModule } from '@angular/common';
  */
 @Component({
   selector: 'ui-progress',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   host: {

@@ -10,7 +10,7 @@ const labelVariants = cva(
   {
     variants: {},
     defaultVariants: {},
-  }
+  },
 );
 
 /**
@@ -24,25 +24,20 @@ export type LabelVariant = VariantProps<typeof labelVariants>;
  * Accessible label component for form inputs.
  *
  * @selector label[spark-label]
- * @standalone true
- *
  * @example
  * ```html
- * <label spark-label [htmlFor]="'email'">Email</label>
+ * <label spark-label for="email">Email</label>
  * ```
  */
 @Component({
   selector: 'label[spark-label]',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
-    '[attr.for]': 'htmlFor()',
   },
   template: '<ng-content />',
 })
 export class LabelComponent {
-  readonly htmlFor = input<string | undefined>(undefined);
   readonly class = input<string>('');
 
   /**

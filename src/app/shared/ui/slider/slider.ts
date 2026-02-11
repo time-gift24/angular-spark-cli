@@ -27,7 +27,6 @@ export type SliderOrientation = 'horizontal' | 'vertical';
  */
 @Component({
   selector: 'ui-slider',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   host: {

@@ -1,9 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { SessionStateService } from '@app/shared/services';
 
 @Component({
   selector: 'app-demo-ai-chat-panel',
-  standalone: true,
   template: `
     <div class="p-8 space-y-6">
       <div class="space-y-2">
@@ -33,6 +32,7 @@ import { SessionStateService } from '@app/shared/services';
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DemoAiChatPanelComponent {
   private sessionState = inject(SessionStateService);

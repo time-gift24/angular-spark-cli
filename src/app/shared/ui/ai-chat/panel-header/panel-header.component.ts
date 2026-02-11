@@ -1,29 +1,37 @@
-import { Component, Input, Output, EventEmitter, signal, computed, Signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Signal,
+  computed,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'ai-panel-header',
-  standalone: true,
   imports: [CommonModule],
   templateUrl: './panel-header.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PanelHeaderComponent {
-  @Input({ required: true }) sessionName!: Signal<string>;
-  @Input() hasNewMessages = false;
-  @Input() isEditing = false;
+  readonly sessionName = input.required<Signal<string>>();
+  readonly hasNewMessages = input(false);
+  readonly isEditing = input(false);
 
-  @Output() rename = new EventEmitter<string>();
-  @Output() delete = new EventEmitter<void>();
-  @Output() close = new EventEmitter<void>();
+  readonly rename = output<string>();
+  readonly delete = output<void>();
+  readonly close = output<void>();
 
   readonly isEditingName = signal(false);
   readonly editValue = signal('');
 
-  protected readonly isNewMessageIndicatorVisible = computed(() => this.hasNewMessages);
+  protected readonly isNewMessageIndicatorVisible = computed(() => this.hasNewMessages());
 
   startEditing(): void {
     this.isEditingName.set(true);
-    this.editValue.set(this.sessionName());
+    this.editValue.set(this.sessionName()());
   }
 
   cancelEdit(): void {
@@ -32,7 +40,7 @@ export class PanelHeaderComponent {
   }
 
   onNameEditComplete(newName: string): void {
-    if (newName.trim() && newName.trim() !== this.sessionName()) {
+    if (newName.trim() && newName.trim() !== this.sessionName()()) {
       this.rename.emit(newName.trim());
     }
     this.isEditingName.set(false);

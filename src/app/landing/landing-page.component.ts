@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ButtonComponent } from '@app/shared/ui/button/button.component';
 import { InputComponent } from '@app/shared/ui/input/input.component';
@@ -25,11 +25,9 @@ import {
  * - Footer
  *
  * @selector app-landing-page
- * @standalone true
  */
 @Component({
   selector: 'app-landing-page',
-  standalone: true,
   imports: [
     RouterLink,
     ButtonComponent,
@@ -47,6 +45,7 @@ import {
   ],
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingPageComponent {
   /**

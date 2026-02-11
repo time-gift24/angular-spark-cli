@@ -4,7 +4,7 @@
  * Renders ordered/unordered lists and nested markdown blocks.
  */
 
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MarkdownBlock, ListBlock, MarkdownInline } from '../../core/models';
 import { MarkdownBlockRouterComponent } from '../block-router/block-router.component';
@@ -12,23 +12,22 @@ import { RenderMathPipe } from '../../core/math-render.pipe';
 
 @Component({
   selector: 'app-markdown-list',
-  standalone: true,
   imports: [CommonModule, MarkdownBlockRouterComponent, RenderMathPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (ordered) {
-      <ol [class]="listClasses">
-        <ng-container *ngTemplateOutlet="itemRef; context: { $implicit: block.items }" />
+    @if (ordered()) {
+      <ol [class]="listClasses()">
+        <ng-container *ngTemplateOutlet="itemRef; context: { $implicit: block().items }" />
       </ol>
     } @else {
-      <ul [class]="listClasses">
-        <ng-container *ngTemplateOutlet="itemRef; context: { $implicit: block.items }" />
+      <ul [class]="listClasses()">
+        <ng-container *ngTemplateOutlet="itemRef; context: { $implicit: block().items }" />
       </ul>
     }
 
     <ng-template #itemRef let-items>
       @for (item of items; track item.id; let itemIndex = $index) {
-        <li [class]="itemClasses">
+        <li [class]="itemClasses()">
           <div class="list-item-body">
             @if (item.task) {
               <input
@@ -51,14 +50,14 @@ import { RenderMathPipe } from '../../core/math-render.pipe';
           @if (item.blocks && item.blocks.length > 0) {
             <div class="list-item-nested">
               @for (nestedBlock of item.blocks; track trackNestedBlock($index, nestedBlock)) {
-                @if (canNest) {
+                @if (canNest()) {
                   <app-markdown-block-router
                     [block]="nestedBlock"
-                    [isComplete]="isComplete"
+                    [isComplete]="isComplete()"
                     [blockIndex]="resolveNestedIndex(itemIndex, $index, nestedBlock)"
-                    [enableLazyHighlight]="enableLazyHighlight"
-                    [allowHighlight]="allowHighlight"
-                    [depth]="depth + 1" />
+                    [enableLazyHighlight]="enableLazyHighlight()"
+                    [allowHighlight]="allowHighlight()"
+                    [depth]="depth() + 1" />
                 } @else {
                   <span class="nested-fallback">[Nested content]</span>
                 }
@@ -125,25 +124,19 @@ import { RenderMathPipe } from '../../core/math-render.pipe';
   styleUrls: ['./list.component.css']
 })
 export class MarkdownListComponent {
-  @Input({ required: true }) block!: ListBlock;
-  @Input() isComplete = true;
-  @Input() blockIndex = -1;
-  @Input() enableLazyHighlight = false;
-  @Input() allowHighlight = true;
-  @Input() depth = 0;
-  @Input() canNest = false;
+  readonly block = input.required<ListBlock>();
+  readonly isComplete = input(true);
+  readonly blockIndex = input(-1);
+  readonly enableLazyHighlight = input(false);
+  readonly allowHighlight = input(true);
+  readonly depth = input(0);
+  readonly canNest = input(false);
 
-  get ordered(): boolean {
-    return this.block.subtype === 'ordered';
-  }
+  protected readonly ordered = computed(() => this.block().subtype === 'ordered');
 
-  get listClasses(): string {
-    return `markdown-list block-list depth-${this.depth}`;
-  }
+  protected readonly listClasses = computed(() => `markdown-list block-list depth-${this.depth()}`);
 
-  get itemClasses(): string {
-    return `list-item depth-${this.depth}`;
-  }
+  protected readonly itemClasses = computed(() => `list-item depth-${this.depth()}`);
 
   hasInlineContent(children: MarkdownInline[] | undefined): children is MarkdownInline[] {
     return !!children && children.length > 0;

@@ -1,4 +1,13 @@
-import { Component, input, computed, inject, OnInit, OnDestroy, ElementRef } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  computed,
+  inject,
+  OnInit,
+  OnDestroy,
+  ElementRef,
+} from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ShaderDisplacementService } from '../../new/services/shader-displacement.service';
 import { displacementMap } from '../../new/constants/displacement-map';
@@ -71,7 +80,7 @@ function getDisplacementMap(mode: GlassFilterMode, shaderMapUrl?: string): strin
  */
 @Component({
   selector: 'spk-glass-filter',
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <svg
       [attr.style]="'position:absolute; width:' + width() + 'px; height:' + height() + 'px;'"

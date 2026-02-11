@@ -8,24 +8,23 @@
  * Implements BlockRenderer interface for plugin architecture.
  */
 
-import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MarkdownBlock, ParagraphBlock, MarkdownInline } from '../../core/models';
+import { ParagraphBlock } from '../../core/models';
 import { RenderMathPipe } from '../../core/math-render.pipe';
 
 @Component({
   selector: 'app-markdown-paragraph',
-  standalone: true,
   imports: [CommonModule, RenderMathPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <p [class]="paragraphClasses()">
-      @if (block.children && block.children.length > 0) {
-        <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block.children }" />
+      @if (block().children?.length) {
+        <ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: block().children }" />
       } @else {
-        {{ block.content }}
+        {{ block().content }}
       }
-      @if (!isComplete) { <span class="streaming-cursor"></span> }
+      @if (!isComplete()) { <span class="streaming-cursor"></span> }
     </p>
 
     <ng-template #inlineRef let-inlines>
@@ -59,21 +58,13 @@ import { RenderMathPipe } from '../../core/math-render.pipe';
   `,
   styleUrls: ['./paragraph.component.css']
 })
-export class MarkdownParagraphComponent implements OnChanges {
-  @Input({ required: true }) block!: ParagraphBlock;
-  @Input() isComplete: boolean = true;
+export class MarkdownParagraphComponent {
+  readonly block = input.required<ParagraphBlock>();
+  readonly isComplete = input(true);
 
-  paragraphClasses = signal<string>('markdown-paragraph block-paragraph');
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['isComplete']) {
-      this.updateClasses();
-    }
-  }
-
-  private updateClasses(): void {
+  protected readonly paragraphClasses = computed(() => {
     const baseClass = 'markdown-paragraph block-paragraph';
-    const streamingClass = !this.isComplete ? ' streaming' : '';
-    this.paragraphClasses.set(`${baseClass}${streamingClass}`);
-  }
+    const streamingClass = !this.isComplete() ? ' streaming' : '';
+    return `${baseClass}${streamingClass}`;
+  });
 }

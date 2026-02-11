@@ -1,4 +1,4 @@
-import { Component, signal, computed, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, computed, Signal } from '@angular/core';
 import { SessionTabsBarComponent } from '@app/shared/ui/ai-chat';
 import { SessionData, SessionStatus, SessionColor } from '@app/shared/models';
 
@@ -9,10 +9,10 @@ import { SessionData, SessionStatus, SessionColor } from '@app/shared/models';
  */
 @Component({
   selector: 'app-demo-session-tabs-bar',
-  standalone: true,
   imports: [SessionTabsBarComponent],
   templateUrl: './demo-session-tabs-bar.component.html',
   styleUrl: './demo-session-tabs-bar.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     style: 'display: block; width: 100%;',
   },

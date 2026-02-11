@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   TabsComponent,
@@ -13,7 +13,6 @@ import { LabelComponent } from '@app/shared/ui/label/label.component';
 
 @Component({
   selector: 'app-tabs-demo',
-  standalone: true,
   imports: [
     CommonModule,
     TabsComponent,
@@ -30,11 +29,12 @@ import { LabelComponent } from '@app/shared/ui/label/label.component';
   host: {
     style: 'display: block; width: 100%;',
   },
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TabsDemoComponent {
-  activeTab = 'account';
+  readonly activeTab = signal('account');
 
   onSelectTab(value: string): void {
-    this.activeTab = value;
+    this.activeTab.set(value);
   }
 }

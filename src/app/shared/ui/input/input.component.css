@@ -20,13 +20,13 @@
 /* Hover State - 悬停效果 */
 :host(:hover:not(:disabled):not(:focus)) {
   border-color: var(--ring) !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-input-hover);
 }
 
 /* Focus State - 主题色焦点环 */
 :host(:focus-visible) {
   border-color: var(--ring) !important;
-  box-shadow: 0 0 0 3px oklch(from var(--ring) calc(l + 0.15) c h / 0.25) !important;
+  box-shadow: var(--shadow-focus-ring) !important;
   outline: none;
 }
 
@@ -55,5 +55,5 @@
 
 :host([aria-invalid='true']:focus-visible) {
   border-color: var(--destructive) !important;
-  box-shadow: 0 0 0 3px oklch(from var(--destructive) calc(l + 0.15) c h / 0.25) !important;
+  box-shadow: var(--shadow-focus-ring-destructive) !important;
 }

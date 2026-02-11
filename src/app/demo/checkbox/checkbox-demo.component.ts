@@ -1,14 +1,14 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CheckboxComponent } from '@app/shared/ui/checkbox/checkbox.component';
 import { LabelComponent } from '@app/shared/ui/label/label.component';
 
 @Component({
   selector: 'app-checkbox-demo',
-  standalone: true,
   imports: [CommonModule, CheckboxComponent, LabelComponent],
   templateUrl: './checkbox-demo.component.html',
   styleUrls: ['./checkbox-demo.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     style: 'display: block; width: 100%;',
   },

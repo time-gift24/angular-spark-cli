@@ -21,7 +21,6 @@ export type SkeletonSize = 'sm' | 'md' | 'lg' | 'full';
  */
 @Component({
   selector: 'ui-skeleton',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',

@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  contentChildren,
   input,
   output,
 } from '@angular/core';
@@ -28,7 +27,6 @@ export type TabsVariant = VariantProps<typeof tabsListVariants>['variant'];
 
 @Component({
   selector: 'ui-tabs',
-  standalone: true,
   template: `
     <div [class]="computedClass()" [attr.data-orientation]="orientation()">
       <ng-content />
@@ -48,7 +46,6 @@ export class TabsComponent {
 
 @Component({
   selector: 'ui-tabs-list',
-  standalone: true,
   template: `
     <div [class]="computedClass()" [attr.data-variant]="variant()" role="tablist">
       <ng-content />
@@ -71,11 +68,10 @@ export class TabsListComponent {
 
 @Component({
   selector: 'ui-tabs-trigger',
-  standalone: true,
   template: `
     <button
       [class]="computedClass()"
-      [id]="id()"
+      [id]="triggerId()"
       [attr.role]="role()"
       [attr.aria-selected]="active()"
       [attr.aria-controls]="ariaControls()"
@@ -92,7 +88,6 @@ export class TabsTriggerComponent {
   readonly class = input('');
   readonly value = input.required<string>();
   readonly disabled = input(false);
-  readonly id = input(() => `tabs-trigger-${Math.random().toString(36).substr(2, 9)}`);
 
   // Get state from parent tabs content
   readonly active = input(false);
@@ -100,6 +95,10 @@ export class TabsTriggerComponent {
 
   // Outputs
   readonly selectTab = output<string>();
+
+  protected triggerId = computed(() => {
+    return `tabs-trigger-${this.value()}`;
+  });
 
   protected ariaControls = computed(() => {
     return `tabs-content-${this.value()}`;
@@ -125,7 +124,6 @@ export class TabsTriggerComponent {
 
 @Component({
   selector: 'ui-tabs-content',
-  standalone: true,
   template: `
     <div
       [class]="computedClass()"

@@ -15,21 +15,21 @@
         <ui-tabs-list>
           <ui-tabs-trigger
             value="account"
-            [active]="activeTab === 'account'"
+            [active]="activeTab() === 'account'"
             (selectTab)="onSelectTab($event)"
           >
             Account
           </ui-tabs-trigger>
           <ui-tabs-trigger
             value="password"
-            [active]="activeTab === 'password'"
+            [active]="activeTab() === 'password'"
             (selectTab)="onSelectTab($event)"
           >
             Password
           </ui-tabs-trigger>
         </ui-tabs-list>
 
-        <ui-tabs-content [value]="'account'" [active]="activeTab === 'account'">
+        <ui-tabs-content [value]="'account'" [active]="activeTab() === 'account'">
           <div spark-card class="w-full">
             <div spark-card-header>
               <h3 spark-card-title>Account</h3>
@@ -53,7 +53,7 @@
           </div>
         </ui-tabs-content>
 
-        <ui-tabs-content [value]="'password'" [active]="activeTab === 'password'">
+        <ui-tabs-content [value]="'password'" [active]="activeTab() === 'password'">
           <div spark-card class="w-full">
             <div spark-card-header>
               <h3 spark-card-title>Password</h3>
@@ -87,28 +87,28 @@
         <ui-tabs-list variant="line">
           <ui-tabs-trigger
             value="line-account"
-            [active]="activeTab === 'line-account'"
+            [active]="activeTab() === 'line-account'"
             (selectTab)="onSelectTab($event)"
           >
             Account
           </ui-tabs-trigger>
           <ui-tabs-trigger
             value="line-password"
-            [active]="activeTab === 'line-password'"
+            [active]="activeTab() === 'line-password'"
             (selectTab)="onSelectTab($event)"
           >
             Password
           </ui-tabs-trigger>
           <ui-tabs-trigger
             value="line-settings"
-            [active]="activeTab === 'line-settings'"
+            [active]="activeTab() === 'line-settings'"
             (selectTab)="onSelectTab($event)"
           >
             Settings
           </ui-tabs-trigger>
         </ui-tabs-list>
 
-        <ui-tabs-content [value]="'line-account'" [active]="activeTab === 'line-account'">
+        <ui-tabs-content [value]="'line-account'" [active]="activeTab() === 'line-account'">
           <div class="rounded-lg border bg-card p-6">
             <h3 class="text-base font-medium mb-2">Account Settings</h3>
             <p class="text-sm text-muted-foreground">
@@ -117,14 +117,14 @@
           </div>
         </ui-tabs-content>
 
-        <ui-tabs-content [value]="'line-password'" [active]="activeTab === 'line-password'">
+        <ui-tabs-content [value]="'line-password'" [active]="activeTab() === 'line-password'">
           <div class="rounded-lg border bg-card p-6">
             <h3 class="text-base font-medium mb-2">Password Settings</h3>
             <p class="text-sm text-muted-foreground">Change your password and security settings.</p>
           </div>
         </ui-tabs-content>
 
-        <ui-tabs-content [value]="'line-settings'" [active]="activeTab === 'line-settings'">
+        <ui-tabs-content [value]="'line-settings'" [active]="activeTab() === 'line-settings'">
           <div class="rounded-lg border bg-card p-6">
             <h3 class="text-base font-medium mb-2">General Settings</h3>
             <p class="text-sm text-muted-foreground">Configure your application preferences.</p>

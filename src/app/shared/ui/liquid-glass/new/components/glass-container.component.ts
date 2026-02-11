@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   input,
   output,
@@ -47,8 +48,8 @@ import { ShaderDisplacementService } from '../../new/services/shader-displacemen
  */
 @Component({
   selector: 'spk-glass-container',
-  standalone: true,
   imports: [CommonModule, GlassFilterComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.spk-glass-container]': 'true',
     '[class.cursor-pointer]': 'hasClick()',
@@ -214,8 +215,8 @@ export class GlassContainerComponent implements OnInit {
   /** Computed box shadow based on overLight mode */
   protected readonly boxShadow = computed(() => {
     return this.overLight()
-      ? '0px 16px 70px rgba(0, 0, 0, 0.75)'
-      : '0px 12px 40px rgba(0, 0, 0, 0.25)';
+      ? 'var(--shadow-control-active), var(--shadow-popover)'
+      : 'var(--shadow-control-hover)';
   });
 
   /** Computed warp filter - CSS url() or null for Firefox */
@@ -234,8 +235,8 @@ export class GlassContainerComponent implements OnInit {
   /** Computed text shadow based on overLight mode */
   protected readonly textShadow = computed(() => {
     return this.overLight()
-      ? '0px 2px 12px rgba(0, 0, 0, 0)'
-      : '0px 2px 12px rgba(0, 0, 0, 0.4)';
+      ? 'none'
+      : '0px 2px 12px color-mix(in oklch, var(--foreground) 40%, transparent)';
   });
 
   // ========== Lifecycle ==========

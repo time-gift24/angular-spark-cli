@@ -22,7 +22,8 @@ export const sessionToggleBase = [
   'backdrop-blur-[20px]',
   '-webkit-backdrop-blur-[20px]',
   'border-0',
-  'shadow-[0_6px_20px_oklch(0_0_0/25%),0_0_0_3px_var(--primary)/30]',
+  'shadow-[var(--shadow-control-hover)]',
+  'ring-2 ring-primary/30',
   'cursor-pointer',
   'flex items-center justify-center',
   'transition-transform duration-[350ms] ease-[var(--ease-spring-snappy)]',
@@ -30,7 +31,8 @@ export const sessionToggleBase = [
   'p-0 text-primary-foreground',
   'hover:bg-primary',
   'hover:scale-[1.08]',
-  'hover:shadow-[0_8px_24px_oklch(0_0_0/30%),0_0_0_4px_var(--primary)/40]',
+  'hover:shadow-[var(--shadow-control-active)]',
+  'hover:ring-primary/40',
   'active:scale-[0.95]',
   'focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2',
 ].join(' ');
@@ -48,7 +50,7 @@ export const notificationBadge = [
   'w-[14px] h-[14px] rounded-[7px]',
   'bg-destructive',
   'border-2 border-primary/98',
-  'shadow-[0_2px_6px_oklch(0_0_0/40%)]',
+  'shadow-[var(--shadow-control-active)]',
 ].join(' ');
 
 /**

@@ -1,28 +1,28 @@
 import {
+  ChangeDetectionStrategy,
   Component,
-  Output,
-  EventEmitter,
   ElementRef,
   inject,
   DestroyRef,
   afterNextRender,
+  input,
+  output,
   signal,
-  Input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'ai-resize-handle',
-  standalone: true,
   imports: [CommonModule],
   templateUrl: './resize-handle.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResizeHandleComponent {
-  @Input() minWidth = 300;
-  @Input() maxWidth = 800;
+  readonly minWidth = input(300);
+  readonly maxWidth = input(800);
 
-  @Output() resizePreview = new EventEmitter<number>();
-  @Output() resizeCommit = new EventEmitter<number>();
+  readonly resizePreview = output<number>();
+  readonly resizeCommit = output<number>();
 
   private el = inject(ElementRef<HTMLElement>);
   private destroyRef = inject(DestroyRef);
@@ -101,7 +101,7 @@ export class ResizeHandleComponent {
   }
 
   private clampWidth(width: number): number {
-    return Math.max(this.minWidth, Math.min(this.maxWidth, width));
+    return Math.max(this.minWidth(), Math.min(this.maxWidth(), width));
   }
 
   protected onMousedown(event: MouseEvent): void {

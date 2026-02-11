@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   computed,
   inject,
@@ -21,7 +22,6 @@ const PANEL_MAX_WIDTH = 800;
 
 @Component({
   selector: 'ai-chat-shell',
-  standalone: true,
   imports: [
     CommonModule,
     RouterOutlet,
@@ -30,6 +30,7 @@ const PANEL_MAX_WIDTH = 800;
     DeleteConfirmDialogComponent,
   ],
   templateUrl: './ai-chat-shell.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AiChatShellComponent implements OnInit {
   private chatState = inject(AiChatStateService);
@@ -387,7 +388,6 @@ import { Component, signal, computed } from '@angular/core';
 
 @Component({
   selector: 'app-counter',
-  standalone: true,
   template: \`
     <div>
       <p>Count: {{ count() }}</p>
@@ -433,10 +433,10 @@ class UserManager:
 
 \`\`\`css
 .card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--chart-2) 100%);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-control-hover);
   transition: transform 0.3s ease;
 }
 

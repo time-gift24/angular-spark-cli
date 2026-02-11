@@ -6,16 +6,17 @@
  */
 
 import {
+  ChangeDetectionStrategy,
   Component,
-  signal,
-  computed,
-  Output,
-  Input,
-  ViewChild,
   ElementRef,
+  ViewChild,
   afterNextRender,
+  computed,
+  effect,
+  input,
+  output,
+  signal,
 } from '@angular/core';
-import { EventEmitter } from '@angular/core';
 import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
 import { ButtonComponent } from '@app/shared/ui/button';
 import {
@@ -38,12 +39,12 @@ import { cn } from '@app/shared/utils';
  */
 @Component({
   selector: 'ai-chat-input',
-  standalone: true,
   imports: [LiquidGlassDirective, ButtonComponent],
   styleUrls: ['./chat-input.component.css'],
   host: {
     class: 'block',
   },
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div [class]="inputContainer">
       <div
@@ -61,14 +62,14 @@ import { cn } from '@app/shared/utils';
             #textarea
             class="chat-textarea"
             [class]="inputFieldClasses()"
-            [placeholder]="placeholder"
-            [value]="value"
+            [placeholder]="placeholder()"
+            [value]="internalValue()"
             (input)="onInput($event)"
             (keydown)="onKeyDown($event)"
             (focus)="isFocused.set(true)"
             (blur)="isFocused.set(false)"
-            [disabled]="disabled"
-            [attr.aria-label]="placeholder"
+            [disabled]="disabled()"
+            [attr.aria-label]="placeholder()"
             [attr.rows]="1"
           ></textarea>
         </div>
@@ -189,64 +190,44 @@ export class ChatInputComponent {
    * Internal value state (for canSend computation)
    * Must be declared before value setter to avoid initialization issues
    */
-  private internalValue = signal('');
+  protected readonly internalValue = signal('');
 
-  /**
-   * Input value (two-way binding)
-   */
-  private _value!: string;
-
-  @Input()
-  get value(): string {
-    return this._value;
-  }
-
-  set value(newValue: string) {
-    this._value = newValue;
-    this.internalValue.set(newValue);
-  }
+  readonly value = input('');
 
   /**
    * Emit when value changes (for two-way binding)
    */
-  @Output()
-  readonly valueChange = new EventEmitter<string>();
+  readonly valueChange = output<string>();
 
   /**
    * Input placeholder text
    */
-  @Input()
-  placeholder = 'Ask AI anything...';
+  readonly placeholder = input('Ask AI anything...');
 
   /**
    * Disabled state
    */
-  @Input()
-  disabled = false;
+  readonly disabled = input(false);
 
   /**
    * Emit when user sends message
    */
-  @Output()
-  readonly send = new EventEmitter<string>();
+  readonly send = output<string>();
 
   /**
    * Emit when file button clicked
    */
-  @Output()
-  readonly fileClick = new EventEmitter<void>();
+  readonly fileClick = output<void>();
 
   /**
    * Emit when image button clicked
    */
-  @Output()
-  readonly imageClick = new EventEmitter<void>();
+  readonly imageClick = output<void>();
 
   /**
    * Emit when voice button clicked
    */
-  @Output()
-  readonly voiceClick = new EventEmitter<void>();
+  readonly voiceClick = output<void>();
 
   /**
    * Input focus state
@@ -289,6 +270,10 @@ export class ChatInputComponent {
   protected sendIconClasses = computed(() => this.sendIconBase);
 
   constructor() {
+    effect(() => {
+      this.internalValue.set(this.value());
+    });
+
     afterNextRender(() => {
       // Auto-resize on init
       this.adjustTextareaHeight();

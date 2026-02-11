@@ -1,4 +1,11 @@
-import { Component, Input, Signal, computed, Output, EventEmitter } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Signal,
+  computed,
+  input,
+  output,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SessionData } from '@app/shared/models';
 import { PanelHeaderComponent } from '../panel-header';
@@ -9,7 +16,6 @@ import { of, Observable } from 'rxjs';
 
 @Component({
   selector: 'ai-chat-panel',
-  standalone: true,
   imports: [
     CommonModule,
     PanelHeaderComponent,
@@ -18,27 +24,28 @@ import { of, Observable } from 'rxjs';
     StreamingMarkdownComponent,
   ],
   templateUrl: './ai-chat-panel.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AiChatPanelComponent {
-  @Input({ required: true }) activeSession!: Signal<SessionData | null | undefined>;
-  @Input() streamingContent: Observable<string> | string | null = null;
-  @Input() previewWidth: number | null = null;
-  @Input() panelWidth = 500;
+  readonly activeSession = input.required<Signal<SessionData | null | undefined>>();
+  readonly streamingContent = input<Observable<string> | string | null>(null);
+  readonly previewWidth = input<number | null>(null);
+  readonly panelWidth = input(500);
 
-  @Output() rename = new EventEmitter<{ sessionId: string; name: string }>();
-  @Output() delete = new EventEmitter<string>();
-  @Output() close = new EventEmitter<void>();
-  @Output() resizePreview = new EventEmitter<number>();
-  @Output() resizeCommit = new EventEmitter<number>();
+  readonly rename = output<{ sessionId: string; name: string }>();
+  readonly delete = output<string>();
+  readonly close = output<void>();
+  readonly resizePreview = output<number>();
+  readonly resizeCommit = output<number>();
 
-  protected readonly sessionName = computed(() => this.activeSession()?.name ?? '');
-  protected readonly messages = computed(() => this.activeSession()?.messages ?? []);
-  protected readonly sessionId = computed(() => this.activeSession()?.id ?? '');
+  protected readonly sessionName = computed(() => this.activeSession()()?.name ?? '');
+  protected readonly messages = computed(() => this.activeSession()()?.messages ?? []);
+  protected readonly sessionId = computed(() => this.activeSession()()?.id ?? '');
   protected readonly of = of;
 
   /** Get the streaming observable for the streaming-content section */
   protected getStreamingStream(): Observable<string> | undefined {
-    const content = this.streamingContent;
+    const content = this.streamingContent();
     if (content instanceof Observable) {
       return content;
     }

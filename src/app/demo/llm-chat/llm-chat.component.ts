@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LlmService, LlmMessage } from '@app/shared/services/llm';
 
 @Component({
   selector: 'app-llm-chat',
-  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './llm-chat.component.html',
   styleUrls: ['./llm-chat.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LlmChatComponent {
   private readonly llmService = inject(LlmService);

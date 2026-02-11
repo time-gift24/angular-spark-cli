@@ -5,8 +5,7 @@ import {
   inject,
   OnInit,
   OnDestroy,
-  Input,
-  HostListener,
+  input,
   booleanAttribute,
 } from '@angular/core';
 import {
@@ -65,7 +64,13 @@ import { REFRACTION_MODE_TURBULENCE } from '@app/shared/ui/liquid-glass/types/th
  */
 @Directive({
   selector: '[liquidGlass]',
-  standalone: true,
+  host: {
+    '(pointermove)': 'onPointerMove($event)',
+    '(pointerenter)': 'onPointerEnter()',
+    '(pointerleave)': 'onPointerLeave()',
+    '(focus)': 'onFocus()',
+    '(blur)': 'onBlur()',
+  },
 })
 export class LiquidGlassDirective implements OnInit, OnDestroy {
   // ========== Dependency Injection ==========
@@ -96,7 +101,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * @default 'mineral-dark'
    */
-  @Input() lgTheme: LiquidGlassTheme = 'mineral-dark';
+  readonly lgThemeInput = input<LiquidGlassTheme>('mineral-dark', { alias: 'lgTheme' });
 
   /**
    * Refraction mode for distortion intensity
@@ -108,7 +113,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * @default 'standard'
    */
-  @Input() lgMode: LiquidGlassRefractionMode = 'standard';
+  readonly lgModeInput = input<LiquidGlassRefractionMode>('standard', { alias: 'lgMode' });
 
   // ----- Color Overrides -----
 
@@ -119,39 +124,39 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * @example lgBorder="oklch(0.70 0.12 75)"
    */
-  @Input() lgBorder?: string;
+  readonly lgBorderInput = input<string | undefined>(undefined, { alias: 'lgBorder' });
 
   /**
    * Hotspot color for radial gradient highlight
    *
    * Creates the glowing hotspot that follows mouse movement
    *
-   * @example lgHotspot="rgba(255,255,255,0.3)"
+   * @example lgHotspot="color-mix(in oklch, var(--card) 30%, transparent)"
    */
-  @Input() lgHotspot?: string;
+  readonly lgHotspotInput = input<string | undefined>(undefined, { alias: 'lgHotspot' });
 
   /**
    * Tint overlay color for base fill
    *
    * Provides the base color layer beneath gradients
    *
-   * @example lgTint="rgba(0,0,0,0.4)"
+   * @example lgTint="color-mix(in oklch, var(--foreground) 40%, transparent)"
    */
-  @Input() lgTint?: string;
+  readonly lgTintInput = input<string | undefined>(undefined, { alias: 'lgTint' });
 
   /**
    * ARIA label for screen readers
    *
    * @default 'Liquid glass card'
    */
-  @Input() lgAriaLabel = 'Liquid glass card';
+  readonly lgAriaLabelInput = input('Liquid glass card', { alias: 'lgAriaLabel' });
 
   /**
    * ARIA role for accessibility
    *
    * @default 'region'
    */
-  @Input() lgRole = 'region';
+  readonly lgRoleInput = input('region', { alias: 'lgRole' });
 
   // ----- Spacing & Layout -----
 
@@ -163,21 +168,21 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    * @default 'var(--radius-xl)'
    * @example 'var(--radius-2xl)' or '16px'
    */
-  @Input() lgCornerRadius: string = 'var(--radius-xl)';
+  readonly lgCornerRadiusInput = input('var(--radius-xl)', { alias: 'lgCornerRadius' });
 
   /**
    * Border width in pixels
    *
    * @default 1
    */
-  @Input() lgBorderWidth: number = 1;
+  readonly lgBorderWidthInput = input(1, { alias: 'lgBorderWidth' });
 
   /**
    * Border width in pixels when activated (hovered or focused)
    *
    * @default 2
    */
-  @Input() lgBorderWidthActive: number = 2;
+  readonly lgBorderWidthActiveInput = input(2, { alias: 'lgBorderWidthActive' });
 
   /**
    * Internal padding in pixels
@@ -186,7 +191,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * @default 12
    */
-  @Input() lgPadding: number = 12;
+  readonly lgPaddingInput = input(12, { alias: 'lgPadding' });
 
   // ----- Filter Configuration -----
 
@@ -197,7 +202,10 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * @default false
    */
-  @Input({ transform: booleanAttribute }) lgDisableFilters = false;
+  readonly lgDisableFiltersInput = input(false, {
+    alias: 'lgDisableFilters',
+    transform: booleanAttribute,
+  });
 
   /**
    * Displacement scale for SVG turbulence
@@ -207,7 +215,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    * @default 0 (no distortion, clean edges)
    * @example Set to 20-60 for liquid glass distortion effect
    */
-  @Input() lgDisplacementScale: number = 0;
+  readonly lgDisplacementScaleInput = input(0, { alias: 'lgDisplacementScale' });
 
   /**
    * Backdrop blur amount multiplier
@@ -216,7 +224,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * @default 0.15 (results in ~2.7px blur - subtle effect)
    */
-  @Input() lgBlurAmount: number = 0.15;
+  readonly lgBlurAmountInput = input(0.15, { alias: 'lgBlurAmount' });
 
   /**
    * Saturation adjustment percentage
@@ -225,7 +233,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * @default 105 (subtle vibrance boost)
    */
-  @Input() lgSaturation: number = 105;
+  readonly lgSaturationInput = input(105, { alias: 'lgSaturation' });
 
   /**
    * Chromatic aberration intensity
@@ -234,7 +242,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * @default 1.5 (subtle effect)
    */
-  @Input() lgAberrationIntensity: number = 1.5;
+  readonly lgAberrationIntensityInput = input(1.5, { alias: 'lgAberrationIntensity' });
 
   // ----- Animation Configuration -----
 
@@ -245,7 +253,10 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * @default false
    */
-  @Input({ transform: booleanAttribute }) lgDisableAnimation = false;
+  readonly lgDisableAnimationInput = input(false, {
+    alias: 'lgDisableAnimation',
+    transform: booleanAttribute,
+  });
 
   /**
    * Animation elasticity (0-1)
@@ -255,7 +266,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * @default 0.25 (smooth, natural feel)
    */
-  @Input() lgElasticity: number = 0.25;
+  readonly lgElasticityInput = input(0.25, { alias: 'lgElasticity' });
 
   /**
    * Parallax intensity in pixels
@@ -264,7 +275,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * @default 2
    */
-  @Input() lgParallaxIntensity: number = 2;
+  readonly lgParallaxIntensityInput = input(2, { alias: 'lgParallaxIntensity' });
 
   /**
    * Respect user's reduced motion preference
@@ -273,7 +284,90 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * @default true
    */
-  @Input({ transform: booleanAttribute }) lgRespectReducedMotion = true;
+  readonly lgRespectReducedMotionInput = input(true, {
+    alias: 'lgRespectReducedMotion',
+    transform: booleanAttribute,
+  });
+
+  private get lgTheme(): LiquidGlassTheme {
+    return this.lgThemeInput();
+  }
+
+  private get lgMode(): LiquidGlassRefractionMode {
+    return this.lgModeInput();
+  }
+
+  private get lgBorder(): string | undefined {
+    return this.lgBorderInput();
+  }
+
+  private get lgHotspot(): string | undefined {
+    return this.lgHotspotInput();
+  }
+
+  private get lgTint(): string | undefined {
+    return this.lgTintInput();
+  }
+
+  private get lgAriaLabel(): string {
+    return this.lgAriaLabelInput();
+  }
+
+  private get lgRole(): string {
+    return this.lgRoleInput();
+  }
+
+  private get lgCornerRadius(): string {
+    return this.lgCornerRadiusInput();
+  }
+
+  private get lgBorderWidth(): number {
+    return this.lgBorderWidthInput();
+  }
+
+  private get lgBorderWidthActive(): number {
+    return this.lgBorderWidthActiveInput();
+  }
+
+  private get lgPadding(): number {
+    return this.lgPaddingInput();
+  }
+
+  private get lgDisableFilters(): boolean {
+    return this.lgDisableFiltersInput();
+  }
+
+  private get lgDisplacementScale(): number {
+    return this.lgDisplacementScaleInput();
+  }
+
+  private get lgBlurAmount(): number {
+    return this.lgBlurAmountInput();
+  }
+
+  private get lgSaturation(): number {
+    return this.lgSaturationInput();
+  }
+
+  private get lgAberrationIntensity(): number {
+    return this.lgAberrationIntensityInput();
+  }
+
+  private get lgDisableAnimation(): boolean {
+    return this.reduceMotionDisabledAnimation || this.lgDisableAnimationInput();
+  }
+
+  private get lgElasticity(): number {
+    return this.lgElasticityInput();
+  }
+
+  private get lgParallaxIntensity(): number {
+    return this.lgParallaxIntensityInput();
+  }
+
+  private get lgRespectReducedMotion(): boolean {
+    return this.lgRespectReducedMotionInput();
+  }
 
   // ========== Private Properties ==========
 
@@ -294,6 +388,9 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
 
   /** Unique ID for SVG filter reference */
   private filterId = '';
+
+  /** Runtime override when prefers-reduced-motion is enabled */
+  private reduceMotionDisabledAnimation = false;
 
   // ----- Animation State -----
 
@@ -340,7 +437,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
 
     // Check reduced motion preference
     if (this.lgRespectReducedMotion && this.prefersReducedMotion()) {
-      this.lgDisableAnimation = true;
+      this.reduceMotionDisabledAnimation = true;
     }
 
     // Generate unique filter ID
@@ -492,7 +589,7 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     this.r.setStyle(
       this.borderLayer,
       'box-shadow',
-      '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)',
+      'var(--shadow-control-active), inset 0 1px 0 color-mix(in oklch, var(--card) 15%, transparent)',
     );
   }
 
@@ -510,13 +607,13 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
   private updateOverlayBackground(x: number, y: number): void {
     const xPct = (x * 100).toFixed(2);
     const yPct = (y * 100).toFixed(2);
-    const hotspot = this.lgHotspot || 'rgba(255,255,255,0.15)';
-    const tint = this.lgTint || 'rgba(0,0,0,0.12)';
+    const hotspot = this.lgHotspot || 'color-mix(in oklch, var(--card) 15%, transparent)';
+    const tint = this.lgTint || 'color-mix(in oklch, var(--foreground) 12%, transparent)';
 
     const gradient = `
       radial-gradient(140px 140px at ${xPct}% ${yPct}%, ${hotspot},
-        rgba(255,255,255,0.08) 35%, rgba(255,255,255,0) 70%),
-      linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 65%),
+        color-mix(in oklch, var(--card) 8%, transparent) 35%, transparent 70%),
+      linear-gradient(180deg, color-mix(in oklch, var(--card) 12%, transparent), transparent 65%),
       ${tint}
     `
       .replace(/\s+/g, ' ')
@@ -558,8 +655,8 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     this.r.setStyle(
       this.overlay,
       'filter',
-      `url(#${this.filterId}) drop-shadow(${aberration}px 0 rgba(255,40,120,0.18)) ` +
-        `drop-shadow(${-aberration}px 0 rgba(40,160,255,0.16))`,
+      `url(#${this.filterId}) drop-shadow(${aberration}px 0 color-mix(in oklch, var(--accent) 18%, transparent)) ` +
+        `drop-shadow(${-aberration}px 0 color-mix(in oklch, var(--primary) 16%, transparent))`,
     );
   }
 
@@ -582,7 +679,6 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * @param event Pointer event with client coordinates
    */
-  @HostListener('pointermove', ['$event'])
   onPointerMove(event: PointerEvent): void {
     if (this.lgDisableAnimation) return;
 
@@ -599,7 +695,6 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * Sets hovered state and updates border to be brighter/deeper
    */
-  @HostListener('pointerenter')
   onPointerEnter(): void {
     this.isHovered = true;
     this.updateBorderColor();
@@ -610,7 +705,6 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * Resets hotspot to center position and restores normal border
    */
-  @HostListener('pointerleave')
   onPointerLeave(): void {
     this.isHovered = false;
     this.targetX = 0.5;
@@ -623,7 +717,6 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * Sets focused state and updates border to show activation
    */
-  @HostListener('focus')
   onFocus(): void {
     this.isFocused = true;
     this.updateBorderColor();
@@ -634,7 +727,6 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
    *
    * Clears focused state and restores normal border if not hovered
    */
-  @HostListener('blur')
   onBlur(): void {
     this.isFocused = false;
     this.updateBorderColor();
@@ -702,9 +794,9 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     const baseColor = this.lgBorder || 'var(--primary)';
 
     // Shadow constants
-    const baseShadow = '0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15)';
-    const focusRing = '0 0 0 3px oklch(from var(--primary) calc(l + 0.15) c h / 0.25)';
-    const activatedShadow = '0 6px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.25), ' + focusRing;
+    const baseShadow = 'var(--shadow-control-active)';
+    const focusRing = 'var(--shadow-focus-ring)';
+    const activatedShadow = `var(--shadow-control-hover), ${focusRing}`;
 
     if (this.isActivated()) {
       // Activated state: keep border color, add focus ring
