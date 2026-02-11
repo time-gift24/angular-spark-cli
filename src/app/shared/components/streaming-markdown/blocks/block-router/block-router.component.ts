@@ -7,7 +7,7 @@
 import { Component, Type, ChangeDetectionStrategy, computed, inject, input } from '@angular/core';
 import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { MarkdownBlock, BlockType, isCodeBlock, isBlockquoteBlock, isListBlock } from '../../core/models';
-import { BLOCK_COMPONENT_REGISTRY } from '../../core/plugin';
+import { BLOCK_COMPONENT_REGISTRY, RenderHookContext, STREAMDOWN_PLUGIN_RUNTIME } from '../../core/plugin';
 import { DepthGuard } from '../../core/depth-guard';
 
 @Component({
@@ -31,11 +31,35 @@ export class MarkdownBlockRouterComponent {
   readonly depth = input(0);
 
   private readonly registry = inject(BLOCK_COMPONENT_REGISTRY);
+  private readonly pluginRuntime = inject(STREAMDOWN_PLUGIN_RUNTIME, { optional: true });
 
-  protected readonly resolvedComponent = computed<Type<unknown> | null>(() =>
-    this.lookupComponent(this.block()),
+  private readonly resolvedHookContext = computed<RenderHookContext>(() => {
+    const block = this.block();
+    const hookContext: RenderHookContext = {
+      block,
+      isComplete: this.isComplete(),
+      blockIndex: this.blockIndex(),
+      depth: this.depth(),
+      component: this.lookupComponent(block),
+      inputs: this.buildResolvedInputs(),
+    };
+
+    if (this.pluginRuntime?.hasBeforeRenderHooks) {
+      this.pluginRuntime.runBeforeRender(hookContext);
+    }
+    if (this.pluginRuntime?.hasAfterRenderHooks) {
+      this.pluginRuntime.runAfterRender(hookContext);
+    }
+
+    return hookContext;
+  });
+
+  protected readonly resolvedComponent = computed<Type<unknown> | null>(
+    () => this.resolvedHookContext().component as Type<unknown> | null,
   );
-  protected readonly resolvedInputs = computed<Record<string, unknown>>(() => this.buildResolvedInputs());
+  protected readonly resolvedInputs = computed<Record<string, unknown>>(
+    () => this.resolvedHookContext().inputs,
+  );
 
   private buildResolvedInputs(): Record<string, unknown> {
     const block = this.block();
@@ -85,6 +109,16 @@ export class MarkdownBlockRouterComponent {
   private lookupComponent(block: MarkdownBlock): Type<unknown> | null {
     for (const entry of this.registry.matchers) {
       if (entry.matcher(block)) {
+        if (entry.resolveType) {
+          const resolvedType = entry.resolveType(block);
+          if (resolvedType) {
+            const resolvedComponent = this.registry.componentMap.get(resolvedType) || entry.components[resolvedType];
+            if (resolvedComponent) {
+              return resolvedComponent;
+            }
+          }
+        }
+
         const keys = Object.keys(entry.components);
         if (keys.length > 0) {
           return entry.components[keys[0]] as Type<unknown>;
