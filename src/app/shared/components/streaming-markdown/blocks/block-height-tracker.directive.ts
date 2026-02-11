@@ -1,15 +1,9 @@
 /**
  * Block Height Tracker Directive
  *
- * Structural directive that measures actual block heights in the DOM.
+ * Attribute directive that measures actual block heights in the DOM.
  * Uses ResizeObserver to detect height changes and reports them back
  * to the VirtualScrollService for accurate window calculations.
- *
- * Features:
- * - Debounced measurements (32ms) to reduce thrashing
- * - Significant change threshold (>1px) to avoid noise
- * - Automatic cleanup on destroy
- * - No memory leaks from observers
  */
 
 import {
@@ -21,9 +15,7 @@ import {
   OnInit,
   OnDestroy,
   ElementRef,
-  TemplateRef,
-  ViewContainerRef,
-  computed,
+  DestroyRef,
   signal
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -52,34 +44,13 @@ interface HeightTrackerConfig {
   changeThreshold: number;
 }
 
-/**
- * Directive to track and report block heights.
- * Wraps content and observes size changes.
- *
- * @example
- * ```html
- * <div *appBlockHeightTracker="block; index: i; id: block.id">
- *   <app-markdown-block-router [block]="block" />
- * </div>
- * ```
- *
- * Or with microsyntax:
- * ```html
- * <ng-container *appBlockHeightTracker="let block; index: i; id: block.id">
- *   <app-markdown-block-router [block]="block" />
- * </ng-container>
- * ```
- */
 @Directive({
   selector: '[appBlockHeightTracker]',
   standalone: true
 })
 export class BlockHeightTrackerDirective implements OnInit, OnDestroy {
-  /** The block to measure (passed via * syntax) */
-  @Input({ required: true, alias: 'appBlockHeightTracker' }) set block(value: unknown) {
-    // Block data is stored but not directly used for measurement
-    // The directive measures the container's actual DOM height
-  }
+  /** The block to measure (for template readability, not used directly) */
+  @Input({ required: true, alias: 'appBlockHeightTracker' }) set block(_value: unknown) {}
 
   /** Index of the block in the blocks array */
   @Input({ required: true, alias: 'appBlockHeightTrackerIndex' }) set index(value: number) {
@@ -96,81 +67,46 @@ export class BlockHeightTrackerDirective implements OnInit, OnDestroy {
   /** Emitted when a new height is measured */
   @Output() readonly heightMeasured = new EventEmitter<HeightMeasurement>();
 
-  /** Configuration for height tracking */
   private config: HeightTrackerConfig = {
     debounceMs: 32,
     changeThreshold: 1
   };
 
-  /** ResizeObserver instance */
   private resizeObserver: ResizeObserver | null = null;
-
-  /** Subject for height change notifications */
   private heightChanges$ = new Subject<number>();
-
-  /** Last reported height (for threshold comparison) */
-  private lastReportedHeight = 0;
-
-  /** Template ref for structural directive support */
-  private templateRef = inject(TemplateRef<unknown>);
-
-  /** View container for structural directive support */
-  private viewContainer = inject(ViewContainerRef);
-
-  /** Element ref for the wrapper */
-  private elementRef = inject(ElementRef);
-
-  /** Computed block index and id */
-  readonly blockData = computed(() => ({
-    index: this.blockIndex(),
-    id: this.blockId()
-  }));
+  private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
-    // Create the embedded view for the content
-    this.viewContainer.createEmbeddedView(this.templateRef);
-
-    // Set up debounced height change notifications
     this.heightChanges$.pipe(
       debounceTime(this.config.debounceMs),
       distinctUntilChanged((a, b) => Math.abs(a - b) < this.config.changeThreshold),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe((height) => {
-      this.lastReportedHeight = height;
       this.heightMeasured.emit({
-        index: this.blockData().index,
-        id: this.blockData().id,
+        index: this.blockIndex(),
+        id: this.blockId(),
         height
       });
     });
 
-    // Initialize ResizeObserver after view is created
-    // Use setTimeout to ensure DOM is ready
-    setTimeout(() => {
-      this.setupResizeObserver();
-    }, 0);
+    queueMicrotask(() => this.setupResizeObserver());
   }
 
   ngOnDestroy(): void {
     this.cleanup();
   }
 
-  /**
-   * Set up ResizeObserver to track height changes
-   */
   private setupResizeObserver(): void {
     if (typeof ResizeObserver === 'undefined') {
-      console.warn('[BlockHeightTrackerDirective] ResizeObserver not supported');
       return;
     }
 
-    // Get the wrapper element
-    const element = this.elementRef.nativeElement as HTMLElement;
+    const element = this.elementRef.nativeElement;
     if (!element) {
       return;
     }
 
-    // Create and attach observer
     this.resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const height = entry.contentRect.height;
@@ -182,30 +118,24 @@ export class BlockHeightTrackerDirective implements OnInit, OnDestroy {
 
     this.resizeObserver.observe(element);
 
-    // Measure initial height
     const initialHeight = element.offsetHeight;
     if (initialHeight > 0) {
       this.heightChanges$.next(initialHeight);
     }
   }
 
-  /**
-   * Clean up observer and subscriptions
-   */
   private cleanup(): void {
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
     }
+
     this.heightChanges$.complete();
   }
 
-  /**
-   * Manually trigger a height measurement
-   * Useful for forcing a re-measure after content changes
-   */
+  /** Manually trigger a height measurement */
   measure(): void {
-    const element = this.elementRef.nativeElement as HTMLElement;
+    const element = this.elementRef.nativeElement;
     if (!element) {
       return;
     }
@@ -216,11 +146,9 @@ export class BlockHeightTrackerDirective implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Get the current measured height
-   */
+  /** Get the current measured height */
   getCurrentHeight(): number {
-    const element = this.elementRef.nativeElement as HTMLElement;
+    const element = this.elementRef.nativeElement;
     return element ? element.offsetHeight : 0;
   }
 }

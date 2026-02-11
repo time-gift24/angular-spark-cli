@@ -55,6 +55,10 @@ export class ShiniHighlighter implements IShiniHighlighter {
   }
 
   async initialize(): Promise<void> {
+    if (this.initPromise) {
+      return this.initPromise
+    }
+
     this.initPromise = (async () => {
       try {
         const shiki = await this.loadShikiWasm()

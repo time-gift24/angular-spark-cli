@@ -81,29 +81,23 @@ export interface CodeBlock extends MarkdownBlockBase {
 /**
  * List block type.
  * Has a required subtype and nested items.
- *
- * NOTE: items is typed as string[] to avoid circular type reference.
- * The parser will populate this with actual MarkdownBlock objects at runtime.
  */
 export interface ListBlock extends MarkdownBlockBase {
   type: BlockType.LIST;
   /** List subtype distinction */
   subtype: 'ordered' | 'unordered';
-  /** Nested list items (contains markdown content strings) */
-  items: string[];
+  /** Nested list items (contains markdown content or nested MarkdownBlock objects) */
+  items: (string | MarkdownBlock)[];
 }
 
 /**
  * Blockquote block type.
  * Contains nested blocks.
- *
- * NOTE: blocks is typed as string[] to avoid circular type reference.
- * The parser will populate this with actual MarkdownBlock objects at runtime.
  */
 export interface BlockquoteBlock extends MarkdownBlockBase {
   type: BlockType.BLOCKQUOTE;
-  /** Nested blocks (contains markdown content strings) */
-  blocks: string[];
+  /** Nested blocks (contains MarkdownBlock objects) */
+  blocks: MarkdownBlock[];
 }
 
 /**

@@ -1,19 +1,14 @@
 /**
  * Markdown Block Router Component
  *
- * Dynamically routes markdown blocks to their registered renderer components
- * using NgComponentOutlet and the plugin-based BlockComponentRegistry.
- *
- * Lookup order:
- * 1. Custom matchers from plugins (in registration order)
- * 2. Direct type → component map lookup
- * 3. Fallback to UNKNOWN or PARAGRAPH component
+ * Dynamically routes markdown blocks to registered renderer components.
  */
 
-import { Component, Input, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, inject, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule, NgComponentOutlet } from '@angular/common';
-import { MarkdownBlock, BlockType, isCodeBlock, isBlockquoteBlock } from '../../core/models';
-import { BLOCK_COMPONENT_REGISTRY, BlockComponentRegistry } from '../../core/plugin';
+import { MarkdownBlock, BlockType, isCodeBlock, isBlockquoteBlock, isListBlock } from '../../core/models';
+import { BLOCK_COMPONENT_REGISTRY } from '../../core/plugin';
+import { DepthGuard } from '../../core/depth-guard';
 
 @Component({
   selector: 'app-markdown-block-router',
@@ -22,25 +17,35 @@ import { BLOCK_COMPONENT_REGISTRY, BlockComponentRegistry } from '../../core/plu
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="markdown-block-router" [attr.data-block-type]="block.type">
-      @if (resolvedComponent()) {
-        <ng-container
-          *ngComponentOutlet="resolvedComponent(); inputs: resolvedInputs()" />
+      @if (resolvedComponent; as component) {
+        <ng-container *ngComponentOutlet="component; inputs: resolvedInputs" />
       }
     </div>
   `
 })
-export class MarkdownBlockRouterComponent {
+export class MarkdownBlockRouterComponent implements OnChanges {
   @Input({ required: true }) block!: MarkdownBlock;
-  @Input() isComplete: boolean = true;
-  @Input() blockIndex: number = -1;
-  @Input() enableLazyHighlight: boolean = false;
-  @Input() allowHighlight: boolean = true;
+  @Input() isComplete = true;
+  @Input() blockIndex = -1;
+  @Input() enableLazyHighlight = false;
+  @Input() allowHighlight = true;
+  @Input() depth = 0;
 
   private registry = inject(BLOCK_COMPONENT_REGISTRY);
 
-  resolvedComponent = computed(() => this.lookupComponent(this.block));
+  resolvedComponent: any = null;
+  resolvedInputs: Record<string, unknown> = {};
 
-  resolvedInputs = computed(() => {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['block'] && !changes['isComplete'] && !changes['blockIndex'] && !changes['enableLazyHighlight'] && !changes['allowHighlight'] && !changes['depth']) {
+      return;
+    }
+
+    this.resolvedComponent = this.lookupComponent(this.block);
+    this.resolvedInputs = this.buildResolvedInputs();
+  }
+
+  private buildResolvedInputs(): Record<string, unknown> {
     if (isCodeBlock(this.block)) {
       return {
         block: this.block,
@@ -57,7 +62,21 @@ export class MarkdownBlockRouterComponent {
         isComplete: this.isComplete,
         blockIndex: this.blockIndex,
         enableLazyHighlight: this.enableLazyHighlight,
-        allowHighlight: this.allowHighlight
+        allowHighlight: this.allowHighlight,
+        depth: this.depth,
+        canNest: DepthGuard.canNest(this.block, this.depth)
+      };
+    }
+
+    if (isListBlock(this.block)) {
+      return {
+        block: this.block,
+        isComplete: this.isComplete,
+        blockIndex: this.blockIndex,
+        enableLazyHighlight: this.enableLazyHighlight,
+        allowHighlight: this.allowHighlight,
+        depth: this.depth,
+        canNest: DepthGuard.canNest(this.block, this.depth)
       };
     }
 
@@ -65,15 +84,11 @@ export class MarkdownBlockRouterComponent {
       block: this.block,
       isComplete: this.isComplete
     };
-  });
+  }
 
   private lookupComponent(block: MarkdownBlock): any {
-    if (!block) return null;
-
-    // 1. Check custom matchers first
     for (const entry of this.registry.matchers) {
       if (entry.matcher(block)) {
-        // Return the first component from the matching plugin
         const keys = Object.keys(entry.components);
         if (keys.length > 0) {
           return entry.components[keys[0]];
@@ -81,22 +96,11 @@ export class MarkdownBlockRouterComponent {
       }
     }
 
-    // 2. Direct type lookup
-    const component = this.registry.componentMap.get(block.type);
-    if (component) {
-      return component;
-    }
-
-    // 3. Fallback chain: UNKNOWN → PARAGRAPH → null
-    const fallback =
+    return (
+      this.registry.componentMap.get(block.type) ||
       this.registry.componentMap.get(BlockType.UNKNOWN) ||
-      this.registry.componentMap.get(BlockType.PARAGRAPH);
-
-    if (fallback) {
-      return fallback;
-    }
-
-    console.warn(`[MarkdownBlockRouter] No component found for block type: ${block.type}`);
-    return null;
+      this.registry.componentMap.get(BlockType.PARAGRAPH) ||
+      null
+    );
   }
 }

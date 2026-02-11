@@ -1,23 +1,35 @@
 /**
  * Markdown Blockquote Component
  *
- * Renders quoted text with left border styling.
- *
- * Implements BlockRenderer interface for plugin architecture.
+ * Renders blockquote content and nested markdown blocks.
  */
 
 import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import type { BlockquoteBlock } from '../../core/models';
+import { MarkdownBlock, BlockquoteBlock } from '../../core/models';
+import { MarkdownBlockRouterComponent } from '../block-router/block-router.component';
 
 @Component({
   selector: 'app-markdown-blockquote',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MarkdownBlockRouterComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <blockquote [class]="blockquoteClasses()">
-      {{ block.content }}
+      @if (canNest && block.blocks.length > 0) {
+        @for (nestedBlock of block.blocks; track nestedBlock.id) {
+          <app-markdown-block-router
+            [block]="nestedBlock"
+            [isComplete]="isComplete"
+            [blockIndex]="resolveNestedIndex($index, nestedBlock)"
+            [enableLazyHighlight]="enableLazyHighlight"
+            [allowHighlight]="allowHighlight"
+            [depth]="depth + 1" />
+        }
+      } @else {
+        <p class="blockquote-text">{{ block.content }}</p>
+      }
+
       @if (!isComplete) {
         <span class="streaming-cursor"></span>
       }
@@ -27,10 +39,12 @@ import type { BlockquoteBlock } from '../../core/models';
 })
 export class MarkdownBlockquoteComponent implements OnChanges {
   @Input({ required: true }) block!: BlockquoteBlock;
-  @Input() isComplete: boolean = true;
-  @Input() blockIndex: number = -1;
-  @Input() enableLazyHighlight: boolean = false;
-  @Input() allowHighlight: boolean = true;
+  @Input() isComplete = true;
+  @Input() blockIndex = -1;
+  @Input() enableLazyHighlight = false;
+  @Input() allowHighlight = true;
+  @Input() depth = 0;
+  @Input() canNest = true;
 
   blockquoteClasses = signal<string>('markdown-blockquote block-blockquote');
 
@@ -38,6 +52,13 @@ export class MarkdownBlockquoteComponent implements OnChanges {
     if (changes['isComplete']) {
       this.updateClasses();
     }
+  }
+
+  resolveNestedIndex(index: number, block: MarkdownBlock): number {
+    if (typeof block.position === 'number' && block.position >= 0) {
+      return block.position;
+    }
+    return index;
   }
 
   private updateClasses(): void {

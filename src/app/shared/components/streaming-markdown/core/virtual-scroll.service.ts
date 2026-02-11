@@ -31,12 +31,25 @@ interface BlockHeightCache {
 @Injectable({ providedIn: 'root' })
 export class VirtualScrollService {
   /** Current configuration for virtual scrolling */
-  private config: VirtualScrollConfig;
+  private config = signal<VirtualScrollConfig>({ ...DEFAULT_VIRTUAL_SCROLL_CONFIG });
 
   /** Cache of measured block heights */
   private heightCache: BlockHeightCache = {
     heights: new Map(),
     estimatedHeight: DEFAULT_VIRTUAL_SCROLL_CONFIG.estimatedBlockHeight!
+  };
+
+  /** Internal cache version so height mutations trigger computed recalculation */
+  private readonly heightCacheVersion = signal(0);
+  /** Cached prefix sums for fast offset-to-index lookup */
+  private prefixSumCache: {
+    token: number;
+    totalBlocks: number;
+    prefix: number[];
+  } = {
+    token: -1,
+    totalBlocks: -1,
+    prefix: [0]
   };
 
   /** Current scroll position (pixels from top) */
@@ -50,6 +63,8 @@ export class VirtualScrollService {
 
   /** Current visible window - computed from scroll position and viewport */
   readonly window = computed<VirtualWindow>(() => {
+    this.heightCacheVersion();
+    this.config();
     const top = this.scrollTop();
     const height = this.viewportHeight();
     const count = this.totalBlocks();
@@ -58,21 +73,19 @@ export class VirtualScrollService {
 
   /** Total scrollable height based on cached and estimated heights */
   readonly totalHeight = computed(() => {
+    this.heightCacheVersion();
+    this.config();
     return this.calculateTotalHeight(this.totalBlocks());
   });
-
-  constructor() {
-    this.config = { ...DEFAULT_VIRTUAL_SCROLL_CONFIG };
-  }
 
   /**
    * Update the virtual scroll configuration
    */
   setConfig(config: Partial<VirtualScrollConfig>): void {
-    this.config = { ...this.config, ...config };
-    // Update estimated height in cache
-    if (config.estimatedBlockHeight !== undefined) {
+    this.config.update((current) => ({ ...current, ...config }));
+    if (config.estimatedBlockHeight !== undefined && config.estimatedBlockHeight > 0) {
       this.heightCache.estimatedHeight = config.estimatedBlockHeight;
+      this.bumpHeightCacheVersion();
     }
   }
 
@@ -80,7 +93,7 @@ export class VirtualScrollService {
    * Get current configuration
    */
   getConfig(): VirtualScrollConfig {
-    return { ...this.config };
+    return { ...this.config() };
   }
 
   /**
@@ -123,56 +136,27 @@ export class VirtualScrollService {
       };
     }
 
-    const overscan = this.config.overscan ?? DEFAULT_VIRTUAL_SCROLL_CONFIG.overscan!;
+    const overscan = this.config().overscan ?? DEFAULT_VIRTUAL_SCROLL_CONFIG.overscan!;
     const estimatedHeight = this.heightCache.estimatedHeight;
     const normalizedViewportHeight = Math.max(viewportHeight, estimatedHeight);
-    const totalHeight = this.calculateTotalHeight(totalBlocks);
+    const prefix = this.getPrefixSums(totalBlocks);
+    const totalHeight = prefix[totalBlocks] ?? 0;
     const maxScrollTop = Math.max(0, totalHeight - normalizedViewportHeight);
     const normalizedScrollTop = Math.min(Math.max(0, scrollTop), maxScrollTop);
 
-    // Find start index by accumulating heights from top
-    let accumulatedHeight = 0;
-    let firstVisibleIndex = 0;
-
-    for (let i = 0; i < totalBlocks; i++) {
-      const blockHeight = this.heightCache.heights.get(i) ?? estimatedHeight;
-      if (accumulatedHeight + blockHeight > normalizedScrollTop) {
-        firstVisibleIndex = i;
-        break;
-      }
-      accumulatedHeight += blockHeight;
-
-      if (i === totalBlocks - 1) {
-        firstVisibleIndex = i;
-      }
-    }
+    const firstVisibleIndex = this.findBlockIndexAtOffset(prefix, normalizedScrollTop, totalBlocks);
 
     const startIndex = Math.max(0, firstVisibleIndex - overscan);
 
-    // Find end index by accumulating from start
-    let visibleHeight = 0;
-    let endIndex = firstVisibleIndex;
-
-    for (let i = firstVisibleIndex; i < totalBlocks; i++) {
-      const blockHeight = this.heightCache.heights.get(i) ?? estimatedHeight;
-      visibleHeight += blockHeight;
-      endIndex = i;
-
-      if (visibleHeight >= normalizedViewportHeight) {
-        endIndex = Math.min(totalBlocks - 1, i + overscan);
-        break;
-      }
-    }
+    const viewportEndOffset = Math.max(normalizedScrollTop, normalizedScrollTop + normalizedViewportHeight - 0.001);
+    const lastVisibleIndex = this.findBlockIndexAtOffset(prefix, viewportEndOffset, totalBlocks);
+    let endIndex = Math.min(totalBlocks - 1, lastVisibleIndex + overscan);
 
     if (endIndex < startIndex) {
       endIndex = startIndex;
     }
 
-    // Calculate offset for positioning the first visible block
-    let offsetTop = 0;
-    for (let i = 0; i < startIndex; i++) {
-      offsetTop += this.heightCache.heights.get(i) ?? estimatedHeight;
-    }
+    const offsetTop = prefix[startIndex] ?? 0;
 
     return {
       start: startIndex,
@@ -190,9 +174,17 @@ export class VirtualScrollService {
    * @param height - Measured height in pixels
    */
   updateBlockHeight(index: number, height: number): void {
-    if (index >= 0 && height > 0) {
-      this.heightCache.heights.set(index, height);
+    if (index < 0 || height <= 0) {
+      return;
     }
+
+    const previous = this.heightCache.heights.get(index);
+    if (previous !== undefined && Math.abs(previous - height) < 1) {
+      return;
+    }
+
+    this.heightCache.heights.set(index, height);
+    this.bumpHeightCacheVersion();
   }
 
   /**
@@ -209,7 +201,12 @@ export class VirtualScrollService {
    * Clear the height cache (useful when content changes significantly)
    */
   clearHeightCache(): void {
+    if (this.heightCache.heights.size === 0) {
+      return;
+    }
+
     this.heightCache.heights.clear();
+    this.bumpHeightCacheVersion();
   }
 
   /**
@@ -226,14 +223,8 @@ export class VirtualScrollService {
    * Internal method to calculate total height from block count
    */
   private calculateTotalHeight(totalBlocks: number): number {
-    const estimatedHeight = this.heightCache.estimatedHeight;
-    let total = 0;
-
-    for (let i = 0; i < totalBlocks; i++) {
-      total += this.heightCache.heights.get(i) ?? estimatedHeight;
-    }
-
-    return total;
+    const prefix = this.getPrefixSums(totalBlocks);
+    return prefix[totalBlocks] ?? 0;
   }
 
   /**
@@ -243,8 +234,9 @@ export class VirtualScrollService {
    * @returns True if virtual scrolling should be used
    */
   shouldUseVirtualScroll(blockCount: number): boolean {
-    const minBlocks = this.config.minBlocksForVirtual ?? DEFAULT_VIRTUAL_SCROLL_CONFIG.minBlocksForVirtual!;
-    return this.config.enabled && blockCount >= minBlocks;
+    const config = this.config();
+    const minBlocks = config.minBlocksForVirtual ?? DEFAULT_VIRTUAL_SCROLL_CONFIG.minBlocksForVirtual!;
+    return config.enabled && blockCount >= minBlocks;
   }
 
   /**
@@ -257,29 +249,24 @@ export class VirtualScrollService {
   estimateBlockHeight(block: MarkdownBlock): number {
     const base = this.heightCache.estimatedHeight;
 
-    // Code blocks are typically taller
     if (block.type === 'code') {
       const lineCount = block.content.split('\n').length;
-      return Math.max(base, lineCount * 24 + 40); // ~24px per line + padding
+      return Math.max(base, lineCount * 24 + 40);
     }
 
-    // Lists may be taller depending on content
     if (block.type === 'list') {
       const lineCount = block.content.split('\n').length;
       return Math.max(base, lineCount * 22 + 20);
     }
 
-    // Blockquotes with nested content
     if (block.type === 'blockquote') {
       return base * 1.3;
     }
 
-    // Headings vary by level
     if (block.type === 'heading') {
       return base * 0.8;
     }
 
-    // Default for paragraphs and other blocks
     return base;
   }
 
@@ -290,10 +277,72 @@ export class VirtualScrollService {
    * @param blocks - Array of markdown blocks
    */
   preWarmHeightCache(blocks: MarkdownBlock[]): void {
+    let changed = false;
+
     blocks.forEach((block, index) => {
       if (!this.heightCache.heights.has(index)) {
         this.heightCache.heights.set(index, this.estimateBlockHeight(block));
+        changed = true;
       }
     });
+
+    if (changed) {
+      this.bumpHeightCacheVersion();
+    }
+  }
+
+  private bumpHeightCacheVersion(): void {
+    this.heightCacheVersion.update((version) => version + 1);
+  }
+
+  private getPrefixSums(totalBlocks: number): number[] {
+    const token = this.heightCacheVersion();
+    const cache = this.prefixSumCache;
+    if (cache.token === token && cache.totalBlocks === totalBlocks) {
+      return cache.prefix;
+    }
+
+    const estimatedHeight = this.heightCache.estimatedHeight;
+    const prefix = new Array<number>(totalBlocks + 1);
+    prefix[0] = 0;
+
+    for (let i = 0; i < totalBlocks; i++) {
+      const blockHeight = this.heightCache.heights.get(i) ?? estimatedHeight;
+      prefix[i + 1] = prefix[i] + blockHeight;
+    }
+
+    this.prefixSumCache = {
+      token,
+      totalBlocks,
+      prefix
+    };
+    return prefix;
+  }
+
+  private findBlockIndexAtOffset(prefix: number[], offset: number, totalBlocks: number): number {
+    if (totalBlocks <= 0) {
+      return 0;
+    }
+
+    const totalHeight = prefix[totalBlocks] ?? 0;
+    const clampedOffset = Math.min(Math.max(0, offset), totalHeight);
+    const index = this.upperBound(prefix, clampedOffset) - 1;
+    return Math.min(totalBlocks - 1, Math.max(0, index));
+  }
+
+  private upperBound(values: number[], target: number): number {
+    let low = 0;
+    let high = values.length;
+
+    while (low < high) {
+      const mid = (low + high) >> 1;
+      if (values[mid] <= target) {
+        low = mid + 1;
+      } else {
+        high = mid;
+      }
+    }
+
+    return low;
   }
 }

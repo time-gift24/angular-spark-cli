@@ -72,17 +72,10 @@ export class MarkdownCodeComponent implements OnChanges, OnDestroy {
 
   private highlightScheduler = inject(HighlightSchedulerService);
   private unsubscribeHighlightResult: (() => void) | null = null;
+  private subscribedBlockId: string | null = null;
+  private syncRequestId = 0;
 
-  constructor() {
-    this.unsubscribeHighlightResult = this.highlightScheduler.onHighlightResult((result) => {
-      if (!this.block || result.blockId !== this.block.id) {
-        return;
-      }
-
-      this.highlightedLines.set(result.lines);
-      this.block.isHighlighted = true;
-    });
-  }
+  constructor() {}
 
   get code(): string {
     return this.block.rawContent || this.block.content;
@@ -99,6 +92,10 @@ export class MarkdownCodeComponent implements OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['block']) {
+      this.ensureHighlightSubscription();
+    }
+
     if (changes['block'] || changes['isComplete'] || changes['enableLazyHighlight'] || changes['allowHighlight'] || changes['blockIndex']) {
       void this.syncHighlightState();
     }
@@ -111,7 +108,35 @@ export class MarkdownCodeComponent implements OnChanges, OnDestroy {
     }
   }
 
+  private ensureHighlightSubscription(): void {
+    const nextBlockId = this.block?.id || null;
+    if (nextBlockId === this.subscribedBlockId) {
+      return;
+    }
+
+    if (this.unsubscribeHighlightResult) {
+      this.unsubscribeHighlightResult();
+      this.unsubscribeHighlightResult = null;
+    }
+
+    this.subscribedBlockId = nextBlockId;
+    if (!nextBlockId) {
+      return;
+    }
+
+    this.unsubscribeHighlightResult = this.highlightScheduler.onHighlightResult((result) => {
+      if (this.block?.id !== result.blockId) {
+        return;
+      }
+      this.highlightedLines.set(result.lines);
+      this.block.isHighlighted = true;
+    }, nextBlockId);
+  }
+
   private async syncHighlightState(): Promise<void> {
+    const requestId = ++this.syncRequestId;
+    const blockIdAtStart = this.block?.id;
+
     if (!this.isComplete || !this.allowHighlight) {
       this.highlightedLines.set([]);
       return;
@@ -124,7 +149,12 @@ export class MarkdownCodeComponent implements OnChanges, OnDestroy {
       return;
     }
 
-    const cached = this.highlightScheduler.getHighlightedLines(this.block.id);
+    const code = this.block.rawContent || this.block.content;
+    const head = code.slice(0, 120);
+    const tail = code.length > 120 ? code.slice(-120) : '';
+    const signature = `${code.length}:${head}:${tail}`;
+
+    const cached = this.highlightScheduler.getHighlightedLinesBySignature(this.block.id, signature);
     if (cached?.length) {
       this.highlightedLines.set(cached);
       this.block.isHighlighted = true;
@@ -139,6 +169,9 @@ export class MarkdownCodeComponent implements OnChanges, OnDestroy {
     }
 
     const lines = await this.highlightScheduler.highlightNow(this.block, index);
+    if (requestId !== this.syncRequestId || !blockIdAtStart || this.block?.id !== blockIdAtStart) {
+      return;
+    }
     this.highlightedLines.set(lines);
     this.block.isHighlighted = true;
   }

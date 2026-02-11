@@ -18,7 +18,8 @@ import {
   MarkdownBlock,
   MarkdownInline,
   ParserResult,
-  BlockType
+  BlockType,
+  ListBlock
 } from './models';
 import {
   BLOCK_COMPONENT_REGISTRY,
@@ -261,14 +262,101 @@ export class BlockParser implements IBlockParser {
   }
 
   /**
-   * Find the last stable boundary (double newline) in text.
-   * Everything before this boundary is considered "stable" and won't change.
+   * Find last stable boundary for incremental parsing.
+   *
+   * Boundary rule:
+   * - only blank-line boundaries outside fenced code blocks are considered stable
+   * - fences inside blockquotes are also respected
    */
   private findLastStableBoundary(text: string): number {
-    const lastDoubleNewline = text.lastIndexOf('\n\n');
-    if (lastDoubleNewline === -1) return 0;
-    // Return position after the double newline
-    return lastDoubleNewline + 2;
+    if (!text) {
+      return 0;
+    }
+
+    const lines = text.split('\n');
+    let inFence = false;
+    let fenceChar: '`' | '~' | null = null;
+    let fenceLength = 0;
+    let cursor = 0;
+    let lastBoundary = 0;
+
+    for (let index = 0; index < lines.length; index++) {
+      const line = lines[index];
+      const hasNewline = index < lines.length - 1;
+      const normalizedLine = this.stripBlockquotePrefix(line).trimStart();
+
+      if (!inFence) {
+        const openingFence = this.getFenceOpening(normalizedLine);
+        if (openingFence) {
+          inFence = true;
+          fenceChar = openingFence.char;
+          fenceLength = openingFence.length;
+        }
+      } else if (fenceChar && this.isFenceClosing(normalizedLine, fenceChar, fenceLength)) {
+        inFence = false;
+        fenceChar = null;
+        fenceLength = 0;
+      }
+
+      if (hasNewline && !inFence && line.trim().length === 0) {
+        lastBoundary = cursor + line.length + 1;
+      }
+
+      cursor += line.length + (hasNewline ? 1 : 0);
+    }
+
+    return lastBoundary;
+  }
+
+  private getFenceOpening(line: string): { char: '`' | '~'; length: number } | null {
+    const marker = line.match(/^(`{3,}|~{3,})/);
+    if (!marker) {
+      return null;
+    }
+
+    const value = marker[1];
+    const char = value[0];
+    if (char !== '`' && char !== '~') {
+      return null;
+    }
+
+    return {
+      char,
+      length: value.length
+    };
+  }
+
+  private isFenceClosing(line: string, fenceChar: '`' | '~', minimumLength: number): boolean {
+    const trimmed = line.trim();
+    if (trimmed.length < minimumLength) {
+      return false;
+    }
+
+    let markerLength = 0;
+    while (markerLength < trimmed.length && trimmed[markerLength] === fenceChar) {
+      markerLength++;
+    }
+
+    if (markerLength < minimumLength) {
+      return false;
+    }
+
+    return trimmed.slice(markerLength).trim().length === 0;
+  }
+
+  private stripBlockquotePrefix(line: string): string {
+    let remaining = line;
+
+    while (true) {
+      const prefix = remaining.match(/^\s{0,3}>\s?/);
+      if (!prefix) {
+        break;
+      }
+
+      remaining = remaining.slice(prefix[0].length);
+    }
+
+    return remaining;
   }
 
   /** Update the incremental cache after a parse */
@@ -364,25 +452,26 @@ export class BlockParser implements IBlockParser {
       case 'list': {
         const listToken = token as any;
         const items = listToken.items || [];
-        const subtype = listToken.ordered ? 'ordered' : 'unordered';
-        const parsedItems: string[] = items.map((item: any) => item.text || '');
+
         return {
           ...baseBlock,
           type: BlockType.LIST,
           content: items.map((item: any) => item.text || '').join('\n'),
-          subtype: subtype as 'ordered' | 'unordered',
-          items: parsedItems
-        };
+          subtype: listToken.ordered ? 'ordered' : 'unordered',
+          items: this.parseListItems(items, `${baseBlock.id}-item`)
+        } satisfies ListBlock;
       }
 
       case 'blockquote': {
         const bqToken = token as any;
-        const nestedBlocks: string[] = [];
+        const nestedBlocks: MarkdownBlock[] = [];
         if (bqToken.tokens && Array.isArray(bqToken.tokens)) {
+          let nestedPos = 0;
           for (const nestedToken of bqToken.tokens) {
-            const text = this.extractText(nestedToken);
-            if (text) {
-              nestedBlocks.push(text);
+            const nestedBlock = this.tokenToBlock(nestedToken, nestedPos);
+            if (nestedBlock) {
+              nestedBlocks.push(nestedBlock);
+              nestedPos++;
             }
           }
         }
@@ -391,7 +480,7 @@ export class BlockParser implements IBlockParser {
           type: BlockType.BLOCKQUOTE,
           content: this.extractText(token),
           blocks: nestedBlocks
-        };
+        } as const;
       }
 
       case 'hr':
@@ -431,6 +520,53 @@ export class BlockParser implements IBlockParser {
         // Silently skip unsupported token types
         return null;
     }
+  }
+
+
+  private parseListItems(items: any[], idPrefix: string): (string | MarkdownBlock)[] {
+    const parsedItems: (string | MarkdownBlock)[] = [];
+
+    items.forEach((item: any, itemIndex: number) => {
+      const tokens = Array.isArray(item?.tokens) ? item.tokens : [];
+      const nestedListTokens = tokens.filter((token: any) => token.type === 'list');
+      const inlineTokens = tokens.filter((token: any) => token.type !== 'list');
+      const textFromTokens = inlineTokens.map((token: any) => this.extractText(token)).join('').trim();
+      const itemText = (textFromTokens || item?.text || '').trim();
+
+      if (itemText) {
+        parsedItems.push(itemText);
+      }
+
+      nestedListTokens.forEach((nestedToken: any, nestedIndex: number) => {
+        parsedItems.push(
+          this.parseNestedListBlock(
+            nestedToken,
+            `${idPrefix}-${itemIndex}-${nestedIndex}`,
+            itemIndex + nestedIndex
+          )
+        );
+      });
+
+      if (!itemText && nestedListTokens.length === 0) {
+        parsedItems.push('');
+      }
+    });
+
+    return parsedItems;
+  }
+
+  private parseNestedListBlock(listToken: any, id: string, position: number): ListBlock {
+    const items = listToken.items || [];
+
+    return {
+      id,
+      type: BlockType.LIST,
+      content: items.map((item: any) => item.text || '').join('\n'),
+      subtype: listToken.ordered ? 'ordered' : 'unordered',
+      items: this.parseListItems(items, `${id}-item`),
+      isComplete: true,
+      position
+    } satisfies ListBlock;
   }
 
   private tryExtensionHandlers(

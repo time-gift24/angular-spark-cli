@@ -2,6 +2,10 @@
   border-left: 3px solid var(--primary);
   padding-left: var(--spacing-md);
   margin-bottom: var(--spacing-sm);
+  color: var(--foreground);
+}
+
+.blockquote-text {
   color: var(--muted-foreground);
   font-style: italic;
 }

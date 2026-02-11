@@ -124,7 +124,7 @@ export class StreamingPipelineService implements OnDestroy {
 
     this.subscription = stream$.pipe(
       // Buffer chunks for ~2 frames at 60fps to reduce parse frequency
-      bufferTime(32),
+      bufferTime(this.pipelineConfig.debounceTime ?? 32),
       // Skip empty buffers
       filter((chunks: string[]) => chunks.length > 0),
       // Merge buffered chunks into a single string
@@ -268,9 +268,7 @@ export class StreamingPipelineService implements OnDestroy {
     const currentState = this.internalState();
     const updatedRawContent = currentState.rawContent + chunk;
 
-    // During streaming, parse raw content without preprocessor repairs
-    // This prevents "jumpy" rendering from auto-closed syntax
-    const parserResult: ParserResult = this.parser.parse(updatedRawContent);
+    const parserResult: ParserResult = this.parser.parseIncremental(currentState.rawContent, updatedRawContent);
 
     this.internalState.set(this.buildStreamingState(updatedRawContent, parserResult));
   }

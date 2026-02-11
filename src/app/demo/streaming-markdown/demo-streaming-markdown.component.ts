@@ -7,12 +7,13 @@ import { StaticMarkdownComponent } from '@app/shared/ui/ai-chat/static-markdown/
 const DEMO_MARKDOWN = `# Streaming Markdown 对照演示
 
 同一份 Markdown 同时用于：
-- 左侧：静态渲染（一次性）
-- 右侧：流式渲染（分块输入）
+
+- 左侧: 静态渲染一次性
+- 右侧: 流式渲染分块输入
 
 ## Blockquote 内代码块
 
-> 下面是 blockquote 内的 fenced code block：
+> 下面是 blockquote 内的 fenced code block:
 >
 > \`\`\`typescript
 > const inQuote = true;
@@ -41,6 +42,15 @@ console.log(users.map((u) => u.name).join(', '));
 
 - 列表项 A
 - 列表项 B
+
+## 嵌套列表示例
+
+- 父项 1
+    - 子项 1.1
+    - 子项 1.2
+- 父项 2
+    1. 子项 2.1
+    2. 子项 2.2
 
 | Key | Value |
 |---|---|

@@ -16,9 +16,7 @@ import {
   Output,
   EventEmitter,
   OnInit,
-  OnChanges,
   OnDestroy,
-  SimpleChanges,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Injector,
@@ -26,15 +24,14 @@ import {
   computed,
   effect,
   signal,
-  Signal,
   WritableSignal,
   ViewChild,
   ElementRef,
   AfterViewChecked
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, Subject, Subscription } from 'rxjs';
-import { takeUntil, bufferTime, filter, map } from 'rxjs/operators';
+import { Observable, Subject, EMPTY, ReplaySubject } from 'rxjs';
+import { takeUntil, bufferTime, filter, map, switchMap, tap, catchError, finalize } from 'rxjs/operators';
 import {
   MarkdownBlock,
   StreamingState,
@@ -47,9 +44,11 @@ import {
   HighlightResult,
   CodeLine,
   isCodeBlock,
-  CodeBlock
+  CodeBlock,
+  BlockType
 } from './core/models';
 import { MarkdownBlockRouterComponent } from './blocks/block-router/block-router.component';
+import { BlockHeightTrackerDirective, type HeightMeasurement } from './blocks/block-height-tracker.directive';
 import { ScrollEvent, VirtualScrollViewportComponent } from './blocks/virtual-scroll-viewport.component';
 import { VirtualScrollService } from './core/virtual-scroll.service';
 import {
@@ -60,7 +59,6 @@ import {
 } from './core/block-parser';
 import { ShiniHighlighter } from './core/shini-highlighter';
 import { HighlightSchedulerService } from './core/highlight-scheduler.service';
-import { BlockType } from './core/models';
 
 /**
  * Configuration for the RxJS streaming pipeline.
@@ -76,7 +74,7 @@ interface PipelineConfig {
 @Component({
   selector: 'app-streaming-markdown',
   standalone: true,
-  imports: [MarkdownBlockRouterComponent, VirtualScrollViewportComponent, CommonModule],
+  imports: [MarkdownBlockRouterComponent, BlockHeightTrackerDirective, VirtualScrollViewportComponent, CommonModule],
   providers: [
     MarkdownPreprocessor,
     BlockParser,
@@ -122,12 +120,18 @@ interface PipelineConfig {
           [style.max-height]="maxHeight">
           <!-- Render visible blocks only -->
           @for (block of visibleBlocks(); track trackById(block)) {
-            <app-markdown-block-router
-              [block]="block"
-              [isComplete]="true"
-              [blockIndex]="block.position"
-              [enableLazyHighlight]="enableLazyHighlight"
-              [allowHighlight]="true" />
+            <div
+              [appBlockHeightTracker]="block"
+              [appBlockHeightTrackerIndex]="block.position"
+              [appBlockHeightTrackerId]="block.id"
+              (heightMeasured)="onBlockHeightMeasured($event)">
+              <app-markdown-block-router
+                [block]="block"
+                [isComplete]="true"
+                [blockIndex]="block.position"
+                [enableLazyHighlight]="enableLazyHighlight"
+                [allowHighlight]="true" />
+            </div>
           }
         </app-virtual-scroll-viewport>
       } @else {
@@ -160,8 +164,19 @@ interface PipelineConfig {
     </div>
   `
 })
-export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy, AfterViewChecked {
-  @Input() stream$!: Observable<string>;
+export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewChecked {
+  private currentStream$: Observable<string> = EMPTY;
+
+  @Input()
+  set stream$(value: Observable<string> | null | undefined) {
+    this.currentStream$ = value ?? EMPTY;
+    this.streamInput$.next(this.currentStream$);
+  }
+
+  get stream$(): Observable<string> {
+    return this.currentStream$;
+  }
+
   @Input() maxHeight: string | undefined;
   @Input() set virtualScroll(value: VirtualScrollConfig | boolean) {
     this.virtualScrollInput.set(value);
@@ -238,8 +253,10 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
 
   private state = signal<StreamingState>(createEmptyState());
   private destroy$ = new Subject<void>();
-  private streamSubscription: Subscription | null = null;
+  private streamInput$ = new ReplaySubject<Observable<string>>(1);
+  private streamVersion = 0;
   private copyResetTimeout: ReturnType<typeof setTimeout> | null = null;
+  private lastQueuedVisibleRange: { start: number; end: number } | null = null;
 
   private pipelineConfig: PipelineConfig = {
     debounceTime: 50,
@@ -254,9 +271,18 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     private virtualScrollService: VirtualScrollService,
     private highlightScheduler: HighlightSchedulerService
   ) {
+    this.streamInput$.next(this.currentStream$);
+
     effect(() => {
       this.virtualScrollService.setConfig(this.virtualScrollConfig());
-      this.virtualScrollService.setTotalBlocks(this.blocks().length);
+    }, { injector: this.injector });
+
+    effect(() => {
+      const allBlocks = this.blocks();
+      this.virtualScrollService.setTotalBlocks(allBlocks.length);
+      if (this.shouldUseVirtualScroll()) {
+        this.virtualScrollService.preWarmHeightCache(allBlocks);
+      }
     }, { injector: this.injector });
   }
 
@@ -266,26 +292,10 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
       console.error('[StreamingMarkdownComponent] Shini initialization failed:', error);
     });
 
-    // Set up the streaming pipeline immediately
-    this.subscribeToStream();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['stream$'] && !changes['stream$'].isFirstChange()) {
-      // Clean up previous subscription and reset full component state
-      this.unsubscribeFromStream();
-      this.resetStreamingState();
-
-      // Subscribe to new stream
-      this.subscribeToStream();
-    }
-  }
-
-  private unsubscribeFromStream(): void {
-    if (this.streamSubscription) {
-      this.streamSubscription.unsubscribe();
-      this.streamSubscription = null;
-    }
+    this.streamInput$.pipe(
+      takeUntil(this.destroy$),
+      switchMap((source$) => this.bindStream(source$))
+    ).subscribe();
   }
 
   /**
@@ -293,55 +303,68 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
    * Uses bufferTime(32) to merge high-frequency chunk emissions (~2 frames at 60fps),
    * reducing parse + change detection frequency.
    */
-  private subscribeToStream(): void {
-    // Guard against null/undefined stream$
-    if (!this.stream$) {
-      return;
-    }
+  private bindStream(source$: Observable<string>): Observable<string> {
+    const version = ++this.streamVersion;
+    let hasData = false;
+    let completed = false;
 
-    // Reset parser cache for new stream
-    this.parser.reset();
+    this.resetStreamingState();
     this.emitStatus('streaming');
 
-    this.streamSubscription = this.stream$.pipe(
-      // Buffer chunks for ~2 frames at 60fps to reduce parse frequency
-      bufferTime(32),
-      // Skip empty buffers
+    return source$.pipe(
+      bufferTime(this.pipelineConfig.debounceTime ?? 32),
       filter((chunks: string[]) => chunks.length > 0),
-      // Merge buffered chunks into a single string
       map((chunks: string[]) => chunks.join('')),
-      // Complete when component is destroyed
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (mergedChunk: string) => {
-        if (!mergedChunk) return;
+      tap((mergedChunk: string) => {
+        if (!mergedChunk) {
+          return;
+        }
 
+        hasData = true;
         const updatedState = this.processChunk(mergedChunk);
-        // Update the state signal with new blocks and currentBlock
         this.state.set(updatedState);
-        // Emit raw content change event for parent component
         this.rawContentChange.emit(updatedState.rawContent);
-        // Mark that scrolling is needed after view update
         this.needsScroll = true;
-        // Trigger change detection manually for OnPush strategy
+
         if (this.pipelineConfig.enableChangeDetectionOptimization) {
           this.cdr.markForCheck();
         }
+      }),
+      tap({ complete: () => { completed = true; } }),
+      catchError((error: unknown) => {
+        if (this.streamVersion === version) {
+          this.handleStreamError(this.normalizeStreamError(error));
+        }
+        return EMPTY;
+      }),
+      finalize(() => {
+        if (this.streamVersion !== version || !completed) {
+          return;
+        }
 
-      },
-      error: (error: Error) => {
-        this.handleStreamError(error);
-      },
-      complete: () => {
+        if (!hasData) {
+          this.emitStatus('completed');
+          this.completed.emit('');
+          return;
+        }
+
         this.finalizeCompletedState();
         this.emitStatus('completed');
         this.completed.emit(this.rawContent());
 
         if (this.enableLazyHighlight) {
-          setTimeout(() => this.initializeLazyHighlighting(), 0);
+          queueMicrotask(() => this.initializeLazyHighlighting());
         }
-      }
-    });
+      })
+    );
+  }
+
+  private normalizeStreamError(error: unknown): Error {
+    if (error instanceof Error) {
+      return error;
+    }
+
+    return new Error(typeof error === 'string' ? error : 'Unknown stream error');
   }
 
   /**
@@ -352,7 +375,7 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     const currentState = this.state();
     const updatedRawContent = currentState.rawContent + chunk;
 
-    const parserResult: ParserResult = this.parser.parse(updatedRawContent);
+    const parserResult: ParserResult = this.parser.parseIncremental(currentState.rawContent, updatedRawContent);
 
     return this.buildStreamingState(updatedRawContent, parserResult);
   }
@@ -385,11 +408,11 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     }
 
     const completedBlocks = [...renderedBlocks];
-    const currentBlock = completedBlocks.pop() || null;
+    const currentBlock = completedBlocks.pop();
 
     return {
       blocks: completedBlocks,
-      currentBlock: currentBlock ? this.decorateBlock(currentBlock) : null,
+      currentBlock: currentBlock ? { ...currentBlock, isComplete: false } : null,
       rawContent
     };
   }
@@ -421,6 +444,10 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     this.virtualScrollService.setViewportHeight(event.clientHeight);
   }
 
+  onBlockHeightMeasured(measurement: HeightMeasurement): void {
+    this.virtualScrollService.updateBlockHeight(measurement.index, measurement.height);
+  }
+
   /**
    * Queue code blocks in the visible window for highlighting
    */
@@ -429,11 +456,21 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     const start = Math.max(0, window.start - 5); // Include some overscan
     const end = Math.min(allBlocks.length, window.end + 6);
 
+    if (this.lastQueuedVisibleRange && this.lastQueuedVisibleRange.start === start && this.lastQueuedVisibleRange.end === end) {
+      return;
+    }
+    this.lastQueuedVisibleRange = { start, end };
+
+    const pending: Array<{ block: MarkdownBlock; index: number }> = [];
     for (let i = start; i < end; i++) {
       const block = allBlocks[i];
       if (block.type === BlockType.CODE_BLOCK && !this.hasHighlightResult(block.id) && !block.isHighlighted) {
-        this.highlightScheduler.queueBlock(block, i);
+        pending.push({ block, index: i });
       }
+    }
+
+    if (pending.length > 0) {
+      this.highlightScheduler.queueIndexedBlocks(pending);
     }
   }
 
@@ -447,11 +484,16 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
 
     // Queue all code blocks for progressive highlighting
     const allBlocks = this.blocks();
+    const pending: Array<{ block: MarkdownBlock; index: number }> = [];
     for (let i = 0; i < allBlocks.length; i++) {
       const block = allBlocks[i];
       if (block.type === BlockType.CODE_BLOCK && !this.hasHighlightResult(block.id) && !block.isHighlighted) {
-        this.highlightScheduler.queueBlock(block, i);
+        pending.push({ block, index: i });
       }
+    }
+
+    if (pending.length > 0) {
+      this.highlightScheduler.queueIndexedBlocks(pending);
     }
   }
 
@@ -596,6 +638,7 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
     this.virtualScrollService.setTotalBlocks(0);
     this.streamStatus.set('idle');
     this.needsScroll = false;
+    this.lastQueuedVisibleRange = null;
 
     this.state.set(createEmptyState());
     this.rawContentChange.emit('');
@@ -688,11 +731,6 @@ export class StreamingMarkdownComponent implements OnInit, OnChanges, OnDestroy,
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-
-    if (this.streamSubscription) {
-      this.streamSubscription.unsubscribe();
-      this.streamSubscription = null;
-    }
 
     if (this.copyResetTimeout) {
       clearTimeout(this.copyResetTimeout);

@@ -151,3 +151,9 @@ export {
   type RecoveryResult,
   type IErrorFactory
 } from './error-handling';
+
+// Depth guard
+export { DepthGuard, MAX_NEST_DEPTH } from './depth-guard';
+
+// Block Router Registry
+export { BlockRouterRegistry } from './block-router-registry';
