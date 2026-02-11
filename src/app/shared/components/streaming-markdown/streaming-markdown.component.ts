@@ -431,10 +431,11 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
       const previousBlock = previousBlocks && i < previousBlocks.length ? previousBlocks[i] : null;
       completedBlocks[i] = this.reuseBlockIfEquivalent(nextBlock, previousBlock);
     }
+    const finalBlocks = this.reuseBlocksArrayIfSame(completedBlocks, previousBlocks);
 
     if (!hasStreamingTail) {
       return {
-        blocks: completedBlocks,
+        blocks: finalBlocks,
         currentBlock: null,
         rawContent
       };
@@ -445,7 +446,7 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
     const currentBlock = this.reuseBlockIfEquivalent(streamingTail, previousState?.currentBlock ?? null);
 
     return {
-      blocks: completedBlocks,
+      blocks: finalBlocks,
       currentBlock,
       rawContent
     };
@@ -584,6 +585,23 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
       default:
         return nextBlock;
     }
+  }
+
+  private reuseBlocksArrayIfSame(
+    nextBlocks: MarkdownBlock[],
+    previousBlocks?: MarkdownBlock[]
+  ): MarkdownBlock[] {
+    if (!previousBlocks || previousBlocks.length !== nextBlocks.length) {
+      return nextBlocks;
+    }
+
+    for (let i = 0; i < nextBlocks.length; i++) {
+      if (nextBlocks[i] !== previousBlocks[i]) {
+        return nextBlocks;
+      }
+    }
+
+    return previousBlocks;
   }
 
   /**
