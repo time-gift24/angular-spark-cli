@@ -53,6 +53,21 @@ export {
 export {
   type BlockRenderer,
   type BlockMatcher,
+  type BlockResolver,
+  type RenderHookContext,
+  type BeforeRenderHook,
+  type AfterRenderHook,
+  type InlineParserContext,
+  type InlineTokenHandlerInput,
+  type InlineTokenHandler,
+  type InlineParserExtension,
+  type StreamdownPluginRuntime,
+  type StreamdownPluginInput,
+  type StreamdownPluginObservability,
+  type PluginObservabilitySnapshot,
+  type PluginConflictRecord,
+  type StreamdownSecurityPolicy,
+  type PluginOverrideStrategy,
   type BlockParserContext,
   type BlockParseBase,
   type TokenHandlerInput,
@@ -62,9 +77,15 @@ export {
   type BlockComponentRegistry,
   createStreamdownPlugin,
   createParserExtensionPlugin,
+  createInlineParserExtensionPlugin,
   defineBlockParserExtension,
+  defineInlineParserExtension,
+  DEFAULT_STREAMDOWN_SECURITY_POLICY,
+  LEGACY_STREAMDOWN_SECURITY_POLICY,
   STREAMDOWN_PLUGINS,
-  BLOCK_COMPONENT_REGISTRY
+  BLOCK_COMPONENT_REGISTRY,
+  STREAMDOWN_PLUGIN_RUNTIME,
+  STREAMDOWN_SECURITY_POLICY
 } from './plugin';
 
 export { provideStreamingMarkdown } from './provide-streaming-markdown';
@@ -80,6 +101,7 @@ export {
   type ParagraphBlock,
   type HeadingBlock,
   type CodeBlock,
+  type MarkdownListItem,
   type ListBlock,
   type BlockquoteBlock,
   type TableBlock,
@@ -88,6 +110,7 @@ export {
   type FootnoteDefBlock,
   type UnknownBlock,
   type RawBlock,
+  type CustomBlock,
   type MarkdownInline,
   type StreamingState,
   type ParserResult,
@@ -105,6 +128,7 @@ export {
   isFootnoteDefBlock,
   isUnknownBlock,
   isRawBlock,
+  isCustomBlock,
   type VirtualScrollConfig,
   type VirtualWindow,
   DEFAULT_VIRTUAL_SCROLL_CONFIG

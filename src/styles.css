@@ -3,6 +3,7 @@
 @import '@fontsource/figtree/400.css';
 @import '@fontsource/figtree/500.css';
 @import '@fontsource/figtree/600.css';
+@import 'katex/dist/katex.min.css';
 
 @theme inline {
   /* Color mapping - maps to CSS variables below */

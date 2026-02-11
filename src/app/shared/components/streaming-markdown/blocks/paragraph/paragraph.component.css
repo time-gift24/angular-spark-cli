@@ -29,6 +29,18 @@
   vertical-align: baseline;
 }
 
+.inline-math {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.inline-math.block-math {
+  display: block;
+  margin: var(--spacing-sm) 0;
+  overflow-x: auto;
+}
+
 /* Force line-height with ::ng-deep for nested elements */
 .markdown-paragraph ::ng-deep .inline-code {
   line-height: 1 !important;
@@ -36,6 +48,10 @@
 
 .markdown-paragraph ::ng-deep .inline-code * {
   line-height: 1 !important;
+}
+
+.markdown-paragraph ::ng-deep .inline-math .katex-display {
+  margin: 0;
 }
 
 .inline-strikethrough {

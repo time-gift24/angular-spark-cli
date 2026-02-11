@@ -7,7 +7,7 @@ describe('BlockRouter Nested Rendering Logic', () => {
       id: 'list-1',
       type: BlockType.LIST,
       content: 'item',
-      items: ['item'],
+      items: [{ id: 'list-1-item-0', content: 'item' }],
       subtype: 'unordered',
       isComplete: true,
       position: 0
@@ -46,7 +46,7 @@ describe('BlockRouter Nested Rendering Logic', () => {
       id: 'nested-list',
       type: BlockType.LIST,
       content: 'child',
-      items: ['child'],
+      items: [{ id: 'nested-list-item-0', content: 'child' }],
       subtype: 'unordered',
       isComplete: true,
       position: 0

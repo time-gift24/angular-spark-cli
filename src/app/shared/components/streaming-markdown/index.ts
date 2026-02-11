@@ -23,6 +23,7 @@ export {
   type ParagraphBlock,
   type HeadingBlock,
   type CodeBlock,
+  type MarkdownListItem,
   type ListBlock,
   type BlockquoteBlock,
   type TableBlock,
@@ -31,6 +32,7 @@ export {
   type FootnoteDefBlock,
   type UnknownBlock,
   type RawBlock,
+  type CustomBlock,
   type MarkdownInline,
   type StreamingState,
   type ParserResult,
@@ -53,7 +55,8 @@ export {
   isHtmlBlock,
   isFootnoteDefBlock,
   isUnknownBlock,
-  isRawBlock
+  isRawBlock,
+  isCustomBlock
 } from './core/models';
 
 // Virtual scroll types
@@ -98,6 +101,21 @@ export type { PipelineConfig } from './core/streaming-pipeline.service';
 export {
   type BlockRenderer,
   type BlockMatcher,
+  type BlockResolver,
+  type RenderHookContext,
+  type BeforeRenderHook,
+  type AfterRenderHook,
+  type InlineParserContext,
+  type InlineTokenHandlerInput,
+  type InlineTokenHandler,
+  type InlineParserExtension,
+  type StreamdownPluginRuntime,
+  type StreamdownPluginInput,
+  type StreamdownPluginObservability,
+  type PluginObservabilitySnapshot,
+  type PluginConflictRecord,
+  type StreamdownSecurityPolicy,
+  type PluginOverrideStrategy,
   type BlockParserContext,
   type BlockParseBase,
   type TokenHandlerInput,
@@ -107,7 +125,13 @@ export {
   type BlockComponentRegistry,
   createStreamdownPlugin,
   createParserExtensionPlugin,
-  defineBlockParserExtension
+  createInlineParserExtensionPlugin,
+  defineBlockParserExtension,
+  defineInlineParserExtension,
+  DEFAULT_STREAMDOWN_SECURITY_POLICY,
+  LEGACY_STREAMDOWN_SECURITY_POLICY,
+  STREAMDOWN_PLUGIN_RUNTIME,
+  STREAMDOWN_SECURITY_POLICY
 } from './core/plugin';
 
 // Provider function

@@ -7,7 +7,10 @@ describe('DepthGuard', () => {
     type: BlockType.LIST,
     content: 'test content',
     subtype: 'unordered',
-    items: ['item1', 'item2'],
+    items: [
+      { id: 'test-list-1-item-0', content: 'item1' },
+      { id: 'test-list-1-item-1', content: 'item2' }
+    ],
     isComplete: true,
     position: 0
   };

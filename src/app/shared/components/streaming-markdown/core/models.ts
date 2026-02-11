@@ -23,8 +23,11 @@ export interface MarkdownBlockBase {
   /** Unique identifier (UUID) for this block */
   id: string;
 
-  /** Block type from the BlockType enumeration */
-  type: BlockType;
+  /**
+   * Block type.
+   * Built-in blocks use BlockType enum values; plugins may use custom strings.
+   */
+  type: BlockType | string;
 
   /** Raw markdown content of this block */
   content: string;
@@ -82,12 +85,31 @@ export interface CodeBlock extends MarkdownBlockBase {
  * List block type.
  * Has a required subtype and nested items.
  */
+export interface MarkdownListItem {
+  /** Stable item identifier (used by Angular track expressions) */
+  id: string;
+  /** Plain-text fallback content for this list item */
+  content: string;
+  /** Structured inline content for rich list item rendering */
+  children?: MarkdownInline[];
+  /** Nested block content inside this list item (e.g. child lists, blockquotes, code) */
+  blocks?: MarkdownBlock[];
+  /** Whether this is a task-list item (`- [ ]` / `- [x]`) */
+  task?: boolean;
+  /** Checked state for task-list items */
+  checked?: boolean;
+}
+
+/**
+ * List block type.
+ * Has a required subtype and structured list items.
+ */
 export interface ListBlock extends MarkdownBlockBase {
   type: BlockType.LIST;
   /** List subtype distinction */
   subtype: 'ordered' | 'unordered';
-  /** Nested list items (contains markdown content or nested MarkdownBlock objects) */
-  items: (string | MarkdownBlock)[];
+  /** Structured list items with inline + nested block support */
+  items: MarkdownListItem[];
 }
 
 /**
@@ -162,6 +184,15 @@ export interface RawBlock extends MarkdownBlockBase {
 }
 
 /**
+ * Custom block type for plugin-defined blocks.
+ * Enables extensions to introduce new block discriminators without changing core union.
+ */
+export interface CustomBlock extends MarkdownBlockBase {
+  type: string;
+  [key: string]: unknown;
+}
+
+/**
  * Discriminated union type for all markdown blocks.
  *
  * This union provides type-safe access to block-specific fields.
@@ -179,7 +210,8 @@ export type MarkdownBlock =
   | HtmlBlock
   | FootnoteDefBlock
   | UnknownBlock
-  | RawBlock;
+  | RawBlock
+  | CustomBlock;
 
 // ============================================================================
 // TYPE GUARD FUNCTIONS
@@ -270,6 +302,13 @@ export function isRawBlock(block: MarkdownBlock): block is RawBlock {
   return block.type === BlockType.RAW;
 }
 
+/**
+ * Type guard for plugin-defined custom block types.
+ */
+export function isCustomBlock(block: MarkdownBlock): block is CustomBlock {
+  return !Object.values(BlockType).includes(block.type as BlockType);
+}
+
 // ============================================================================
 
 /**
@@ -303,11 +342,12 @@ export type StreamingStatus = 'idle' | 'streaming' | 'completed' | 'error';
  * Supports nesting via optional `children` array (e.g. bold+italic).
  */
 export interface MarkdownInline {
-  type: 'text' | 'bold' | 'italic' | 'strikethrough' | 'code' | 'link' | 'image' | 'hard-break' | 'sup' | 'sub' | 'footnote-ref';
+  type: 'text' | 'bold' | 'italic' | 'strikethrough' | 'code' | 'link' | 'image' | 'hard-break' | 'sup' | 'sub' | 'footnote-ref' | 'math';
   content: string;
   href?: string;
   src?: string;
   alt?: string;
+  displayMode?: boolean;
   children?: MarkdownInline[];
 }
 

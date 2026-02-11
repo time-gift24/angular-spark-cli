@@ -11,11 +11,12 @@
 import { Component, Input, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MarkdownBlock, ParagraphBlock, MarkdownInline } from '../../core/models';
+import { RenderMathPipe } from '../../core/math-render.pipe';
 
 @Component({
   selector: 'app-markdown-paragraph',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RenderMathPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <p [class]="paragraphClasses()">
@@ -34,6 +35,9 @@ import { MarkdownBlock, ParagraphBlock, MarkdownInline } from '../../core/models
             <a [href]="inline.href" class="inline-link" target="_blank" rel="noopener">@if (inline.children?.length) {<ng-container *ngTemplateOutlet="inlineRef; context: { $implicit: inline.children }" />} @else {{{ inline.content }}}</a>
           }
           @case ('code') { <code class="inline-code">{{ inline.content }}</code> }
+          @case ('math') {
+            <span class="inline-math" [class.block-math]="inline.displayMode" [innerHTML]="inline.content | renderMath : inline.displayMode"></span>
+          }
           @case ('hard-break') { <br /> }
           @case ('image') { <img [src]="inline.src" [alt]="inline.alt || inline.content" class="inline-image" /> }
           @case ('bold') {

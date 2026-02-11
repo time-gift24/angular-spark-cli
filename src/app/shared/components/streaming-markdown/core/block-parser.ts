@@ -17,15 +17,22 @@ import { Token } from 'marked';
 import {
   MarkdownBlock,
   MarkdownInline,
+  MarkdownListItem,
   ParserResult,
   BlockType,
-  ListBlock
+  ListBlock,
+  isFootnoteDefBlock
 } from './models';
 import {
   BLOCK_COMPONENT_REGISTRY,
   BlockComponentRegistry,
   BlockParseBase,
   BlockParserContext,
+  DEFAULT_STREAMDOWN_SECURITY_POLICY,
+  InlineParserContext,
+  InlineTokenHandlerInput,
+  StreamdownPluginObservability,
+  StreamdownSecurityPolicy,
   TokenHandlerInput
 } from './plugin';
 
@@ -66,18 +73,34 @@ export interface IBlockParser {
 export class BlockParser implements IBlockParser {
   private cache: IncrementalCache = { parsedText: '', stableBlocks: [], stableTextEnd: 0 };
   private extractTextCache: WeakMap<object, string> | null = null;
+  private readonly securityPolicy: StreamdownSecurityPolicy;
+  private readonly observability: StreamdownPluginObservability | null;
+  private readonly hasBlockExtensions: boolean;
+  private readonly hasInlineExtensions: boolean;
 
   private readonly parserContext: BlockParserContext = {
     parseInlineTokens: (tokens) => this.parseInlineTokens(tokens),
     extractText: (token) => this.extractText(token),
     tokenToBlock: (token, position) => this.tokenToBlock(token, position),
-    generateStableId: (type, position) => this.generateStableId(type, position)
+    generateStableId: (type, position) => this.generateStableId(type, position),
+    sanitizeInline: (inline) => this.sanitizeInline(inline)
+  };
+
+  private readonly inlineParserContext: InlineParserContext = {
+    parseInlineTokens: (tokens) => this.parseInlineTokens(tokens),
+    extractText: (token) => this.extractText(token),
+    sanitizeInline: (inline) => this.sanitizeInline(inline)
   };
 
   constructor(
     @Optional() @Inject(BLOCK_COMPONENT_REGISTRY)
     private readonly registry?: BlockComponentRegistry
-  ) {}
+  ) {
+    this.securityPolicy = this.registry?.securityPolicy ?? DEFAULT_STREAMDOWN_SECURITY_POLICY;
+    this.observability = this.registry?.observability ?? null;
+    this.hasBlockExtensions = !!this.registry?.parserExtensions && this.registry.parserExtensions.length > 0;
+    this.hasInlineExtensions = !!this.registry?.inlineParserExtensions && this.registry.inlineParserExtensions.length > 0;
+  }
 
   /**
    * Generate deterministic ID from block type + position.
@@ -204,7 +227,7 @@ export class BlockParser implements IBlockParser {
 
     for (let i = 0; i < stableBlocks.length; i++) {
       const block = stableBlocks[i];
-      if (block.type !== BlockType.FOOTNOTE_DEF || !block.footnoteDefs) {
+      if (!isFootnoteDefBlock(block) || !block.footnoteDefs) {
         if (stableBlocksTrimmed) {
           stableBlocksWithoutFootnotes.push(block);
         }
@@ -738,49 +761,92 @@ export class BlockParser implements IBlockParser {
   }
 
 
-  private parseListItems(items: any[], idPrefix: string): (string | MarkdownBlock)[] {
-    const parsedItems: (string | MarkdownBlock)[] = [];
+  private parseListItems(items: any[], idPrefix: string): MarkdownListItem[] {
+    const parsedItems: MarkdownListItem[] = [];
 
     items.forEach((item: any, itemIndex: number) => {
+      const itemId = `${idPrefix}-${itemIndex}`;
       const tokens = Array.isArray(item?.tokens) ? item.tokens : [];
-      const nestedListTokens: any[] = [];
-      const inlineTextParts: string[] = [];
+      const inlineTokens: any[] = [];
+      const textParts: string[] = [];
+      const nestedBlocks: MarkdownBlock[] = [];
 
       for (const token of tokens) {
-        if (token?.type === 'list') {
-          nestedListTokens.push(token);
+        if (!token || token.type === 'space') {
           continue;
         }
 
-        const text = this.extractText(token);
+        if (token.type === 'list') {
+          nestedBlocks.push(
+            this.parseNestedListBlock(
+              token,
+              `${itemId}-list-${nestedBlocks.length}`,
+              nestedBlocks.length
+            )
+          );
+          continue;
+        }
+
+        if (token.type === 'text' || token.type === 'paragraph') {
+          if (Array.isArray(token.tokens) && token.tokens.length > 0) {
+            for (const inlineToken of token.tokens) {
+              inlineTokens.push(inlineToken);
+            }
+          }
+
+          const text = this.extractText(token).trim();
+          if (text) {
+            textParts.push(text);
+          }
+          continue;
+        }
+
+        const nestedBlock = this.tokenToBlock(token, nestedBlocks.length);
+        if (nestedBlock) {
+          nestedBlocks.push({
+            ...nestedBlock,
+            id: `${itemId}-block-${nestedBlocks.length}-${nestedBlock.type}`,
+            position: nestedBlocks.length
+          });
+          continue;
+        }
+
+        const text = this.extractText(token).trim();
         if (text) {
-          inlineTextParts.push(text);
+          textParts.push(text);
         }
       }
 
-      const textFromTokens = inlineTextParts.length > 0 ? inlineTextParts.join('').trim() : '';
-      const itemText = (textFromTokens || item?.text || '').trim();
+      const children = inlineTokens.length > 0 ? this.parseInlineTokens(inlineTokens) : undefined;
+      const parsedItem: MarkdownListItem = {
+        id: itemId,
+        content: this.normalizeListItemContent(textParts, tokens.length === 0 ? item?.text : ''),
+        children: children && children.length > 0 ? children : undefined,
+        blocks: nestedBlocks.length > 0 ? nestedBlocks : undefined
+      };
 
-      if (itemText) {
-        parsedItems.push(itemText);
+      if (item?.task === true) {
+        parsedItem.task = true;
+        parsedItem.checked = item?.checked === true;
       }
 
-      nestedListTokens.forEach((nestedToken: any, nestedIndex: number) => {
-        parsedItems.push(
-          this.parseNestedListBlock(
-            nestedToken,
-            `${idPrefix}-${itemIndex}-${nestedIndex}`,
-            itemIndex + nestedIndex
-          )
-        );
-      });
-
-      if (!itemText && nestedListTokens.length === 0) {
-        parsedItems.push('');
-      }
+      parsedItems.push(parsedItem);
     });
 
     return parsedItems;
+  }
+
+  private normalizeListItemContent(textParts: string[], fallback: unknown): string {
+    const normalizedText = textParts.join(' ').replace(/\s+/g, ' ').trim();
+    if (normalizedText) {
+      return normalizedText;
+    }
+
+    if (typeof fallback === 'string') {
+      return fallback.trim();
+    }
+
+    return '';
   }
 
   private parseNestedListBlock(listToken: any, id: string, position: number): ListBlock {
@@ -817,12 +883,15 @@ export class BlockParser implements IBlockParser {
     position: number,
     baseBlock: BlockParseBase
   ): MarkdownBlock | null | undefined {
-    const extensions = this.registry?.parserExtensions;
-    if (!extensions || extensions.length === 0) {
+    if (!this.hasBlockExtensions || !this.registry?.parserExtensions) {
       return undefined;
     }
 
-    for (const { extension } of extensions) {
+    const extensions = this.registry.parserExtensions;
+    for (let i = 0; i < extensions.length; i++) {
+      const entry = extensions[i];
+      const extension = entry.extension;
+      const pluginName = entry.pluginName;
       if (extension.type && extension.type !== token.type) {
         continue;
       }
@@ -838,10 +907,182 @@ export class BlockParser implements IBlockParser {
         context: this.parserContext
       };
 
-      return extension.handler(input);
+      this.observability?.increment('parserExtensionCalls', pluginName);
+
+      let result: MarkdownBlock | null | undefined;
+      let threw = false;
+      try {
+        result = extension.handler(input);
+      } catch (error) {
+        threw = true;
+        this.observability?.increment('errors', pluginName);
+        console.error('[BlockParser] Block parser extension error:', error);
+      }
+
+      if (!threw && result !== undefined) {
+        if (this.validateBlockExtensionResult(extension.validate, result, input, pluginName)) {
+          return result === null ? null : this.sanitizeBlockExtensionResult(result);
+        }
+
+        const fallback = this.runBlockExtensionFallback(extension, input, pluginName);
+        if (fallback !== undefined) {
+          return fallback;
+        }
+        continue;
+      }
+
+      const fallback = this.runBlockExtensionFallback(extension, input, pluginName);
+      if (fallback !== undefined) {
+        return fallback;
+      }
     }
 
     return undefined;
+  }
+
+  private validateBlockExtensionResult(
+    validate:
+      | ((result: MarkdownBlock | null | undefined, input: TokenHandlerInput) => boolean)
+      | undefined,
+    result: MarkdownBlock | null,
+    input: TokenHandlerInput,
+    pluginName?: string
+  ): boolean {
+    if (validate) {
+      try {
+        if (!validate(result, input)) {
+          return false;
+        }
+      } catch (error) {
+        this.observability?.increment('errors', pluginName);
+        console.error('[BlockParser] Block parser extension validator error:', error);
+        return false;
+      }
+    }
+
+    if (result === null) {
+      return true;
+    }
+
+    if (!result || typeof result !== 'object') {
+      return false;
+    }
+
+    const block = result as Partial<MarkdownBlock>;
+    return (
+      typeof block.id === 'string' &&
+      typeof block.type === 'string' &&
+      typeof block.content === 'string' &&
+      typeof block.position === 'number' &&
+      typeof block.isComplete === 'boolean'
+    );
+  }
+
+  private runBlockExtensionFallback(
+    extension: { fallback?: (input: TokenHandlerInput) => MarkdownBlock | null | undefined },
+    input: TokenHandlerInput,
+    pluginName?: string
+  ): MarkdownBlock | null | undefined {
+    if (!extension.fallback) {
+      return undefined;
+    }
+
+    this.observability?.increment('parserExtensionFallbacks', pluginName);
+
+    try {
+      const fallbackResult = extension.fallback(input);
+      if (fallbackResult === undefined) {
+        return undefined;
+      }
+
+      if (this.validateBlockExtensionResult(undefined, fallbackResult, input, pluginName)) {
+        return fallbackResult === null ? null : this.sanitizeBlockExtensionResult(fallbackResult);
+      }
+    } catch (error) {
+      this.observability?.increment('errors', pluginName);
+      console.error('[BlockParser] Block parser extension fallback error:', error);
+    }
+
+    return undefined;
+  }
+
+  private sanitizeBlockExtensionResult(block: MarkdownBlock): MarkdownBlock {
+    const anyBlock = block as any;
+    let mutated = false;
+    let nextBlock: any = block;
+
+    if (Array.isArray(anyBlock.children)) {
+      const sanitizedChildren = this.sanitizeInlineArray(anyBlock.children);
+      if (sanitizedChildren !== anyBlock.children) {
+        mutated = true;
+        nextBlock = { ...nextBlock, children: sanitizedChildren };
+      }
+    }
+
+    if (Array.isArray(anyBlock.blocks)) {
+      const nestedBlocks = anyBlock.blocks as MarkdownBlock[];
+      const sanitizedBlocks = new Array<MarkdownBlock>(nestedBlocks.length);
+      let nestedMutated = false;
+      for (let i = 0; i < nestedBlocks.length; i++) {
+        const sanitized = this.sanitizeBlockExtensionResult(nestedBlocks[i]);
+        sanitizedBlocks[i] = sanitized;
+        if (sanitized !== nestedBlocks[i]) {
+          nestedMutated = true;
+        }
+      }
+      if (nestedMutated) {
+        mutated = true;
+        nextBlock = { ...nextBlock, blocks: sanitizedBlocks };
+      }
+    }
+
+    if (Array.isArray(anyBlock.items)) {
+      const nestedItems = anyBlock.items as MarkdownListItem[];
+      const sanitizedItems = new Array<MarkdownListItem>(nestedItems.length);
+      let itemsMutated = false;
+      for (let i = 0; i < nestedItems.length; i++) {
+        const item = nestedItems[i];
+        let nextItem = item;
+        let itemMutated = false;
+
+        if (Array.isArray(item.children)) {
+          const sanitizedChildren = this.sanitizeInlineArray(item.children);
+          if (sanitizedChildren !== item.children) {
+            itemMutated = true;
+            nextItem = { ...nextItem, children: sanitizedChildren };
+          }
+        }
+
+        if (Array.isArray(item.blocks)) {
+          const nestedBlocks = item.blocks;
+          const sanitizedBlocks = new Array<MarkdownBlock>(nestedBlocks.length);
+          let nestedMutated = false;
+          for (let j = 0; j < nestedBlocks.length; j++) {
+            const sanitized = this.sanitizeBlockExtensionResult(nestedBlocks[j]);
+            sanitizedBlocks[j] = sanitized;
+            if (sanitized !== nestedBlocks[j]) {
+              nestedMutated = true;
+            }
+          }
+
+          if (nestedMutated) {
+            itemMutated = true;
+            nextItem = { ...nextItem, blocks: sanitizedBlocks };
+          }
+        }
+
+        sanitizedItems[i] = nextItem;
+        if (itemMutated) {
+          itemsMutated = true;
+        }
+      }
+      if (itemsMutated) {
+        mutated = true;
+        nextBlock = { ...nextBlock, items: sanitizedItems };
+      }
+    }
+
+    return mutated ? (nextBlock as MarkdownBlock) : block;
   }
 
   /**
@@ -883,51 +1124,57 @@ export class BlockParser implements IBlockParser {
 
   private appendInlineTokens(tokens: any[], target: MarkdownInline[]): void {
     for (const token of tokens) {
+      const extensionResult = this.tryInlineExtensionHandlers(token);
+      if (extensionResult !== undefined) {
+        this.appendInlineExtensionResult(extensionResult, target);
+        continue;
+      }
+
       switch (token.type) {
         case 'strong': {
           const children = token.tokens ? this.parseInlineTokens(token.tokens) : undefined;
-          target.push({ type: 'bold', content: token.text || '', children });
+          this.pushInline(target, { type: 'bold', content: token.text || '', children });
           break;
         }
         case 'em': {
           const children = token.tokens ? this.parseInlineTokens(token.tokens) : undefined;
-          target.push({ type: 'italic', content: token.text || '', children });
+          this.pushInline(target, { type: 'italic', content: token.text || '', children });
           break;
         }
         case 'del': {
           const children = token.tokens ? this.parseInlineTokens(token.tokens) : undefined;
-          target.push({ type: 'strikethrough', content: token.text || '', children });
+          this.pushInline(target, { type: 'strikethrough', content: token.text || '', children });
           break;
         }
         case 'codespan':
-          target.push({ type: 'code', content: token.text || '' });
+          this.pushInline(target, { type: 'code', content: token.text || '' });
           break;
         case 'link': {
           const children = token.tokens ? this.parseInlineTokens(token.tokens) : undefined;
-          target.push({ type: 'link', content: token.text || '', href: token.href, children });
+          this.pushInline(target, { type: 'link', content: token.text || '', href: token.href, children });
           break;
         }
         case 'image':
-          target.push({ type: 'image', content: token.text || '', src: token.href, alt: token.text || '' });
+          this.pushInline(target, { type: 'image', content: token.text || '', src: token.href, alt: token.text || '' });
           break;
         case 'br':
-          target.push({ type: 'hard-break', content: '' });
+          this.pushInline(target, { type: 'hard-break', content: '' });
           break;
         case 'html': {
           const raw: string = token.raw || token.text || '';
           // Parse <sup>...</sup> and <sub>...</sub>
           const supMatch = raw.match(/^<sup>([\s\S]*?)<\/sup>$/i);
           if (supMatch) {
-            target.push({ type: 'sup', content: supMatch[1] });
+            this.pushInline(target, { type: 'sup', content: supMatch[1] });
             break;
           }
           const subMatch = raw.match(/^<sub>([\s\S]*?)<\/sub>$/i);
           if (subMatch) {
-            target.push({ type: 'sub', content: subMatch[1] });
+            this.pushInline(target, { type: 'sub', content: subMatch[1] });
             break;
           }
           // Fallback: render raw HTML as text
-          target.push({ type: 'text', content: raw });
+          this.pushInline(target, { type: 'text', content: raw });
           break;
         }
         case 'text':
@@ -936,11 +1183,346 @@ export class BlockParser implements IBlockParser {
           if (token.tokens && token.tokens.length > 0) {
             this.appendInlineTokens(token.tokens, target);
           } else {
-            target.push({ type: 'text', content: token.text || token.raw || '' });
+            this.appendTextWithMath(token.text || token.raw || '', target);
           }
           break;
         }
       }
+    }
+  }
+
+  private appendTextWithMath(source: string, target: MarkdownInline[]): void {
+    if (!source) {
+      return;
+    }
+
+    if (!source.includes('$')) {
+      this.pushInline(target, { type: 'text', content: source });
+      return;
+    }
+
+    let cursor = 0;
+    let buffer = '';
+
+    while (cursor < source.length) {
+      const char = source[cursor];
+
+      if (char === '\\' && source[cursor + 1] === '$') {
+        buffer += '$';
+        cursor += 2;
+        continue;
+      }
+
+      if (char !== '$') {
+        buffer += char;
+        cursor++;
+        continue;
+      }
+
+      const delimiterLength: 1 | 2 = source[cursor + 1] === '$' ? 2 : 1;
+      if (delimiterLength === 1 && !this.isLikelyInlineMathStart(source, cursor)) {
+        buffer += '$';
+        cursor++;
+        continue;
+      }
+
+      const closeIndex = this.findClosingMathDelimiter(source, cursor + delimiterLength, delimiterLength);
+
+      if (closeIndex < 0) {
+        buffer += source.slice(cursor, cursor + delimiterLength);
+        cursor += delimiterLength;
+        continue;
+      }
+
+      const rawFormula = source.slice(cursor + delimiterLength, closeIndex);
+      const formula = rawFormula.trim();
+
+      if (!formula) {
+        buffer += source.slice(cursor, closeIndex + delimiterLength);
+        cursor = closeIndex + delimiterLength;
+        continue;
+      }
+
+      if (buffer) {
+        this.pushInline(target, { type: 'text', content: buffer });
+        buffer = '';
+      }
+
+      this.pushInline(target, {
+        type: 'math',
+        content: formula,
+        displayMode: delimiterLength === 2
+      });
+
+      cursor = closeIndex + delimiterLength;
+    }
+
+    if (buffer) {
+      this.pushInline(target, { type: 'text', content: buffer });
+    }
+  }
+
+  private findClosingMathDelimiter(source: string, start: number, delimiterLength: 1 | 2): number {
+    for (let i = start; i <= source.length - delimiterLength; i++) {
+      if (source[i] !== '$') {
+        continue;
+      }
+
+      if (delimiterLength === 2 && source[i + 1] !== '$') {
+        continue;
+      }
+
+      if (source[i - 1] === '\\') {
+        continue;
+      }
+
+      if (delimiterLength === 1 && this.isInlineWhitespace(source[i - 1] || '')) {
+        continue;
+      }
+
+      return i;
+    }
+
+    return -1;
+  }
+
+  private isLikelyInlineMathStart(source: string, index: number): boolean {
+    const next = source[index + 1];
+    if (!next || this.isInlineWhitespace(next)) {
+      return false;
+    }
+
+    if (next >= '0' && next <= '9') {
+      return false;
+    }
+
+    const prev = index > 0 ? source[index - 1] : '';
+    if (prev && /[A-Za-z0-9]/.test(prev)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private tryInlineExtensionHandlers(token: any): MarkdownInline | MarkdownInline[] | null | undefined {
+    if (!this.hasInlineExtensions || !this.registry?.inlineParserExtensions) {
+      return undefined;
+    }
+
+    const extensions = this.registry.inlineParserExtensions;
+    for (let i = 0; i < extensions.length; i++) {
+      const entry = extensions[i];
+      const extension = entry.extension;
+      const pluginName = entry.pluginName;
+      if (extension.type && extension.type !== token.type) {
+        continue;
+      }
+
+      if (extension.match && !extension.match(token)) {
+        continue;
+      }
+
+      const input: InlineTokenHandlerInput = {
+        token,
+        context: this.inlineParserContext
+      };
+
+      this.observability?.increment('inlineExtensionCalls', pluginName);
+
+      let result: MarkdownInline | MarkdownInline[] | null | undefined;
+      let threw = false;
+      try {
+        result = extension.handler(input);
+      } catch (error) {
+        threw = true;
+        this.observability?.increment('errors', pluginName);
+        console.error('[BlockParser] Inline parser extension error:', error);
+      }
+
+      if (!threw && result !== undefined) {
+        if (this.validateInlineExtensionResult(extension.validate, result, input, pluginName)) {
+          return result;
+        }
+
+        const fallback = this.runInlineExtensionFallback(extension, input, pluginName);
+        if (fallback !== undefined) {
+          return fallback;
+        }
+        continue;
+      }
+
+      const fallback = this.runInlineExtensionFallback(extension, input, pluginName);
+      if (fallback !== undefined) {
+        return fallback;
+      }
+    }
+
+    return undefined;
+  }
+
+  private validateInlineExtensionResult(
+    validate:
+      | ((
+        result: MarkdownInline | MarkdownInline[] | null | undefined,
+        input: InlineTokenHandlerInput
+      ) => boolean)
+      | undefined,
+    result: MarkdownInline | MarkdownInline[] | null,
+    input: InlineTokenHandlerInput,
+    pluginName?: string
+  ): boolean {
+    if (validate) {
+      try {
+        if (!validate(result, input)) {
+          return false;
+        }
+      } catch (error) {
+        this.observability?.increment('errors', pluginName);
+        console.error('[BlockParser] Inline parser extension validator error:', error);
+        return false;
+      }
+    }
+
+    if (result === null) {
+      return true;
+    }
+
+    if (Array.isArray(result)) {
+      for (let i = 0; i < result.length; i++) {
+        if (!this.isValidInlineResult(result[i])) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    return this.isValidInlineResult(result);
+  }
+
+  private runInlineExtensionFallback(
+    extension: { fallback?: (input: InlineTokenHandlerInput) => MarkdownInline | MarkdownInline[] | null | undefined },
+    input: InlineTokenHandlerInput,
+    pluginName?: string
+  ): MarkdownInline | MarkdownInline[] | null | undefined {
+    if (!extension.fallback) {
+      return undefined;
+    }
+
+    this.observability?.increment('inlineExtensionFallbacks', pluginName);
+
+    try {
+      const fallbackResult = extension.fallback(input);
+      if (fallbackResult === undefined) {
+        return undefined;
+      }
+      if (this.validateInlineExtensionResult(undefined, fallbackResult, input, pluginName)) {
+        return fallbackResult;
+      }
+    } catch (error) {
+      this.observability?.increment('errors', pluginName);
+      console.error('[BlockParser] Inline parser extension fallback error:', error);
+    }
+
+    return undefined;
+  }
+
+  private appendInlineExtensionResult(
+    result: MarkdownInline | MarkdownInline[] | null,
+    target: MarkdownInline[]
+  ): void {
+    if (result === null) {
+      return;
+    }
+
+    if (Array.isArray(result)) {
+      for (let i = 0; i < result.length; i++) {
+        this.pushInline(target, result[i]);
+      }
+      return;
+    }
+
+    this.pushInline(target, result);
+  }
+
+  private isValidInlineResult(result: MarkdownInline | null | undefined): result is MarkdownInline {
+    if (!result || typeof result !== 'object') {
+      return false;
+    }
+
+    const inline = result as Partial<MarkdownInline>;
+    return typeof inline.type === 'string' && typeof inline.content === 'string';
+  }
+
+  private pushInline(target: MarkdownInline[], inline: MarkdownInline): void {
+    const sanitized = this.sanitizeInline(inline);
+    if (!sanitized) {
+      return;
+    }
+    target.push(sanitized);
+  }
+
+  private sanitizeInlineArray(inlines: MarkdownInline[]): MarkdownInline[] {
+    let sanitized: MarkdownInline[] | null = null;
+    let writeIndex = 0;
+
+    for (let i = 0; i < inlines.length; i++) {
+      const source = inlines[i];
+      const next = this.sanitizeInline(source);
+
+      if (!next) {
+        if (!sanitized) {
+          sanitized = inlines.slice(0, i);
+          writeIndex = i;
+        }
+        continue;
+      }
+
+      if (!sanitized) {
+        if (next === source) {
+          continue;
+        }
+
+        sanitized = inlines.slice(0, i);
+        writeIndex = i;
+      }
+
+      sanitized[writeIndex++] = next;
+    }
+
+    if (!sanitized) {
+      return inlines;
+    }
+
+    sanitized.length = writeIndex;
+    return sanitized;
+  }
+
+  private sanitizeInline(inline: MarkdownInline): MarkdownInline | null {
+    if (!inline) {
+      return null;
+    }
+
+    const children = inline.children;
+    let candidate = inline;
+    if (children && children.length > 0) {
+      const sanitizedChildren = this.sanitizeInlineArray(children);
+      if (sanitizedChildren !== children) {
+        candidate = {
+          ...candidate,
+          children: sanitizedChildren
+        };
+      }
+    }
+
+    try {
+      return this.securityPolicy.sanitizeInline(candidate);
+    } catch (error) {
+      this.observability?.increment('errors');
+      console.error('[BlockParser] Inline sanitizer error:', error);
+      return {
+        type: 'text',
+        content: candidate.content
+      };
     }
   }
 

@@ -35,6 +35,18 @@
   vertical-align: baseline;
 }
 
+.inline-math {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.inline-math.block-math {
+  display: block;
+  margin: var(--spacing-sm) 0;
+  overflow-x: auto;
+}
+
 .inline-strikethrough {
   text-decoration: line-through;
 }
@@ -62,4 +74,8 @@
 
 .footnote-ref a:hover {
   text-decoration: underline;
+}
+
+.markdown-heading ::ng-deep .inline-math .katex-display {
+  margin: 0;
 }
