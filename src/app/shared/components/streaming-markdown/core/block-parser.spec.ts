@@ -2,6 +2,20 @@ import { BlockParser } from './block-parser';
 import { BlockType, MarkdownBlock, CodeBlock, BlockquoteBlock } from './models';
 
 describe('BlockParser incremental fence-aware boundary', () => {
+  it('keeps stable block ids and content unchanged across incremental parses', () => {
+    const parser = new BlockParser();
+    const chunk1 = ['First paragraph.', '', 'Second line in stable block.', ''].join('\n');
+    const chunk2 = `${chunk1}Tail line still streaming`;
+
+    const first = parser.parseIncremental('', chunk1);
+    const second = parser.parseIncremental(chunk1, chunk2);
+
+    expect(first.blocks.length).toBeGreaterThan(0);
+    expect(second.blocks.length).toBeGreaterThan(0);
+    expect(second.blocks[0].id).toBe(first.blocks[0].id);
+    expect(second.blocks[0].content).toBe(first.blocks[0].content);
+  });
+
   it('does not truncate top-level fenced code content with blank lines', () => {
     const parser = new BlockParser();
 

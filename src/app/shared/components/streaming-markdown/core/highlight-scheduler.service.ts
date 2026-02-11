@@ -299,6 +299,10 @@ export class HighlightSchedulerService {
     return this.highlightResults().get(blockId);
   }
 
+  hasHighlightedResult(blockId: string): boolean {
+    return this.highlightResults().has(blockId);
+  }
+
   getHighlightedLinesBySignature(blockId: string, signature: string): CodeLine[] | undefined {
     const cachedSignature = this.highlightSignatures().get(blockId);
     if (cachedSignature !== signature) {

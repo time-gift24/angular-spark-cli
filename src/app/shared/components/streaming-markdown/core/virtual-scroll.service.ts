@@ -250,12 +250,12 @@ export class VirtualScrollService {
     const base = this.heightCache.estimatedHeight;
 
     if (block.type === 'code') {
-      const lineCount = block.content.split('\n').length;
+      const lineCount = this.countLines(block.content);
       return Math.max(base, lineCount * 24 + 40);
     }
 
     if (block.type === 'list') {
-      const lineCount = block.content.split('\n').length;
+      const lineCount = this.countLines(block.content);
       return Math.max(base, lineCount * 22 + 20);
     }
 
@@ -279,12 +279,13 @@ export class VirtualScrollService {
   preWarmHeightCache(blocks: MarkdownBlock[]): void {
     let changed = false;
 
-    blocks.forEach((block, index) => {
+    for (let index = 0; index < blocks.length; index++) {
+      const block = blocks[index];
       if (!this.heightCache.heights.has(index)) {
         this.heightCache.heights.set(index, this.estimateBlockHeight(block));
         changed = true;
       }
-    });
+    }
 
     if (changed) {
       this.bumpHeightCacheVersion();
@@ -344,5 +345,19 @@ export class VirtualScrollService {
     }
 
     return low;
+  }
+
+  private countLines(text: string): number {
+    if (!text) {
+      return 1;
+    }
+
+    let lines = 1;
+    for (let i = 0; i < text.length; i++) {
+      if (text[i] === '\n') {
+        lines++;
+      }
+    }
+    return lines;
   }
 }

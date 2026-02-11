@@ -248,7 +248,23 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
     }
     const window = this.visibleWindow();
     const allBlocks = this.blocks();
-    return allBlocks.slice(Math.max(0, window.start), Math.min(allBlocks.length, window.end + 1));
+    const start = Math.max(0, window.start);
+    const endExclusive = Math.min(allBlocks.length, window.end + 1);
+
+    if (
+      this.lastVisibleSliceSource === allBlocks &&
+      this.lastVisibleSliceRange &&
+      this.lastVisibleSliceRange.start === start &&
+      this.lastVisibleSliceRange.end === endExclusive
+    ) {
+      return this.lastVisibleSliceResult;
+    }
+
+    const next = allBlocks.slice(start, endExclusive);
+    this.lastVisibleSliceSource = allBlocks;
+    this.lastVisibleSliceRange = { start, end: endExclusive };
+    this.lastVisibleSliceResult = next;
+    return next;
   });
 
   private state = signal<StreamingState>(createEmptyState());
@@ -257,6 +273,9 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
   private streamVersion = 0;
   private copyResetTimeout: ReturnType<typeof setTimeout> | null = null;
   private lastQueuedVisibleRange: { start: number; end: number } | null = null;
+  private lastVisibleSliceSource: MarkdownBlock[] | null = null;
+  private lastVisibleSliceRange: { start: number; end: number } | null = null;
+  private lastVisibleSliceResult: MarkdownBlock[] = [];
 
   private pipelineConfig: PipelineConfig = {
     debounceTime: 50,
@@ -314,7 +333,7 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
     return source$.pipe(
       bufferTime(this.pipelineConfig.debounceTime ?? 32),
       filter((chunks: string[]) => chunks.length > 0),
-      map((chunks: string[]) => chunks.join('')),
+      map((chunks: string[]) => chunks.length === 1 ? chunks[0] : chunks.join('')),
       tap((mergedChunk: string) => {
         if (!mergedChunk) {
           return;
@@ -377,7 +396,7 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
 
     const parserResult: ParserResult = this.parser.parseIncremental(currentState.rawContent, updatedRawContent);
 
-    return this.buildStreamingState(updatedRawContent, parserResult);
+    return this.buildStreamingState(updatedRawContent, parserResult, currentState);
   }
 
   /**
@@ -388,7 +407,7 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
     const repairedInput = this.preprocessor.process(raw);
     const parserResult = this.parser.parse(repairedInput);
 
-    this.state.set(this.buildStreamingState(raw, parserResult));
+    this.state.set(this.buildStreamingState(raw, parserResult, this.state()));
     this.needsScroll = true;
 
     if (this.pipelineConfig.enableChangeDetectionOptimization) {
@@ -396,23 +415,38 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
     }
   }
 
-  private buildStreamingState(rawContent: string, parserResult: ParserResult): StreamingState {
-    const renderedBlocks = parserResult.blocks.map((block) => this.decorateBlock(block));
+  private buildStreamingState(
+    rawContent: string,
+    parserResult: ParserResult,
+    previousState?: StreamingState
+  ): StreamingState {
+    const sourceBlocks = parserResult.blocks;
+    const hasStreamingTail = parserResult.hasIncompleteBlock && sourceBlocks.length > 0;
+    const completedCount = hasStreamingTail ? sourceBlocks.length - 1 : sourceBlocks.length;
+    const completedBlocks = new Array<MarkdownBlock>(completedCount);
+    const previousBlocks = previousState?.blocks;
 
-    if (!parserResult.hasIncompleteBlock || renderedBlocks.length === 0) {
+    for (let i = 0; i < completedCount; i++) {
+      const nextBlock = this.decorateBlock(sourceBlocks[i]);
+      const previousBlock = previousBlocks && i < previousBlocks.length ? previousBlocks[i] : null;
+      completedBlocks[i] = this.reuseBlockIfEquivalent(nextBlock, previousBlock);
+    }
+
+    if (!hasStreamingTail) {
       return {
-        blocks: renderedBlocks,
+        blocks: completedBlocks,
         currentBlock: null,
         rawContent
       };
     }
 
-    const completedBlocks = [...renderedBlocks];
-    const currentBlock = completedBlocks.pop();
+    const tailBlock = this.decorateBlock(sourceBlocks[sourceBlocks.length - 1]);
+    const streamingTail = tailBlock.isComplete ? ({ ...tailBlock, isComplete: false } as MarkdownBlock) : tailBlock;
+    const currentBlock = this.reuseBlockIfEquivalent(streamingTail, previousState?.currentBlock ?? null);
 
     return {
       blocks: completedBlocks,
-      currentBlock: currentBlock ? { ...currentBlock, isComplete: false } : null,
+      currentBlock,
       rawContent
     };
   }
@@ -426,12 +460,11 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
    * Queues code blocks for highlighting based on visibility
    */
   onVisibleRangeChange(window: VirtualWindow): void {
-    const effectiveWindow = this.shouldUseVirtualScroll()
-      ? this.visibleWindow()
-      : window;
+    const usingVirtualScroll = this.shouldUseVirtualScroll();
+    const effectiveWindow = usingVirtualScroll ? this.visibleWindow() : window;
 
     // Queue visible code blocks for lazy highlighting
-    if (this.enableLazyHighlight && this.shouldUseVirtualScroll()) {
+    if (this.enableLazyHighlight && usingVirtualScroll) {
       this.queueVisibleCodeBlocks(effectiveWindow);
     }
   }
@@ -464,7 +497,7 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
     const pending: Array<{ block: MarkdownBlock; index: number }> = [];
     for (let i = start; i < end; i++) {
       const block = allBlocks[i];
-      if (block.type === BlockType.CODE_BLOCK && !this.hasHighlightResult(block.id) && !block.isHighlighted) {
+      if (block.type === BlockType.CODE_BLOCK && !block.isHighlighted && !this.hasHighlightResult(block.id)) {
         pending.push({ block, index: i });
       }
     }
@@ -487,7 +520,7 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
     const pending: Array<{ block: MarkdownBlock; index: number }> = [];
     for (let i = 0; i < allBlocks.length; i++) {
       const block = allBlocks[i];
-      if (block.type === BlockType.CODE_BLOCK && !this.hasHighlightResult(block.id) && !block.isHighlighted) {
+      if (block.type === BlockType.CODE_BLOCK && !block.isHighlighted && !this.hasHighlightResult(block.id)) {
         pending.push({ block, index: i });
       }
     }
@@ -505,15 +538,52 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
       return block;
     }
 
+    const codeBlock = block as CodeBlock;
     const highlightSignal = this.ensureHighlightSignal(block.id);
-    const highlighted = !!highlightSignal() || block.isHighlighted === true;
+    const highlighted = !!highlightSignal() || codeBlock.isHighlighted === true;
+    const needsUpdate =
+      codeBlock.canLazyHighlight !== this.enableLazyHighlight ||
+      codeBlock.isHighlighted !== highlighted ||
+      codeBlock.highlightResult !== highlightSignal;
 
-    return {
-      ...block,
-      canLazyHighlight: this.enableLazyHighlight,
-      isHighlighted: highlighted,
-      highlightResult: highlightSignal
-    };
+    if (!needsUpdate) {
+      return codeBlock;
+    }
+
+    codeBlock.canLazyHighlight = this.enableLazyHighlight;
+    codeBlock.isHighlighted = highlighted;
+    codeBlock.highlightResult = highlightSignal;
+    return codeBlock;
+  }
+
+  private reuseBlockIfEquivalent(nextBlock: MarkdownBlock, previousBlock: MarkdownBlock | null): MarkdownBlock {
+    if (!previousBlock || previousBlock.id !== nextBlock.id || previousBlock.type !== nextBlock.type) {
+      return nextBlock;
+    }
+
+    switch (nextBlock.type) {
+      case BlockType.PARAGRAPH:
+      case BlockType.HTML:
+      case BlockType.THEMATIC_BREAK:
+        return previousBlock.content === nextBlock.content ? previousBlock : nextBlock;
+
+      case BlockType.HEADING:
+        return previousBlock.content === nextBlock.content
+          && (previousBlock as any).level === (nextBlock as any).level
+          ? previousBlock
+          : nextBlock;
+
+      case BlockType.CODE_BLOCK:
+        return previousBlock.content === nextBlock.content
+          && (previousBlock as any).rawContent === (nextBlock as any).rawContent
+          && (previousBlock as any).language === (nextBlock as any).language
+          && previousBlock.isComplete === nextBlock.isComplete
+          ? previousBlock
+          : nextBlock;
+
+      default:
+        return nextBlock;
+    }
   }
 
   /**
@@ -534,7 +604,7 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
    * Check if a code block already has highlighted output
    */
   private hasHighlightResult(blockId: string): boolean {
-    if (this.highlightScheduler.getHighlightedLines(blockId)?.length) {
+    if (this.highlightScheduler.hasHighlightedResult(blockId)) {
       return true;
     }
 
@@ -555,26 +625,25 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
     const blockSignal = this.ensureHighlightSignal(blockId);
     blockSignal.set({ lines, fallback: false });
 
+    let changed = false;
     this.state.update((currentState) => {
-      let changed = false;
+      let updatedBlocks = currentState.blocks;
 
-      const updatedBlocks = currentState.blocks.map((block): MarkdownBlock => {
-        if (block.id !== blockId) {
-          return block;
-        }
-
-        changed = true;
-        // Only code blocks should have highlight properties
-        if (isCodeBlock(block)) {
-          return {
-            ...block,
+      const blockIndex = currentState.blocks.findIndex((block) => block.id === blockId);
+      if (blockIndex >= 0) {
+        const existing = currentState.blocks[blockIndex];
+        if (isCodeBlock(existing)) {
+          const nextBlock: CodeBlock = {
+            ...existing,
             isHighlighted: true,
             canLazyHighlight: this.enableLazyHighlight,
             highlightResult: blockSignal
-          } as CodeBlock;
+          };
+          updatedBlocks = [...currentState.blocks];
+          updatedBlocks[blockIndex] = nextBlock;
+          changed = true;
         }
-        return block;
-      });
+      }
 
       let updatedCurrentBlock = currentState.currentBlock;
       if (updatedCurrentBlock?.id === blockId) {
@@ -600,7 +669,9 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
       };
     });
 
-    this.cdr.markForCheck();
+    if (changed) {
+      this.cdr.markForCheck();
+    }
   }
 
   /**
@@ -639,6 +710,9 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
     this.streamStatus.set('idle');
     this.needsScroll = false;
     this.lastQueuedVisibleRange = null;
+    this.lastVisibleSliceSource = null;
+    this.lastVisibleSliceRange = null;
+    this.lastVisibleSliceResult = [];
 
     this.state.set(createEmptyState());
     this.rawContentChange.emit('');

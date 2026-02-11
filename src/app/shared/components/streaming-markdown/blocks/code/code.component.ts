@@ -74,6 +74,7 @@ export class MarkdownCodeComponent implements OnChanges, OnDestroy {
   private unsubscribeHighlightResult: (() => void) | null = null;
   private subscribedBlockId: string | null = null;
   private syncRequestId = 0;
+  private copiedResetTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {}
 
@@ -105,6 +106,11 @@ export class MarkdownCodeComponent implements OnChanges, OnDestroy {
     if (this.unsubscribeHighlightResult) {
       this.unsubscribeHighlightResult();
       this.unsubscribeHighlightResult = null;
+    }
+
+    if (this.copiedResetTimer) {
+      clearTimeout(this.copiedResetTimer);
+      this.copiedResetTimer = null;
     }
   }
 
@@ -192,8 +198,14 @@ export class MarkdownCodeComponent implements OnChanges, OnDestroy {
     try {
       await navigator.clipboard.writeText(this.code);
       this.copied.set(true);
-      setTimeout(() => {
+
+      if (this.copiedResetTimer) {
+        clearTimeout(this.copiedResetTimer);
+      }
+
+      this.copiedResetTimer = setTimeout(() => {
         this.copied.set(false);
+        this.copiedResetTimer = null;
       }, 2000);
     } catch (error) {
       console.error('[MarkdownCodeComponent] Failed to copy:', error);

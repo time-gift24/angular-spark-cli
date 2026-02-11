@@ -42,6 +42,11 @@ interface IncrementalCache {
   stableTextEnd: number;
 }
 
+interface BoundaryScanState {
+  lastStableBoundary: number;
+  inFenceAtEnd: boolean;
+}
+
 /**
  * Main block parser interface.
  * Parses markdown text into structured blocks with support for streaming scenarios.
@@ -60,6 +65,7 @@ export interface IBlockParser {
 @Injectable()
 export class BlockParser implements IBlockParser {
   private cache: IncrementalCache = { parsedText: '', stableBlocks: [], stableTextEnd: 0 };
+  private extractTextCache: WeakMap<object, string> | null = null;
 
   private readonly parserContext: BlockParserContext = {
     parseInlineTokens: (tokens) => this.parseInlineTokens(tokens),
@@ -97,6 +103,7 @@ export class BlockParser implements IBlockParser {
     const { cleanedText, footnoteDefs } = this.extractFootnotes(text);
 
     try {
+      this.extractTextCache = new WeakMap<object, string>();
       const tokens = marked.lexer(cleanedText);
 
       for (const token of tokens) {
@@ -126,6 +133,8 @@ export class BlockParser implements IBlockParser {
     } catch (error) {
       console.error('[BlockParser] Parse error:', error);
       return { blocks, hasIncompleteBlock: false };
+    } finally {
+      this.extractTextCache = null;
     }
   }
 
@@ -159,45 +168,63 @@ export class BlockParser implements IBlockParser {
     }
 
     // Find the last double-newline boundary — everything before it is "stable"
-    const lastBoundary = this.findLastStableBoundary(newText);
+    const boundaryState = this.scanBoundaryState(newText);
+    const lastBoundary = boundaryState.lastStableBoundary;
 
     if (lastBoundary <= 0) {
       // No stable boundary found, full parse
       const result = this.parse(newText);
-      this.updateCache(newText, result.blocks);
+      this.cache = { parsedText: newText, stableBlocks: [], stableTextEnd: 0 };
       return result;
     }
 
     // Check if we can reuse cached stable blocks
-    const stableText = newText.substring(0, lastBoundary);
-
     let stableBlocks: MarkdownBlock[];
-    if (this.cache.parsedText.length > 0 && stableText.startsWith(this.cache.parsedText.substring(0, this.cache.stableTextEnd)) && this.cache.stableTextEnd === lastBoundary) {
+    if (
+      this.cache.parsedText.length > 0 &&
+      this.cache.stableTextEnd === lastBoundary &&
+      this.hasSamePrefix(newText, this.cache.parsedText, lastBoundary)
+    ) {
       // Cache hit: stable portion unchanged
       stableBlocks = this.cache.stableBlocks;
     } else {
       // Cache miss: re-parse stable portion
-      const stableResult = this.parse(stableText);
+      const stableResult = this.parse(newText.substring(0, lastBoundary));
       stableBlocks = stableResult.blocks;
     }
 
     // Parse only the tail
     const tailText = newText.substring(lastBoundary);
-    const hasIncompleteBlock = this.detectIncompleteBlock(newText);
+    const hasIncompleteBlock = this.detectIncompleteBlock(newText, boundaryState.inFenceAtEnd);
 
     // Collect footnote defs from stable blocks (if any FOOTNOTE_DEF block exists)
-    const mergedFootnoteDefs = new Map<string, string>();
-    const stableBlocksWithoutFootnotes = stableBlocks.filter(b => {
-      if (b.type === BlockType.FOOTNOTE_DEF && b.footnoteDefs) {
-        b.footnoteDefs.forEach((v, k) => mergedFootnoteDefs.set(k, v));
-        return false;
-      }
-      return true;
-    });
+    let mergedFootnoteDefs: Map<string, string> | null = null;
+    let stableBlocksWithoutFootnotes: MarkdownBlock[] = stableBlocks;
+    let stableBlocksTrimmed = false;
 
-    if (!tailText.trim()) {
+    for (let i = 0; i < stableBlocks.length; i++) {
+      const block = stableBlocks[i];
+      if (block.type !== BlockType.FOOTNOTE_DEF || !block.footnoteDefs) {
+        if (stableBlocksTrimmed) {
+          stableBlocksWithoutFootnotes.push(block);
+        }
+        continue;
+      }
+
+      if (!mergedFootnoteDefs) {
+        mergedFootnoteDefs = new Map<string, string>();
+      }
+      block.footnoteDefs.forEach((value, key) => mergedFootnoteDefs!.set(key, value));
+
+      if (!stableBlocksTrimmed) {
+        stableBlocksTrimmed = true;
+        stableBlocksWithoutFootnotes = stableBlocks.slice(0, i);
+      }
+    }
+
+    if (!this.hasNonWhitespace(tailText)) {
       const allBlocks = [...stableBlocksWithoutFootnotes];
-      if (mergedFootnoteDefs.size > 0) {
+      if (mergedFootnoteDefs && mergedFootnoteDefs.size > 0) {
         allBlocks.push({
           id: this.generateStableId('footnote_def', allBlocks.length),
           type: BlockType.FOOTNOTE_DEF,
@@ -207,14 +234,19 @@ export class BlockParser implements IBlockParser {
           footnoteDefs: mergedFootnoteDefs
         });
       }
-      this.cache = { parsedText: newText, stableBlocks: [...stableBlocks], stableTextEnd: lastBoundary };
+      this.cache = { parsedText: newText, stableBlocks, stableTextEnd: lastBoundary };
       return { blocks: allBlocks, hasIncompleteBlock };
     }
 
     try {
       // Extract footnotes from tail before tokenizing
       const { cleanedText: cleanedTail, footnoteDefs: tailFootnoteDefs } = this.extractFootnotes(tailText);
-      tailFootnoteDefs.forEach((v, k) => mergedFootnoteDefs.set(k, v));
+      if (tailFootnoteDefs.size > 0) {
+        if (!mergedFootnoteDefs) {
+          mergedFootnoteDefs = new Map<string, string>();
+        }
+        tailFootnoteDefs.forEach((v, k) => mergedFootnoteDefs!.set(k, v));
+      }
 
       const tailTokens = marked.lexer(cleanedTail);
       const positionOffset = stableBlocksWithoutFootnotes.length;
@@ -232,7 +264,7 @@ export class BlockParser implements IBlockParser {
       const allBlocks = [...stableBlocksWithoutFootnotes, ...tailBlocks];
 
       // Append merged footnote defs if any
-      if (mergedFootnoteDefs.size > 0) {
+      if (mergedFootnoteDefs && mergedFootnoteDefs.size > 0) {
         allBlocks.push({
           id: this.generateStableId('footnote_def', allBlocks.length),
           type: BlockType.FOOTNOTE_DEF,
@@ -244,7 +276,7 @@ export class BlockParser implements IBlockParser {
       }
 
       // Update cache
-      this.cache = { parsedText: newText, stableBlocks: [...stableBlocks], stableTextEnd: lastBoundary };
+      this.cache = { parsedText: newText, stableBlocks, stableTextEnd: lastBoundary };
 
       return { blocks: allBlocks, hasIncompleteBlock };
     } catch (error) {
@@ -269,71 +301,94 @@ export class BlockParser implements IBlockParser {
    * - fences inside blockquotes are also respected
    */
   private findLastStableBoundary(text: string): number {
+    return this.scanBoundaryState(text).lastStableBoundary;
+  }
+
+  private scanBoundaryState(text: string): BoundaryScanState {
     if (!text) {
-      return 0;
+      return { lastStableBoundary: 0, inFenceAtEnd: false };
     }
 
-    const lines = text.split('\n');
     let inFence = false;
     let fenceChar: '`' | '~' | null = null;
     let fenceLength = 0;
     let cursor = 0;
     let lastBoundary = 0;
 
-    for (let index = 0; index < lines.length; index++) {
-      const line = lines[index];
-      const hasNewline = index < lines.length - 1;
-      const normalizedLine = this.stripBlockquotePrefix(line).trimStart();
+    while (cursor <= text.length) {
+      const newlineIndex = text.indexOf('\n', cursor);
+      const hasNewline = newlineIndex !== -1;
+      const lineEnd = hasNewline ? newlineIndex : text.length;
+      const line = text.slice(cursor, lineEnd);
+      const normalizedStart = this.findFenceStartIndex(line);
 
       if (!inFence) {
-        const openingFence = this.getFenceOpening(normalizedLine);
+        const openingFence = this.getFenceOpeningAt(line, normalizedStart);
         if (openingFence) {
           inFence = true;
           fenceChar = openingFence.char;
           fenceLength = openingFence.length;
         }
-      } else if (fenceChar && this.isFenceClosing(normalizedLine, fenceChar, fenceLength)) {
+      } else if (fenceChar && this.isFenceClosingAt(line, normalizedStart, fenceChar, fenceLength)) {
         inFence = false;
         fenceChar = null;
         fenceLength = 0;
       }
 
-      if (hasNewline && !inFence && line.trim().length === 0) {
-        lastBoundary = cursor + line.length + 1;
+      if (hasNewline && !inFence && this.isBlankLine(line)) {
+        lastBoundary = lineEnd + 1;
       }
 
-      cursor += line.length + (hasNewline ? 1 : 0);
+      if (!hasNewline) {
+        break;
+      }
+
+      cursor = lineEnd + 1;
     }
 
-    return lastBoundary;
+    return {
+      lastStableBoundary: lastBoundary,
+      inFenceAtEnd: inFence
+    };
   }
 
-  private getFenceOpening(line: string): { char: '`' | '~'; length: number } | null {
-    const marker = line.match(/^(`{3,}|~{3,})/);
-    if (!marker) {
+  private getFenceOpeningAt(line: string, start: number): { char: '`' | '~'; length: number } | null {
+    if (start >= line.length) {
       return null;
     }
 
-    const value = marker[1];
-    const char = value[0];
+    const char = line[start];
     if (char !== '`' && char !== '~') {
+      return null;
+    }
+
+    let markerLength = 0;
+    while (start + markerLength < line.length && line[start + markerLength] === char) {
+      markerLength++;
+    }
+
+    if (markerLength < 3) {
       return null;
     }
 
     return {
       char,
-      length: value.length
+      length: markerLength
     };
   }
 
-  private isFenceClosing(line: string, fenceChar: '`' | '~', minimumLength: number): boolean {
-    const trimmed = line.trim();
-    if (trimmed.length < minimumLength) {
+  private isFenceClosingAt(
+    line: string,
+    start: number,
+    fenceChar: '`' | '~',
+    minimumLength: number
+  ): boolean {
+    if (start >= line.length) {
       return false;
     }
 
     let markerLength = 0;
-    while (markerLength < trimmed.length && trimmed[markerLength] === fenceChar) {
+    while (start + markerLength < line.length && line[start + markerLength] === fenceChar) {
       markerLength++;
     }
 
@@ -341,33 +396,77 @@ export class BlockParser implements IBlockParser {
       return false;
     }
 
-    return trimmed.slice(markerLength).trim().length === 0;
+    for (let i = start + markerLength; i < line.length; i++) {
+      if (!this.isInlineWhitespace(line[i])) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
-  private stripBlockquotePrefix(line: string): string {
-    let remaining = line;
+  private findFenceStartIndex(line: string): number {
+    let cursor = 0;
 
-    while (true) {
-      const prefix = remaining.match(/^\s{0,3}>\s?/);
-      if (!prefix) {
+    while (cursor < line.length) {
+      let probe = cursor;
+      let leadingSpaces = 0;
+      while (leadingSpaces < 3 && probe < line.length && line[probe] === ' ') {
+        leadingSpaces++;
+        probe++;
+      }
+
+      if (probe >= line.length || line[probe] !== '>') {
         break;
       }
 
-      remaining = remaining.slice(prefix[0].length);
+      probe++;
+      if (probe < line.length && line[probe] === ' ') {
+        probe++;
+      }
+
+      cursor = probe;
     }
 
-    return remaining;
+    while (cursor < line.length && this.isInlineWhitespace(line[cursor])) {
+      cursor++;
+    }
+
+    return cursor;
+  }
+
+  private isBlankLine(line: string): boolean {
+    for (let i = 0; i < line.length; i++) {
+      if (!this.isInlineWhitespace(line[i])) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private isInlineWhitespace(char: string): boolean {
+    return char === ' ' || char === '\t' || char === '\r';
   }
 
   /** Update the incremental cache after a parse */
   private updateCache(text: string, blocks: MarkdownBlock[]): void {
     const boundary = this.findLastStableBoundary(text);
     if (boundary > 0) {
-      // Only cache blocks that fall within the stable boundary
-      const stableResult = this.parse(text.substring(0, boundary));
+      const canReuseCachedStable =
+        this.cache.stableTextEnd === boundary &&
+        this.cache.stableBlocks.length > 0 &&
+        this.hasSamePrefix(text, this.cache.parsedText, boundary);
+
+      // If all text is stable, reuse current blocks and avoid re-parse.
+      const stableBlocks = boundary >= text.length
+        ? blocks
+        : canReuseCachedStable
+          ? this.cache.stableBlocks
+          : this.parse(text.substring(0, boundary)).blocks;
       this.cache = {
         parsedText: text,
-        stableBlocks: stableResult.blocks,
+        stableBlocks,
         stableTextEnd: boundary
       };
     } else {
@@ -375,29 +474,132 @@ export class BlockParser implements IBlockParser {
     }
   }
 
+  private hasSamePrefix(left: string, right: string, length: number): boolean {
+    if (length < 0 || left.length < length || right.length < length) {
+      return false;
+    }
+
+    for (let i = 0; i < length; i++) {
+      if (left[i] !== right[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private hasNonWhitespace(text: string): boolean {
+    for (let i = 0; i < text.length; i++) {
+      if (!this.isGeneralWhitespace(text[i])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Detects if the text ends with an incomplete block.
    */
-  private detectIncompleteBlock(text: string): boolean {
+  private detectIncompleteBlock(text: string, inFenceAtEnd?: boolean): boolean {
     const trimmed = text.trim();
+    if (!trimmed) {
+      return false;
+    }
 
-    // Check for unclosed code blocks (odd number of ``` or ~~~)
-    const codeBlockCount = (trimmed.match(/```|~~~/g) || []).length;
-    if (codeBlockCount % 2 !== 0) {
+    const hasUnclosedFence = inFenceAtEnd ?? this.scanBoundaryState(text).inFenceAtEnd;
+    if (hasUnclosedFence) {
       return true;
     }
 
-    const lines = trimmed.split('\n');
-    const lastNonEmptyLine = lines.reverse().find(line => line.trim().length > 0);
+    const lastNonEmptyLine = this.findLastNonEmptyLine(trimmed);
 
-    if (lastNonEmptyLine) {
-      if (/^#{1,6}\s*$/.test(lastNonEmptyLine)) return true;
-      if (/^[\*\-+]\s*$/.test(lastNonEmptyLine)) return true;
-      if (/^\d+\.\s*$/.test(lastNonEmptyLine)) return true;
-      if (/^>\s*$/.test(lastNonEmptyLine)) return true;
+    return !!lastNonEmptyLine && this.isIncompleteTrailingLine(lastNonEmptyLine);
+  }
+
+  private findLastNonEmptyLine(text: string): string | null {
+    let end = text.length - 1;
+    while (end >= 0 && this.isGeneralWhitespace(text[end])) {
+      end--;
+    }
+    if (end < 0) {
+      return null;
     }
 
-    return false;
+    let start = end;
+    while (start >= 0 && text[start] !== '\n' && text[start] !== '\r') {
+      start--;
+    }
+
+    const line = text.slice(start + 1, end + 1).trim();
+    return line || null;
+  }
+
+  private isGeneralWhitespace(char: string): boolean {
+    return char === ' ' || char === '\t' || char === '\n' || char === '\r';
+  }
+
+  private isIncompleteTrailingLine(line: string): boolean {
+    return this.isIncompleteHeadingLine(line)
+      || this.isIncompleteBulletLine(line)
+      || this.isIncompleteOrderedLine(line)
+      || this.isIncompleteQuoteLine(line);
+  }
+
+  private isIncompleteHeadingLine(line: string): boolean {
+    let i = 0;
+    while (i < line.length && line[i] === '#') {
+      i++;
+    }
+    if (i < 1 || i > 6) {
+      return false;
+    }
+    for (; i < line.length; i++) {
+      if (!this.isInlineWhitespace(line[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private isIncompleteBulletLine(line: string): boolean {
+    const marker = line[0];
+    if (marker !== '*' && marker !== '-' && marker !== '+') {
+      return false;
+    }
+    for (let i = 1; i < line.length; i++) {
+      if (!this.isInlineWhitespace(line[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private isIncompleteOrderedLine(line: string): boolean {
+    let i = 0;
+    while (i < line.length && line[i] >= '0' && line[i] <= '9') {
+      i++;
+    }
+    if (i === 0 || i >= line.length || line[i] !== '.') {
+      return false;
+    }
+    for (i = i + 1; i < line.length; i++) {
+      if (!this.isInlineWhitespace(line[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private isIncompleteQuoteLine(line: string): boolean {
+    if (line[0] !== '>') {
+      return false;
+    }
+    for (let i = 1; i < line.length; i++) {
+      if (!this.isInlineWhitespace(line[i])) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -456,7 +658,7 @@ export class BlockParser implements IBlockParser {
         return {
           ...baseBlock,
           type: BlockType.LIST,
-          content: items.map((item: any) => item.text || '').join('\n'),
+          content: this.buildListContent(items),
           subtype: listToken.ordered ? 'ordered' : 'unordered',
           items: this.parseListItems(items, `${baseBlock.id}-item`)
         } satisfies ListBlock;
@@ -499,10 +701,23 @@ export class BlockParser implements IBlockParser {
 
       case 'table': {
         const tableToken = token as any;
-        const headerCells = tableToken.header?.map((h: any) => h.text || '') || [];
-        const bodyRows = tableToken.rows?.map((row: any) =>
-          row.map((cell: any) => cell.text || '')
-        ) || [];
+        const headerSource = tableToken.header || [];
+        const headerCells = new Array<string>(headerSource.length);
+        for (let i = 0; i < headerSource.length; i++) {
+          headerCells[i] = headerSource[i]?.text || '';
+        }
+
+        const rowSource = tableToken.rows || [];
+        const bodyRows = new Array<string[]>(rowSource.length);
+        for (let i = 0; i < rowSource.length; i++) {
+          const row = rowSource[i] || [];
+          const cells = new Array<string>(row.length);
+          for (let j = 0; j < row.length; j++) {
+            cells[j] = row[j]?.text || '';
+          }
+          bodyRows[i] = cells;
+        }
+
         const alignments = tableToken.align || [];
         return {
           ...baseBlock,
@@ -528,9 +743,22 @@ export class BlockParser implements IBlockParser {
 
     items.forEach((item: any, itemIndex: number) => {
       const tokens = Array.isArray(item?.tokens) ? item.tokens : [];
-      const nestedListTokens = tokens.filter((token: any) => token.type === 'list');
-      const inlineTokens = tokens.filter((token: any) => token.type !== 'list');
-      const textFromTokens = inlineTokens.map((token: any) => this.extractText(token)).join('').trim();
+      const nestedListTokens: any[] = [];
+      const inlineTextParts: string[] = [];
+
+      for (const token of tokens) {
+        if (token?.type === 'list') {
+          nestedListTokens.push(token);
+          continue;
+        }
+
+        const text = this.extractText(token);
+        if (text) {
+          inlineTextParts.push(text);
+        }
+      }
+
+      const textFromTokens = inlineTextParts.length > 0 ? inlineTextParts.join('').trim() : '';
       const itemText = (textFromTokens || item?.text || '').trim();
 
       if (itemText) {
@@ -561,12 +789,27 @@ export class BlockParser implements IBlockParser {
     return {
       id,
       type: BlockType.LIST,
-      content: items.map((item: any) => item.text || '').join('\n'),
+      content: this.buildListContent(items),
       subtype: listToken.ordered ? 'ordered' : 'unordered',
       items: this.parseListItems(items, `${id}-item`),
       isComplete: true,
       position
     } satisfies ListBlock;
+  }
+
+  private buildListContent(items: any[]): string {
+    if (!items || items.length === 0) {
+      return '';
+    }
+
+    let result = '';
+    for (let i = 0; i < items.length; i++) {
+      if (i > 0) {
+        result += '\n';
+      }
+      result += items[i]?.text || '';
+    }
+    return result;
   }
 
   private tryExtensionHandlers(
@@ -629,70 +872,76 @@ export class BlockParser implements IBlockParser {
    *       link→link, image→image, br→hard-break, html→sup/sub/footnote-ref
    */
   private parseInlineTokens(tokens: any[] | undefined): MarkdownInline[] {
-    if (!tokens || !Array.isArray(tokens)) return [];
+    if (!tokens || !Array.isArray(tokens) || tokens.length === 0) {
+      return [];
+    }
 
     const result: MarkdownInline[] = [];
+    this.appendInlineTokens(tokens, result);
+    return result;
+  }
+
+  private appendInlineTokens(tokens: any[], target: MarkdownInline[]): void {
     for (const token of tokens) {
       switch (token.type) {
         case 'strong': {
           const children = token.tokens ? this.parseInlineTokens(token.tokens) : undefined;
-          result.push({ type: 'bold', content: token.text || '', children });
+          target.push({ type: 'bold', content: token.text || '', children });
           break;
         }
         case 'em': {
           const children = token.tokens ? this.parseInlineTokens(token.tokens) : undefined;
-          result.push({ type: 'italic', content: token.text || '', children });
+          target.push({ type: 'italic', content: token.text || '', children });
           break;
         }
         case 'del': {
           const children = token.tokens ? this.parseInlineTokens(token.tokens) : undefined;
-          result.push({ type: 'strikethrough', content: token.text || '', children });
+          target.push({ type: 'strikethrough', content: token.text || '', children });
           break;
         }
         case 'codespan':
-          result.push({ type: 'code', content: token.text || '' });
+          target.push({ type: 'code', content: token.text || '' });
           break;
         case 'link': {
           const children = token.tokens ? this.parseInlineTokens(token.tokens) : undefined;
-          result.push({ type: 'link', content: token.text || '', href: token.href, children });
+          target.push({ type: 'link', content: token.text || '', href: token.href, children });
           break;
         }
         case 'image':
-          result.push({ type: 'image', content: token.text || '', src: token.href, alt: token.text || '' });
+          target.push({ type: 'image', content: token.text || '', src: token.href, alt: token.text || '' });
           break;
         case 'br':
-          result.push({ type: 'hard-break', content: '' });
+          target.push({ type: 'hard-break', content: '' });
           break;
         case 'html': {
           const raw: string = token.raw || token.text || '';
           // Parse <sup>...</sup> and <sub>...</sub>
           const supMatch = raw.match(/^<sup>([\s\S]*?)<\/sup>$/i);
           if (supMatch) {
-            result.push({ type: 'sup', content: supMatch[1] });
+            target.push({ type: 'sup', content: supMatch[1] });
             break;
           }
           const subMatch = raw.match(/^<sub>([\s\S]*?)<\/sub>$/i);
           if (subMatch) {
-            result.push({ type: 'sub', content: subMatch[1] });
+            target.push({ type: 'sub', content: subMatch[1] });
             break;
           }
           // Fallback: render raw HTML as text
-          result.push({ type: 'text', content: raw });
+          target.push({ type: 'text', content: raw });
           break;
         }
         case 'text':
         default: {
           // marked.js text tokens can themselves contain nested tokens
           if (token.tokens && token.tokens.length > 0) {
-            result.push(...this.parseInlineTokens(token.tokens));
+            this.appendInlineTokens(token.tokens, target);
           } else {
-            result.push({ type: 'text', content: token.text || token.raw || '' });
+            target.push({ type: 'text', content: token.text || token.raw || '' });
           }
           break;
         }
       }
     }
-    return result;
   }
 
   /**
@@ -701,6 +950,10 @@ export class BlockParser implements IBlockParser {
    * References: `[^id]` → converted to `<sup>` for marked.js to handle
    */
   private extractFootnotes(text: string): { cleanedText: string; footnoteDefs: Map<string, string> } {
+    if (text.indexOf('[^') === -1) {
+      return { cleanedText: text, footnoteDefs: new Map<string, string>() };
+    }
+
     const footnoteDefs = new Map<string, string>();
 
     // Extract definitions: [^id]: text (at start of line)
@@ -724,25 +977,60 @@ export class BlockParser implements IBlockParser {
    */
   private extractText(token: any): string {
     if (!token) return '';
+    if (typeof token !== 'object') {
+      return '';
+    }
+
+    const cache = this.extractTextCache;
+    if (cache) {
+      const cached = cache.get(token);
+      if (cached !== undefined) {
+        return cached;
+      }
+    }
 
     // For headings, use text property (without # symbols)
     if (token.type === 'heading') {
-      return token.text || '';
+      const value = token.text || '';
+      if (cache) {
+        cache.set(token, value);
+      }
+      return value;
     }
 
     // Prefer raw property for other types (preserves formatting)
-    if (token.raw) return token.raw;
+    if (token.raw) {
+      const value = token.raw;
+      if (cache) {
+        cache.set(token, value);
+      }
+      return value;
+    }
 
     // Fallback to text property for code blocks
-    if (token.text) return token.text;
+    if (token.text) {
+      const value = token.text;
+      if (cache) {
+        cache.set(token, value);
+      }
+      return value;
+    }
 
     // If token has tokens array (nested tokens), join their raw content
     if (token.tokens && Array.isArray(token.tokens)) {
-      return token.tokens
-        .map((t: any) => this.extractText(t))
-        .join('');
+      let combined = '';
+      for (const childToken of token.tokens) {
+        combined += this.extractText(childToken);
+      }
+      if (cache) {
+        cache.set(token, combined);
+      }
+      return combined;
     }
 
+    if (cache) {
+      cache.set(token, '');
+    }
     return '';
   }
 }
