@@ -7,6 +7,19 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./landing/landing-page.component').then((m) => m.LandingPageComponent),
   },
+  // Review Queue feature page
+  {
+    path: 'review-queue',
+    pathMatch: 'full',
+    redirectTo: 'review-queue/cycle-001',
+  },
+  {
+    path: 'review-queue/:cycleId',
+    loadComponent: () =>
+      import('./features/review-queue/pages/review-queue-page').then(
+        (m) => m.ReviewQueuePageComponent,
+      ),
+  },
   // Demo routes with MainLayout as parent
   {
     path: 'demo',

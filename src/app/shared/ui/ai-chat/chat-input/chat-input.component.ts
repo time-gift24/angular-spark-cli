@@ -1,6 +1,6 @@
 /**
  * Chat Input Component
- * Modern pill-style input with liquid-glass effect
+ * Compact input panel optimized for dense workspace layouts
  * Mineral & Time Theme - Angular 20+
  * Inspired by Claude/Gemini design patterns
  */
@@ -17,7 +17,6 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
 import { ButtonComponent } from '@app/shared/ui/button';
 import {
   inputContainer,
@@ -34,12 +33,12 @@ import { cn } from '@app/shared/utils';
 
 /**
  * Chat input component with modern pill design
- * Single unified rectangle with liquid-glass effect
+ * Single unified rectangle with compact density
  * Icon buttons integrated inline
  */
 @Component({
   selector: 'ai-chat-input',
-  imports: [LiquidGlassDirective, ButtonComponent],
+  imports: [ButtonComponent],
   styleUrls: ['./chat-input.component.css'],
   host: {
     class: 'block',
@@ -47,15 +46,7 @@ import { cn } from '@app/shared/utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div [class]="inputContainer">
-      <div
-        liquidGlass
-        lgTheme="mineral-light"
-        lgCornerRadius="16px"
-        [lgBlurAmount]="0.9"
-        [lgDisplacementScale]="0"
-        lgAriaLabel="AI chat input"
-        [class]="inputWrapperClasses()"
-      >
+      <div [class]="inputWrapperClasses()">
         <!-- Input Area (Top) -->
         <div [class]="inputAreaClasses()">
           <textarea

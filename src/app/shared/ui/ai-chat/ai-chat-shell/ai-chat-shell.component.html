@@ -1,52 +1,138 @@
-<div class="app-shell flex min-h-screen bg-background relative">
-  <!-- Main Content Area (compressible when panel opens) -->
-  <main
-    #mainContent
-    class="main-content flex-1 transition-all duration-300 ease-out"
-    [style.padding-right.px]="panelOpen() ? effectivePanelWidth() + 12 : 0">
-    <router-outlet />
-  </main>
+<div class="relative h-screen overflow-hidden bg-background text-[13px] leading-5">
+  <header class="pointer-events-none fixed inset-x-0 top-0 z-50 px-4 pt-3">
+    <div
+      class="pointer-events-auto mx-auto flex h-10 max-w-[1600px] items-center justify-between rounded-xl border border-border/60 bg-background/85 px-3 shadow-sm backdrop-blur"
+    >
+      <div class="flex items-center gap-4">
+        <a routerLink="/" class="text-sm font-semibold text-foreground">Angular Spark</a>
+        <nav class="flex items-center gap-2">
+          <a
+            routerLink="/"
+            routerLinkActive="bg-accent text-accent-foreground"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            >Home</a
+          >
+          <a
+            routerLink="/demo/ai-chat-panel"
+            routerLinkActive="bg-accent text-accent-foreground"
+            class="rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            >Workspace</a
+          >
+          <a
+            routerLink="/review-queue/cycle-001"
+            routerLinkActive="bg-accent text-accent-foreground"
+            class="rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            >Review Queue</a
+          >
+        </nav>
+      </div>
 
-  <!-- AI Chat Panel (fixed floating panel) -->
-  @if (panelOpen()) {
-    <ai-chat-panel
-      [activeSession]="activeSession"
-      [panelWidth]="panelWidth()"
-      [previewWidth]="panelPreviewWidth()"
-      [streamingContent]="streamingResponse()"
-      (rename)="onRename($event)"
-      (delete)="onDelete($event)"
-      (close)="onClosePanel()"
-      (resizePreview)="onResizePreview($event)"
-      (resizeCommit)="onResizeCommit($event)" />
-  }
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          (click)="onToggleDock()"
+          data-testid="dock-toggle"
+          class="inline-flex h-7 items-center rounded-md border border-border/70 bg-background px-2 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+        >
+          {{ isDockPinned() ? '收起 LLM' : '展开 LLM' }}
+        </button>
+      </div>
+    </div>
+  </header>
 
-  <!-- Session Chat Container (fixed, always floating at bottom) -->
-  <!-- Width is 40% of main content area, positioned accordingly -->
-  <div
-    class="fixed z-40 flex justify-center"
-    [class]="panelOpen() ? 'bottom-3' : 'bottom-6'"
-    [style.width.px]="sessionContainerWidthPx()"
-    [style.left.px]="sessionContainerLeftPx()"
-    [style.transform]="'translateX(-50%)'">
-    <app-session-chat-container
-      [sessions]="sessions"
-      [activeSessionId]="activeSessionId"
-      [inputValue]="currentInputValue"
-      (newChat)="onNewChat()"
-      (sessionSelect)="onSessionSelect($event)"
-      (sessionToggle)="onSessionToggle()"
-      (send)="onSend($event)"
-      (inputValueChange)="onInputChange($event)"
-      (sessionColorChange)="onSessionColorChange($event)"
-      (sessionRename)="onSessionRenameFromTabs($event)"
-      (sessionClose)="onDelete($event)" />
+  <div class="absolute inset-0 px-4 pb-4 pt-16">
+    <div class="flex h-full min-h-0">
+      <main
+        class="h-full min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain rounded-xl border border-border/40 bg-background/70"
+      >
+        <div class="min-h-full p-4">
+          <router-outlet />
+        </div>
+      </main>
+
+      <aside
+        data-testid="llm-dock"
+        class="relative ml-3 h-full min-h-0 shrink-0 overflow-hidden rounded-xl border border-border/50 bg-card/70 transition-[width,opacity,margin] duration-200 ease-out"
+        [class.pointer-events-none]="!isDockPinned()"
+        [style.width.px]="isDockPinned() ? effectiveDockWidth() : 0"
+        [style.opacity]="isDockPinned() ? 1 : 0"
+        [style.margin-left]="isDockPinned() ? '0.75rem' : '0'"
+      >
+        @if (isDockPinned()) {
+          <div class="relative flex h-full min-h-0 min-w-[320px] flex-col">
+            <ai-resize-handle
+              data-testid="dock-resize"
+              [minWidth]="320"
+              [maxWidth]="520"
+              (resizePreview)="onResizePreview($event)"
+              (resizeCommit)="onResizeCommit($event)"
+            />
+
+            <div class="shrink-0 border-b border-border/60 px-2 py-2">
+              <spark-session-tabs-bar
+                [sessions]="sessions"
+                [activeSessionId]="activeSessionId"
+                (sessionSelect)="onSessionSelect($event)"
+                (sessionToggle)="onSessionToggle()"
+                (newChat)="onNewChat()"
+                (sessionColorChange)="onSessionColorChange($event)"
+                (sessionRename)="onSessionRenameFromTabs($event)"
+                (sessionClose)="onDelete($event)"
+              />
+            </div>
+
+            <div class="ai-messages min-h-0 flex-1 overflow-y-auto overscroll-contain p-2">
+              <div class="space-y-2">
+                @for (message of activeMessages(); track message.id) {
+                  <ai-message-bubble [message]="message" />
+                }
+
+                @if (streamingResponse(); as stream) {
+                  <div class="flex justify-start">
+                    <div class="w-full rounded-lg rounded-tl-sm border border-border/50 bg-muted/50 px-3 py-1.5">
+                      <app-streaming-markdown [stream$]="stream" [maxHeight]="'none'" [virtualScroll]="false" />
+                    </div>
+                  </div>
+                }
+
+                @if (activeMessages().length === 0 && !streamingResponse()) {
+                  <div class="flex h-40 items-center justify-center text-muted-foreground">
+                    <p class="text-xs">开始一个新的对话...</p>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="shrink-0 border-t border-border/60 p-2">
+              <ai-chat-input
+                [value]="currentInputValue()"
+                (valueChange)="onInputChange($event)"
+                [placeholder]="'Ask AI anything...'"
+                (send)="onSend($event)"
+              />
+            </div>
+          </div>
+        }
+      </aside>
+    </div>
   </div>
 
-  <!-- Delete Confirmation Dialog -->
+  @if (!isDockPinned()) {
+    <button
+      type="button"
+      (click)="onOpenDock()"
+      data-testid="dock-open-fab"
+      class="fixed right-4 top-1/2 z-40 inline-flex -translate-y-1/2 items-center rounded-l-md rounded-r-sm border border-border/70 bg-background/90 px-2 py-2 text-xs font-medium text-foreground shadow backdrop-blur hover:bg-accent"
+    >
+      LLM
+    </button>
+  }
+
   <ai-delete-confirm-dialog
     [isOpen]="deleteDialogOpen()"
     [sessionName]="sessionToDeleteName()"
     (confirm)="onConfirmDelete()"
-    (cancel)="onCancelDelete()" />
+    (cancel)="onCancelDelete()"
+  />
 </div>

@@ -26,8 +26,8 @@
 
 /* Toolbar icon buttons - using standard button height */
 .chat-toolbar-btn {
-  height: var(--button-height-md) !important;
-  width: var(--button-height-md) !important;
+  height: 1.875rem !important;
+  width: 1.875rem !important;
   color: var(--muted-foreground);
   transition: transform var(--duration-spring-fast) var(--ease-spring-snappy), background-color var(--duration-fast) ease, color var(--duration-fast) ease;
 }
@@ -54,8 +54,8 @@
 
 /* Send button - circular with custom states */
 .chat-send-btn {
-  height: var(--button-height-md) !important;
-  width: var(--button-height-md) !important;
+  height: 1.875rem !important;
+  width: 1.875rem !important;
   border-radius: 9999px !important; /* Circular */
   background-color: var(--secondary);
   border: 1px solid color-mix(in oklch, var(--primary) 15%, transparent);

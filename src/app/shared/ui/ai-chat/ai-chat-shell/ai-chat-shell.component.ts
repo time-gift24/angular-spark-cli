@@ -2,91 +2,74 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   signal,
-  computed as computedFn,
-  OnInit,
-  effect,
 } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Observable, Subject, of } from 'rxjs';
-import { AiChatStateService } from '../services';
+import { Observable } from 'rxjs';
+import { SessionColor } from '@app/shared/models';
 import { SessionStateService } from '@app/shared/services';
-import { AiChatPanelComponent } from '../ai-chat-panel';
-import { SessionChatContainerComponent } from '../session-chat-container';
-import { DeleteConfirmDialogComponent } from '../delete-confirm-dialog';
+import { StreamingMarkdownComponent } from '@app/shared/components/streaming-markdown';
+import { AiChatStateService } from '../services';
+import { SessionTabsBarComponent } from '../session-tabs-bar/session-tabs-bar.component';
+import { ChatInputComponent } from '../chat-input/chat-input.component';
+import { MessageBubbleComponent } from '../message-bubble/message-bubble.component';
+import { ResizeHandleComponent } from '../resize-handle/resize-handle.component';
+import { DeleteConfirmDialogComponent } from '../delete-confirm-dialog/delete-confirm-dialog.component';
 
-const PANEL_MIN_WIDTH = 300;
-const PANEL_MAX_WIDTH = 800;
+const DOCK_MIN_WIDTH = 320;
+const DOCK_MAX_WIDTH = 520;
 
 @Component({
   selector: 'ai-chat-shell',
   imports: [
     CommonModule,
     RouterOutlet,
-    AiChatPanelComponent,
-    SessionChatContainerComponent,
+    RouterLink,
+    RouterLinkActive,
+    SessionTabsBarComponent,
+    ChatInputComponent,
+    MessageBubbleComponent,
+    ResizeHandleComponent,
+    StreamingMarkdownComponent,
     DeleteConfirmDialogComponent,
   ],
   templateUrl: './ai-chat-shell.component.html',
+  styleUrl: './ai-chat-shell.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AiChatShellComponent implements OnInit {
-  private chatState = inject(AiChatStateService);
-  private sessionState = inject(SessionStateService);
+export class AiChatShellComponent {
+  private readonly chatState = inject(AiChatStateService);
+  private readonly sessionState = inject(SessionStateService);
 
   constructor() {
-    // Initialize default session on first load if no sessions exist
     effect(() => {
       const sessions = this.sessionState.sessions();
       if (sessions.size === 0) {
-        // Create default session
         this.sessionState.createSession('新建对话');
       }
     });
   }
 
-  ngOnInit(): void {
-    // Additional initialization if needed
-  }
+  readonly dockMode = this.chatState.dockMode;
+  readonly dockWidth = this.chatState.dockWidth;
+  readonly dockPreviewWidth = signal<number | null>(null);
+  readonly isDockPinned = computed(() => this.dockMode() === 'pinned');
 
-  // Wrap ComputedSignal as Signal for compatibility
-  readonly panelOpen = computedFn(() => this.chatState.panelOpen());
-  readonly panelWidth = computedFn(() => this.chatState.panelWidth());
-  readonly panelPreviewWidth = signal<number | null>(null);
-
-  // Effective panel width (preview takes precedence)
-  readonly effectivePanelWidth = computed(() => {
-    const width = this.panelPreviewWidth() ?? this.panelWidth();
-    return this.clampPanelWidth(width);
+  readonly effectiveDockWidth = computed(() => {
+    const width = this.dockPreviewWidth() ?? this.dockWidth();
+    return this.clampDockWidth(width);
   });
 
-  // Calculate session container position in pixels (center of main content area)
-  readonly sessionContainerLeftPx = computed(() => {
-    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
-    const panelW = this.panelOpen() ? this.effectivePanelWidth() : 0;
-    // Main content area is from 0 to (viewportWidth - panelWidth - 24px margin)
-    const mainContentWidth = viewportWidth - panelW - (this.panelOpen() ? 24 : 0);
-    return mainContentWidth / 2;
-  });
-
-  // Calculate session container width in pixels (40% of main content area)
-  readonly sessionContainerWidthPx = computed(() => {
-    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
-    const panelW = this.panelOpen() ? this.effectivePanelWidth() : 0;
-    const mainContentWidth = viewportWidth - panelW - (this.panelOpen() ? 24 : 0);
-    return mainContentWidth * 0.4;
-  });
-
-  // Connect SessionState to AiChatState
   readonly sessions = this.sessionState.sessions;
   readonly activeSessionId = this.sessionState.activeSessionId;
   readonly activeSession = this.sessionState.activeSession;
+  readonly activeMessages = this.sessionState.activeMessages;
   readonly currentInputValue = this.sessionState.activeInputValue;
   readonly streamingResponse = this.sessionState.streamingResponse;
 
-  // Delete dialog state
   readonly deleteDialogOpen = signal(false);
   readonly sessionToDelete = signal<string | null>(null);
   readonly sessionToDeleteName = computed(() => {
@@ -94,51 +77,48 @@ export class AiChatShellComponent implements OnInit {
     return id ? this.sessions().get(id)?.name ?? '' : '';
   });
 
-  // Event handlers
+  onToggleDock(): void {
+    this.dockPreviewWidth.set(null);
+    this.chatState.toggleDockMode();
+  }
+
+  onOpenDock(): void {
+    this.dockPreviewWidth.set(null);
+    this.chatState.setDockMode('pinned');
+  }
+
   onNewChat(): void {
     this.sessionState.createSession();
-    this.chatState.openPanel();
+    this.chatState.setDockMode('pinned');
   }
 
   onSessionSelect(sessionId: string): void {
     this.sessionState.switchSession(sessionId);
-    if (!this.panelOpen()) {
-      this.chatState.openPanel();
-    }
+    this.chatState.setDockMode('pinned');
   }
 
   onSessionToggle(): void {
-    this.panelPreviewWidth.set(null);
-    this.chatState.togglePanel();
+    this.onToggleDock();
   }
 
   onSend(message: string): void {
     const sessionId = this.activeSessionId();
-    if (sessionId) {
-      console.log('[AiChatShell] Sending message to session:', sessionId);
-      console.log('[AiChatShell] Panel open before:', this.panelOpen());
-
-      // Open panel when sending message
-      if (!this.panelOpen()) {
-        console.log('[AiChatShell] Opening panel...');
-        this.chatState.openPanel();
-      }
-
-      this.sessionState.addMessage(sessionId, {
-        id: `msg-${Date.now()}`,
-        role: 'user',
-        content: message,
-        timestamp: Date.now()
-      });
-
-      // Start streaming AI response
-      this.startStreamingResponse(sessionId, message);
-    } else {
-      console.log('[AiChatShell] No active session, cannot send message');
+    if (!sessionId) {
+      return;
     }
+
+    this.chatState.setDockMode('pinned');
+
+    this.sessionState.addMessage(sessionId, {
+      id: `msg-${Date.now()}`,
+      role: 'user',
+      content: message,
+      timestamp: Date.now(),
+    });
+
+    this.startStreamingResponse(sessionId, message);
   }
 
-  /** Starts a streaming AI response */
   private startStreamingResponse(sessionId: string, userMessage: string): void {
     const mockResponses: Record<string, string> = {
       default: this.getRichMarkdownResponse(),
@@ -147,7 +127,6 @@ export class AiChatShellComponent implements OnInit {
       table: this.getTableExampleResponse(),
     };
 
-    // Select response based on user input keywords, or use default
     let response = mockResponses['default'];
     const lowerMessage = userMessage.toLowerCase();
 
@@ -159,13 +138,11 @@ export class AiChatShellComponent implements OnInit {
       response = mockResponses['table'];
     }
 
-    // Create streaming observable similar to demo MockAIApi
-    const stream$ = new Observable<string>(subscriber => {
-      // Split into chunks of ~20 characters (similar to demo)
+    const stream$ = new Observable<string>((subscriber) => {
       const chunkSize = 20;
       const chunks = this.splitIntoChunks(response, chunkSize);
       let index = 0;
-      const delay = 50; // ms between chunks (same as demo)
+      const delay = 50;
 
       const interval = setInterval(() => {
         if (index < chunks.length) {
@@ -177,21 +154,16 @@ export class AiChatShellComponent implements OnInit {
         }
       }, delay);
 
-      // Cleanup on unsubscribe
       return () => clearInterval(interval);
     });
 
-    // Set streaming state for panel to display
     this.sessionState.setStreamingResponse(stream$);
 
-    // When stream completes, add the complete message to session
     stream$.subscribe({
       next: () => {
-        // Stream is being processed by streaming-markdown component
-        // This subscription is only for completion handling
+        // streaming content is rendered by StreamingMarkdownComponent
       },
-      error: (error: Error) => {
-        console.error('[AiChatShellComponent] Stream error:', error);
+      error: () => {
         this.sessionState.setStreamingResponse(null);
       },
       complete: () => {
@@ -199,18 +171,13 @@ export class AiChatShellComponent implements OnInit {
           id: `msg-ai-${Date.now()}`,
           role: 'assistant',
           content: response,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
         this.sessionState.setStreamingResponse(null);
-      }
+      },
     });
   }
 
-  /**
-   * Splits text into chunks of approximately specified size.
-   * Attempts to break at word boundaries when possible.
-   * Copied from MockAIApi for consistent streaming behavior.
-   */
   private splitIntoChunks(text: string, chunkSize: number): string[] {
     const chunks: string[] = [];
     let remaining = text;
@@ -221,26 +188,18 @@ export class AiChatShellComponent implements OnInit {
         break;
       }
 
-      // Find a good break point (newline or space) near chunkSize
       let breakPoint = chunkSize;
-
-      // Prefer breaking at newline
       const lastNewline = remaining.lastIndexOf('\n', chunkSize);
       if (lastNewline > chunkSize * 0.5) {
         breakPoint = lastNewline + 1;
       } else {
-        // Otherwise break at space
         const lastSpace = remaining.lastIndexOf(' ', chunkSize);
         if (lastSpace > chunkSize * 0.5) {
           breakPoint = lastSpace + 1;
         }
       }
 
-      const candidate = remaining.substring(0, breakPoint);
-
-      // Check for unclosed markdown markers and extend break point
       breakPoint = this.adjustBreakPointForMarkers(remaining, breakPoint);
-
       chunks.push(remaining.substring(0, breakPoint));
       remaining = remaining.substring(breakPoint);
     }
@@ -248,15 +207,10 @@ export class AiChatShellComponent implements OnInit {
     return chunks;
   }
 
-  /**
-   * Adjusts break point to avoid splitting markdown markers.
-   * Copied from MockAIApi for consistent streaming behavior.
-   */
   private adjustBreakPointForMarkers(text: string, breakPoint: number): number {
     const candidate = text.substring(0, breakPoint);
     let adjusted = breakPoint;
 
-    // Check for unclosed code blocks (odd number of ```)
     const backtickCount = (candidate.match(/```/g) || []).length;
     if (backtickCount % 2 !== 0) {
       const fenceEnd = text.indexOf('```', breakPoint);
@@ -265,7 +219,6 @@ export class AiChatShellComponent implements OnInit {
       }
     }
 
-    // Check for unclosed bold (**)
     const boldCount = (candidate.match(/\*\*/g) || []).length;
     if (boldCount % 2 !== 0) {
       const boldEnd = text.indexOf('**', breakPoint);
@@ -274,13 +227,11 @@ export class AiChatShellComponent implements OnInit {
       }
     }
 
-    // Check for unclosed links [text](url)
     const openBrackets = (candidate.match(/\[/g) || []).length;
     const closeBrackets = (candidate.match(/\]/g) || []).length;
     if (openBrackets > closeBrackets) {
       const linkEnd = text.indexOf(']', breakPoint);
       if (linkEnd !== -1 && linkEnd < breakPoint + 100) {
-        // Also check for closing parenthesis
         const parenEnd = text.indexOf(')', linkEnd);
         if (parenEnd !== -1 && parenEnd < breakPoint + 150) {
           adjusted = Math.max(adjusted, parenEnd + 1);
@@ -291,7 +242,6 @@ export class AiChatShellComponent implements OnInit {
     return adjusted;
   }
 
-  /** Returns a rich markdown response with various formatting */
   private getRichMarkdownResponse(): string {
     return `# 欢迎使用 AI Chat
 
@@ -354,7 +304,6 @@ $$
 希望这个示例能帮助你了解 Markdown 的各种功能！`;
   }
 
-  /** Returns a greeting response */
   private getGreetingResponse(): string {
     return `# 👋 你好！
 
@@ -374,7 +323,6 @@ $$
 试试问："**给我一个代码示例**" 或 "**展示表格功能**"`;
   }
 
-  /** Returns a code example response */
   private getCodeExampleResponse(): string {
     return `# 代码示例
 
@@ -383,7 +331,6 @@ $$
 ## TypeScript / JavaScript
 
 \`\`\`typescript
-// 使用 Signals 的 Angular 组件示例
 import { Component, signal, computed } from '@angular/core';
 
 @Component({
@@ -450,7 +397,6 @@ class UserManager:
 需要更多代码示例吗？`;
   }
 
-  /** Returns a table example response */
   private getTableExampleResponse(): string {
     return `# Markdown 表格示例
 
@@ -495,20 +441,18 @@ Markdown 表格让数据展示更清晰！`;
     this.sessionState.updateInputValue(value);
   }
 
-  onRename(data: { sessionId: string; name: string }): void {
-    this.sessionState.renameSession(data.sessionId, data.name);
-  }
-
   onSessionRenameFromTabs(data: { sessionId: string; newName: string }): void {
     this.sessionState.renameSession(data.sessionId, data.newName);
   }
 
   onDelete(sessionId: string): void {
     const session = this.sessions().get(sessionId);
-    if (session) {
-      this.sessionToDelete.set(sessionId);
-      this.deleteDialogOpen.set(true);
+    if (!session) {
+      return;
     }
+
+    this.sessionToDelete.set(sessionId);
+    this.deleteDialogOpen.set(true);
   }
 
   onConfirmDelete(): void {
@@ -516,9 +460,10 @@ Markdown 表格让数据展示更清晰！`;
     if (sessionId) {
       this.sessionState.deleteSession(sessionId);
       if (!this.activeSession()) {
-        this.chatState.closePanel();
+        this.sessionState.createSession('新建对话');
       }
     }
+
     this.deleteDialogOpen.set(false);
     this.sessionToDelete.set(null);
   }
@@ -528,27 +473,27 @@ Markdown 表格让数据展示更清晰！`;
     this.sessionToDelete.set(null);
   }
 
-  onClosePanel(): void {
-    this.panelPreviewWidth.set(null);
-    this.chatState.closePanel();
-  }
-
   onResizePreview(width: number): void {
-    if (!Number.isFinite(width)) return;
-    this.panelPreviewWidth.set(this.clampPanelWidth(width));
+    if (!Number.isFinite(width)) {
+      return;
+    }
+    this.dockPreviewWidth.set(this.clampDockWidth(width));
   }
 
   onResizeCommit(width: number): void {
-    if (!Number.isFinite(width)) return;
-    this.panelPreviewWidth.set(null);
-    this.chatState.setPanelWidth(width);
+    if (!Number.isFinite(width)) {
+      return;
+    }
+
+    this.dockPreviewWidth.set(null);
+    this.chatState.setDockWidth(width);
   }
 
-  private clampPanelWidth(width: number): number {
-    return Math.max(PANEL_MIN_WIDTH, Math.min(PANEL_MAX_WIDTH, width));
+  private clampDockWidth(width: number): number {
+    return Math.max(DOCK_MIN_WIDTH, Math.min(DOCK_MAX_WIDTH, width));
   }
 
-  onSessionColorChange(event: { sessionId: string; color: string }): void {
+  onSessionColorChange(event: { sessionId: string; color: SessionColor }): void {
     this.sessionState.updateSessionColor(event.sessionId, event.color);
   }
 }

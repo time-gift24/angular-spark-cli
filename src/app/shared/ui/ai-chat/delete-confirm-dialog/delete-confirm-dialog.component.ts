@@ -1,10 +1,9 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LiquidGlassDirective } from '@app/shared/ui/liquid-glass';
 
 @Component({
   selector: 'ai-delete-confirm-dialog',
-  imports: [CommonModule, LiquidGlassDirective],
+  imports: [CommonModule],
   templateUrl: './delete-confirm-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
