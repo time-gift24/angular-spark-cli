@@ -10,7 +10,8 @@
       "@app/*": ["src/app/*"],
       "@app/shared": ["src/app/shared/index"],
       "@app/shared/*": ["src/app/shared/*"],
-      "@app/shared/models": ["src/app/shared/models/index"]
+      "@app/shared/models": ["src/app/shared/models/index"],
+      "@app/features/*": ["src/app/features/*"]
     }
   },
   "include": [
