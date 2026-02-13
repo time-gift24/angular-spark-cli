@@ -183,10 +183,8 @@ export interface SessionData {
    * 会话颜色
    *
    * 用于在 tabs bar 中区分不同会话的视觉标识。
-   * 可选颜色：default（石绿）、blue（蓝色）、purple（紫色）、
+   * 可选颜色：blue（蓝色）、purple（紫色）、
    *          pink（粉色）、orange（橙色）、yellow（黄色）
-   *
-   * @default 'default'
    */
   color?: SessionColor;
 }
@@ -194,4 +192,4 @@ export interface SessionData {
 /**
  * 会话颜色选项
  */
-export type SessionColor = 'default' | 'blue' | 'purple' | 'pink' | 'orange' | 'yellow';
+export type SessionColor = 'blue' | 'purple' | 'pink' | 'orange' | 'yellow';

@@ -62,7 +62,7 @@ export class DemoSessionTabsAndInputComponent {
         size: { width: 400, height: 500 },
         lastUpdated: now - 1000 * 60 * 5,
         status: SessionStatus.PROCESSING,
-        color: 'default',
+        color: 'purple',
         mode: 'docked',
       },
       {
@@ -127,7 +127,7 @@ export class DemoSessionTabsAndInputComponent {
       size: { width: 400, height: 500 },
       lastUpdated: Date.now(),
       status: SessionStatus.IDLE,
-      color: 'default',
+      color: 'purple',
       mode: 'docked',
     };
 

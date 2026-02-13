@@ -14,7 +14,7 @@ export const initialState: DemoState = {
         size: { width: 400, height: 500 },
         lastUpdated: Date.now() - 1000 * 60 * 5,
         status: SessionStatus.IDLE,
-        color: 'default',
+        color: 'purple',
         mode: 'docked',
       },
     ],

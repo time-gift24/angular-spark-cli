@@ -71,7 +71,7 @@ export class DemoSessionChatContainerComponent {
       size: { width: 400, height: 500 },
       lastUpdated: Date.now(),
       status: SessionStatus.IDLE,
-      color: 'default',
+      color: 'purple',
       mode: 'docked',
     };
 

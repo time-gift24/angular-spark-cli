@@ -3,4 +3,4 @@ export {
   ContextMenuContentComponent,
   ContextMenuTriggerDirective,
 } from './context-menu.component';
-export type { ContextMenuItem } from './context-menu.component';
+export type { ContextMenuIcon, ContextMenuIconName, ContextMenuItem } from './context-menu.component';

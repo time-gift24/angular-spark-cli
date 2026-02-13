@@ -1,162 +1,89 @@
 :host {
-  --session-color-default: var(--primary);
-  --session-color-blue: var(--chart-2);
-  --session-color-purple: var(--chart-5);
-  --session-color-pink: var(--destructive);
-  --session-color-orange: var(--accent);
-  --session-color-yellow: var(--accent-hover);
+  display: block;
 }
 
 .session-tabs-container {
-  position: relative;
-  width: 100%;
-  padding: 0 var(--spacing-md);
-  display: flex;
-  gap: var(--spacing-sm);
-  justify-content: flex-start;
-}
-.session-tab {
-  background: color-mix(in oklch, var(--primary) 15%, transparent);
-  color: var(--primary);
-  padding: 2px var(--spacing-sm);
-  border-radius: var(--radius-md);
-  border: 1px solid transparent;
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  font-weight: 400;
-  line-height: 1.4;
-  cursor: pointer;
-  outline: none;
-  user-select: none;
-  transition: transform var(--duration-spring-fast) var(--ease-spring-snappy), box-shadow var(--duration-spring-fast) var(--ease-spring-snappy), border-color var(--duration-fast) ease, background var(--duration-fast) ease, filter var(--duration-fast) ease;
-  box-shadow: var(--shadow-control);
   display: flex;
   align-items: center;
-  gap: 2px;
-  width: 80px;
-  flex-shrink: 0;
+  gap: 0.2rem;
+  width: 100%;
+  overflow-x: auto;
+  padding: 0.1rem 0;
+  scrollbar-width: none;
 }
-.session-tab:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-control-hover);
+
+.session-tabs-container::-webkit-scrollbar {
+  display: none;
 }
+
+.session-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  height: 1.45rem;
+  max-width: 9.5rem;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0 0.38rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 500;
+  transition:
+    background-color 200ms var(--ease-out),
+    border-color 200ms var(--ease-out),
+    color 200ms var(--ease-out),
+    box-shadow 200ms var(--ease-out);
+}
+
+.session-tab:not(.active):hover {
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--foreground) 8%, transparent);
+}
+
 .session-tab.active {
-  border-color: var(--primary);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-control-active);
+  font-weight: 600;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, currentColor 20%, transparent),
+    0 0 0 1px color-mix(in oklch, currentColor 28%, transparent),
+    0 8px 20px -12px color-mix(in oklch, currentColor 75%, transparent);
 }
-.session-tab:active {
-  transform: scale(0.96);
-  transition: transform 80ms var(--ease-spring-snappy);
-}
-.session-tab.active:hover {
-  box-shadow: var(--shadow-control-active);
-}
+
 .session-tab:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, currentColor 20%, transparent),
+    0 0 0 2px color-mix(in oklch, var(--primary) 42%, transparent),
+    0 8px 20px -12px color-mix(in oklch, currentColor 70%, transparent);
 }
-.session-tab.active:focus-visible {
-  outline-color: var(--primary);
-}
-.session-tab.session-color-default {
-  background: color-mix(in oklch, var(--session-color-default) 20%, transparent);
-  color: var(--session-color-default);
-}
-.session-tab.session-color-blue {
-  background: color-mix(in oklch, var(--session-color-blue) 20%, transparent);
-  color: var(--session-color-blue);
-}
-.session-tab.session-color-purple {
-  background: color-mix(in oklch, var(--session-color-purple) 20%, transparent);
-  color: var(--session-color-purple);
-}
-.session-tab.session-color-pink {
-  background: color-mix(in oklch, var(--session-color-pink) 20%, transparent);
-  color: var(--session-color-pink);
-}
-.session-tab.session-color-orange {
-  background: color-mix(in oklch, var(--session-color-orange) 20%, transparent);
-  color: var(--session-color-orange);
-}
-.session-tab.session-color-yellow {
-  background: color-mix(in oklch, var(--session-color-yellow) 20%, transparent);
-  color: var(--session-color-yellow);
-}
-.session-tab:not(.new-chat-tab)[class*='session-color-']:hover {
-  filter: brightness(1.15);
-}
+
 .status-icon {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   flex-shrink: 0;
 }
+
 .processing-icon {
-  animation: rotate 1s linear infinite;
-  color: var(--primary);
+  animation: rotate 1.05s linear infinite;
 }
+
+.disconnected-icon {
+  color: var(--destructive);
+}
+
 @keyframes rotate {
   to {
     transform: rotate(360deg);
   }
 }
-.disconnected-icon {
-  color: var(--destructive);
-}
-.idle-icon {
-  color: var(--chart-2);
-}
-.session-name {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  position: relative;
-}
-.session-name:hover::after {
-  content: attr(title);
-  position: absolute;
-  left: 0;
-  top: 100%;
-  padding: 1px 3px;
-  background: var(--popover);
-  color: var(--popover-foreground);
-}
-.new-chat-tab {
-  background: color-mix(in oklch, var(--primary) 8%, transparent);
-  width: auto;
-}
-.new-chat-tab:hover {
-  filter: brightness(0.9);
-}
-.new-chat-icon {
-  width: 14px;
-  height: 14px;
-  stroke-width: 2;
-}
-.dark .session-tab {
-  box-shadow: var(--shadow-control);
-}
-.dark .session-tab:hover {
-  box-shadow: var(--shadow-control-hover);
-}
-.dark .session-tab.active {
-  border-color: var(--primary);
-  box-shadow: var(--shadow-control-active);
-}
-@media (max-width: 640px) {
-  .session-tabs-container {
-    bottom: 75px;
-    padding: 0 var(--spacing-sm);
-  }
+
+@media (prefers-reduced-motion: reduce) {
   .session-tab {
-    padding: 2px 3px;
-    font-size: 0.6875rem;
-    width: 56px;
+    transition: none;
   }
-  .new-chat-icon {
-    width: 12px;
-    height: 12px;
+
+  .processing-icon {
+    animation: none;
   }
 }

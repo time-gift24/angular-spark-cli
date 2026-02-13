@@ -1,10 +1,9 @@
 <div class="session-tabs-container">
-  <!-- New Chat Button -->
   <button
-    class="session-tab new-chat-tab"
+    type="button"
+    class="inline-flex h-6 shrink-0 cursor-pointer select-none items-center gap-0.5 rounded-full border border-primary/25 bg-primary/8 px-1.5 text-[10px] font-medium leading-none text-primary transition-colors duration-200 hover:bg-primary/14 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45 focus-visible:ring-offset-1"
     (click)="handleNewChat($event)"
     [attr.aria-label]="'New Chat'"
-    type="button"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -14,31 +13,33 @@
       stroke-width="2"
       stroke-linecap="round"
       stroke-linejoin="round"
-      class="new-chat-icon"
+      class="h-2.5 w-2.5"
+      aria-hidden="true"
     >
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
-    <span class="session-name">新建</span>
+    <span class="hidden max-w-[7.5rem] truncate sm:inline">新建</span>
   </button>
 
-  <!-- Session Tabs -->
-  @for (session of sortedSessions(); track session.id) {
+  @for (session of displaySessions(); track session.id) {
+    @let isActive = session.id === activeSessionId()();
     <button
-      [class.active]="session.id === activeSessionId()()"
-      [class.status-processing]="session.status === 'processing'"
-      [class.status-disconnected]="session.status === 'disconnected'"
-      [class]="getSessionColorClass(session)"
-      (click)="handleSessionClick($event, session.id)"
+      type="button"
       [uiContextMenuTrigger]="getSessionMenuItems(session.id)"
       [title]="session.name"
-      class="session-tab"
+      (click)="handleSessionClick($event, session.id)"
       [attr.aria-label]="'Switch to ' + session.name"
-      [attr.aria-selected]="session.id === activeSessionId()()"
-      type="button"
+      [attr.aria-selected]="isActive"
+      class="session-tab"
+      [class.active]="isActive"
+      [class.status-processing]="session.status === 'processing'"
+      [class.status-disconnected]="session.status === 'disconnected'"
+      [style.background]="getSessionBackgroundColor(session, isActive)"
+      [style.borderColor]="getSessionBorderColor(session, isActive)"
+      [style.color]="getSessionTextColor(session, isActive)"
     >
       @if (session.status === 'processing') {
-        <!-- Processing: 加载图标 -->
         <svg
           class="status-icon processing-icon"
           xmlns="http://www.w3.org/2000/svg"
@@ -55,7 +56,6 @@
           />
         </svg>
       } @else if (session.status === 'disconnected') {
-        <!-- Disconnected: 警告图标 -->
         <svg
           class="status-icon disconnected-icon"
           xmlns="http://www.w3.org/2000/svg"
@@ -74,22 +74,24 @@
           <line x1="12" y1="17" x2="12.01" y2="17" />
         </svg>
       } @else {
-        <!-- Idle: 正常/勾选图标 -->
         <svg
-          class="status-icon idle-icon"
+          class="status-icon"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
+          stroke-width="1.9"
           stroke-linecap="round"
           stroke-linejoin="round"
           aria-hidden="true"
         >
-          <polyline points="20 6 9 17 4 12" />
+          <path d="m3 8 9 5 9-5" />
+          <path d="m3 16 9 5 9-5" />
+          <path d="M12 13v8" />
+          <path d="M12 3 3 8l9 5 9-5-9-5Z" />
         </svg>
       }
-      <span class="session-name" [attr.title]="session.name">{{ session.name }}</span>
+      <span class="max-w-[6.5rem] truncate">{{ session.name }}</span>
     </button>
   }
 </div>

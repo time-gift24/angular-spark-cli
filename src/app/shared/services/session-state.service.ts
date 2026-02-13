@@ -310,10 +310,10 @@ export class SessionStateService {
   /**
    * Switches to a different session with automatic draft preservation.
    *
-   * Draft Preservation Flow:
-   * 1. Save current active session's inputValue draft
-   * 2. Update activeSessionId to the new session
-   * 3. Computed signals automatically react and load the new session's draft
+   * Switching behavior:
+   * 1. Validates target session exists
+   * 2. Updates activeSessionId only
+   * 3. Does not mutate session timestamps during tab switching
    *
    * If the target session doesn't exist, this method does nothing.
    *
@@ -339,24 +339,9 @@ export class SessionStateService {
       return;
     }
 
-    // If there's an active session, preserve its draft before switching
     const currentActiveId = this.activeSessionId();
-    if (currentActiveId) {
-      const currentSession = sessionMap.get(currentActiveId);
-      if (currentSession) {
-        // Create an updated sessions map with the preserved draft
-        const updatedSessions = new Map(sessionMap);
-        updatedSessions.set(currentActiveId, {
-          ...currentSession,
-          inputValue: this.activeInputValue(),
-          lastUpdated: Date.now(),
-        });
-
-        // Update the sessions signal with the new Map
-        (this.sessions as unknown as ReturnType<typeof signal<Map<string, SessionData>>>).set(
-          updatedSessions,
-        );
-      }
+    if (currentActiveId === sessionId) {
+      return;
     }
 
     // Switch to the new session
@@ -515,7 +500,7 @@ export class SessionStateService {
       size: { ...DEFAULT_SIZE },
       lastUpdated: now,
       status: SessionStatus.IDLE,
-      color: 'default',
+      color: 'purple',
       mode: 'docked',
     };
 
@@ -645,8 +630,10 @@ export class SessionStateService {
     }
 
     // Validate color is a valid SessionColor
-    const validColors: SessionColor[] = ['default', 'blue', 'purple', 'pink', 'orange', 'yellow'];
-    const validatedColor = validColors.includes(color as SessionColor) ? (color as SessionColor) : 'default';
+    const validColors: SessionColor[] = ['blue', 'purple', 'pink', 'orange', 'yellow'];
+    const validatedColor = validColors.includes(color as SessionColor)
+      ? (color as SessionColor)
+      : 'purple';
 
     // Create an updated sessions map with the new color
     const updatedSessions = new Map(sessionMap);

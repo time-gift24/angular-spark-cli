@@ -19,11 +19,11 @@ import { ContextMenuTriggerDirective, ContextMenuItem } from '@app/shared/ui/con
  * Key Features:
  * - Displays all available sessions as tabs
  * - Highlights the currently active session
- * - Emits events for session selection and panel toggle
- * - Sorts sessions by last updated timestamp (most recent first)
+ * - Emits events for session selection
+ * - Preserves insertion order (no auto-sorting while clicking tabs)
  *
  * Interaction Behavior:
- * - Clicking active session → Emits sessionToggle event (collapse/expand panel)
+ * - Clicking active session → Keep active highlight only
  * - Clicking different session → Emits sessionSelect event with session ID
  *
  * @example
@@ -34,7 +34,6 @@ import { ContextMenuTriggerDirective, ContextMenuItem } from '@app/shared/ui/con
  *       [sessions]="sessionState.sessions"
  *       [activeSessionId]="sessionState.activeSessionId"
  *       (sessionSelect)="onSessionSelect($event)"
- *       (sessionToggle)="onSessionToggle()"
  *     />
  *   `
  * })
@@ -43,10 +42,6 @@ import { ContextMenuTriggerDirective, ContextMenuItem } from '@app/shared/ui/con
  *
  *   onSessionSelect(sessionId: string): void {
  *     this.sessionState.switchSession(sessionId);
- *   }
- *
- *   onSessionToggle(): void {
- *     this.sessionState.toggleMessagesVisibility();
  *   }
  * }
  * ```
@@ -64,8 +59,8 @@ export class SessionTabsBarComponent {
   /**
    * Signal containing the map of all sessions.
    *
-   * The component computes a sorted array from this map for display.
-   * Sessions are sorted by lastUpdated timestamp (most recent first).
+   * The component converts this map into an array for display while
+   * preserving the map insertion order.
    *
    * @required
    */
@@ -85,7 +80,7 @@ export class SessionTabsBarComponent {
    * Event emitted when a user selects a different session.
    *
    * Emits the session ID of the selected session.
-   * NOT emitted when clicking the already-active session (that emits sessionToggle instead).
+   * NOT emitted when clicking the already-active session.
    *
    * @example
    * ```typescript
@@ -99,19 +94,9 @@ export class SessionTabsBarComponent {
   readonly sessionSelect = output<string>();
 
   /**
-   * Event emitted when a user clicks the active session tab.
+   * Legacy output kept for backward compatibility.
    *
-   * This typically toggles the visibility of the messages panel
-   * (collapse/expand). Emits no payload.
-   *
-   * @example
-   * ```typescript
-   * (sessionToggle)="handleSessionToggle()"
-   *
-   * handleSessionToggle(): void {
-   *   this.sessionState.toggleMessagesVisibility();
-   * }
-   * ```
+   * Session tab clicks no longer emit this event.
    */
   readonly sessionToggle = output<void>();
 
@@ -162,74 +147,120 @@ export class SessionTabsBarComponent {
     label: string;
     color: string;
   }> = [
-    { value: 'default', label: '默认绿', color: 'var(--session-color-default)' },
-    { value: 'blue', label: '蓝色', color: 'var(--session-color-blue)' },
-    { value: 'purple', label: '紫色', color: 'var(--session-color-purple)' },
-    { value: 'pink', label: '粉色', color: 'var(--session-color-pink)' },
-    { value: 'orange', label: '橙色', color: 'var(--session-color-orange)' },
-    { value: 'yellow', label: '黄色', color: 'var(--session-color-yellow)' },
+    { value: 'blue', label: '蓝色', color: '#3b82f6' },
+    { value: 'purple', label: '紫色', color: '#8b5cf6' },
+    { value: 'pink', label: '粉色', color: '#ec4899' },
+    { value: 'orange', label: '橙色', color: '#f97316' },
+    { value: 'yellow', label: '黄色', color: '#eab308' },
   ] as const;
 
-  /**
-   * Cache for menu items to avoid recreating on every change detection
-   */
-  private menuItemsCache = new Map<string, ContextMenuItem[]>();
+  private readonly COLOR_STYLE_TOKENS: Readonly<
+    Record<
+      SessionColor,
+      {
+        bg: string;
+        bgActive: string;
+        border: string;
+        borderActive: string;
+        text: string;
+        textActive: string;
+      }
+    >
+  > = {
+    // Tailwind colors: blue-500/600/700
+    blue: {
+      bg: '#3b82f61f',
+      bgActive: '#3b82f638',
+      border: '#3b82f652',
+      borderActive: '#3b82f680',
+      text: '#1d4ed8',
+      textActive: '#1e40af',
+    },
+    // Tailwind colors: violet-500/600/700
+    purple: {
+      bg: '#8b5cf61f',
+      bgActive: '#8b5cf638',
+      border: '#8b5cf652',
+      borderActive: '#8b5cf680',
+      text: '#6d28d9',
+      textActive: '#5b21b6',
+    },
+    // Tailwind colors: pink-500/600/700
+    pink: {
+      bg: '#ec48991f',
+      bgActive: '#ec489938',
+      border: '#ec489952',
+      borderActive: '#ec489980',
+      text: '#be185d',
+      textActive: '#9d174d',
+    },
+    // Tailwind colors: orange-500/600/700
+    orange: {
+      bg: '#f973161f',
+      bgActive: '#f9731638',
+      border: '#f9731652',
+      borderActive: '#f9731680',
+      text: '#c2410c',
+      textActive: '#9a3412',
+    },
+    // Tailwind colors: yellow-500/600/700
+    yellow: {
+      bg: '#eab3081f',
+      bgActive: '#eab30838',
+      border: '#eab30852',
+      borderActive: '#eab30880',
+      text: '#a16207',
+      textActive: '#854d0e',
+    },
+  } as const;
 
   /**
    * Gets menu items for a session tab
    */
   getSessionMenuItems(sessionId: string): ContextMenuItem[] {
-    // Check cache first
-    if (this.menuItemsCache.has(sessionId)) {
-      return this.menuItemsCache.get(sessionId)!;
+    const session = this.sessions()().get(sessionId);
+    if (!session) {
+      return [];
     }
 
-    const session = this.sessions()().get(sessionId);
-    if (!session) return [];
-
     // Build color menu items (flattened, not nested)
-    const colorMenuItems: ContextMenuItem[] = this.AVAILABLE_COLORS.map((color) => ({
-      label: color.label,
-      icon: `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${color.color}"></span>`,
-      action: () => this.changeSessionColor(sessionId, color.value),
-    }));
+    const colorMenuItems: ContextMenuItem[] = this.AVAILABLE_COLORS.map((color) => {
+      const isCurrent = (session.color ?? 'purple') === color.value;
+      return {
+        label: isCurrent ? `${color.label}（当前）` : color.label,
+        icon: { type: 'swatch', color: color.color },
+        shortcut: isCurrent ? '✓' : undefined,
+        action: () => this.changeSessionColor(sessionId, color.value),
+      };
+    });
 
     const menuItems: ContextMenuItem[] = [
       {
         label: '重命名',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>`,
+        icon: { type: 'icon', name: 'edit' },
         action: () => this.renameSession(sessionId),
       },
       ...colorMenuItems,
       {
         label: '关闭会话',
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+        icon: { type: 'icon', name: 'x' },
         destructive: true,
         action: () => this.closeSession(sessionId),
       },
     ];
 
-    // Cache the menu items
-    this.menuItemsCache.set(sessionId, menuItems);
     return menuItems;
   }
 
   /**
-   * Computed signal that returns sessions sorted by last updated timestamp.
-   *
-   * Sorting Logic:
-   * - Sorts by lastUpdated in descending order (most recent first)
-   * - Provides stable ordering for tabs
-   * - Automatically reacts when sessions map changes
+   * Computed signal that returns sessions in insertion order.
    *
    * @readonly
-   * @returns Array of SessionData objects sorted by recency
+   * @returns Array of SessionData objects for display
    */
-  readonly sortedSessions: Signal<SessionData[]> = computed(() => {
+  readonly displaySessions: Signal<SessionData[]> = computed(() => {
     const sessionMap = this.sessions()();
-
-    // Convert Map to array and sort by lastUpdated (most recent first)
-    return Array.from(sessionMap.values()).sort((a, b) => b.lastUpdated - a.lastUpdated);
+    return Array.from(sessionMap.values());
   });
 
   /**
@@ -237,7 +268,7 @@ export class SessionTabsBarComponent {
    *
    * Click Behavior:
    * - Only responds to left-click (button === 0)
-   * - If clicking the active session → Emit sessionToggle event
+   * - If clicking the active session → No-op (keep highlight)
    * - If clicking a different session → Emit sessionSelect event with session ID
    *
    * @param event - The mouse event (prevent default to avoid form submission)
@@ -255,12 +286,11 @@ export class SessionTabsBarComponent {
     const activeId = this.activeSessionId()();
 
     if (sessionId === activeId) {
-      // Clicking active session → toggle panel visibility
-      this.sessionToggle.emit();
-    } else {
-      // Clicking different session → switch to that session
-      this.sessionSelect.emit(sessionId);
+      return;
     }
+
+    // Clicking different session → switch to that session
+    this.sessionSelect.emit(sessionId);
   }
 
   /**
@@ -310,14 +340,32 @@ export class SessionTabsBarComponent {
     this.sessionClose.emit(sessionId);
   }
 
-  /**
-   * Gets the color class for a session.
-   *
-   * @param session - The session data
-   * @returns The color class name
-   */
-  getSessionColorClass(session: SessionData): string {
-    const color = session.color || 'default';
-    return `session-color-${color}`;
+  private getSessionColorKey(color?: string): SessionColor {
+    switch (color) {
+      case 'blue':
+      case 'purple':
+      case 'pink':
+      case 'orange':
+      case 'yellow':
+        return color;
+      default:
+        // Backward compatible fallback for old persisted values (e.g. "default")
+        return 'purple';
+    }
+  }
+
+  getSessionBackgroundColor(session: SessionData, isActive: boolean): string {
+    const palette = this.COLOR_STYLE_TOKENS[this.getSessionColorKey(session.color)];
+    return isActive ? palette.bgActive : palette.bg;
+  }
+
+  getSessionBorderColor(session: SessionData, isActive: boolean): string {
+    const palette = this.COLOR_STYLE_TOKENS[this.getSessionColorKey(session.color)];
+    return isActive ? palette.borderActive : palette.border;
+  }
+
+  getSessionTextColor(session: SessionData, isActive: boolean): string {
+    const palette = this.COLOR_STYLE_TOKENS[this.getSessionColorKey(session.color)];
+    return isActive ? palette.textActive : palette.text;
   }
 }
