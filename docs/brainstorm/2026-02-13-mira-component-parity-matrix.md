@@ -122,3 +122,8 @@ Angular 当前缺失：
 3. 新增 demo 路由全部可访问。
 4. `npm run build` 通过。
 5. token 校验通过（见 token 文档）。
+
+## 9. Post-Parity Backlog
+Mira parity 主线完成后的扩展组件清单见：
+
+`/Users/wanyaozhong/Projects/angular-spark-cli/docs/brainstorm/2026-02-13-post-parity-component-import-backlog.md`

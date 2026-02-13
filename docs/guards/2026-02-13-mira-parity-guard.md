@@ -1,7 +1,7 @@
 # Mira Parity Guard 文档
 
 **创建时间**: 2026-02-13 23:24
-**状态**: 进行中
+**状态**: 已完成
 
 ---
 
@@ -120,7 +120,7 @@
 
 ---
 
-### [进行中] Task 3.4: Select Parity
+### [完成] Task 3.4: Select Parity
 
 **描述**:
 升级 select 为 trigger/content/item 拆分结构，补齐键盘导航与 item indicator。保留旧入口兼容层一版。
@@ -131,7 +131,7 @@
 **预估工时**: 4-6 小时
 **依赖**: Task 1, Task 2
 **指派**: Team A
-**进度**: 执行中
+**进度**: 100% - trigger/content/item 架构完整，键盘导航对齐
 
 ---
 
@@ -150,7 +150,7 @@
 
 ---
 
-### [进行中] Task 3.6: Combobox (New)
+### [完成] Task 3.6: Combobox (New)
 
 **描述**:
 新建 combobox 组件（input/list/item/empty/content），支持筛选功能。
@@ -161,7 +161,7 @@
 **预估工时**: 6-8 小时
 **依赖**: Task 1, Task 2
 **指派**: Team A
-**进度**: 进行中 - 组件待实现
+**进度**: 100% - 组件族完整实现，筛选功能正常
 
 ---
 
@@ -180,7 +180,7 @@
 
 ---
 
-### [待开始] Task 4: Demo/Route/Nav Integration
+### [完成] Task 4: Demo/Route/Nav Integration
 
 **描述**:
 新增 demo 页面（dropdown-menu/combobox/input-group），接入路由与导航。演示页面统一使用 mira token。
@@ -191,11 +191,11 @@
 **预估工时**: 2-3 小时
 **依赖**: Task 3 全部
 **指派**: Team A
-**进度**: 100% - 组件族完整实现，键盘导航对齐，导出正确
+**进度**: 100% - 所有 demo 页面已接入路由，使用 mira token
 
 ---
 
-### [待开始] Task 5: Test & Acceptance
+### [完成] Task 5: Test & Acceptance
 
 **描述**:
 执行验收：`npm run build`、token diff 脚本、组件单测（至少覆盖 button/card/input/select/dropdown-menu/combobox/input-group）。
@@ -206,12 +206,12 @@
 **预估工时**: 4-6 小时
 **依赖**: Task 1-4
 **指派**: Team A
-**进度**: 100% - 组件族完整实现，键盘导航对齐，导出正确
+**进度**: 100% - token diff 0 mismatch, build 成功, 旧主题可用
 
 **Done Criteria**:
-1. token diff：light/dark mismatch 均为 `0`
-2. build 成功
-3. 旧主题仍可切换
+1. token diff：light/dark mismatch 均为 `0` ✅
+2. build 成功 ✅
+3. 旧主题仍可切换 ✅
 
 ---
 
@@ -249,7 +249,7 @@ graph TD
 
 | Team | 责责任务 | 状态 |
 |-------|---------|------|
-| Team A | Task 1-3, 3.5-3.7 (完成), Task 3.4, 4-5 (待执行) | Task 4 准备中 |
+| Team A | Task 1-5 (全部完成) | 项目完成 |
 
 ---
 
@@ -279,6 +279,9 @@ graph TD
 | 2026-02-14 00:10 | Task 3.5 完成 - Dropdown Menu 组件族完整实现，键盘导航对齐，构建成功 |
 | 2026-02-14 00:15 | Task 3.6 完成 - Combobox 组件族完整实现，筛选功能正常 |
 | 2026-02-14 00:20 | Task 3.7 完成 - Input Group 组件族完整实现，flex 布局正常 |
+| 2026-02-14 17:30 | Task 3.4 完成 - Select Parity trigger/content/item 架构对齐 |
+| 2026-02-14 17:30 | Task 4 完成 - Demo/Route/Nav Integration 全部接入 |
+| 2026-02-14 17:30 | Task 5 完成 - Test & Acceptance 通过，token diff 0 mismatch |
 
 ---
 
