@@ -1,14 +1,25 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { SelectComponent, type SelectOption } from '@app/shared/ui/select';
+import {
+  SelectRootComponent,
+  SelectTriggerComponent,
+  SelectContentComponent,
+  SelectItemComponent,
+} from '@app/shared/ui/select';
 
-/**
- * Select Demo Component
- *
- * 展示 Select 组件的各种用法和样式
- */
+export interface SelectOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}
+
 @Component({
   selector: 'app-select-demo',
-  imports: [SelectComponent],
+  imports: [
+    SelectRootComponent,
+    SelectTriggerComponent,
+    SelectContentComponent,
+    SelectItemComponent,
+  ],
   templateUrl: './select-demo.component.html',
   styleUrl: './select-demo.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,21 +28,20 @@ import { SelectComponent, type SelectOption } from '@app/shared/ui/select';
   },
 })
 export class SelectDemoComponent {
-  // 示例选项数据
   readonly fruits: SelectOption[] = [
-    { value: 'apple', label: '苹果' },
-    { value: 'banana', label: '香蕉' },
-    { value: 'orange', label: '橙子' },
-    { value: 'grape', label: '葡萄' },
-    { value: 'watermelon', label: '西瓜' },
+    { value: 'apple', label: 'Apple' },
+    { value: 'banana', label: 'Banana' },
+    { value: 'orange', label: 'Orange' },
+    { value: 'grape', label: 'Grape' },
+    { value: 'watermelon', label: 'Watermelon' },
   ];
 
   readonly cities: SelectOption[] = [
-    { value: 'beijing', label: '北京' },
-    { value: 'shanghai', label: '上海' },
-    { value: 'guangzhou', label: '广州' },
-    { value: 'shenzhen', label: '深圳' },
-    { value: 'hangzhou', label: '杭州' },
+    { value: 'beijing', label: 'Beijing' },
+    { value: 'shanghai', label: 'Shanghai' },
+    { value: 'guangzhou', label: 'Guangzhou' },
+    { value: 'shenzhen', label: 'Shenzhen' },
+    { value: 'hangzhou', label: 'Hangzhou' },
   ];
 
   readonly users: SelectOption[] = [
@@ -42,35 +52,25 @@ export class SelectDemoComponent {
   ];
 
   readonly priorities: SelectOption[] = [
-    { value: 'low', label: '低优先级' },
-    { value: 'medium', label: '中优先级' },
-    { value: 'high', label: '高优先级' },
+    { value: 'low', label: 'Low Priority' },
+    { value: 'medium', label: 'Medium Priority' },
+    { value: 'high', label: 'High Priority' },
   ];
 
-  // 交互式演示状态
   readonly selectedFruit = signal('');
   readonly selectedCity = signal('');
   readonly selectedUser = signal('');
   readonly selectedPriority = signal('');
 
-  /**
-   * 处理选项变化
-   */
-  onFruitChange(value: string): void {
-    console.log('Selected fruit:', value);
+  onFruitChange(val: string): void {
+    console.log('Selected fruit:', val);
   }
 
-  /**
-   * 获取选中项标签
-   */
-  getSelectedLabel(options: SelectOption[], value: string): string {
-    if (!value) return '未选择';
-    return options.find(opt => opt.value === value)?.label || '未知';
+  getSelectedLabel(opts: SelectOption[], val: string): string {
+    if (!val) return 'Not selected';
+    return opts.find((opt) => opt.value === val)?.label || 'Unknown';
   }
 
-  /**
-   * 重置选择
-   */
   resetSelections(): void {
     this.selectedFruit.set('');
     this.selectedCity.set('');
@@ -78,9 +78,6 @@ export class SelectDemoComponent {
     this.selectedPriority.set('');
   }
 
-  /**
-   * 提交表单
-   */
   submitForm(): void {
     console.log({
       fruit: this.selectedFruit(),
@@ -88,6 +85,6 @@ export class SelectDemoComponent {
       user: this.selectedUser(),
       priority: this.selectedPriority(),
     });
-    alert('表单数据已提交到控制台');
+    alert('Form data submitted to console');
   }
 }

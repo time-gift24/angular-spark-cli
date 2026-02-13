@@ -1,0 +1,106 @@
+/* Alert Dialog Component - 矿物与时光主题 */
+
+:host([data-state='open']) {
+  display: flex;
+}
+
+:host([data-state='closed']) {
+  display: none;
+}
+
+/* Overlay */
+.alert-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--sheet-overlay-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--sheet-z-overlay);
+  animation: dialog-fade-in var(--duration-spring-normal) var(--ease-spring-smooth);
+}
+
+/* Content */
+.alert-dialog-content {
+  position: relative;
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-popover);
+  max-width: var(--sheet-max-width);
+  width: 100%;
+  margin: var(--spacing-lg);
+  padding: var(--sheet-padding);
+  animation: dialog-scale-in var(--duration-spring-normal) var(--ease-spring-smooth);
+}
+
+/* Header */
+.alert-dialog-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Title */
+.alert-dialog-title {
+  font-size: 1rem; /* text-base */
+  font-weight: 500;
+  color: var(--foreground);
+  margin: 0;
+}
+
+/* Description */
+.alert-dialog-description {
+  font-size: 0.875rem; /* text-sm */
+  color: var(--muted-foreground);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Footer */
+.alert-dialog-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+}
+
+/* Animations */
+@keyframes dialog-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .alert-dialog-content {
+    margin: var(--spacing-md);
+    padding: var(--spacing-lg);
+  }
+
+  .alert-dialog-footer {
+    flex-direction: column;
+  }
+
+  .alert-dialog-cancel,
+  .alert-dialog-confirm {
+    width: 100%;
+  }
+}

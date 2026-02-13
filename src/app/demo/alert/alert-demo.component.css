@@ -1,0 +1,37 @@
+/* ============================================================================
+   Alert Demo Page Styles
+   ============================================================================ */
+
+@import '../../demo/shared/demo-page-styles.css';
+
+/* Demo Examples Layout */
+.demo-examples {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* Custom content styling for ng-content examples */
+.demo-examples :deep(p) {
+  margin: 0;
+}
+
+.demo-examples :deep(.mt-2) {
+  margin-top: var(--spacing-md);
+}
+
+.demo-examples :deep(a) {
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-color: var(--primary);
+}
+
+.demo-examples :deep(a:hover) {
+  text-decoration-style: solid;
+  text-decoration-thickness: var(--separator-thickness);
+}
+
+/* Reset button area */
+.pt-4 {
+  padding-top: var(--spacing-xl);
+}

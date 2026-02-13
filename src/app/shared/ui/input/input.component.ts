@@ -4,15 +4,14 @@ import { cn } from '@app/shared';
 
 /**
  * Input variants using class-variance-authority
- * Centralizes all input style definitions
+ * Aligned 1:1 with aim reference implementation
+ * Reference: .vendor/aim/components/ui/input.tsx
  */
 const inputVariants = cva(
-  // Base styles - 矿物与时光主题，更舒适的视觉效果
-  'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground w-full min-w-0 rounded-md bg-card text-sm shadow-sm transition-all duration-200 outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-xs file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+  // Base styles - exact match with aim reference
+  'bg-input/20 dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/30 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 h-7 rounded-md border px-2 py-0.5 text-sm transition-colors file:h-6 file:text-xs/relaxed file:font-medium focus-visible:ring-2 aria-invalid:ring-2 md:text-xs/relaxed file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
   {
-    variants: {
-      // Future variants can be added here (e.g., size, variant)
-    },
+    variants: {},
     defaultVariants: {},
   },
 );
@@ -28,9 +27,9 @@ export type InputVariant = VariantProps<typeof inputVariants>;
   host: {
     '[class]': 'computedClass()',
     '[attr.disabled]': 'disabled() ? "" : null',
+    '[attr.data-slot]': '"input"',
   },
   template: '',
-  styleUrl: './input.component.css',
 })
 export class InputComponent {
   readonly type = input<string>('text');
@@ -46,13 +45,17 @@ export class InputComponent {
 
   /**
    * Computed class using CVA pattern
-   * Centralizes base styles and adds focus/validation states
+   * 1:1 aligned with aim reference implementation
+   *
+   * Key styles from aim:
+   * - h-7: height 1.75rem (28px)
+   * - px-2 py-0.5: padding x 0.5rem, y 0.125rem
+   * - bg-input/20 dark:bg-input/30: background with opacity
+   * - border-input: border color from --input variable
+   * - focus-visible:border-ring focus-visible:ring-ring/30 focus-visible:ring-2: focus ring
+   * - aria-invalid:* states: destructive ring on invalid
    */
   protected computedClass = computed(() => {
-    return cn(
-      inputVariants(),
-      'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
-      this.class(),
-    );
+    return cn(inputVariants(), this.class());
   });
 }

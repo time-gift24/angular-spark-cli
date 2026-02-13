@@ -28,7 +28,7 @@
     <!-- Sizes Section -->
     <div class="demo-section">
       <h2>Sizes</h2>
-      <p class="text-sm text-muted-foreground">Available button sizes</p>
+      <p class="text-sm text-muted-foreground">Available button sizes (mira parity)</p>
       <div class="button-group">
         @for (size of buttonSizes; track size.label) {
           <button spark-button [size]="size.size ?? 'default'">
@@ -36,26 +36,50 @@
           </button>
         }
       </div>
+      <div class="size-descriptions">
+        @for (size of buttonSizes; track size.label) {
+          <div class="size-description">
+            <strong>{{ size.label }}</strong>: {{ size.description }}
+          </div>
+        }
+      </div>
     </div>
 
-    <!-- Icon Button -->
-    <div class="button-group">
-      <button spark-button size="icon" class="icon-button">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M5 12h14" />
-          <path d="m12 5 7 7-7 7" />
-        </svg>
-      </button>
+    <!-- Icon Button Sizes -->
+    <div class="demo-section">
+      <h2>Icon Buttons</h2>
+      <p class="text-sm text-muted-foreground">Icon-only button sizes for compact UI elements</p>
+      <div class="button-group">
+        @for (size of buttonIconSizes; track size.label) {
+          <button
+            spark-button
+            [size]="size.size ?? 'icon'"
+            [attr.aria-label]="size.label"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </button>
+        }
+      </div>
+      <div class="size-descriptions">
+        @for (size of buttonIconSizes; track size.label) {
+          <div class="size-description">
+            <strong>{{ size.label }}</strong>: {{ size.description }}
+          </div>
+        }
+      </div>
     </div>
 
     <!-- Disabled State Section -->
@@ -68,6 +92,23 @@
             spark-button
             [variant]="state.variant ?? 'default'"
             [disabled]="state.disabled ?? false"
+          >
+            {{ state.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Invalid State Section -->
+    <div class="demo-section">
+      <h2>Invalid State</h2>
+      <p class="text-sm text-muted-foreground">Form validation error state (mira parity)</p>
+      <div class="button-group">
+        @for (state of buttonValidationStates; track state.label) {
+          <button
+            spark-button
+            [variant]="state.variant ?? 'default'"
+            [invalid]="state.invalid ?? false"
           >
             {{ state.label }}
           </button>

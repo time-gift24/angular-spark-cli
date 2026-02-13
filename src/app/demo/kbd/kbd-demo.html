@@ -1,0 +1,125 @@
+<div class="demo-container">
+  <div class="demo-header">
+    <h1>Keyboard</h1>
+    <p class="text-muted-foreground">Display keyboard shortcuts and key combinations.</p>
+  </div>
+
+  <div class="demo-section">
+    <h2>Single Key</h2>
+    <p class="text-sm text-muted-foreground">Single keyboard shortcut.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <kbd spark-kbd [keys]="['K']"></kbd>
+        <span class="text-sm">Toggle search</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Two Keys</h2>
+    <p class="text-sm text-muted-foreground">Two-key combination.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-col items-start gap-2">
+        <div class="flex flex-row items-center gap-4">
+          <kbd spark-kbd [keys]="['Ctrl', 'K']"></kbd>
+          <span class="text-sm">Toggle search</span>
+        </div>
+        <div class="flex flex-row items-center gap-4">
+          <kbd spark-kbd [keys]="['⌘', 'K']"></kbd>
+          <span class="text-sm">Toggle search (Mac)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Three Keys</h2>
+    <p class="text-sm text-muted-foreground">Three-key combination.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-col items-start gap-2">
+        <div class="flex flex-row items-center gap-4">
+          <kbd spark-kbd [keys]="['Ctrl', '⇧', 'K']"></kbd>
+          <span class="text-sm">Toggle search (with shift)</span>
+        </div>
+        <div class="flex flex-row items-center gap-4">
+          <kbd spark-kbd [keys]="['Ctrl', '⇧', 'P']"></kbd>
+          <span class="text-sm">Open command palette</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Common Shortcuts</h2>
+    <p class="text-sm text-muted-foreground">Common keyboard shortcuts.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-col items-start gap-2">
+        <div class="flex flex-row items-center gap-4">
+          <kbd spark-kbd [keys]="['Ctrl', 'C']"></kbd>
+          <span class="text-sm">Copy</span>
+        </div>
+        <div class="flex flex-row items-center gap-4">
+          <kbd spark-kbd [keys]="['Ctrl', 'V']"></kbd>
+          <span class="text-sm">Paste</span>
+        </div>
+        <div class="flex flex-row items-center gap-4">
+          <kbd spark-kbd [keys]="['Ctrl', 'X']"></kbd>
+          <span class="text-sm">Cut</span>
+        </div>
+        <div class="flex flex-row items-center gap-4">
+          <kbd spark-kbd [keys]="['Ctrl', 'Z']"></kbd>
+          <span class="text-sm">Undo</span>
+        </div>
+        <div class="flex flex-row items-center gap-4">
+          <kbd spark-kbd [keys]="['Ctrl', '⇧', 'Z']"></kbd>
+          <span class="text-sm">Redo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Navigation</h2>
+    <p class="text-sm text-muted-foreground">Navigation shortcuts.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-col items-start gap-2">
+        <div class="flex flex-row items-center gap-4">
+          <kbd spark-kbd [keys]="['↑']"></kbd>
+          <span class="text-sm">Move up</span>
+        </div>
+        <div class="flex flex-row items-center gap-4">
+          <kbd spark-kbd [keys]="['↓']"></kbd>
+          <span class="text-sm">Move down</span>
+        </div>
+        <div class="flex flex-row items-center gap-4">
+          <kbd spark-kbd [keys]="['←']"></kbd>
+          <span class="text-sm">Move left</span>
+        </div>
+        <div class="flex flex-row items-center gap-4">
+          <kbd spark-kbd [keys]="['→']"></kbd>
+          <span class="text-sm">Move right</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>In Text</h2>
+    <p class="text-sm text-muted-foreground">Keyboard shortcuts inline with text.</p>
+
+    <div class="demo-example">
+      <p class="text-sm">
+        Press
+        <kbd spark-kbd [keys]="['Ctrl', 'K']"></kbd>
+        to open the command palette. You can also use
+        <kbd spark-kbd [keys]="['⌘', 'K']"></kbd>
+        on Mac.
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,51 @@
+/* Empty Component - 矿物与时光主题 */
+
+:host {
+  display: flex;
+  padding: var(--empty-padding);
+  min-height: var(--empty-min-height);
+}
+
+/* Content container */
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  text-align: center;
+  max-width: var(--empty-max-width);
+}
+
+/* Icon container */
+.empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--empty-icon-size);
+  height: var(--empty-icon-size);
+  color: var(--muted-foreground);
+  opacity: 0.6;
+}
+
+/* Title */
+.empty-title {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--foreground);
+  margin: 0;
+}
+
+/* Description */
+.empty-description {
+  font-size: var(--kbd-font-size);
+  color: var(--muted-foreground);
+  margin: 0;
+  line-height: var(--kbd-line-height);
+  max-width: var(--empty-max-width);
+}
+
+/* Action button */
+.empty-action {
+  margin-top: var(--spacing-sm);
+}

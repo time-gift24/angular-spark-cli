@@ -1,0 +1,85 @@
+<div class="demo-container">
+  <div class="demo-header">
+    <h1>Alert Dialog</h1>
+    <p class="text-muted-foreground">Modal dialog for confirmation actions.</p>
+  </div>
+
+  <div class="demo-section">
+    <h2>Default Alert</h2>
+    <p class="text-sm text-muted-foreground">Standard confirmation dialog.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <button
+          type="button"
+          spark-button
+          variant="outline"
+          (click)="isDefaultOpen.set(true)"
+        >
+          Open Dialog
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Destructive Alert</h2>
+    <p class="text-sm text-muted-foreground">Destructive action confirmation.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <button
+          type="button"
+          spark-button
+          variant="destructive"
+          (click)="isDestructiveOpen.set(true)"
+        >
+          Delete Item
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>With Description</h2>
+    <p class="text-sm text-muted-foreground">Dialog with detailed description.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <button
+          type="button"
+          spark-button
+          variant="outline"
+          (click)="isDefaultOpen.set(true)"
+        >
+          Open Dialog
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Default Alert Dialog -->
+<div
+  spark-alert-dialog
+  [(open)]="isDefaultOpen"
+  [title]="'Confirm Action'"
+  [description]="'Are you sure you want to proceed? This action cannot be undone.'"
+  [confirmLabel]="'Confirm'"
+  [cancelLabel]="'Cancel'"
+  (confirm)="onDefaultConfirm()"
+  (cancel)="onDefaultCancel()"
+></div>
+
+<!-- Destructive Alert Dialog -->
+<div
+  spark-alert-dialog
+  [(open)]="isDestructiveOpen"
+  [title]="'Delete Item'"
+  [description]="'Are you sure you want to delete this item? This action cannot be undone.'"
+  [confirmLabel]="'Delete'"
+  [cancelLabel]="'Cancel'"
+  [variant]="'destructive'"
+  (confirm)="onDestructiveConfirm()"
+  (cancel)="onDestructiveCancel()"
+></div>

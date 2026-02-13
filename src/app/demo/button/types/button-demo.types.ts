@@ -12,6 +12,8 @@ export interface ComponentTemplate {
   size?: ButtonSize | undefined;
   /** 是否禁用 */
   disabled?: boolean | undefined;
+  /** 是否无效状态（对齐 mira 语义） */
+  invalid?: boolean | undefined;
   /** 图标名称 */
   icon?: string | undefined;
   /** 按钮描述 */

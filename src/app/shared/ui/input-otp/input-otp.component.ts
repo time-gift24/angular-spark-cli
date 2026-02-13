@@ -5,6 +5,7 @@ import {
   computed,
   model,
   signal,
+  effect,
   ChangeDetectionStrategy,
   inject,
   ElementRef,
@@ -50,9 +51,9 @@ export type InputOtpError = VariantProps<typeof inputVariants>['error'];
       @for (i of indices(); track i; let index = $index) {
         <input
           type="text"
-          inputmode="numeric"
+          [attr.inputmode]="inputMode()"
           maxlength="1"
-          pattern="[0-9]*"
+          [attr.pattern]="inputPattern()"
           [class]="inputClass()"
           [attr.disabled]="disabled() ? '' : null"
           [value]="getValue(index)"
@@ -60,7 +61,7 @@ export type InputOtpError = VariantProps<typeof inputVariants>['error'];
           [attr.aria-required]="true"
           (input)="handleInput($event, index)"
           (keydown)="handleKeydown($event, index)"
-          (paste)="handlePaste($event)"
+          (paste)="handlePaste($event, index)"
           (focus)="focusedIndex.set(index)"
           (blur)="handleBlur(index)"
         />
@@ -117,17 +118,40 @@ export class InputOtpComponent {
    * Outputs
    */
   readonly complete = output<string>();
-  readonly valueChange = output<string>();
 
   /**
    * Internal state
    */
   readonly focusedIndex = signal<number>(-1);
+  private readonly slots = signal<string[]>([]);
+
+  constructor() {
+    effect(() => {
+      const length = this.length();
+      const externalValue = this.value();
+      const nextSlots = this.toSlots(externalValue, length);
+      const normalizedValue = this.serializeSlots(nextSlots);
+      if (!this.areSlotsEqual(this.slots(), nextSlots)) {
+        this.slots.set(nextSlots);
+      }
+      if (externalValue !== normalizedValue) {
+        this.value.set(normalizedValue);
+      }
+    });
+  }
 
   /**
    * Create an array for iteration in template
    */
   protected readonly indices = computed(() => Array.from({ length: this.length() }, (_, i) => i));
+
+  protected readonly inputMode = computed(() => {
+    return this.type() === 'numeric' ? 'numeric' : 'text';
+  });
+
+  protected readonly inputPattern = computed(() => {
+    return this.type() === 'numeric' ? '[0-9]*' : '[A-Za-z0-9]*';
+  });
 
   /**
    * Host class
@@ -154,8 +178,7 @@ export class InputOtpComponent {
    * Get value at specific index
    */
   protected getValue(index: number): string {
-    const currentValue = this.value();
-    return currentValue[index] ?? '';
+    return this.slots()[index] ?? '';
   }
 
   /**
@@ -163,35 +186,15 @@ export class InputOtpComponent {
    */
   protected handleInput(event: Event, index: number): void {
     const input = event.target as HTMLInputElement;
-    let inputValue = input.value;
-
-    // Filter based on type
-    if (this.type() === 'numeric') {
-      inputValue = inputValue.replace(/[^0-9]/g, '');
-    } else {
-      // Alphanumeric: letters and numbers only
-      inputValue = inputValue.replace(/[^a-zA-Z0-9]/g, '');
-    }
+    const inputValue = this.filterInput(input.value);
 
     // Only take first character
     const char = inputValue[0] || '';
-
-    // Update value model
-    const currentValue = this.value();
-    const newValue =
-      currentValue.slice(0, index) + char + currentValue.slice(index + 1);
-
-    this.value.set(newValue);
-    this.valueChange.emit(newValue);
+    this.updateSlot(index, char, true);
 
     // Auto-focus next input
     if (char && index < this.length() - 1) {
       this.focusInput(index + 1);
-    }
-
-    // Emit complete event if all filled
-    if (newValue.length === this.length()) {
-      this.complete.emit(newValue);
     }
   }
 
@@ -201,7 +204,10 @@ export class InputOtpComponent {
   protected handleKeydown(event: KeyboardEvent, index: number): void {
     switch (event.key) {
       case 'Backspace':
-        if (!this.getValue(index) && index > 0) {
+        if (this.getValue(index)) {
+          event.preventDefault();
+          this.updateSlot(index, '');
+        } else if (index > 0) {
           event.preventDefault();
           this.focusInput(index - 1);
         }
@@ -224,59 +230,92 @@ export class InputOtpComponent {
   /**
    * Handle paste event
    */
-  protected handlePaste(event: ClipboardEvent): void {
+  protected handlePaste(event: ClipboardEvent, index: number): void {
     event.preventDefault();
     const pastedData = event.clipboardData?.getData('text/plain');
     if (!pastedData) {
       return;
     }
 
-    // Filter based on type
-    let filteredData: string;
-    if (this.type() === 'numeric') {
-      filteredData = pastedData.replace(/[^0-9]/g, '');
-    } else {
-      filteredData = pastedData.replace(/[^a-zA-Z0-9]/g, '');
+    const filteredData = this.filterInput(pastedData);
+    if (!filteredData) {
+      return;
     }
 
-    // Truncate to length
-    const maxLength = this.length();
-    const newValue = filteredData.slice(0, maxLength);
+    const nextSlots = [...this.slots()];
+    let cursor = index;
+    for (const char of filteredData) {
+      if (cursor >= nextSlots.length) {
+        break;
+      }
+      nextSlots[cursor] = char;
+      cursor += 1;
+    }
+    this.updateSlots(nextSlots, true);
 
-    // Update value model
-    this.value.set(newValue);
-    this.valueChange.emit(newValue);
-
-    // Focus the next empty input or last one
-    const nextIndex = Math.min(newValue.length, maxLength - 1);
+    const nextIndex = Math.min(cursor, this.length() - 1);
     this.focusInput(nextIndex);
-
-    // Emit complete event if all filled
-    if (newValue.length === maxLength) {
-      this.complete.emit(newValue);
-    }
   }
 
   /**
    * Handle blur event
    */
   protected handleBlur(index: number): void {
-    // Remove value if invalid on blur
-    const currentValue = this.value();
-    const char = currentValue[index];
+    const char = this.getValue(index);
+    if (char && !this.isValidChar(char)) {
+      this.updateSlot(index, '');
+    }
+  }
 
-    if (char && this.type() === 'numeric' && !/^[0-9]$/.test(char)) {
-      const newValue = currentValue.slice(0, index) + currentValue.slice(index + 1);
-      this.value.set(newValue);
-      this.valueChange.emit(newValue);
-    } else if (
-      char &&
-      this.type() === 'alphanumeric' &&
-      !/^[a-zA-Z0-9]$/.test(char)
-    ) {
-      const newValue = currentValue.slice(0, index) + currentValue.slice(index + 1);
-      this.value.set(newValue);
-      this.valueChange.emit(newValue);
+  private filterInput(value: string): string {
+    if (this.type() === 'numeric') {
+      return value.replace(/[^0-9]/g, '');
+    }
+    return value.replace(/[^a-zA-Z0-9]/g, '');
+  }
+
+  private isValidChar(char: string): boolean {
+    if (this.type() === 'numeric') {
+      return /^[0-9]$/.test(char);
+    }
+    return /^[a-zA-Z0-9]$/.test(char);
+  }
+
+  private toSlots(value: string, length: number): string[] {
+    const sanitized = this.filterInput(value).slice(0, length);
+    return Array.from({ length }, (_, index) => sanitized[index] ?? '');
+  }
+
+  private serializeSlots(slots: string[]): string {
+    return slots.join('');
+  }
+
+  private areSlotsEqual(left: string[], right: string[]): boolean {
+    if (left.length !== right.length) {
+      return false;
+    }
+    for (let index = 0; index < left.length; index++) {
+      if (left[index] !== right[index]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private updateSlot(index: number, char: string, emitComplete = false): void {
+    const nextSlots = [...this.slots()];
+    nextSlots[index] = char;
+    this.updateSlots(nextSlots, emitComplete);
+  }
+
+  private updateSlots(slots: string[], emitComplete = false): void {
+    this.slots.set(slots);
+    const serialized = this.serializeSlots(slots);
+    if (serialized !== this.value()) {
+      this.value.set(serialized);
+    }
+    if (emitComplete && slots.length > 0 && slots.every((slot) => slot.length === 1)) {
+      this.complete.emit(serialized);
     }
   }
 

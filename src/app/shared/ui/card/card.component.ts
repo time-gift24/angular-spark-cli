@@ -1,19 +1,45 @@
 import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@app/shared';
+
+/**
+ * Card variants using class-variance-authority
+ * Aligned with aim reference implementation
+ * Reference: .vendor/aim/components/ui/card.tsx
+ */
+const cardVariants = cva(
+  'ring-foreground/10 bg-card text-card-foreground gap-4 overflow-hidden rounded-lg py-4 text-xs/relaxed ring-1 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 *:[img:first-child]:rounded-t-lg *:[img:last-child]:rounded-b-lg group/card flex flex-col',
+  {
+    variants: {
+      size: {
+        default: '',
+        sm: '',
+      },
+    },
+    defaultVariants: {
+      size: 'default',
+    },
+  },
+);
+
+export type CardSize = VariantProps<typeof cardVariants>['size'];
 
 @Component({
   selector: 'div[spark-card]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
+    '[attr.data-slot]': '"card"',
+    '[attr.data-size]': 'size()',
   },
   template: '<ng-content />',
 })
 export class CardComponent {
+  readonly size = input<CardSize>('default');
   readonly class = input<string>('');
 
   protected computedClass = computed(() => {
-    return cn('rounded-xl border bg-card text-card-foreground shadow', this.class());
+    return cn(cardVariants({ size: this.size() }), this.class());
   });
 }
 
@@ -22,7 +48,7 @@ export class CardComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
-    '[style]': 'headerPadding()',
+    '[attr.data-slot]': '"card-header"',
   },
   template: '<ng-content />',
 })
@@ -30,10 +56,11 @@ export class CardHeaderComponent {
   readonly class = input<string>('');
 
   protected computedClass = computed(() => {
-    return cn('flex flex-col space-y-1.5', this.class());
+    return cn(
+      'group/card-header gap-1 rounded-t-lg px-4 group-data-[size=sm]/card:px-3 [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3 @container/card-header grid auto-rows-min items-start has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]',
+      this.class(),
+    );
   });
-
-  protected headerPadding = computed(() => `padding: var(--card-padding);`);
 }
 
 @Component({
@@ -41,6 +68,7 @@ export class CardHeaderComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
+    '[attr.data-slot]': '"card-title"',
   },
   template: '<ng-content />',
 })
@@ -48,15 +76,16 @@ export class CardTitleComponent {
   readonly class = input<string>('');
 
   protected computedClass = computed(() => {
-    return cn('font-semibold leading-none tracking-tight', this.class());
+    return cn('text-sm font-medium', this.class());
   });
 }
 
 @Component({
-  selector: 'p[spark-card-description]',
+  selector: 'div[spark-card-description]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
+    '[attr.data-slot]': '"card-description"',
   },
   template: '<ng-content />',
 })
@@ -64,7 +93,24 @@ export class CardDescriptionComponent {
   readonly class = input<string>('');
 
   protected computedClass = computed(() => {
-    return cn('text-sm text-muted-foreground', this.class());
+    return cn('text-muted-foreground text-xs/relaxed', this.class());
+  });
+}
+
+@Component({
+  selector: 'div[spark-card-action]',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class]': 'computedClass()',
+    '[attr.data-slot]': '"card-action"',
+  },
+  template: '<ng-content />',
+})
+export class CardActionComponent {
+  readonly class = input<string>('');
+
+  protected computedClass = computed(() => {
+    return cn('col-start-2 row-span-2 row-start-1 self-start justify-self-end', this.class());
   });
 }
 
@@ -73,7 +119,7 @@ export class CardDescriptionComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
-    '[style]': 'cardPadding()',
+    '[attr.data-slot]': '"card-content"',
   },
   template: '<ng-content />',
 })
@@ -81,12 +127,8 @@ export class CardContentComponent {
   readonly class = input<string>('');
 
   protected computedClass = computed(() => {
-    return cn(this.class());
+    return cn('px-4 group-data-[size=sm]/card:px-3', this.class());
   });
-
-  protected cardPadding = computed(
-    () => `padding: 0 var(--card-padding) var(--card-padding) var(--card-padding);`,
-  );
 }
 
 @Component({
@@ -94,7 +136,7 @@ export class CardContentComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
-    '[style]': 'cardFooterPadding()',
+    '[attr.data-slot]': '"card-footer"',
   },
   template: '<ng-content />',
 })
@@ -102,12 +144,8 @@ export class CardFooterComponent {
   readonly class = input<string>('');
 
   protected computedClass = computed(() => {
-    return cn('flex items-center', this.class());
+    return cn('rounded-b-lg px-4 group-data-[size=sm]/card:px-3 [.border-t]:pt-4 group-data-[size=sm]/card:[.border-t]:pt-3 flex items-center', this.class());
   });
-
-  protected cardFooterPadding = computed(
-    () => `padding: 0 var(--card-padding) var(--card-padding) var(--card-padding);`,
-  );
 }
 
 export const CardComponents = [
@@ -115,6 +153,7 @@ export const CardComponents = [
   CardHeaderComponent,
   CardTitleComponent,
   CardDescriptionComponent,
+  CardActionComponent,
   CardContentComponent,
   CardFooterComponent,
 ];

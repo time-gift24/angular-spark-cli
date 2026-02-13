@@ -1,131 +1,211 @@
 <div class="min-h-screen bg-background p-6">
   <div class="mx-auto max-w-4xl">
-    <!-- Page Header -->
     <div class="mb-6">
       <h1>Select Component</h1>
-      <p class="text-muted-foreground">灵活且可访问的下拉选择组件，采用矿物与时光主题设计</p>
+      <p class="text-muted-foreground">Flexible and accessible dropdown select component with theme design</p>
     </div>
 
-    <!-- Basic Select Section -->
     <div class="demo-section">
-      <h2>基础选择器</h2>
-      <p class="text-sm text-muted-foreground">基本用法示例</p>
+      <h2>Basic Select</h2>
+      <p class="text-sm text-muted-foreground">Basic usage examples</p>
       <div class="space-y-4">
         <div class="input-wrapper">
-          <label class="input-label">选择水果</label>
-          <div spark-select [options]="fruits" [(value)]="selectedFruit" placeholder="请选择水果..."></div>
-          <p class="input-hint">已选择: {{ getSelectedLabel(fruits, selectedFruit()) }}</p>
+          <label class="input-label">Select Fruit</label>
+          <div spark-select-root [(value)]="selectedFruit">
+            <button spark-select-trigger placeholder="Select a fruit..."></button>
+            <div spark-select-content>
+              @for (fruit of fruits; track fruit.value) {
+                <div spark-select-item [value]="fruit.value" [disabled]="fruit.disabled ?? false">{{ fruit.label }}</div>
+              }
+            </div>
+          </div>
+          <p class="input-hint">Selected: {{ getSelectedLabel(fruits, selectedFruit()) }}</p>
         </div>
 
         <div class="input-wrapper">
-          <label class="input-label">选择城市</label>
-          <div spark-select [options]="cities" [(value)]="selectedCity" placeholder="请选择城市..."></div>
-          <p class="input-hint">已选择: {{ getSelectedLabel(cities, selectedCity()) }}</p>
+          <label class="input-label">Select City</label>
+          <div spark-select-root [(value)]="selectedCity">
+            <button spark-select-trigger placeholder="Select a city..."></button>
+            <div spark-select-content>
+              @for (city of cities; track city.value) {
+                <div spark-select-item [value]="city.value">{{ city.label }}</div>
+              }
+            </div>
+          </div>
+          <p class="input-hint">Selected: {{ getSelectedLabel(cities, selectedCity()) }}</p>
         </div>
       </div>
     </div>
 
-    <!-- Disabled Options Section -->
     <div class="demo-section">
-      <h2>禁用选项</h2>
-      <p class="text-sm text-muted-foreground">包含禁用选项的选择器</p>
+      <h2>Disabled Options</h2>
+      <p class="text-sm text-muted-foreground">Select with disabled options (Alice is disabled)</p>
       <div class="input-wrapper">
-        <label class="input-label">选择用户（Alice 已禁用）</label>
-        <div spark-select [options]="users" [(value)]="selectedUser" placeholder="请选择用户..."></div>
-        <p class="input-hint">已选择: {{ getSelectedLabel(users, selectedUser()) }}</p>
+        <label class="input-label">Select User</label>
+        <div spark-select-root [(value)]="selectedUser">
+          <button spark-select-trigger placeholder="Select a user..."></button>
+          <div spark-select-content>
+            @for (user of users; track user.value) {
+              <div spark-select-item [value]="user.value" [disabled]="user.disabled ?? false">{{ user.label }}</div>
+            }
+          </div>
+        </div>
+        <p class="input-hint">Selected: {{ getSelectedLabel(users, selectedUser()) }}</p>
       </div>
     </div>
 
-    <!-- Interactive Demo Section -->
     <div class="demo-section">
-      <h2>交互式演示</h2>
-      <p class="text-muted-foreground">尝试使用键盘导航（↑↓方向键，Enter 确认，Esc 关闭）：</p>
+      <h2>Sizes</h2>
+      <p class="text-sm text-muted-foreground">Different size variants</p>
       <div class="space-y-4">
         <div class="input-wrapper">
-          <label class="input-label">任务优先级</label>
-          <div spark-select [options]="priorities" [(value)]="selectedPriority" placeholder="选择优先级..."></div>
+          <label class="input-label">Small (sm)</label>
+          <div spark-select-root>
+            <button spark-select-trigger placeholder="Small size..." size="sm"></button>
+            <div spark-select-content>
+              @for (city of cities; track city.value) {
+                <div spark-select-item [value]="city.value">{{ city.label }}</div>
+              }
+            </div>
+          </div>
         </div>
-
-        <div class="flex gap-2">
-          <button spark-button (click)="submitForm()">提交表单</button>
-          <button spark-button variant="outline" (click)="resetSelections()">重置</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- States Preview Section -->
-    <div class="demo-section">
-      <h2>组件状态</h2>
-      <p class="text-sm text-muted-foreground">不同状态的选择器示例</p>
-      <div class="space-y-4">
         <div class="input-wrapper">
-          <label class="input-label">默认状态</label>
-          <div spark-select [options]="fruits" placeholder="请选择..."></div>
+          <label class="input-label">Default (md)</label>
+          <div spark-select-root>
+            <button spark-select-trigger placeholder="Default size..." size="md"></button>
+            <div spark-select-content>
+              @for (city of cities; track city.value) {
+                <div spark-select-item [value]="city.value">{{ city.label }}</div>
+              }
+            </div>
+          </div>
         </div>
-
         <div class="input-wrapper">
-          <label class="input-label">禁用状态</label>
-          <div spark-select [options]="fruits" disabled placeholder="已禁用..."></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Dark Mode Preview Section -->
-    <div class="demo-section">
-      <h2>深色模式预览</h2>
-      <p class="text-muted-foreground">查看选择器在深色模式下的效果：</p>
-      <div class="dark-preview">
-        <div class="space-y-4">
-          <div class="input-wrapper">
-            <label class="input-label">深色模式选择器</label>
-            <div spark-select [options]="cities" placeholder="请选择..."></div>
+          <label class="input-label">Large (lg)</label>
+          <div spark-select-root>
+            <button spark-select-trigger placeholder="Large size..." size="lg"></button>
+            <div spark-select-content>
+              @for (city of cities; track city.value) {
+                <div spark-select-item [value]="city.value">{{ city.label }}</div>
+              }
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Keyboard Shortcuts Section -->
     <div class="demo-section">
-      <h2>键盘快捷键</h2>
-      <p class="text-muted-foreground">选择器支持的键盘操作：</p>
-      <div class="shortcuts-grid">
-        <div class="shortcut-item">
-          <kbd>↑</kbd>
-          <kbd>↓</kbd>
-          <span>导航选项</span>
+      <h2>Interactive Demo</h2>
+      <p class="text-muted-foreground">Try keyboard navigation (Arrow keys, Enter to select, Esc to close):</p>
+      <div class="space-y-4">
+        <div class="input-wrapper">
+          <label class="input-label">Task Priority</label>
+          <div spark-select-root [(value)]="selectedPriority">
+            <button spark-select-trigger placeholder="Select priority..."></button>
+            <div spark-select-content>
+              @for (priority of priorities; track priority.value) {
+                <div spark-select-item [value]="priority.value">{{ priority.label }}</div>
+              }
+            </div>
+          </div>
         </div>
-        <div class="shortcut-item">
-          <kbd>Enter</kbd>
-          <span>确认选择</span>
-        </div>
-        <div class="shortcut-item">
-          <kbd>Esc</kbd>
-          <span>关闭下拉</span>
-        </div>
-        <div class="shortcut-item">
-          <kbd>Tab</kbd>
-          <span>移出焦点</span>
+
+        <div class="flex gap-2">
+          <button spark-button (click)="submitForm()">Submit Form</button>
+          <button spark-button variant="outline" (click)="resetSelections()">Reset</button>
         </div>
       </div>
     </div>
 
-    <!-- Usage Example Section -->
     <div class="demo-section">
-      <h2>使用示例</h2>
+      <h2>Component States</h2>
+      <p class="text-sm text-muted-foreground">Different select states</p>
+      <div class="space-y-4">
+        <div class="input-wrapper">
+          <label class="input-label">Default State</label>
+          <div spark-select-root>
+            <button spark-select-trigger placeholder="Select..."></button>
+            <div spark-select-content>
+              @for (fruit of fruits; track fruit.value) {
+                <div spark-select-item [value]="fruit.value">{{ fruit.label }}</div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="input-wrapper">
+          <label class="input-label">Disabled State</label>
+          <div spark-select-root [disabled]="true">
+            <button spark-select-trigger placeholder="Disabled..." [disabled]="true"></button>
+            <div spark-select-content>
+              @for (fruit of fruits; track fruit.value) {
+                <div spark-select-item [value]="fruit.value">{{ fruit.label }}</div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Dark Mode Preview</h2>
+      <p class="text-muted-foreground">Preview in dark mode:</p>
+      <div class="dark-preview">
+        <div class="space-y-4">
+          <div class="input-wrapper">
+            <label class="input-label">Dark Mode Select</label>
+            <div spark-select-root>
+              <button spark-select-trigger placeholder="Select..."></button>
+              <div spark-select-content>
+                @for (city of cities; track city.value) {
+                  <div spark-select-item [value]="city.value">{{ city.label }}</div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Keyboard Shortcuts</h2>
+      <p class="text-muted-foreground">Supported keyboard operations:</p>
+      <div class="shortcuts-grid">
+        <div class="shortcut-item">
+          <kbd>ArrowUp</kbd>
+          <kbd>ArrowDown</kbd>
+          <span>Navigate options</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Enter</kbd>
+          <span>Confirm selection</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Esc</kbd>
+          <span>Close dropdown</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Tab</kbd>
+          <span>Move focus out</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Usage Examples</h2>
       <div class="code-example">
-        <p class="text-xs font-semibold mb-2">基础用法：</p>
+        <p class="text-xs font-semibold mb-2">Basic Usage:</p>
         <code class="code-block">
-          &lt;div spark-select [options]="options" placeholder="请选择..."&gt;&lt;/div&gt;
+          &lt;div spark-select-root [(value)]="value"&gt;<br>
+          &nbsp;&nbsp;&lt;button spark-select-trigger placeholder="Select..."&gt;&lt;/button&gt;<br>
+          &nbsp;&nbsp;&lt;div spark-select-content&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;div spark-select-item [value]="'option1'"&gt;Option 1&lt;/div&gt;<br>
+          &nbsp;&nbsp;&lt;/div&gt;<br>
+          &lt;/div&gt;
         </code>
       </div>
       <div class="code-example">
-        <p class="text-xs font-semibold mb-2">双向绑定：</p>
-        <code class="code-block">
-          &lt;div spark-select [options]="options" [(value)]="selectedValue()"&gt;&lt;/div&gt;
-        </code>
-      </div>
-      <div class="code-example">
-        <p class="text-xs font-semibold mb-2">选项数据结构：</p>
+        <p class="text-xs font-semibold mb-2">Option Data Structure:</p>
         <code class="code-block">
           interface SelectOption &#123;<br>
           &nbsp;&nbsp;value: string;<br>

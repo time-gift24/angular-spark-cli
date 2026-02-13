@@ -1,0 +1,52 @@
+<div class="demo-container">
+  <div class="demo-header">
+    <h1>Empty State</h1>
+    <p class="text-muted-foreground">Placeholder for empty states with optional action.</p>
+  </div>
+
+  <div class="demo-section">
+    <h2>Basic Empty</h2>
+    <p class="text-sm text-muted-foreground">Simple empty state with title only.</p>
+
+    <div class="demo-example">
+      <div spark-empty [title]="'No items yet'"></div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>With Description</h2>
+    <p class="text-sm text-muted-foreground">Empty state with title and description.</p>
+
+    <div class="demo-example">
+      <div
+        spark-empty
+        [title]="'No results found'"
+        [description]="'Try adjusting your search or filters to find what you are looking for.'"
+      ></div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>With Action</h2>
+    <p class="text-sm text-muted-foreground">Empty state with action button.</p>
+
+    <div class="demo-example">
+      <div
+        spark-empty
+        [title]="'No items yet'"
+        [description]="'Create your first item to get started'"
+        [actionLabel]="'Create Item'"
+        (actionClick)="onActionClick()"
+      ></div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Minimal</h2>
+    <p class="text-sm text-muted-foreground">Minimal empty state with just title.</p>
+
+    <div class="demo-example">
+      <div spark-empty [title]="'No data'"></div>
+    </div>
+  </div>
+</div>

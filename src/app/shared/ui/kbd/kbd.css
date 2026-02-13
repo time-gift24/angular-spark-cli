@@ -1,0 +1,26 @@
+/* KBD Component - 矿物与时光主题 */
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  border: var(--separator-thickness) solid var(--border);
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  font-size: var(--kbd-font-size);
+  font-weight: 500;
+  box-shadow: 0 1px 2px oklch(0 0 0 / 5%);
+  white-space: nowrap;
+}
+
+/* Individual key */
+.kbd-key {
+  display: inline-block;
+}
+
+/* Key separator */
+.kbd-separator {
+  opacity: 0.5;
+}

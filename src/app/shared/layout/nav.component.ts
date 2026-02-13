@@ -208,6 +208,38 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             >
               Slider
             </a>
+            <a
+              routerLink="/demo/empty"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Empty
+            </a>
+            <a
+              routerLink="/demo/spinner"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Spinner
+            </a>
+            <a
+              routerLink="/demo/kbd"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Keyboard
+            </a>
+            <a
+              routerLink="/demo/alert-dialog"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Alert Dialog
+            </a>
           </div>
 
           <!-- Effects Section -->
@@ -220,6 +252,19 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
               class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
             >
               Liquid Glass
+            </a>
+          </div>
+
+          <!-- Theme Section -->
+          <div class="nav-section">
+            <div class="nav-section-title">主题</div>
+            <a
+              routerLink="/demo/theme-switcher"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Theme Switcher
             </a>
           </div>
 

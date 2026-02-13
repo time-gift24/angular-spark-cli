@@ -4,7 +4,9 @@ import { ButtonComponent } from '@app/shared/ui/button';
 import {
   buttonVariants,
   buttonSizes,
+  buttonIconSizes,
   buttonStates,
+  buttonValidationStates,
   buttonWithIcons,
   iconPaths,
 } from './examples/button-examples';
@@ -29,7 +31,9 @@ export class DemoButtonPageComponent {
   // 示例配置 - 从 examples 文件导入
   readonly buttonVariants = buttonVariants;
   readonly buttonSizes = buttonSizes;
+  readonly buttonIconSizes = buttonIconSizes;
   readonly buttonStates = buttonStates;
+  readonly buttonValidationStates = buttonValidationStates;
   readonly buttonWithIcons = buttonWithIcons;
   readonly iconPaths = iconPaths;
 

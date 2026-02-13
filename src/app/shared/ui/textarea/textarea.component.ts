@@ -37,8 +37,11 @@ export type TextareaSize = VariantProps<typeof textareaVariants>['size'];
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'computedClass()',
+    '[value]': 'value()',
+    '[attr.placeholder]': 'placeholder()',
     '[attr.disabled]': 'disabled() ? "" : null',
     '[attr.aria-invalid]': 'error()',
+    '(input)': 'onInput($event)',
   },
   template: '',
 })
@@ -82,4 +85,9 @@ export class TextareaComponent {
       this.class(),
     );
   });
+
+  protected onInput(event: Event): void {
+    const target = event.target as HTMLTextAreaElement | null;
+    this.value.set(target?.value ?? '');
+  }
 }

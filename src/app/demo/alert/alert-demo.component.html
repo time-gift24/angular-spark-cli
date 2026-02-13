@@ -1,0 +1,106 @@
+<div class="demo-container">
+  <div class="demo-header">
+    <h1>Alert</h1>
+    <p>
+      Ultra compact alert component with variant-based styling for different message
+      types. Supports title, description, and optional dismiss action.
+    </p>
+  </div>
+
+  <div class="flex flex-col gap-8">
+    <!-- Basic Variants -->
+    <div class="demo-section">
+      <h2>Basic Variants</h2>
+      <p>Alert variants with different semantic meanings.</p>
+
+      <div class="demo-examples space-y-4">
+        @for (example of alertVariants; track example.label) {
+          <spark-alert
+            [variant]="example.variant"
+          >
+            {{ example.description }}
+          </spark-alert>
+        }
+      </div>
+    </div>
+
+    <!-- With Title -->
+    <div class="demo-section">
+      <h2>With Title</h2>
+      <p>Alerts with optional title for structured messages.</p>
+
+      <div class="demo-examples space-y-4">
+        @for (example of alertWithTitle; track example.label) {
+          <spark-alert
+            [variant]="example.variant"
+            [title]="example.title ?? ''"
+          >
+            {{ example.description }}
+          </spark-alert>
+        }
+      </div>
+    </div>
+
+    <!-- Dismissible -->
+    <div class="demo-section">
+      <h2>Dismissible Alerts</h2>
+      <p>Alerts that can be dismissed by clicking the close button.</p>
+
+      <div class="demo-examples space-y-4">
+        @for (example of dismissibleAlerts; track example.label) {
+          @if (!isDismissed(example.label + '-' + example.variant)) {
+            <spark-alert
+              [variant]="example.variant"
+              [title]="example.title ?? ''"
+              [dismissible]="true"
+              (dismissed)="onAlertDismiss(example)"
+            >
+              {{ example.description }}
+            </spark-alert>
+          }
+        }
+      </div>
+
+      @if (dismissedAlerts().size > 0) {
+        <div class="flex justify-center pt-4">
+          <button
+            type="button"
+            spark-button
+            variant="outline"
+            (click)="resetAlerts()"
+          >
+            Reset All Alerts
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Using ng-content -->
+    <div class="demo-section">
+      <h2>Custom Content</h2>
+      <p>Alert with custom content using ng-content projection.</p>
+
+      <div class="demo-examples space-y-4">
+        <spark-alert
+          variant="info"
+          title="Custom Alert"
+        >
+          <p>This alert contains custom content with links and formatting.</p>
+          <p class="text-sm mt-2">
+            Visit the <a href="#" class="underline">documentation</a> for more
+            details.
+          </p>
+        </spark-alert>
+
+        <spark-alert
+          variant="success"
+          title="Multi-line Content"
+        >
+          <p>First paragraph of information.</p>
+          <p>Second paragraph with additional details.</p>
+          <p class="text-sm mt-2">Final note with emphasis.</p>
+        </spark-alert>
+      </div>
+    </div>
+  </div>
+</div>

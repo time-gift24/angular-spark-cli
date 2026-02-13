@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, signal, computed, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { InputComponent } from '@app/shared/ui';
 import { basicInputs, stateInputs, specialInputs, formFields } from './examples/input-examples';
@@ -20,6 +20,7 @@ import type { InputStats } from './types/input-demo.types';
   },
 })
 export class InputDemoComponent {
+  readonly submitFormEvent = new EventEmitter<void>();
   // 示例配置
   readonly basicInputs = basicInputs;
   readonly stateInputs = stateInputs;
@@ -90,15 +91,15 @@ export class InputDemoComponent {
       lastValue: '',
       lastUpdateTime: null,
     });
-    console.log('Stats reset!');
+    this.resetForm();
   }
 
   /**
    * 提交表单
    */
   submitForm(): void {
-    console.log('Form submitted:', this.formData());
-    alert('表单数据已提交到控制台');
+    this.submitFormEvent.emit();
+    this.resetForm();
   }
 
   /**

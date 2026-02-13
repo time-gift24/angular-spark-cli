@@ -1,0 +1,84 @@
+<div class="demo-container">
+  <div class="demo-header">
+    <h1>Spinner</h1>
+    <p class="text-muted-foreground">Loading indicator with different sizes.</p>
+  </div>
+
+  <div class="demo-section">
+    <h2>Small</h2>
+    <p class="text-sm text-muted-foreground">Small spinner (32px).</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-spinner size="sm"></div>
+        <span>Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Medium</h2>
+    <p class="text-sm text-muted-foreground">Medium spinner (40px).</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-spinner size="md"></div>
+        <span>Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Large</h2>
+    <p class="text-sm text-muted-foreground">Large spinner (48px).</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-spinner size="lg"></div>
+        <span>Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Extra Large</h2>
+    <p class="text-sm text-muted-foreground">Extra large spinner (64px).</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-spinner size="xl"></div>
+        <span>Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>All Sizes</h2>
+    <p class="text-sm text-muted-foreground">All spinner sizes together.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        @for (size of sizes; track size) {
+          <div class="flex flex-col items-center gap-2">
+            <div spark-spinner [size]="size"></div>
+            <span class="text-xs text-muted-foreground">{{ size }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Loading State</h2>
+    <p class="text-sm text-muted-foreground">Spinner in a loading card context.</p>
+
+    <div class="demo-example">
+      <div class="w-250px p-4 border border-border rounded-lg">
+        <div class="flex flex-col items-center gap-4">
+          <div spark-spinner size="md"></div>
+          <p class="text-sm text-muted-foreground">Please wait...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

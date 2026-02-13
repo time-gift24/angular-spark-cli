@@ -69,6 +69,11 @@ export const routes: Routes = [
           import('./demo/avatar/avatar-demo/avatar-demo').then((m) => m.AvatarDemoComponent),
       },
       {
+        path: 'alert',
+        loadComponent: () =>
+          import('./demo/alert/alert-demo.component').then((m) => m.AlertDemoComponent),
+      },
+      {
         path: 'progress',
         loadComponent: () =>
           import('./demo/progress/progress-demo/progress-demo').then(
@@ -172,6 +177,35 @@ export const routes: Routes = [
         path: 'field',
         loadComponent: () =>
           import('./demo/field/field-demo.component').then((m) => m.FieldDemoComponent),
+      },
+      {
+        path: 'empty',
+        loadComponent: () =>
+          import('./demo/empty/empty-demo').then((m) => m.EmptyDemoComponent),
+      },
+      {
+        path: 'spinner',
+        loadComponent: () =>
+          import('./demo/spinner/spinner-demo').then((m) => m.SpinnerDemoComponent),
+      },
+      {
+        path: 'kbd',
+        loadComponent: () =>
+          import('./demo/kbd/kbd-demo').then((m) => m.KbdDemoComponent),
+      },
+      {
+        path: 'alert-dialog',
+        loadComponent: () =>
+          import('./demo/alert-dialog/alert-dialog-demo').then(
+            (m) => m.AlertDialogDemoComponent,
+          ),
+      },
+      {
+        path: 'theme-switcher',
+        loadComponent: () =>
+          import('./demo/theme-switcher/theme-switcher-demo.component').then(
+            (m) => m.ThemeSwitcherDemoComponent,
+          ),
       },
     ],
   },

@@ -1,39 +1,162 @@
-<div class="container max-w-2xl mx-auto py-8 px-4">
+<div class="container max-w-4xl mx-auto py-8 px-4">
   <div class="mb-8">
     <h1 class="text-xl font-semibold mb-2">Card</h1>
     <p class="text-sm text-muted-foreground">
-      A versatile card component with header, content, and footer sections.
+      A versatile card component with size variants, header, action, content, and footer sections.
     </p>
   </div>
 
-  <div spark-card class="w-full">
-    <div spark-card-header>
-      <h3 spark-card-title>Login to your account</h3>
-      <p spark-card-description>Enter your email below to login to your account</p>
-    </div>
-
-    <div spark-card-content class="wu-full">
-      <div class="flex flex-col gap-6">
-        <div class="grid gap-2">
-          <label spark-label for="email">Email</label>
-          <input spark-input id="email" type="email" placeholder="m@example.com" />
+  <!-- Default Size Card -->
+  <div class="mb-8">
+    <h2 class="text-lg font-medium mb-4">Default Size</h2>
+    <div spark-card class="w-full group/card">
+      <div spark-card-header>
+        <h3 spark-card-title>Login to your account</h3>
+        <p spark-card-description>Enter your email below to login to your account</p>
+        <div spark-card-action>
+          <button spark-button variant="ghost" size="sm">Menu</button>
         </div>
+      </div>
 
-        <div class="grid gap-2">
-          <div class="flex items-center justify-between">
-            <label spark-label for="password">Password</label>
-            <a href="#" class="text-xs underline-offset-4 hover:underline">
-              Forgot your password?
-            </a>
+      <div spark-card-content>
+        <div class="flex flex-col gap-4">
+          <div class="grid gap-2">
+            <label spark-label for="email-default">Email</label>
+            <input spark-input id="email-default" type="email" placeholder="m@example.com" />
           </div>
-          <input spark-input id="password" type="password" />
+
+          <div class="grid gap-2">
+            <div class="flex items-center justify-between">
+              <label spark-label for="password-default">Password</label>
+              <a href="#" class="text-xs underline-offset-4 hover:underline">
+                Forgot your password?
+              </a>
+            </div>
+            <input spark-input id="password-default" type="password" />
+          </div>
+        </div>
+      </div>
+
+      <div spark-card-footer class="flex-col gap-2">
+        <button spark-button class="w-full">Login</button>
+        <button spark-button variant="outline" class="w-full">Login with Google</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Small Size Card -->
+  <div class="mb-8">
+    <h2 class="text-lg font-medium mb-4">Small Size</h2>
+    <div spark-card size="sm" class="w-full group/card">
+      <div spark-card-header>
+        <h3 spark-card-title>Quick Settings</h3>
+        <p spark-card-description>Manage your preferences</p>
+        <div spark-card-action>
+          <button spark-button variant="ghost" size="icon" class="h-6 w-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="19" cy="12" r="1"></circle>
+              <circle cx="5" cy="12" r="1"></circle>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div spark-card-content>
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs">Enable notifications</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" class="sr-only peer" checked>
+              <div class="w-7 h-4 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+            </label>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs">Dark mode</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" class="sr-only peer">
+              <div class="w-7 h-4 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+            </label>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <div spark-card-footer class="flex-col gap-2">
-      <button spark-button class="w-full">Login</button>
-      <button spark-button variant="outline" class="w-full">Login with Google</button>
+  <!-- Card with Action Button -->
+  <div class="mb-8">
+    <h2 class="text-lg font-medium mb-4">Card with Action</h2>
+    <div spark-card class="w-full group/card">
+      <div spark-card-header>
+        <h3 spark-card-title>Profile</h3>
+        <p spark-card-description>Manage your profile information</p>
+        <div spark-card-action>
+          <button spark-button variant="outline" size="sm">Edit</button>
+        </div>
+      </div>
+
+      <div spark-card-content>
+        <div class="flex items-center gap-4">
+          <div class="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-medium">John Doe</p>
+            <p class="text-xs text-muted-foreground">john.doe@example.com</p>
+          </div>
+        </div>
+      </div>
+
+      <div spark-card-footer>
+        <button spark-button variant="destructive" size="sm">Delete Account</button>
+      </div>
     </div>
+  </div>
+
+  <!-- Card with Image -->
+  <div class="mb-8">
+    <h2 class="text-lg font-medium mb-4">Card with Image</h2>
+    <div spark-card class="w-full group/card">
+      <img
+        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23e2e8f0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='16' fill='%2364748b'%3EImage Placeholder%3C/text%3E%3C/svg%3E"
+        alt="Card image"
+        class="w-full h-40 object-cover"
+      />
+      <div spark-card-header>
+        <h3 spark-card-title>Nature Photography</h3>
+        <p spark-card-description>Capturing the beauty of the natural world</p>
+      </div>
+      <div spark-card-content>
+        <p class="text-xs text-muted-foreground">
+          Explore stunning photographs from around the world. Each image tells a unique story about nature's wonders.
+        </p>
+      </div>
+      <div spark-card-footer>
+        <button spark-button variant="outline" size="sm">View Gallery</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Usage Example Section -->
+  <div class="mt-12 p-4 bg-muted rounded-lg">
+    <h2 class="text-sm font-semibold mb-2">Usage Example</h2>
+    <pre class="text-xs bg-background p-3 rounded border overflow-x-auto"><code>&lt;div spark-card [size]="'sm'"&gt;
+  &lt;div spark-card-header&gt;
+    &lt;h3 spark-card-title&gt;Title&lt;/h3&gt;
+    &lt;p spark-card-description&gt;Description&lt;/p&gt;
+    &lt;div spark-card-action&gt;
+      &lt;button spark-button&gt;Action&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div spark-card-content&gt;
+    Content goes here...
+  &lt;/div&gt;
+  &lt;div spark-card-footer&gt;
+    Footer content...
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
   </div>
 </div>
