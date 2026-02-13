@@ -53,4 +53,9 @@ export class PanelHeaderComponent {
       this.cancelEdit();
     }
   }
+
+  onInput(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.editValue.set(target.value);
+  }
 }

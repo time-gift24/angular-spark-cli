@@ -803,11 +803,7 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
     }
 
     try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(content);
-      } else {
-        this.fallbackCopy(content);
-      }
+      await navigator.clipboard.writeText(content);
 
       this.copied.set(true);
 
@@ -822,26 +818,6 @@ export class StreamingMarkdownComponent implements OnInit, OnDestroy, AfterViewC
 
     } catch (error) {
       console.error('[StreamingMarkdownComponent] Copy to clipboard failed:', error);
-    }
-  }
-
-  private fallbackCopy(content: string): void {
-    const textArea = document.createElement('textarea');
-    textArea.value = content;
-
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-9999px';
-    textArea.style.top = '0';
-
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-
-    const successful = document.execCommand('copy');
-    document.body.removeChild(textArea);
-
-    if (!successful) {
-      throw new Error('execCommand("copy") failed');
     }
   }
 

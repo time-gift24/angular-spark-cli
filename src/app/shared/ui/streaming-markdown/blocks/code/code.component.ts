@@ -241,13 +241,18 @@ export class MarkdownCodeComponent implements OnInit, OnDestroy {
     const filename = `code.${ext}`;
     const blob = new Blob([this.code], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+
+    // Create a temporary anchor element for download without appending to DOM
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.style.display = 'none';
+
+    // Trigger download and cleanup in the same microtask
+    anchor.click();
+
+    // Revoke the object URL after a short delay to ensure download starts
+    setTimeout(() => URL.revokeObjectURL(url), 100);
   }
 
   private getFileExtension(lang: string): string {

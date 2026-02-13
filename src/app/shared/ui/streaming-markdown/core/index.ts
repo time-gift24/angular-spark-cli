@@ -181,3 +181,38 @@ export { DepthGuard, MAX_NEST_DEPTH } from './depth-guard';
 
 // Block Router Registry
 export { BlockRouterRegistry } from './block-router-registry';
+
+// Marked.js token types
+export {
+  type MarkedToken,
+  type MarkedTokenBase,
+  type MarkedInlineToken,
+  type MarkedHeadingToken,
+  type MarkedParagraphToken,
+  type MarkedCodeToken,
+  type MarkedListToken,
+  type MarkedListItemToken,
+  type MarkedBlockquoteToken,
+  type MarkedHrToken,
+  type MarkedSpaceToken,
+  type MarkedHtmlBlockToken,
+  type MarkedTableToken,
+  type MarkedTableCellToken,
+  type MarkedStrongToken,
+  type MarkedEmToken,
+  type MarkedDelToken,
+  type MarkedCodespanToken,
+  type MarkedLinkToken,
+  type MarkedImageToken,
+  type MarkedBrToken,
+  type MarkedHtmlInlineToken,
+  type MarkedTextToken,
+  type MarkedAnyInlineToken,
+  isMarkedHeadingToken,
+  isMarkedParagraphToken,
+  isMarkedCodeToken,
+  isMarkedListToken,
+  isMarkedBlockquoteToken,
+  isMarkedHtmlBlockToken,
+  isMarkedTableToken
+} from './marked-tokens';

@@ -8,6 +8,12 @@
 
 import { InjectionToken, Type } from '@angular/core';
 import { MarkdownBlock, MarkdownInline } from './models';
+import {
+  MarkedToken,
+  MarkedInlineToken,
+  MarkedTokenBase,
+  MarkedAnyInlineToken
+} from './marked-tokens';
 
 export type PluginOverrideStrategy = 'replace' | 'preserve' | 'error';
 
@@ -128,16 +134,16 @@ export const LEGACY_STREAMDOWN_SECURITY_POLICY: StreamdownSecurityPolicy = {
 };
 
 export interface BlockParserContext {
-  parseInlineTokens(tokens: any[] | undefined): MarkdownInline[];
-  extractText(token: any): string;
-  tokenToBlock(token: any, position: number): MarkdownBlock | null;
+  parseInlineTokens(tokens: MarkedInlineToken[] | undefined): MarkdownInline[];
+  extractText(token: MarkedToken | MarkedInlineToken): string;
+  tokenToBlock(token: MarkedToken, position: number): MarkdownBlock | null;
   generateStableId(type: string, position: number): string;
   sanitizeInline(inline: MarkdownInline): MarkdownInline | null;
 }
 
 export interface InlineParserContext {
-  parseInlineTokens(tokens: any[] | undefined): MarkdownInline[];
-  extractText(token: any): string;
+  parseInlineTokens(tokens: MarkedInlineToken[] | undefined): MarkdownInline[];
+  extractText(token: MarkedToken | MarkedInlineToken): string;
   sanitizeInline(inline: MarkdownInline): MarkdownInline | null;
 }
 
@@ -148,14 +154,14 @@ export interface BlockParseBase {
 }
 
 export interface TokenHandlerInput {
-  token: any;
+  token: MarkedToken;
   position: number;
   baseBlock: BlockParseBase;
   context: BlockParserContext;
 }
 
 export interface InlineTokenHandlerInput {
-  token: any;
+  token: MarkedInlineToken;
   context: InlineParserContext;
 }
 
@@ -172,7 +178,7 @@ export interface BlockParserExtension {
   priority?: number;
 
   type?: string;
-  match?: (token: any) => boolean;
+  match?: (token: MarkedToken) => boolean;
   handler: BlockTokenHandler;
 
   /** Validate handler output; invalid output triggers fallback */
@@ -190,7 +196,7 @@ export interface InlineParserExtension {
   priority?: number;
 
   type?: string;
-  match?: (token: any) => boolean;
+  match?: (token: MarkedInlineToken) => boolean;
   handler: InlineTokenHandler;
 
   /** Validate handler output; invalid output triggers fallback */
@@ -212,7 +218,7 @@ export function defineInlineParserExtension(extension: InlineParserExtension): I
 }
 
 export interface StreamdownPluginInput extends Omit<StreamdownPlugin, 'components'> {
-  components?: Record<string, Type<any>>;
+  components?: Record<string, Type<unknown>>;
 }
 
 export function createStreamdownPlugin(input: StreamdownPluginInput): StreamdownPlugin {
@@ -270,7 +276,7 @@ export interface RenderHookContext {
   isComplete: boolean;
   blockIndex: number;
   depth: number;
-  component: Type<any> | null;
+  component: Type<unknown> | null;
   inputs: Record<string, unknown>;
 }
 
@@ -343,7 +349,7 @@ export interface StreamdownPlugin {
   overrideStrategy?: PluginOverrideStrategy;
 
   /** Map of block type string → component class */
-  components: Record<string, Type<any>>;
+  components: Record<string, Type<unknown>>;
 
   /** Optional custom matcher for blocks that don't match by type string alone */
   blockMatcher?: BlockMatcher;
@@ -372,14 +378,14 @@ export interface StreamdownPlugin {
  */
 export interface BlockComponentRegistry {
   /** Direct type → component lookup map */
-  componentMap: Map<string, Type<any>>;
+  componentMap: Map<string, Type<unknown>>;
 
   /** Ordered list of custom matchers from plugins */
   matchers: {
     pluginName: string;
     matcher: BlockMatcher;
     resolveType?: BlockResolver;
-    components: Record<string, Type<any>>;
+    components: Record<string, Type<unknown>>;
   }[];
 
   parserExtensions: {

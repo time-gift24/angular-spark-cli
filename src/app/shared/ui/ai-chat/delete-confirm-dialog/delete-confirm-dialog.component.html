@@ -2,19 +2,26 @@
   <div
     (click)="onBackdropClick($event)"
     class="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-    <div class="w-[28rem] max-w-[calc(100vw-2rem)] rounded-xl bg-card p-5 shadow-xl sm:p-6">
-      <h3 class="mb-2 text-base font-medium text-foreground sm:text-lg">确认删除会话</h3>
-      <p class="mb-6 text-sm leading-6 text-muted-foreground whitespace-normal break-words">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dialog-title"
+      aria-describedby="dialog-description"
+      class="w-[28rem] max-w-[calc(100vw-2rem)] rounded-xl bg-card p-5 shadow-xl sm:p-6">
+      <h3 id="dialog-title" class="mb-2 text-base font-medium text-foreground sm:text-lg">确认删除会话</h3>
+      <p id="dialog-description" class="mb-6 text-sm leading-6 text-muted-foreground whitespace-normal break-words">
         确定要删除会话 "<span class="inline-block max-w-full align-bottom font-medium text-foreground break-words">{{ sessionName() }}</span>" 吗？此操作无法撤销。
       </p>
 
       <div class="flex justify-end gap-3">
         <button
+          type="button"
           (click)="onCancel()"
           class="px-4 py-2 text-sm font-medium rounded-md hover:bg-muted transition-colors">
           取消
         </button>
         <button
+          type="button"
           (click)="onConfirm()"
           class="px-4 py-2 text-sm font-medium rounded-md bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors">
           删除

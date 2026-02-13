@@ -13,7 +13,6 @@
 
 import { Injectable, inject } from '@angular/core';
 import { marked } from 'marked';
-import { Token } from 'marked';
 import {
   MarkdownBlock,
   MarkdownInline,
@@ -35,9 +34,20 @@ import {
   StreamdownSecurityPolicy,
   TokenHandlerInput
 } from './plugin';
-
-// Type alias for Marked.js tokens
-type MarkedToken = Token;
+import {
+  MarkedToken,
+  MarkedTokenBase,
+  MarkedHeadingToken,
+  MarkedParagraphToken,
+  MarkedCodeToken,
+  MarkedListToken,
+  MarkedListItemToken,
+  MarkedBlockquoteToken,
+  MarkedHtmlBlockToken,
+  MarkedTableToken,
+  MarkedInlineToken,
+  MarkedAnyInlineToken
+} from './marked-tokens';
 
 /** Internal cache for incremental parsing */
 interface IncrementalCache {
@@ -639,7 +649,7 @@ export class BlockParser implements IBlockParser {
 
     switch (token.type) {
       case 'heading': {
-        const headingToken = token as any;
+        const headingToken = token as MarkedHeadingToken;
         const children = headingToken.tokens ? this.parseInlineTokens(headingToken.tokens) : undefined;
         return {
           ...baseBlock,
@@ -651,7 +661,7 @@ export class BlockParser implements IBlockParser {
       }
 
       case 'paragraph': {
-        const paraToken = token as any;
+        const paraToken = token as MarkedParagraphToken;
         const children = paraToken.tokens ? this.parseInlineTokens(paraToken.tokens) : undefined;
         return {
           ...baseBlock,
@@ -662,17 +672,17 @@ export class BlockParser implements IBlockParser {
       }
 
       case 'code':
-        const normalizedLanguage = this.normalizeCodeFenceLanguage((token as any).lang);
+        const normalizedLanguage = this.normalizeCodeFenceLanguage((token as MarkedCodeToken).lang);
         return {
           ...baseBlock,
           type: BlockType.CODE_BLOCK,
-          content: (token as any).text || '',
-          rawContent: (token as any).text || '',
+          content: (token as MarkedCodeToken).text || '',
+          rawContent: (token as MarkedCodeToken).text || '',
           language: normalizedLanguage
         };
 
       case 'list': {
-        const listToken = token as any;
+        const listToken = token as MarkedListToken;
         const items = listToken.items || [];
 
         return {
@@ -685,7 +695,7 @@ export class BlockParser implements IBlockParser {
       }
 
       case 'blockquote': {
-        const bqToken = token as any;
+        const bqToken = token as MarkedBlockquoteToken;
         const nestedBlocks: MarkdownBlock[] = [];
         if (bqToken.tokens && Array.isArray(bqToken.tokens)) {
           let nestedPos = 0;
@@ -716,11 +726,11 @@ export class BlockParser implements IBlockParser {
         return {
           ...baseBlock,
           type: BlockType.HTML,
-          content: (token as any).raw || ''
+          content: (token as MarkedHtmlBlockToken).raw || ''
         };
 
       case 'table': {
-        const tableToken = token as any;
+        const tableToken = token as MarkedTableToken;
         const headerSource = tableToken.header || [];
         const headerCells = new Array<string>(headerSource.length);
         for (let i = 0; i < headerSource.length; i++) {
@@ -758,13 +768,13 @@ export class BlockParser implements IBlockParser {
   }
 
 
-  private parseListItems(items: any[], idPrefix: string): MarkdownListItem[] {
+  private parseListItems(items: MarkedListItemToken[], idPrefix: string): MarkdownListItem[] {
     const parsedItems: MarkdownListItem[] = [];
 
-    items.forEach((item: any, itemIndex: number) => {
+    items.forEach((item: MarkedListItemToken, itemIndex: number) => {
       const itemId = `${idPrefix}-${itemIndex}`;
       const tokens = Array.isArray(item?.tokens) ? item.tokens : [];
-      const inlineTokens: any[] = [];
+      const inlineTokens: MarkedInlineToken[] = [];
       const textParts: string[] = [];
       const nestedBlocks: MarkdownBlock[] = [];
 
@@ -776,7 +786,7 @@ export class BlockParser implements IBlockParser {
         if (token.type === 'list') {
           nestedBlocks.push(
             this.parseNestedListBlock(
-              token,
+              token as MarkedListToken,
               `${itemId}-list-${nestedBlocks.length}`,
               nestedBlocks.length
             )
@@ -785,9 +795,10 @@ export class BlockParser implements IBlockParser {
         }
 
         if (token.type === 'text' || token.type === 'paragraph') {
-          if (Array.isArray(token.tokens) && token.tokens.length > 0) {
-            for (const inlineToken of token.tokens) {
-              inlineTokens.push(inlineToken);
+          const inlineToken = token as MarkedParagraphToken | MarkedInlineToken;
+          if (Array.isArray(inlineToken.tokens) && inlineToken.tokens.length > 0) {
+            for (const childToken of inlineToken.tokens) {
+              inlineTokens.push(childToken);
             }
           }
 
@@ -798,7 +809,7 @@ export class BlockParser implements IBlockParser {
           continue;
         }
 
-        const nestedBlock = this.tokenToBlock(token, nestedBlocks.length);
+        const nestedBlock = this.tokenToBlock(token as MarkedToken, nestedBlocks.length);
         if (nestedBlock) {
           nestedBlocks.push({
             ...nestedBlock,
@@ -808,7 +819,7 @@ export class BlockParser implements IBlockParser {
           continue;
         }
 
-        const text = this.extractText(token).trim();
+        const text = this.extractText(token as MarkedToken | MarkedInlineToken).trim();
         if (text) {
           textParts.push(text);
         }
@@ -846,7 +857,7 @@ export class BlockParser implements IBlockParser {
     return '';
   }
 
-  private parseNestedListBlock(listToken: any, id: string, position: number): ListBlock {
+  private parseNestedListBlock(listToken: MarkedListToken, id: string, position: number): ListBlock {
     const items = listToken.items || [];
 
     return {
@@ -860,7 +871,7 @@ export class BlockParser implements IBlockParser {
     } satisfies ListBlock;
   }
 
-  private buildListContent(items: any[]): string {
+  private buildListContent(items: MarkedListItemToken[]): string {
     if (!items || items.length === 0) {
       return '';
     }
@@ -1004,20 +1015,20 @@ export class BlockParser implements IBlockParser {
   }
 
   private sanitizeBlockExtensionResult(block: MarkdownBlock): MarkdownBlock {
-    const anyBlock = block as any;
+    const partialBlock = block as Partial<MarkdownBlock> & { blocks?: MarkdownBlock[]; items?: MarkdownListItem[]; children?: MarkdownInline[] };
     let mutated = false;
-    let nextBlock: any = block;
+    let nextBlock: MarkdownBlock = block;
 
-    if (Array.isArray(anyBlock.children)) {
-      const sanitizedChildren = this.sanitizeInlineArray(anyBlock.children);
-      if (sanitizedChildren !== anyBlock.children) {
+    if (Array.isArray(partialBlock.children)) {
+      const sanitizedChildren = this.sanitizeInlineArray(partialBlock.children);
+      if (sanitizedChildren !== partialBlock.children) {
         mutated = true;
         nextBlock = { ...nextBlock, children: sanitizedChildren };
       }
     }
 
-    if (Array.isArray(anyBlock.blocks)) {
-      const nestedBlocks = anyBlock.blocks as MarkdownBlock[];
+    if (Array.isArray(partialBlock.blocks)) {
+      const nestedBlocks = partialBlock.blocks;
       const sanitizedBlocks = new Array<MarkdownBlock>(nestedBlocks.length);
       let nestedMutated = false;
       for (let i = 0; i < nestedBlocks.length; i++) {
@@ -1033,8 +1044,8 @@ export class BlockParser implements IBlockParser {
       }
     }
 
-    if (Array.isArray(anyBlock.items)) {
-      const nestedItems = anyBlock.items as MarkdownListItem[];
+    if (Array.isArray(partialBlock.items)) {
+      const nestedItems = partialBlock.items;
       const sanitizedItems = new Array<MarkdownListItem>(nestedItems.length);
       let itemsMutated = false;
       for (let i = 0; i < nestedItems.length; i++) {
@@ -1109,7 +1120,7 @@ export class BlockParser implements IBlockParser {
    * Maps: strong→bold, em→italic, del→strikethrough, codespan→code,
    *       link→link, image→image, br→hard-break, html→sup/sub/footnote-ref
    */
-  private parseInlineTokens(tokens: any[] | undefined): MarkdownInline[] {
+  private parseInlineTokens(tokens: MarkedInlineToken[] | undefined): MarkdownInline[] {
     if (!tokens || !Array.isArray(tokens) || tokens.length === 0) {
       return [];
     }
@@ -1119,7 +1130,7 @@ export class BlockParser implements IBlockParser {
     return result;
   }
 
-  private appendInlineTokens(tokens: any[], target: MarkdownInline[]): void {
+  private appendInlineTokens(tokens: MarkedInlineToken[], target: MarkdownInline[]): void {
     for (const token of tokens) {
       const extensionResult = this.tryInlineExtensionHandlers(token);
       if (extensionResult !== undefined) {
@@ -1301,7 +1312,7 @@ export class BlockParser implements IBlockParser {
     return true;
   }
 
-  private tryInlineExtensionHandlers(token: any): MarkdownInline | MarkdownInline[] | null | undefined {
+  private tryInlineExtensionHandlers(token: MarkedInlineToken): MarkdownInline | MarkdownInline[] | null | undefined {
     if (!this.hasInlineExtensions || !this.registry?.inlineParserExtensions) {
       return undefined;
     }
@@ -1554,7 +1565,7 @@ export class BlockParser implements IBlockParser {
   /**
    * Extracts text content from a token.
    */
-  private extractText(token: any): string {
+  private extractText(token: MarkedToken | MarkedInlineToken): string {
     if (!token) return '';
     if (typeof token !== 'object') {
       return '';
@@ -1570,7 +1581,7 @@ export class BlockParser implements IBlockParser {
 
     // For headings, use text property (without # symbols)
     if (token.type === 'heading') {
-      const value = token.text || '';
+      const value = (token as MarkedHeadingToken).text || '';
       if (cache) {
         cache.set(token, value);
       }
@@ -1578,27 +1589,28 @@ export class BlockParser implements IBlockParser {
     }
 
     // Prefer raw property for other types (preserves formatting)
-    if (token.raw) {
-      const value = token.raw;
+    const rawValue = (token as Partial<MarkedTokenBase>).raw;
+    if (rawValue !== undefined) {
       if (cache) {
-        cache.set(token, value);
+        cache.set(token, rawValue);
       }
-      return value;
+      return rawValue;
     }
 
     // Fallback to text property for code blocks
-    if (token.text) {
-      const value = token.text;
+    const textValue = (token as Partial<MarkedInlineToken>).text;
+    if (textValue !== undefined) {
       if (cache) {
-        cache.set(token, value);
+        cache.set(token, textValue);
       }
-      return value;
+      return textValue;
     }
 
     // If token has tokens array (nested tokens), join their raw content
-    if (token.tokens && Array.isArray(token.tokens)) {
+    const childTokens = (token as Partial<MarkedInlineToken>).tokens;
+    if (childTokens && Array.isArray(childTokens)) {
       let combined = '';
-      for (const childToken of token.tokens) {
+      for (const childToken of childTokens) {
         combined += this.extractText(childToken);
       }
       if (cache) {

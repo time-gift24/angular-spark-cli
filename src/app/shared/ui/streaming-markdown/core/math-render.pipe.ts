@@ -1,7 +1,21 @@
 import { Pipe, PipeTransform, SecurityContext, inject } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import katex from 'katex';
 
+/**
+ * Math Rendering Pipe
+ *
+ * Safely renders LaTeX/KaTeX expressions to HTML with proper sanitization.
+ *
+ * SECURITY CONSIDERATIONS:
+ * - KaTeX is used with trust: false to prevent arbitrary command execution
+ * - All output is sanitized through Angular's DomSanitizer with SecurityContext.HTML
+ * - Returns SafeHtml to prevent double-sanitization and ensure innerHTML safety
+ * - Cached results store SafeHtml objects to maintain security guarantees
+ * - On parsing errors, content is HTML-escaped before rendering
+ *
+ * @see https://katex.org/docs/options.html#trust - KaTeX trust option documentation
+ */
 @Pipe({
   name: 'renderMath',
   standalone: true,
@@ -9,9 +23,9 @@ import katex from 'katex';
 })
 export class RenderMathPipe implements PipeTransform {
   private readonly sanitizer = inject(DomSanitizer);
-  private readonly cache = new Map<string, string>();
+  private readonly cache = new Map<string, SafeHtml>();
 
-  transform(expression: string | null | undefined, displayMode: boolean = false): string {
+  transform(expression: string | null | undefined, displayMode: boolean = false): SafeHtml | string {
     const source = typeof expression === 'string' ? expression.trim() : '';
     if (!source) {
       return '';
@@ -38,6 +52,7 @@ export class RenderMathPipe implements PipeTransform {
       return fallback;
     }
 
+    // First sanitize through Angular's HTML security context
     const sanitizedHtml = this.sanitizer.sanitize(SecurityContext.HTML, html);
     if (!sanitizedHtml) {
       const fallback = this.wrapAsEscapedCode(source);
@@ -45,19 +60,23 @@ export class RenderMathPipe implements PipeTransform {
       return fallback;
     }
 
-    this.memoize(cacheKey, sanitizedHtml);
-    return sanitizedHtml;
+    // Mark as safe to prevent double-sanitization when used with innerHTML
+    const safeHtml = this.sanitizer.bypassSecurityTrustHtml(sanitizedHtml);
+    this.memoize(cacheKey, safeHtml);
+    return safeHtml;
   }
 
-  private memoize(key: string, html: string): void {
+  private memoize(key: string, html: SafeHtml | string): void {
     if (this.cache.size > 512) {
       this.cache.clear();
     }
     this.cache.set(key, html);
   }
 
-  private wrapAsEscapedCode(text: string): string {
-    return `<code>${this.escapeHtml(text)}</code>`;
+  private wrapAsEscapedCode(text: string): SafeHtml {
+    const escaped = this.escapeHtml(text);
+    // Already escaped, mark as safe for innerHTML
+    return this.sanitizer.bypassSecurityTrustHtml(`<code>${escaped}</code>`);
   }
 
   private escapeHtml(text: string): string {
