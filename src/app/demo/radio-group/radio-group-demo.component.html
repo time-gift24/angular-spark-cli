@@ -1,0 +1,166 @@
+<div class="min-h-screen bg-background p-6">
+  <div class="mx-auto max-w-4xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+      <h1>RadioGroup Component</h1>
+      <p class="text-muted-foreground">灵活且可访问的单选组组件，采用矿物与时光主题设计</p>
+    </div>
+
+    <!-- Basic Vertical Section -->
+    <div class="demo-section">
+      <h2>基础单选组（纵向）</h2>
+      <p class="text-sm text-muted-foreground">纵向排列的单选按钮</p>
+      <div class="input-wrapper">
+        <label class="input-label">选择尺寸</label>
+        <div
+          spark-radio-group
+          [options]="sizes"
+          [(value)]="selectedSize"
+          orientation="vertical"
+        ></div>
+        <p class="input-hint">已选择: {{ getSelectedLabel(sizes, selectedSize()) }}</p>
+      </div>
+    </div>
+
+    <!-- Basic Horizontal Section -->
+    <div class="demo-section">
+      <h2>基础单选组（横向）</h2>
+      <p class="text-sm text-muted-foreground">横向排列的单选按钮</p>
+      <div class="input-wrapper">
+        <label class="input-label">选择颜色</label>
+        <div
+          spark-radio-group
+          [options]="colors"
+          [(value)]="selectedColor"
+          orientation="horizontal"
+        ></div>
+        <p class="input-hint">已选择: {{ getSelectedLabel(colors, selectedColor()) }}</p>
+      </div>
+    </div>
+
+    <!-- With Descriptions Section -->
+    <div class="demo-section">
+      <h2>带描述的单选组</h2>
+      <p class="text-sm text-muted-foreground">包含额外描述信息的单选按钮</p>
+      <div class="input-wrapper">
+        <label class="input-label">选择配送方式</label>
+        <div
+          spark-radio-group
+          [options]="shippingOptions"
+          [(value)]="selectedShipping"
+          orientation="vertical"
+        ></div>
+        <p class="input-hint">已选择: {{ getSelectedLabel(shippingOptions, selectedShipping()) }}</p>
+      </div>
+    </div>
+
+    <!-- Interactive Demo Section -->
+    <div class="demo-section">
+      <h2>交互式演示</h2>
+      <p class="text-muted-foreground">尝试使用键盘导航（↑↓方向键，Space 确认）：</p>
+      <div class="space-y-4">
+        <div class="input-wrapper">
+          <label class="input-label">通知设置</label>
+          <div
+            spark-radio-group
+            [options]="notifications"
+            [(value)]="selectedNotification"
+            orientation="vertical"
+          ></div>
+        </div>
+
+        <div class="flex gap-2">
+          <button spark-button (click)="submitForm()">保存设置</button>
+          <button spark-button variant="outline" (click)="resetSelections()">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disabled State Section -->
+    <div class="demo-section">
+      <h2>禁用状态</h2>
+      <p class="text-sm text-muted-foreground">禁用的单选组</p>
+      <div class="input-wrapper">
+        <label class="input-label">禁用的单选组</label>
+        <div
+          spark-radio-group
+          [options]="sizes"
+          disabled
+          orientation="horizontal"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Dark Mode Preview Section -->
+    <div class="demo-section">
+      <h2>深色模式预览</h2>
+      <p class="text-muted-foreground">查看单选组在深色模式下的效果：</p>
+      <div class="dark-preview">
+        <div class="space-y-4">
+          <div class="input-wrapper">
+            <label class="input-label">深色模式单选组</label>
+            <div
+              spark-radio-group
+              [options]="colors"
+              orientation="horizontal"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Section -->
+    <div class="demo-section">
+      <h2>键盘快捷键</h2>
+      <p class="text-muted-foreground">单选组支持的键盘操作：</p>
+      <div class="shortcuts-grid">
+        <div class="shortcut-item">
+          <kbd>↑</kbd>
+          <kbd>↓</kbd>
+          <span>导航选项（纵向）</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>←</kbd>
+          <kbd>→</kbd>
+          <span>导航选项（横向）</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Space</kbd>
+          <span>选中当前项</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Tab</kbd>
+          <span>移出焦点</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Example Section -->
+    <div class="demo-section">
+      <h2>使用示例</h2>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">基础用法：</p>
+        <code class="code-block">
+          &lt;div spark-radio-group [options]="options" orientation="vertical"&gt;&lt;/div&gt;
+        </code>
+      </div>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">双向绑定：</p>
+        <code class="code-block">
+          &lt;div spark-radio-group [options]="options" [(value)]="selectedValue()"&gt;&lt;/div&gt;
+        </code>
+      </div>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">选项数据结构：</p>
+        <code class="code-block">
+          interface RadioOption &#123;<br>
+          &nbsp;&nbsp;value: string;<br>
+          &nbsp;&nbsp;label: string;<br>
+          &nbsp;&nbsp;description?: string;<br>
+          &nbsp;&nbsp;disabled?: boolean;<br>
+          &#125;
+        </code>
+      </div>
+    </div>
+  </div>
+</div>

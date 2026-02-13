@@ -1,0 +1,150 @@
+<div class="min-h-screen bg-background p-6">
+  <div class="mx-auto max-w-4xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+      <h1>Textarea Component</h1>
+      <p class="text-muted-foreground">灵活且可访问的多行文本输入组件，采用矿物与时光主题设计</p>
+    </div>
+
+    <!-- Size Variants Section -->
+    <div class="demo-section">
+      <h2>尺寸变体</h2>
+      <p class="text-sm text-muted-foreground">不同尺寸的文本域示例</p>
+      <div class="space-y-4">
+        @for (size of sizes; track size.value) {
+          <div class="input-wrapper">
+            <label class="input-label">{{ size.label }}尺寸文本域</label>
+            <textarea
+              spark-textarea
+              [size]="size.value"
+              placeholder="请输入内容..."
+              rows="3"
+            ></textarea>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- States Section -->
+    <div class="demo-section">
+      <h2>输入状态</h2>
+      <p class="text-sm text-muted-foreground">不同状态的文本域示例</p>
+      <div class="space-y-4">
+        <div class="input-wrapper">
+          <label class="input-label">默认状态</label>
+          <textarea spark-textarea placeholder="默认状态的文本域..." rows="3"></textarea>
+        </div>
+        <div class="input-wrapper">
+          <label class="input-label">错误状态</label>
+          <textarea spark-textarea error placeholder="包含错误的文本域..." rows="3"></textarea>
+          <p class="input-error">请输入有效的内容</p>
+        </div>
+        <div class="input-wrapper">
+          <label class="input-label">禁用状态</label>
+          <textarea spark-textarea disabled placeholder="禁用的文本域..." rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Demo Section -->
+    <div class="demo-section">
+      <h2>交互式演示</h2>
+      <p class="text-muted-foreground">实时查看输入内容：</p>
+
+      <div class="space-y-4">
+        <div class="input-wrapper">
+          <label class="input-label">消息</label>
+          <textarea
+            spark-textarea
+            [(value)]="message"
+            placeholder="输入消息..."
+            rows="4"
+          ></textarea>
+          <p class="input-hint">字符数: {{ getCharCount(message()) }}</p>
+        </div>
+
+        <div class="input-wrapper">
+          <label class="input-label">个人简介</label>
+          <textarea
+            spark-textarea
+            [(value)]="bio"
+            placeholder="介绍一下你自己..."
+            rows="5"
+            size="lg"
+          ></textarea>
+          <p class="input-hint">字符数: {{ getCharCount(bio()) }}</p>
+        </div>
+
+        <button spark-button (click)="clear('message')">清空消息</button>
+      </div>
+    </div>
+
+    <!-- Form Example Section -->
+    <div class="demo-section">
+      <h2>表单示例</h2>
+      <p class="text-muted-foreground">用户反馈表单示例</p>
+      <div class="space-y-4">
+        <div class="input-wrapper">
+          <label class="input-label">反馈标题</label>
+          <input spark-input type="text" placeholder="简要描述反馈内容..." />
+        </div>
+
+        <div class="input-wrapper">
+          <label class="input-label">详细描述</label>
+          <textarea
+            spark-textarea
+            [(value)]="feedback"
+            placeholder="请详细描述您的反馈..."
+            rows="6"
+          ></textarea>
+        </div>
+
+        <div class="flex gap-2">
+          <button spark-button (click)="submitForm()">提交反馈</button>
+          <button spark-button variant="outline" (click)="clear('feedback')">清空</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dark Mode Preview Section -->
+    <div class="demo-section">
+      <h2>深色模式预览</h2>
+      <p class="text-muted-foreground">查看文本域在深色模式下的效果：</p>
+      <div class="dark-preview">
+        <div class="space-y-4">
+          <div class="input-wrapper">
+            <label class="input-label">默认文本域</label>
+            <textarea spark-textarea placeholder="深色模式下的文本域..." rows="3"></textarea>
+          </div>
+          <div class="input-wrapper">
+            <label class="input-label">错误状态</label>
+            <textarea spark-textarea error placeholder="错误状态..." rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Example Section -->
+    <div class="demo-section">
+      <h2>使用示例</h2>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">基础用法：</p>
+        <code class="code-block">
+          &lt;textarea spark-textarea placeholder="请输入内容" rows="4"&gt;&lt;/textarea&gt;
+        </code>
+      </div>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">双向绑定：</p>
+        <code class="code-block">
+          &lt;textarea spark-textarea [(value)]="message" rows="4"&gt;&lt;/textarea&gt;
+        </code>
+      </div>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">错误状态：</p>
+        <code class="code-block">
+          &lt;textarea spark-textarea [error]="true" rows="4"&gt;&lt;/textarea&gt;
+        </code>
+      </div>
+    </div>
+  </div>
+</div>

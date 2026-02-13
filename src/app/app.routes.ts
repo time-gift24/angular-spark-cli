@@ -146,6 +146,33 @@ export const routes: Routes = [
             (m) => m.DemoAiChatPanelComponent,
           ),
       },
+      {
+        path: 'textarea',
+        loadComponent: () =>
+          import('./demo/textarea/textarea-demo.component').then((m) => m.TextareaDemoComponent),
+      },
+      {
+        path: 'select',
+        loadComponent: () =>
+          import('./demo/select/select-demo.component').then((m) => m.SelectDemoComponent),
+      },
+      {
+        path: 'radio-group',
+        loadComponent: () =>
+          import('./demo/radio-group/radio-group-demo.component').then(
+            (m) => m.RadioGroupDemoComponent,
+          ),
+      },
+      {
+        path: 'input-otp',
+        loadComponent: () =>
+          import('./demo/input-otp/input-otp-demo.component').then((m) => m.InputOtpDemoComponent),
+      },
+      {
+        path: 'field',
+        loadComponent: () =>
+          import('./demo/field/field-demo.component').then((m) => m.FieldDemoComponent),
+      },
     ],
   },
 ];

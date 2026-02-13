@@ -1,0 +1,177 @@
+<div class="min-h-screen bg-background p-6">
+  <div class="mx-auto max-w-4xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+      <h1>InputOTP Component</h1>
+      <p class="text-muted-foreground">灵活且可访问的验证码输入组件，采用矿物与时光主题设计</p>
+    </div>
+
+    <!-- Basic OTP Section -->
+    <div class="demo-section">
+      <h2>基础验证码输入</h2>
+      <p class="text-sm text-muted-foreground">6 位数字验证码输入</p>
+      <div class="otp-wrapper">
+        <label class="input-label">输入验证码</label>
+        <div
+          spark-input-otp
+          [(value)]="otp"
+          [length]="6"
+          type="numeric"
+          (complete)="onOtpComplete($event)"
+          (valueChange)="onOtpChange($event)"
+        ></div>
+        <p class="input-hint">
+          当前值: {{ getOtpString(otp()) }}
+          @if (isComplete()) {
+            <span class="complete-badge">✓ 已完成</span>
+          }
+        </p>
+        <div class="flex gap-2">
+          <button spark-button (click)="verifyOtp()">验证</button>
+          <button spark-button variant="outline" (click)="clear('otp')">清空</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIN Code Section -->
+    <div class="demo-section">
+      <h2>PIN 码输入</h2>
+      <p class="text-sm text-muted-foreground">4 位 PIN 码输入</p>
+      <div class="otp-wrapper">
+        <label class="input-label">输入 PIN 码</label>
+        <div
+          spark-input-otp
+          [(value)]="pin"
+          [length]="4"
+          type="numeric"
+        ></div>
+        <p class="input-hint">当前值: {{ getOtpString(pin()) }}</p>
+        <div class="flex gap-2">
+          <button spark-button (click)="submitPin()">提交</button>
+          <button spark-button variant="outline" (click)="clear('pin')">清空</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alphanumeric Section -->
+    <div class="demo-section">
+      <h2>字母数字验证码</h2>
+      <p class="text-sm text-muted-foreground">支持字母和数字的验证码</p>
+      <div class="otp-wrapper">
+        <label class="input-label">输入验证码（字母数字）</label>
+        <div
+          spark-input-otp
+          [(value)]="alphanumeric"
+          [length]="6"
+          type="alphanumeric"
+        ></div>
+        <p class="input-hint">当前值: {{ getOtpString(alphanumeric()) }}</p>
+        <div class="flex gap-2">
+          <button spark-button variant="outline" (click)="clear('alphanumeric')">清空</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="demo-section">
+      <h2>功能特性</h2>
+      <p class="text-muted-foreground">InputOTP 组件支持以下功能：</p>
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon">⌨️</div>
+          <h3>自动聚焦</h3>
+          <p>输入一位数字后自动聚焦到下一个输入框</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📋</div>
+          <h3>粘贴支持</h3>
+          <p>可以直接粘贴完整的验证码</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">⬅️</div>
+          <h3>退格导航</h3>
+          <p>按退格键自动返回上一个输入框</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">✅</div>
+          <h3>完成事件</h3>
+          <p>所有位填满后触发完成事件</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔢</div>
+          <h3>输入验证</h3>
+          <p>数字模式自动过滤非数字字符</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">♿</div>
+          <h3>无障碍支持</h3>
+          <p>完整的 ARIA 属性和键盘导航</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dark Mode Preview Section -->
+    <div class="demo-section">
+      <h2>深色模式预览</h2>
+      <p class="text-muted-foreground">查看验证码输入在深色模式下的效果：</p>
+      <div class="dark-preview">
+        <div class="otp-wrapper">
+          <label class="input-label">深色模式验证码</label>
+          <div spark-input-otp [length]="6" type="numeric"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Section -->
+    <div class="demo-section">
+      <h2>键盘快捷键</h2>
+      <p class="text-muted-foreground">验证码输入支持的键盘操作：</p>
+      <div class="shortcuts-grid">
+        <div class="shortcut-item">
+          <kbd>0-9</kbd>
+          <span>输入数字</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>A-Z</kbd>
+          <span>输入字母（字母数字模式）</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>←</kbd>
+          <kbd>→</kbd>
+          <span>导航输入框</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Backspace</kbd>
+          <span>删除并后退</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Ctrl</kbd>+<kbd>V</kbd>
+          <span>粘贴验证码</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Example Section -->
+    <div class="demo-section">
+      <h2>使用示例</h2>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">基础用法：</p>
+        <code class="code-block">
+          &lt;div spark-input-otp [length]="6" type="numeric"&gt;&lt;/div&gt;
+        </code>
+      </div>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">双向绑定：</p>
+        <code class="code-block">
+          &lt;div spark-input-otp [(value)]="otp" [length]="6" type="numeric"&gt;&lt;/div&gt;
+        </code>
+      </div>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">完成事件：</p>
+        <code class="code-block">
+          &lt;div spark-input-otp (complete)="onComplete($event)"&gt;&lt;/div&gt;
+        </code>
+      </div>
+    </div>
+  </div>
+</div>

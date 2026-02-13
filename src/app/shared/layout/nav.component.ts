@@ -49,6 +49,46 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
               Input
             </a>
             <a
+              routerLink="/demo/textarea"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Textarea
+            </a>
+            <a
+              routerLink="/demo/select"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Select
+            </a>
+            <a
+              routerLink="/demo/radio-group"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Radio Group
+            </a>
+            <a
+              routerLink="/demo/input-otp"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Input OTP
+            </a>
+            <a
+              routerLink="/demo/field"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Field
+            </a>
+            <a
               routerLink="/demo/card"
               routerLinkActive="bg-accent text-accent-foreground"
               [routerLinkActiveOptions]="{ exact: true }"

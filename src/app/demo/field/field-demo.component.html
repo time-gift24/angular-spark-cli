@@ -1,0 +1,197 @@
+<div class="min-h-screen bg-background p-6">
+  <div class="mx-auto max-w-4xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+      <h1>Field Component</h1>
+      <p class="text-muted-foreground">灵活且可访问的表单字段包装组件，采用矿物与时光主题设计</p>
+    </div>
+
+    <!-- Basic Field Section -->
+    <div class="demo-section">
+      <h2>基础字段</h2>
+      <p class="text-sm text-muted-foreground">包含标签和描述的基础字段</p>
+      <div class="field-grid">
+        <div spark-field description="请输入您的用户名">
+          <label spark-label>用户名</label>
+          <input spark-input type="text" placeholder="user@example" />
+        </div>
+
+        <div spark-field description="我们会保护您的隐私">
+          <label spark-label>邮箱地址</label>
+          <input spark-input type="email" placeholder="user@example.com" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Field with Error Section -->
+    <div class="demo-section">
+      <h2>错误状态</h2>
+      <p class="text-sm text-muted-foreground">显示错误信息的字段</p>
+      <div class="field-grid">
+        <div spark-field [error]="'用户名已被占用'">
+          <label spark-label>用户名</label>
+          <input spark-input type="text" value="taken_user" />
+        </div>
+
+        <div spark-field [error]="'密码强度不够，请包含大小写字母和数字'">
+          <label spark-label>密码</label>
+          <input spark-input type="password" value="123" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Required Field Section -->
+    <div class="demo-section">
+      <h2>必填字段</h2>
+      <p class="text-sm text-muted-foreground">标记为必填的字段</p>
+      <div class="field-grid">
+        <div spark-field required description="此字段为必填项">
+          <label spark-label>姓名</label>
+          <input spark-input type="text" placeholder="请输入姓名" />
+        </div>
+
+        <div spark-field required description="请输入有效的手机号码">
+          <label spark-label>手机号</label>
+          <input spark-input type="tel" placeholder="请输入手机号" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Form Section -->
+    <div class="demo-section">
+      <h2>交互式表单</h2>
+      <p class="text-muted-foreground">带实时验证的表单示例：</p>
+      <div class="form-container">
+        <div spark-field [error]="usernameError()" [required]="true" description="至少 3 个字符">
+          <label spark-label for="username">用户名</label>
+          <input
+            spark-input
+            id="username"
+            type="text"
+            [value]="username()"
+            (input)="validateUsername($any($event).target.value)"
+          />
+        </div>
+
+        <div spark-field [error]="emailError()" [required]="true" description="用于登录和找回密码">
+          <label spark-label for="email">邮箱地址</label>
+          <input
+            spark-input
+            id="email"
+            type="email"
+            [value]="email()"
+            (input)="validateEmail($any($event).target.value)"
+          />
+        </div>
+
+        <div spark-field [error]="passwordError()" [required]="true" description="至少 8 个字符">
+          <label spark-label for="password">密码</label>
+          <input
+            spark-input
+            id="password"
+            type="password"
+            [value]="password()"
+            (input)="validatePassword($any($event).target.value)"
+          />
+        </div>
+
+        <div spark-field [error]="phoneError()" description="选填，用于安全验证">
+          <label spark-label for="phone">手机号</label>
+          <input
+            spark-input
+            id="phone"
+            type="tel"
+            [value]="phone()"
+            (input)="validatePhone($any($event).target.value)"
+          />
+        </div>
+
+        <div spark-field [error]="websiteError()" description="选填，个人博客或网站">
+          <label spark-label for="website">个人网站</label>
+          <input
+            spark-input
+            id="website"
+            type="url"
+            [value]="website()"
+            (input)="validateWebsite($any($event).target.value)"
+          />
+        </div>
+
+        <div class="form-actions">
+          <button spark-button (click)="submitForm()">提交表单</button>
+          <button spark-button variant="outline" (click)="resetForm()">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dark Mode Preview Section -->
+    <div class="demo-section">
+      <h2>深色模式预览</h2>
+      <p class="text-muted-foreground">查看字段在深色模式下的效果：</p>
+      <div class="dark-preview">
+        <div class="space-y-4">
+          <div spark-field description="深色模式下的描述文本">
+            <label spark-label>用户名</label>
+            <input spark-input type="text" placeholder="user@example" />
+          </div>
+
+          <div spark-field error="这是一个错误提示" required>
+            <label spark-label>邮箱</label>
+            <input spark-input type="email" value="invalid-email" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accessibility Section -->
+    <div class="demo-section">
+      <h2>无障碍特性</h2>
+      <p class="text-muted-foreground">Field 组件内置的无障碍支持：</p>
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon">🏷️</div>
+          <h3>标签关联</h3>
+          <p>自动关联 label 和 input 的 for/id 属性</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📝</div>
+          <h3>描述支持</h3>
+          <p>通过 aria-describedby 关联描述文本</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">⚠️</div>
+          <h3>错误提示</h3>
+          <p>通过 aria-live 实时通知错误状态</p>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">✓</div>
+          <h3>必填标记</h3>
+          <p>视觉和 aria-required 双重标记</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Example Section -->
+    <div class="demo-section">
+      <h2>使用示例</h2>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">基础用法：</p>
+        <code class="code-block">
+          &lt;div spark-field description="这是描述文本"&gt;<br>
+          &nbsp;&nbsp;&lt;label spark-label&gt;标签&lt;/label&gt;<br>
+          &nbsp;&nbsp;&lt;input spark-input type="text" /&gt;<br>
+          &lt;/div&gt;
+        </code>
+      </div>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">带错误状态：</p>
+        <code class="code-block">
+          &lt;div spark-field error="错误信息" required&gt;<br>
+          &nbsp;&nbsp;&lt;label spark-label&gt;必填项&lt;/label&gt;<br>
+          &nbsp;&nbsp;&lt;input spark-input type="text" /&gt;<br>
+          &lt;/div&gt;
+        </code>
+      </div>
+    </div>
+  </div>
+</div>

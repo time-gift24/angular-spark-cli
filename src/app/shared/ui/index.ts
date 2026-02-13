@@ -20,3 +20,8 @@ export * from './tabs';
 export * from './streaming-markdown';
 export * from './tokens';
 export * from './tooltip/tooltip.component';
+export * from './textarea';
+export * from './select';
+export * from './radio-group';
+export * from './input-otp';
+export * from './field';

@@ -1,0 +1,139 @@
+<div class="min-h-screen bg-background p-6">
+  <div class="mx-auto max-w-4xl">
+    <!-- Page Header -->
+    <div class="mb-6">
+      <h1>Select Component</h1>
+      <p class="text-muted-foreground">灵活且可访问的下拉选择组件，采用矿物与时光主题设计</p>
+    </div>
+
+    <!-- Basic Select Section -->
+    <div class="demo-section">
+      <h2>基础选择器</h2>
+      <p class="text-sm text-muted-foreground">基本用法示例</p>
+      <div class="space-y-4">
+        <div class="input-wrapper">
+          <label class="input-label">选择水果</label>
+          <div spark-select [options]="fruits" [(value)]="selectedFruit" placeholder="请选择水果..."></div>
+          <p class="input-hint">已选择: {{ getSelectedLabel(fruits, selectedFruit()) }}</p>
+        </div>
+
+        <div class="input-wrapper">
+          <label class="input-label">选择城市</label>
+          <div spark-select [options]="cities" [(value)]="selectedCity" placeholder="请选择城市..."></div>
+          <p class="input-hint">已选择: {{ getSelectedLabel(cities, selectedCity()) }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disabled Options Section -->
+    <div class="demo-section">
+      <h2>禁用选项</h2>
+      <p class="text-sm text-muted-foreground">包含禁用选项的选择器</p>
+      <div class="input-wrapper">
+        <label class="input-label">选择用户（Alice 已禁用）</label>
+        <div spark-select [options]="users" [(value)]="selectedUser" placeholder="请选择用户..."></div>
+        <p class="input-hint">已选择: {{ getSelectedLabel(users, selectedUser()) }}</p>
+      </div>
+    </div>
+
+    <!-- Interactive Demo Section -->
+    <div class="demo-section">
+      <h2>交互式演示</h2>
+      <p class="text-muted-foreground">尝试使用键盘导航（↑↓方向键，Enter 确认，Esc 关闭）：</p>
+      <div class="space-y-4">
+        <div class="input-wrapper">
+          <label class="input-label">任务优先级</label>
+          <div spark-select [options]="priorities" [(value)]="selectedPriority" placeholder="选择优先级..."></div>
+        </div>
+
+        <div class="flex gap-2">
+          <button spark-button (click)="submitForm()">提交表单</button>
+          <button spark-button variant="outline" (click)="resetSelections()">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- States Preview Section -->
+    <div class="demo-section">
+      <h2>组件状态</h2>
+      <p class="text-sm text-muted-foreground">不同状态的选择器示例</p>
+      <div class="space-y-4">
+        <div class="input-wrapper">
+          <label class="input-label">默认状态</label>
+          <div spark-select [options]="fruits" placeholder="请选择..."></div>
+        </div>
+
+        <div class="input-wrapper">
+          <label class="input-label">禁用状态</label>
+          <div spark-select [options]="fruits" disabled placeholder="已禁用..."></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dark Mode Preview Section -->
+    <div class="demo-section">
+      <h2>深色模式预览</h2>
+      <p class="text-muted-foreground">查看选择器在深色模式下的效果：</p>
+      <div class="dark-preview">
+        <div class="space-y-4">
+          <div class="input-wrapper">
+            <label class="input-label">深色模式选择器</label>
+            <div spark-select [options]="cities" placeholder="请选择..."></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Section -->
+    <div class="demo-section">
+      <h2>键盘快捷键</h2>
+      <p class="text-muted-foreground">选择器支持的键盘操作：</p>
+      <div class="shortcuts-grid">
+        <div class="shortcut-item">
+          <kbd>↑</kbd>
+          <kbd>↓</kbd>
+          <span>导航选项</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Enter</kbd>
+          <span>确认选择</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Esc</kbd>
+          <span>关闭下拉</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Tab</kbd>
+          <span>移出焦点</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Example Section -->
+    <div class="demo-section">
+      <h2>使用示例</h2>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">基础用法：</p>
+        <code class="code-block">
+          &lt;div spark-select [options]="options" placeholder="请选择..."&gt;&lt;/div&gt;
+        </code>
+      </div>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">双向绑定：</p>
+        <code class="code-block">
+          &lt;div spark-select [options]="options" [(value)]="selectedValue()"&gt;&lt;/div&gt;
+        </code>
+      </div>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">选项数据结构：</p>
+        <code class="code-block">
+          interface SelectOption &#123;<br>
+          &nbsp;&nbsp;value: string;<br>
+          &nbsp;&nbsp;label: string;<br>
+          &nbsp;&nbsp;disabled?: boolean;<br>
+          &#125;
+        </code>
+      </div>
+    </div>
+  </div>
+</div>
