@@ -1,11 +1,11 @@
 /**
- * Select Content Component
+ * Combobox Content Component
  *
- * The dropdown panel that contains select items.
- * Positioned absolutely below trigger.
+ * The dropdown panel that contains combobox items.
+ * Positioned absolutely below the input.
  *
  * Usage:
- * <div spark-select-content class="...">
+ * <div spark-combobox-content class="...">
  *   <ng-content />
  * </div>
  */
@@ -13,17 +13,16 @@
 import {
   Component,
   input,
-  signal,
   computed,
   inject,
   ChangeDetectionStrategy,
   ElementRef,
 } from '@angular/core';
 import { cn } from '@app/shared';
-import { SELECT_ROOT, type SelectRootToken, type SelectItemDef } from './select-root.component';
+import { COMBOBOX_ROOT, type ComboboxRootToken, type ComboboxItemDef } from './combobox-root.component';
 
 @Component({
-  selector: 'div[spark-select-content]',
+  selector: 'div[spark-combobox-content]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClass()',
@@ -31,6 +30,7 @@ import { SELECT_ROOT, type SelectRootToken, type SelectItemDef } from './select-
     '[class.fade-in-0]': 'animateIn()',
     '[class.zoom-in-95]': 'animateIn()',
     '[attr.data-state]': 'isOpen() ? "open" : "closed"',
+    '[attr.id]': 'contentId()',
   },
   template: `
     @if (isOpen()) {
@@ -49,21 +49,28 @@ import { SELECT_ROOT, type SelectRootToken, type SelectItemDef } from './select-
     }
   `,
 })
-export class SelectContentComponent {
-  readonly root: SelectRootToken = inject(SELECT_ROOT);
+export class ComboboxContentComponent {
+  readonly root: ComboboxRootToken = inject(COMBOBOX_ROOT);
   private readonly elementRef = inject(ElementRef<HTMLElement>);
 
   readonly class = input<string>('');
   readonly align = input<'start' | 'center' | 'end'>('start');
   readonly side = input<'top' | 'right' | 'bottom' | 'left'>('bottom');
   readonly animate = input<boolean>(true);
+  readonly inputId = input<string>('');
+
+  readonly contentId = computed(() => {
+    const baseId = this.inputId() || 'combobox';
+    return `${baseId}-content`;
+  });
 
   protected readonly isOpen = this.root.isOpen;
 
   protected readonly hostClass = computed(() => {
     return cn(
       'absolute z-50',
-      'min-w-[var(--select-content-min-width)]',
+      'w-full',
+      'min-w-[var(--combobox-content-min-width)]',
       this.isOpen() && 'block',
       !this.isOpen() && 'hidden',
       this.class()
@@ -91,7 +98,7 @@ export class SelectContentComponent {
       // Positioning
       'mt-1',
       // Max height for scrolling
-      'max-h-[var(--select-content-max-height)]',
+      'max-h-[var(--combobox-content-max-height)]',
       'overflow-y-auto',
       // Inner padding
       'p-1'
@@ -99,8 +106,18 @@ export class SelectContentComponent {
   });
 
   // Get all enabled items for navigation
-  private getEnabledItems(): SelectItemDef[] {
-    return this.root.items().filter((item: SelectItemDef) => !item.disabled());
+  private getEnabledItems(): ComboboxItemDef[] {
+    const search = this.root.searchValue();
+    if (!search || !this.root.filterable()) {
+      return this.root.items().filter((item: ComboboxItemDef) => !item.disabled());
+    }
+    const searchLower = search.toLowerCase();
+    return this.root.items().filter((item: ComboboxItemDef) => {
+      if (item.disabled()) {
+        return false;
+      }
+      return item.label.toLowerCase().includes(searchLower);
+    });
   }
 
   onArrowDown(event: Event): void {
@@ -129,6 +146,8 @@ export class SelectContentComponent {
       return;
     }
 
+    event.preventDefault();
+
     const currentIndex = this.root.focusedIndex();
     const newIndex = this.wrapIndex(currentIndex + direction, enabledItems.length);
     this.root.setFocusedIndex(newIndex);
@@ -143,6 +162,7 @@ export class SelectContentComponent {
   handleHome(event: KeyboardEvent): void {
     const enabledItems = this.getEnabledItems();
     if (enabledItems.length > 0) {
+      event.preventDefault();
       this.root.setFocusedIndex(0);
       enabledItems[0]?.elementRef?.nativeElement?.focus();
     }
@@ -151,6 +171,7 @@ export class SelectContentComponent {
   handleEnd(event: KeyboardEvent): void {
     const enabledItems = this.getEnabledItems();
     if (enabledItems.length > 0) {
+      event.preventDefault();
       const lastIndex = enabledItems.length - 1;
       this.root.setFocusedIndex(lastIndex);
       enabledItems[lastIndex]?.elementRef?.nativeElement?.focus();
@@ -162,6 +183,7 @@ export class SelectContentComponent {
     const currentIndex = this.root.focusedIndex();
     const item = enabledItems[currentIndex];
     if (item) {
+      event.preventDefault();
       this.root.setSelectedValue(item.value);
     }
   }

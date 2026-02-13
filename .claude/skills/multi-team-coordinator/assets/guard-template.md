@@ -50,18 +50,52 @@ graph TD
     A[Task 1] --> B[Task 2]
     A[Task 1] --> C[Task 3]
     B[Task 2] --> D[Task 4]
-    C[Task 3] --> D[Task 4]
 ```
 
 ---
 
 ## 团队分配
 
-| Team | 责责任务 | 状态 |
-|-------|---------|------|
-| Team A | Task 1, Task 4 | 进行中 |
-| Team B | Task 2 | 待开始 |
-| Team C | Task 3, Task 5 | 待开始 |
+| Team | 责责任务 | 状态 | 质量状态 |
+|-------|---------|------|---------|
+| Team A | Task 1, Task 4 | 进行中 | 审查通过 |
+| Team B | Task 2 | 待开始 | - |
+| Team C | Task 3, Task 5 | 待开始 | - |
+
+---
+
+## 质量记录
+
+**重要**：每个 Team 必須确保代码无编译错误，并通过 code-review 审查。
+
+| Team | 时间 | 记录项 | 状态 | 协同方 |
+|-------|------|--------|------|--------|
+| Team A | {{YYYY-MM-DD HH:mm}} | {{具体记录项}} | {{通过/修复中}} | {{Coder/Code-Reviewer}} |
+| Team A | {{YYYY-MM-DD HH:mm}} | {{具体记录项}} | {{通过/修复中}} | {{Coder/Code-Reviewer}} |
+| Team B | {{YYYY-MM-DD HH:mm}} | {{具体记录项}} | {{通过/修复中}} | {{Coder/Code-Reviewer}} |
+
+### 编译错误协同记录
+
+当遇到编译错误时，记录协同过程：
+
+| Team | 时间 | 错误类型 | 协同方 | 结果 |
+|-------|------|---------|--------|------|
+| {{Team X}} | {{YYYY-MM-DD HH:mm}} | {{类型/语法/依赖等}} | {{Code-Reviewer 分析 + Coder 修复}} | {{已修复/进行中}} |
+
+**记录说明**：
+- **协同方**：记录谁参与了问题解决（Coder 独立解决 / Code-Reviewer 协同分析）
+- **错误类型**：类型错误、语法错误、依赖问题、配置错误、API 变更
+- **结果**：问题已解决、修复进行中、需要 Planner 重新评估
+
+### 质量标准
+
+| 维度 | 标准 | 验证方式 |
+|-----|------|---------|
+| **编译** | 无任何编译错误 | 运行 `ng build` 或 `ng test` |
+| **需求** | 功能对齐 Guard 文档 | 对照 Guard 文档任务描述 |
+| **安全** | 无 OWASP Top 10 漏洞 | code-reviewer 审查 |
+| **质量** | 代码可维护、可读 | code-reviewer 审查 |
+| **测试** | 关键路径有测试 | 运行 `ng test` |
 
 ---
 

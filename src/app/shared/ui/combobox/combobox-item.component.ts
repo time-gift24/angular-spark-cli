@@ -1,11 +1,12 @@
 /**
- * Select Item Component
+ * Combobox Item Component
  *
- * Individual selectable item in select dropdown.
+ * Individual selectable item in combobox dropdown.
  * Displays a check indicator when selected.
+ * Supports keyboard navigation and filtering.
  *
  * Usage:
- * <div spark-select-item value="option1">Option 1</div>
+ * <div spark-combobox-item value="option1">Option 1</div>
  */
 
 import {
@@ -18,12 +19,13 @@ import {
   ElementRef,
   DestroyRef,
   afterNextRender,
+  signal,
 } from '@angular/core';
 import { cn } from '@app/shared';
-import { SELECT_ROOT, type SelectItemDef } from './select-root.component';
+import { COMBOBOX_ROOT, type ComboboxItemDef } from './combobox-root.component';
 
 @Component({
-  selector: 'div[spark-select-item]',
+  selector: 'div[spark-combobox-item]',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClass()',
@@ -42,7 +44,7 @@ import { SELECT_ROOT, type SelectItemDef } from './select-root.component';
     @if (showIndicator()) {
       <span class="pointer-events-none absolute right-2 flex items-center justify-center">
         <svg
-          [class]="iconClass()"
+          class="h-3.5 w-3.5"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"
@@ -57,8 +59,8 @@ import { SELECT_ROOT, type SelectItemDef } from './select-root.component';
     }
   `,
 })
-export class SelectItemComponent {
-  private readonly root = inject(SELECT_ROOT);
+export class ComboboxItemComponent {
+  private readonly root = inject(COMBOBOX_ROOT);
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -70,23 +72,36 @@ export class SelectItemComponent {
   readonly triggered = output<string>();
 
   protected readonly isSelected = computed(() => this.root.value() === this.value());
-  protected readonly itemId = computed(() => `select-item-${this.value()}`);
+  protected readonly itemId = computed(() => `combobox-item-${this.value()}`);
 
-  protected readonly iconClass = computed(() => {
-    return cn(
-      'h-[var(--select-icon-size)]',
-      'w-[var(--select-icon-size)]'
-    );
-  });
+  // Get the label for filtering (from content or use value)
+  protected readonly label = signal('');
 
   protected readonly tabindex = computed(() => {
     if (this.disabled()) {
       return -1;
     }
-    const items = this.root.items();
-    const enabledItems = items.filter((item: SelectItemDef) => !item.disabled());
-    const index = enabledItems.findIndex((item: SelectItemDef) => item.value === this.value());
-    return index === this.root.focusedIndex() ? 0 : -1;
+    // Only tabbable if it matches the search filter
+    const search = this.root.searchValue();
+    if (search && this.root.filterable()) {
+      const searchLower = search.toLowerCase();
+      const labelLower = this.label().toLowerCase();
+      if (!labelLower.includes(searchLower)) {
+        return -1;
+      }
+    }
+    return 0;
+  });
+
+  // Check if item is visible (matches search filter)
+  protected readonly isVisible = computed(() => {
+    const search = this.root.searchValue();
+    if (!search || !this.root.filterable()) {
+      return true;
+    }
+    const searchLower = search.toLowerCase();
+    const labelLower = this.label().toLowerCase();
+    return labelLower.includes(searchLower);
   });
 
   protected readonly hostClass = computed(() => {
@@ -98,20 +113,24 @@ export class SelectItemComponent {
       'select-none',
       'items-center',
       'rounded-md',
-      'px-[var(--select-item-padding-x)]',
-      'py-[var(--select-item-padding-y)]',
+      'px-[var(--combobox-item-padding-x)]',
+      'py-[var(--combobox-item-padding-y)]',
       'text-sm',
       'outline-none',
       'transition-colors',
-      // Focus styles
+      // Focus/hover styles
       'focus:bg-accent',
       'focus:text-accent-foreground',
+      'data-[highlighted]:bg-accent',
+      'data-[highlighted]:text-accent-foreground',
       // Selected styles
       this.isSelected() && 'bg-accent',
       this.isSelected() && 'text-accent-foreground',
       // Disabled styles
       this.disabled() && 'opacity-[var(--opacity-disabled)]',
       this.disabled() && 'pointer-events-none',
+      // Hide if not matching filter
+      !this.isVisible() && 'hidden',
       // Padding for indicator
       this.showIndicator() && 'pr-8',
       // Custom class
@@ -120,16 +139,21 @@ export class SelectItemComponent {
   });
 
   constructor() {
-    // Register this item with root - value will be resolved when accessed via getter
-    const itemDef: SelectItemDef = {
+    // Register this item with root
+    const itemDef: ComboboxItemDef = {
       value: '',
+      label: '',
       disabled: computed(() => this.disabled()),
       elementRef: this.elementRef,
     };
 
-    // Update value after component initialization
+    // Update value and label after component initialization
     afterNextRender(() => {
       itemDef.value = this.value();
+      // Get label from element content
+      const textContent = this.elementRef.nativeElement.textContent?.trim() || '';
+      this.label.set(textContent);
+      itemDef.label = textContent;
     });
 
     this.root.registerItem(itemDef);
@@ -139,7 +163,7 @@ export class SelectItemComponent {
   }
 
   select(): void {
-    if (this.disabled()) {
+    if (this.disabled() || !this.isVisible()) {
       return;
     }
     this.root.setSelectedValue(this.value());
@@ -147,23 +171,33 @@ export class SelectItemComponent {
   }
 
   onMouseEnter(): void {
-    if (this.disabled()) {
+    if (this.disabled() || !this.isVisible()) {
       return;
     }
     // Update focused index when hovering
+    const search = this.root.searchValue();
+    let visibleIndex = 0;
     const items = this.root.items();
-    const enabledItems = items.filter((item: SelectItemDef) => {
+    for (const item of items) {
       const itemDisabled = item.disabled();
-      return !itemDisabled;
-    });
-    const index = enabledItems.findIndex((item: SelectItemDef) => item.value === this.value());
-    if (index >= 0) {
-      this.root.setFocusedIndex(index);
+      if (itemDisabled) {
+        continue;
+      }
+      const itemLabel = item.label.toLowerCase();
+      const searchLower = (search || '').toLowerCase();
+      if (searchLower && !itemLabel.includes(searchLower)) {
+        continue;
+      }
+      if (item.value === this.value()) {
+        this.root.setFocusedIndex(visibleIndex);
+        return;
+      }
+      visibleIndex++;
     }
   }
 
   handleKeydown(event: KeyboardEvent): void {
-    if (this.disabled()) {
+    if (this.disabled() || !this.isVisible()) {
       return;
     }
 

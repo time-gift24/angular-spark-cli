@@ -93,7 +93,6 @@ export class SelectRootComponent implements SelectRootToken {
 
   // Events
   readonly openedChange = output<boolean>();
-  readonly valueChange = output<string | null>();
 
   // Internal state
   readonly isOpen = signal(false);
@@ -110,7 +109,6 @@ export class SelectRootComponent implements SelectRootToken {
   // API for child components
   readonly setSelectedValue = (value: string): void => {
     this.value.set(value);
-    this.valueChange.emit(value);
     this.close();
   };
 

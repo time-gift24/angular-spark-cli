@@ -1,0 +1,132 @@
+.demo-section {
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid var(--border);
+}
+
+.demo-section:last-child {
+  border-bottom: none;
+}
+
+.demo-section h1 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.demo-section h2 {
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  margin-bottom: var(--spacing-sm);
+  color: var(--foreground);
+}
+
+.demo-section > p {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  margin-bottom: var(--spacing-md);
+}
+
+.demo-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+}
+
+.mt-2 {
+  margin-top: var(--spacing-sm);
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 640px) {
+  .shortcuts-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.shortcut-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  background: var(--muted);
+  border-radius: var(--radius-md);
+}
+
+.shortcut-item kbd {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: monospace;
+  font-size: 0.75rem;
+}
+
+.shortcut-item span {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.code-example {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--muted);
+  border-radius: var(--radius-md);
+}
+
+.code-example p {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+}
+
+.code-block {
+  display: block;
+  padding: var(--spacing-md);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.75rem;
+  color: var(--foreground);
+  overflow-x: auto;
+}
+
+.variant-default {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+.variant-secondary {
+  background: var(--color-secondary);
+  color: var(--color-secondary-foreground);
+}
+
+.variant-outline {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-foreground);
+}
+
+.variant-ghost {
+  background: transparent;
+  color: var(--color-foreground);
+}
+
+.variant-default:hover,
+.variant-secondary:hover,
+.variant-outline:hover,
+.variant-ghost:hover {
+  opacity: var(--opacity-hover);
+}

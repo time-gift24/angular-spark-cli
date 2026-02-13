@@ -1,0 +1,143 @@
+<div class="min-h-screen bg-background p-6">
+  <div class="mx-auto max-w-4xl">
+    <div class="mb-6">
+      <h1>Dropdown Menu</h1>
+      <p class="text-muted-foreground">Displays a menu to the user — such as a set of actions or functions — triggered by a button.</p>
+    </div>
+
+    <div class="demo-section">
+      <h2>Basic Dropdown Menu</h2>
+      <p class="text-sm text-muted-foreground">A simple dropdown menu with various items.</p>
+      <div class="demo-flex">
+        <div spark-dropdown-menu-root>
+          <button spark-dropdown-menu-trigger class="variant-default">
+            Open Menu
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </button>
+          <div spark-dropdown-menu-content>
+            <div spark-dropdown-menu-item value="new-profile" (triggered)="onItemSelected($event)">New Profile</div>
+            <div spark-dropdown-menu-item value="settings" (triggered)="onItemSelected($event)">Settings</div>
+            <div spark-dropdown-menu-item value="help" (triggered)="onItemSelected($event)">Help</div>
+            <div spark-dropdown-menu-separator></div>
+            <div spark-dropdown-menu-item value="logout" variant="destructive" (triggered)="onItemSelected($event)">Log Out</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Dropdown Menu with Label</h2>
+      <p class="text-sm text-muted-foreground">Group related items with labels.</p>
+      <div class="demo-flex">
+        <div spark-dropdown-menu-root>
+          <button spark-dropdown-menu-trigger class="variant-default">
+            Open Menu
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </button>
+          <div spark-dropdown-menu-content>
+            <div spark-dropdown-menu-label>Appearance</div>
+            <div spark-dropdown-menu-item value="dark-mode" (triggered)="onItemSelected($event)">Dark Mode</div>
+            <div spark-dropdown-menu-item value="light-mode" (triggered)="onItemSelected($event)">Light Mode</div>
+            <div spark-dropdown-menu-separator></div>
+            <div spark-dropdown-menu-label>Account</div>
+            <div spark-dropdown-menu-item value="profile" (triggered)="onItemSelected($event)">Profile</div>
+            <div spark-dropdown-menu-item value="billing" (triggered)="onItemSelected($event)">Billing</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Dropdown Menu with Checkbox Items</h2>
+      <p class="text-sm text-muted-foreground">Toggle options with checkbox items.</p>
+      <div class="demo-flex">
+        <div spark-dropdown-menu-root>
+          <button spark-dropdown-menu-trigger class="variant-default">
+            Text Formatting
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </button>
+          <div spark-dropdown-menu-content>
+            <div spark-dropdown-menu-checkbox-item value="bold" [(checked)]="boldChecked" (checkedChange)="onToggleChanged('Bold', $event)">Bold</div>
+            <div spark-dropdown-menu-checkbox-item value="italic" [(checked)]="italicChecked" (checkedChange)="onToggleChanged('Italic', $event)">Italic</div>
+            <div spark-dropdown-menu-checkbox-item value="underline" [(checked)]="underlineChecked" (checkedChange)="onToggleChanged('Underline', $event)">Underline</div>
+          </div>
+        </div>
+      </div>
+      <p class="mt-2 text-xs text-muted-foreground">
+        Bold: {{ boldChecked() ? 'ON' : 'OFF' }} |
+        Italic: {{ italicChecked() ? 'ON' : 'OFF' }} |
+        Underline: {{ underlineChecked() ? 'ON' : 'OFF' }}
+      </p>
+    </div>
+
+    <div class="demo-section">
+      <h2>Dropdown Menu with Radio Group</h2>
+      <p class="text-sm text-muted-foreground">Select one option from a group using radio items.</p>
+      <div class="demo-flex">
+        <div spark-dropdown-menu-root>
+          <button spark-dropdown-menu-trigger class="variant-default">
+            Text Alignment
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </button>
+          <div spark-dropdown-menu-content>
+            <div spark-dropdown-menu-radio-group [(value)]="alignment">
+              <div spark-dropdown-menu-radio-item value="left">Left</div>
+              <div spark-dropdown-menu-radio-item value="center">Center</div>
+              <div spark-dropdown-menu-radio-item value="right">Right</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="mt-2 text-xs text-muted-foreground">Selected: {{ alignment() }}</p>
+    </div>
+
+    <div class="demo-section">
+      <h2>Keyboard Shortcuts</h2>
+      <p class="text-muted-foreground">Supported keyboard operations:</p>
+      <div class="shortcuts-grid">
+        <div class="shortcut-item">
+          <kbd>ArrowDown</kbd>
+          <kbd>ArrowUp</kbd>
+          <span>Navigate options</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Enter</kbd>
+          <span>Select item</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Esc</kbd>
+          <span>Close menu</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Space</kbd>
+          <span>Toggle checkbox</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Usage Example</h2>
+      <div class="code-example">
+        <p class="text-xs font-semibold mb-2">Basic Usage:</p>
+        <code class="code-block">
+          &lt;div spark-dropdown-menu-root [(open)]="isOpen"&gt;<br>
+          &nbsp;&nbsp;&lt;button spark-dropdown-menu-trigger&gt;Open Menu&lt;/button&gt;<br>
+          &nbsp;&nbsp;&lt;div spark-dropdown-menu-content&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;div spark-dropdown-menu-item value="item1"&gt;Item 1&lt;/div&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;div spark-dropdown-menu-separator&gt;&lt;/div&gt;<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;div spark-dropdown-menu-checkbox-item [(checked)]="checked"&gt;Toggle&lt;/div&gt;<br>
+          &nbsp;&nbsp;&lt;/div&gt;<br>
+          &lt;/div&gt;
+        </code>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,74 @@
+.demo-section {
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid var(--border);
+}
+
+.demo-section:last-child {
+  border-bottom: none;
+}
+
+.demo-section h1 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.demo-section h2 {
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  margin-bottom: var(--spacing-sm);
+  color: var(--foreground);
+}
+
+.demo-section > p {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  margin-bottom: var(--spacing-md);
+}
+
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.input-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.input-hint {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.space-y-4 > * + * {
+  margin-top: var(--spacing-md);
+}
+
+.code-example {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--muted);
+  border-radius: var(--radius-md);
+}
+
+.code-example p {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+}
+
+.code-block {
+  display: block;
+  padding: var(--spacing-md);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.75rem;
+  color: var(--foreground);
+  overflow-x: auto;
+}

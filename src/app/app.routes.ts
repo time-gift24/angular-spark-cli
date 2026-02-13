@@ -207,6 +207,27 @@ export const routes: Routes = [
             (m) => m.ThemeSwitcherDemoComponent,
           ),
       },
+      {
+        path: 'dropdown-menu',
+        loadComponent: () =>
+          import('./demo/dropdown-menu/dropdown-menu-demo.component').then(
+            (m) => m.DropdownMenuDemoComponent,
+          ),
+      },
+      {
+        path: 'input-group',
+        loadComponent: () =>
+          import('./demo/input-group/input-group-demo.component').then(
+            (m) => m.InputGroupDemoComponent,
+          ),
+      },
+      {
+        path: 'combobox',
+        loadComponent: () =>
+          import('./demo/combobox-demo/combobox-demo.component').then(
+            (m) => m.ComboboxDemoComponent,
+          ),
+      },
     ],
   },
 ];

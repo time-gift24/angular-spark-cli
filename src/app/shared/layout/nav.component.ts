@@ -240,6 +240,30 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             >
               Alert Dialog
             </a>
+            <a
+              routerLink="/demo/combobox"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Combobox
+            </a>
+            <a
+              routerLink="/demo/dropdown-menu"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Dropdown Menu
+            </a>
+            <a
+              routerLink="/demo/input-group"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Input Group
+            </a>
           </div>
 
           <!-- Effects Section -->

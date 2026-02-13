@@ -32,3 +32,4 @@ export * from './dropdown-menu';
 export * from './field';
 export * from './empty';
 export * from './spinner';
+export * from './combobox';

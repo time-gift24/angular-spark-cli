@@ -18,7 +18,6 @@
 import {
   Component,
   input,
-  output,
   model,
   signal,
   computed,
@@ -71,14 +70,6 @@ export interface DropdownMenuCheckboxItemDef {
   checked: Signal<boolean>;
   disabled: boolean;
   elementRef: ElementRef<HTMLElement>;
-  // Note: disabled is a boolean value, not a getter
-}
-
-export interface DropdownMenuCheckboxItemDef {
-  value: string;
-  checked: Signal<boolean>;
-  disabled: boolean;
-  elementRef: ElementRef<HTMLElement>;
 }
 
 export interface DropdownMenuRadioGroupDef {
@@ -115,9 +106,6 @@ export class DropdownMenuRootComponent implements DropdownMenuRootToken {
   // Model for two-way binding
   readonly open = model<boolean>(false);
 
-  // Events
-  readonly openChange = output<boolean>();
-
   // Internal state
   readonly isOpen: Signal<boolean> = this.open;
   readonly focusedIndex = signal(0);
@@ -138,7 +126,6 @@ export class DropdownMenuRootComponent implements DropdownMenuRootToken {
       return;
     }
     this.open.set(true);
-    this.openChange.emit(true);
     // Reset focused index to first enabled item
     const enabledItems = this.items().filter((item) => !item.disabled);
     if (enabledItems.length > 0) {
@@ -148,7 +135,6 @@ export class DropdownMenuRootComponent implements DropdownMenuRootToken {
 
   readonly close = (): void => {
     this.open.set(false);
-    this.openChange.emit(false);
     // Return focus to trigger
     afterNextRender(() => {
       this.triggerElementRef()?.nativeElement?.focus();

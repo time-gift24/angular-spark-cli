@@ -13,14 +13,11 @@
 import {
   Component,
   input,
-  output,
   model,
   signal,
   inject,
   InjectionToken,
   ChangeDetectionStrategy,
-  DestroyRef,
-  ElementRef,
   computed,
   WritableSignal,
 } from '@angular/core';
@@ -66,9 +63,6 @@ export class DropdownMenuRadioGroupComponent implements DropdownMenuRadioGroupTo
   // Model for two-way binding
   readonly value = model<string | null>(null);
 
-  // Events
-  readonly valueChange = output<string | null>();
-
   // Internal state
   readonly items: WritableSignal<DropdownMenuItemDef[]> = signal([]);
 
@@ -78,7 +72,6 @@ export class DropdownMenuRadioGroupComponent implements DropdownMenuRadioGroupTo
 
   readonly setSelected = (value: string): void => {
     this.value.set(value);
-    this.valueChange.emit(value);
   };
 
   readonly registerItem = (item: DropdownMenuItemDef): void => {

@@ -1,0 +1,114 @@
+<div class="container mx-auto max-w-4xl p-6">
+  <div class="mb-8">
+    <h1 class="text-xl font-semibold mb-2">Combobox</h1>
+    <p class="text-sm text-muted-foreground">
+      A searchable, filterable dropdown component.
+    </p>
+    <a routerLink="/.." class="text-sm text-primary hover:underline inline-block mt-4">
+      Back to Demos
+    </a>
+  </div>
+
+  <section class="mb-8">
+    <h2 class="text-lg font-medium mb-4">Basic Example</h2>
+    <p class="text-sm text-muted-foreground mb-4">
+      Select a fruit from the list. Type to filter options.
+    </p>
+
+    <div class="flex flex-col gap-4 rounded-lg border bg-card p-6">
+      <div spark-combobox-root [(value)]="selectedFruit">
+        <input spark-combobox-input placeholder="Select a fruit..." class="w-64" />
+        <div spark-combobox-content>
+          <div spark-combobox-list>
+            @for (fruit of fruits; track fruit) {
+              <div spark-combobox-item [value]="fruit">{{ fruit }}</div>
+            }
+            <div spark-combobox-empty>No fruits found</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-sm">
+        <span class="text-muted-foreground">Selected value:</span>
+        <code class="ml-2 rounded bg-muted px-2 py-1 text-xs">{{ selectedFruit() ?? 'null' }}</code>
+      </div>
+    </div>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-lg font-medium mb-4">Controlled Example</h2>
+    <p class="text-sm text-muted-foreground mb-4">
+      The combobox value is controlled and can be set programmatically.
+    </p>
+
+    <div class="flex flex-col gap-4 rounded-lg border bg-card p-6">
+      <div spark-combobox-root [(value)]="selectedFramework">
+        <input spark-combobox-input placeholder="Select a framework..." class="w-64" />
+        <div spark-combobox-content>
+          <div spark-combobox-list>
+            @for (fw of frameworks; track fw.value) {
+              <div spark-combobox-item [value]="fw.value">{{ fw.label }}</div>
+            }
+            <div spark-combobox-empty>No frameworks found</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <span class="text-sm text-muted-foreground">Selected:</span>
+        <code class="rounded bg-muted px-2 py-1 text-xs">{{ selectedFramework() ?? 'null' }}</code>
+        <button
+          (click)="selectedFramework.set('angular')"
+          class="rounded-md bg-secondary px-3 py-1 text-sm hover:bg-secondary/80"
+        >
+          Set to Angular
+        </button>
+        <button
+          (click)="selectedFramework.set(null)"
+          class="rounded-md bg-secondary px-3 py-1 text-sm hover:bg-secondary/80"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-lg font-medium mb-4">Grouped Example</h2>
+    <p class="text-sm text-muted-foreground mb-4">
+      Items can be grouped with labels and separators.
+    </p>
+
+    <div class="flex flex-col gap-4 rounded-lg border bg-card p-6">
+      <div spark-combobox-root [(value)]="selectedFramework">
+        <input spark-combobox-input placeholder="Select a technology..." class="w-64" />
+        <div spark-combobox-content>
+          <div spark-combobox-list>
+            @for (category of categories(); track category; let isLast = $last) {
+              <div spark-combobox-group>
+                <div spark-combobox-label>{{ category }}</div>
+                @for (fw of getFrameworksByCategory(category); track fw.value) {
+                  <div spark-combobox-item [value]="fw.value">{{ fw.label }}</div>
+                }
+                @if (!isLast) {
+                  <div spark-combobox-separator></div>
+                }
+              </div>
+            }
+            <div spark-combobox-empty>No technologies found</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-lg font-medium mb-4">Accessibility</h2>
+    <ul class="list-disc list-inside text-sm text-muted-foreground space-y-1">
+      <li>Use Arrow Down and Arrow Up to navigate options</li>
+      <li>Press Enter to select the highlighted option</li>
+      <li>Press Escape to close dropdown</li>
+      <li>Typing filters options list automatically</li>
+    </ul>
+  </section>
+</div>

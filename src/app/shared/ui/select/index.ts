@@ -20,6 +20,8 @@ export * from './select-item.component';
 export * from './select-label.component';
 export * from './select-separator.component';
 export * from './select-group.component';
+export * from './select-scroll-up-button.component';
+export * from './select-scroll-down-button.component';
 
 // Re-export types
 export type { SelectRootToken, SelectItemDef } from './select-root.component';

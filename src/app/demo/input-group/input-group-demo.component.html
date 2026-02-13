@@ -1,0 +1,36 @@
+<div class="container mx-auto max-w-4xl py-8 px-4">
+  <h1 class="text-3xl font-bold mb-6">Input Group</h1>
+
+  <section class="mb-8">
+    <h2 class="text-2xl font-semibold mb-4">Basic Input Group</h2>
+    <div spark-input-group>
+      <span spark-input-group-text>https://example.com</span>
+      <button spark-input-group-button variant="outline">Copy</button>
+    </div>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-2xl font-semibold mb-4">With Input</h2>
+    <div spark-input-group>
+      <input spark-input-group-input type="text" placeholder="Enter username..." />
+      <button spark-input-group-button variant="ghost">Search</button>
+    </div>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-2xl font-semibold mb-4">With Textarea</h2>
+    <div spark-input-group>
+      <textarea spark-input-group-textarea placeholder="Enter your message..."></textarea>
+      <button spark-input-group-button variant="default">Send</button>
+    </div>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-2xl font-semibold mb-4">With Multiple Elements</h2>
+    <div spark-input-group>
+      <span spark-input-group-text>$</span>
+      <input spark-input-group-input type="number" placeholder="0.00" />
+      <button spark-input-group-button variant="secondary">USD</button>
+    </div>
+  </section>
+</div>

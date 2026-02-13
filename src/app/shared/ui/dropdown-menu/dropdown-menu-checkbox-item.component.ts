@@ -12,16 +12,13 @@
 import {
   Component,
   input,
-  output,
   model,
   computed,
   inject,
   ChangeDetectionStrategy,
   ElementRef,
-  DestroyRef,
   afterNextRender,
 } from '@angular/core';
-import type { Signal } from '@angular/core';
 import { cn } from '@app/shared';
 import {
   DROPDOWN_MENU_ROOT,
@@ -73,9 +70,6 @@ export class DropdownMenuCheckboxItemComponent {
 
   // Model for two-way binding
   readonly checked = model<boolean>(false);
-
-  // Events
-  readonly checkedChange = output<boolean>();
 
   protected readonly tabindex = computed(() => {
     if (this.disabled()) {
@@ -144,7 +138,6 @@ export class DropdownMenuCheckboxItemComponent {
     }
     const newValue = !this.checked();
     this.checked.set(newValue);
-    this.checkedChange.emit(newValue);
   }
 
   onMouseEnter(): void {
