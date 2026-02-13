@@ -3,13 +3,11 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { LLM_CONFIG } from './shared/services/llm';
-import { builtinPlugin, provideStreamingMarkdown } from '@app/shared/ui/streaming-markdown';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideStreamingMarkdown(builtinPlugin()),
     {
       provide: LLM_CONFIG,
       useValue: {

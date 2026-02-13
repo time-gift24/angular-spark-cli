@@ -6,7 +6,7 @@
  * and runtime observability.
  */
 
-import { DestroyRef, EnvironmentProviders, Type, inject, makeEnvironmentProviders } from '@angular/core';
+import { DestroyRef, EnvironmentProviders, Provider, Type, inject, makeEnvironmentProviders } from '@angular/core';
 import { BlockType } from './models';
 import {
   BlockComponentRegistry,
@@ -401,4 +401,25 @@ export function provideStreamingMarkdown(...plugins: StreamdownPlugin[]): Enviro
       }
     }
   ]);
+}
+
+/**
+ * Configures the streaming markdown plugin system for component-level providers.
+ * Use this in a component's `providers` array instead of the root app config.
+ *
+ * @param plugins - One or more StreamdownPlugin instances to register
+ * @returns Array of providers for component-level use
+ */
+export function provideStreamingMarkdownComponent(...plugins: StreamdownPlugin[]): Provider[] {
+  return [
+    { provide: STREAMDOWN_PLUGINS, useValue: plugins },
+    { provide: STREAMDOWN_PLUGIN_RUNTIME, useFactory: () => createPluginRuntime(plugins) },
+    {
+      provide: BLOCK_COMPONENT_REGISTRY,
+      useFactory: () => {
+        const runtime = inject(STREAMDOWN_PLUGIN_RUNTIME);
+        return runtime.registry;
+      }
+    }
+  ];
 }

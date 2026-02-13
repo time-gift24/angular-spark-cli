@@ -19,6 +19,7 @@ import { MarkdownBlockRouterComponent } from '@app/shared/ui/streaming-markdown/
 import { MarkdownBlock } from '@app/shared/ui/streaming-markdown/core/models';
 import { MarkdownPreprocessor } from '@app/shared/ui/streaming-markdown/core/markdown-preprocessor';
 import { BlockParser } from '@app/shared/ui/streaming-markdown/core/block-parser';
+import { builtinPlugin, provideStreamingMarkdownComponent } from '@app/shared/ui/streaming-markdown';
 
 @Component({
   selector: 'static-markdown',
@@ -26,6 +27,7 @@ import { BlockParser } from '@app/shared/ui/streaming-markdown/core/block-parser
   providers: [
     MarkdownPreprocessor,
     BlockParser,
+    provideStreamingMarkdownComponent(builtinPlugin()),
   ],
   template: `
     <div class="static-markdown">

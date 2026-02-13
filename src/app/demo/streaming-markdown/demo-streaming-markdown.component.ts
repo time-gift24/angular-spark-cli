@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EMPTY, Observable, concatMap, delay, from, of, tap } from 'rxjs';
-import { StreamingMarkdownComponent } from '@app/shared/ui/streaming-markdown';
+import { StreamingMarkdownComponent, builtinPlugin, provideStreamingMarkdownComponent } from '@app/shared/ui/streaming-markdown';
 import { StaticMarkdownComponent } from '@app/shared/ui/ai-chat/static-markdown/static-markdown.component';
 
 const DEMO_MARKDOWN = `# Streaming Markdown 对照演示
@@ -61,6 +61,9 @@ console.log(users.map((u) => u.name).join(', '));
 @Component({
   selector: 'app-demo-streaming-markdown',
   imports: [CommonModule, StreamingMarkdownComponent, StaticMarkdownComponent],
+  providers: [
+    provideStreamingMarkdownComponent(builtinPlugin()),
+  ],
   templateUrl: './demo-streaming-markdown.component.html',
   styleUrl: './demo-streaming-markdown.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

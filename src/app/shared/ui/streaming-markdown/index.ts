@@ -7,7 +7,7 @@
 
 import { EnvironmentProviders } from '@angular/core';
 import { builtinPlugin } from './plugins/builtin-plugin';
-import { provideStreamingMarkdown } from './core/provide-streaming-markdown';
+import { provideStreamingMarkdown, provideStreamingMarkdownComponent } from './core/provide-streaming-markdown';
 import type { StreamdownPlugin } from './core/plugin';
 
 export function provideDefaultStreamingMarkdown(...plugins: StreamdownPlugin[]): EnvironmentProviders {
@@ -135,7 +135,7 @@ export {
 } from './core/plugin';
 
 // Provider function
-export { provideStreamingMarkdown } from './core/provide-streaming-markdown';
+export { provideStreamingMarkdown, provideStreamingMarkdownComponent } from './core/provide-streaming-markdown';
 export { builtinPlugin } from './plugins/builtin-plugin';
 
 // Stream adapters

@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { SessionColor } from '@app/shared/models';
 import { SessionStateService } from '@app/shared/services';
-import { StreamingMarkdownComponent } from '@app/shared/ui/streaming-markdown';
+import { StreamingMarkdownComponent, builtinPlugin, provideStreamingMarkdownComponent } from '@app/shared/ui/streaming-markdown';
 import { AiChatStateService } from '../services';
 import { SessionTabsBarComponent } from '../session-tabs-bar/session-tabs-bar.component';
 import { ChatInputComponent } from '../chat-input/chat-input.component';
@@ -35,6 +35,9 @@ const DOCK_MAX_WIDTH = 520;
     ResizeHandleComponent,
     StreamingMarkdownComponent,
     DeleteConfirmDialogComponent,
+  ],
+  providers: [
+    provideStreamingMarkdownComponent(builtinPlugin()),
   ],
   templateUrl: './ai-chat-shell.component.html',
   styleUrl: './ai-chat-shell.component.css',

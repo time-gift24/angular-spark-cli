@@ -10,7 +10,7 @@
   @case ('assistant') {
     <div class="flex justify-start animate-[message-bubble-in_0.2s_var(--ease-spring-snappy)]">
       <div class="w-full rounded-md bg-transparent px-2.5 py-1.5">
-        <static-markdown [content]="message().content" />
+        <p class="text-sm text-foreground whitespace-pre-wrap break-words">{{ message().content }}</p>
       </div>
     </div>
   }
