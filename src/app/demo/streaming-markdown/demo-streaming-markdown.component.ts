@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EMPTY, Observable, concatMap, delay, from, of, tap } from 'rxjs';
-import { StreamingMarkdownComponent } from '@app/shared/components/streaming-markdown/streaming-markdown.component';
+import { StreamingMarkdownComponent } from '@app/shared/ui/streaming-markdown';
 import { StaticMarkdownComponent } from '@app/shared/ui/ai-chat/static-markdown/static-markdown.component';
 
 const DEMO_MARKDOWN = `# Streaming Markdown 对照演示

@@ -1,4 +1,4 @@
-<div class="flex items-center justify-between px-4 py-3 border-b border-border/50">
+<div class="flex items-center justify-between px-4 py-3">
   <div class="flex items-center gap-2 flex-1 min-w-0">
     @if (isEditingName()) {
       <input
@@ -7,7 +7,7 @@
         (input)="editValue.set($any($event.target).value)"
         (keydown)="onKeydown($event)"
         (blur)="onNameEditComplete(editValue())"
-        class="flex-1 px-2 py-1.5 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+        class="flex-1 px-2 py-1.5 text-sm bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
         placeholder="输入会话名称..."
         autofocus
       />

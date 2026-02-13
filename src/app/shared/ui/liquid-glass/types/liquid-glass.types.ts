@@ -11,17 +11,29 @@
  * - `standard`: Balanced noise pattern for general use
  * - `polar`: Directional noise emphasizing vertical/horizontal distortion
  * - `prominent`: More intense, visible distortion effect
+ * - `shader`: Shader-generated displacement map for edge-accurate refraction
  */
-export type LiquidGlassRefractionMode = 'standard' | 'polar' | 'prominent';
+export type LiquidGlassRefractionMode = 'standard' | 'polar' | 'prominent' | 'shader';
 
 /**
  * Theme presets matching "矿物与时光" design system
  *
  * - `mineral-light`: Light mode - 绢黄 + 石绿 (Aged Silk + Malachite)
  * - `mineral-dark`: Dark mode - 深石青 + 浅石绿 (Deep Stone Blue + Light Stone Green)
+ * - `mineral-jade`: Jade mode - 翡翠绿 + 青玉光 (Jade Green + Cool Glow)
+ * - `mineral-ocean`: Ocean mode - 深海蓝 + 冰蓝高光 (Ocean Blue + Ice Highlight)
+ * - `mineral-amber`: Amber mode - 琥珀金 + 暖绢黄 (Amber Gold + Warm Silk)
+ * - `mineral-slate`: Slate mode - 石板灰 + 冷青高光 (Slate Gray + Cool Cyan)
  * - `custom`: User-defined colors
  */
-export type LiquidGlassTheme = 'mineral-light' | 'mineral-dark' | 'custom';
+export type LiquidGlassTheme =
+  | 'mineral-light'
+  | 'mineral-dark'
+  | 'mineral-jade'
+  | 'mineral-ocean'
+  | 'mineral-amber'
+  | 'mineral-slate'
+  | 'custom';
 
 /**
  * Animation state for the state machine

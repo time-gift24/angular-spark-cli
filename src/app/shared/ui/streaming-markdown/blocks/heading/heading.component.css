@@ -1,0 +1,82 @@
+.markdown-heading {
+  font-weight: 600;
+  margin-top: var(--spacing-md);
+  margin-bottom: 0;
+  color: var(--foreground);
+}
+
+.markdown-heading.streaming {
+  opacity: 0.7;
+}
+
+.markdown-heading.fallback {
+  color: var(--destructive);
+  font-style: italic;
+}
+
+.inline-link {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.inline-link:hover {
+  opacity: 0.8;
+}
+
+.inline-code {
+  display: inline-block;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.85em;
+  line-height: 1 !important;
+  vertical-align: baseline;
+}
+
+.inline-math {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.inline-math.block-math {
+  display: block;
+  margin: var(--spacing-sm) 0;
+  overflow-x: auto;
+}
+
+.inline-strikethrough {
+  text-decoration: line-through;
+}
+
+.inline-image {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  margin: var(--spacing-sm) 0;
+  display: inline-block;
+}
+
+.inline-bold {
+  font-weight: 600;
+}
+
+.inline-italic {
+  font-style: italic;
+}
+
+.footnote-ref a {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.8em;
+}
+
+.footnote-ref a:hover {
+  text-decoration: underline;
+}
+
+.markdown-heading ::ng-deep .inline-math .katex-display {
+  margin: 0;
+}

@@ -1,0 +1,87 @@
+.markdown-paragraph {
+  margin-top: 0;
+  margin-bottom: var(--spacing-sm);
+  color: var(--foreground);
+  line-height: 1.6;
+}
+
+.markdown-paragraph.streaming {
+  opacity: 0.7;
+}
+
+.inline-bold {
+  font-weight: 600;
+}
+
+.inline-italic {
+  font-style: italic;
+}
+
+/* Inline code - use display: inline-block to break from parent line-height */
+.inline-code {
+  display: inline-block;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  line-height: 1 !important;
+  vertical-align: baseline;
+}
+
+.inline-math {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.inline-math.block-math {
+  display: block;
+  margin: var(--spacing-sm) 0;
+  overflow-x: auto;
+}
+
+/* Force line-height with ::ng-deep for nested elements */
+.markdown-paragraph ::ng-deep .inline-code {
+  line-height: 1 !important;
+}
+
+.markdown-paragraph ::ng-deep .inline-code * {
+  line-height: 1 !important;
+}
+
+.markdown-paragraph ::ng-deep .inline-math .katex-display {
+  margin: 0;
+}
+
+.inline-strikethrough {
+  text-decoration: line-through;
+}
+
+.inline-image {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  margin: var(--spacing-sm) 0;
+  display: inline-block;
+}
+
+.inline-link {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.inline-link:hover {
+  opacity: 0.8;
+}
+
+.footnote-ref a {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.8em;
+}
+
+.footnote-ref a:hover {
+  text-decoration: underline;
+}

@@ -7,7 +7,7 @@
  * Part of Phase 2: Theme Integration Layer
  */
 
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   LiquidGlassTheme,
   LiquidGlassColorConfig,
@@ -15,6 +15,10 @@ import {
 import {
   MINERAL_LIGHT_THEME,
   MINERAL_DARK_THEME,
+  MINERAL_JADE_THEME,
+  MINERAL_OCEAN_THEME,
+  MINERAL_AMBER_THEME,
+  MINERAL_SLATE_THEME,
 } from '@app/shared/ui/liquid-glass/types/theme.constants';
 
 /**
@@ -52,6 +56,18 @@ export class LiquidGlassThemeResolver {
 
       case 'mineral-dark':
         return MINERAL_DARK_THEME;
+
+      case 'mineral-jade':
+        return MINERAL_JADE_THEME;
+
+      case 'mineral-ocean':
+        return MINERAL_OCEAN_THEME;
+
+      case 'mineral-amber':
+        return MINERAL_AMBER_THEME;
+
+      case 'mineral-slate':
+        return MINERAL_SLATE_THEME;
 
       case 'custom':
         // Return empty config - user must provide custom colors via inputs
@@ -139,6 +155,14 @@ export class LiquidGlassThemeResolver {
    * ```
    */
   isValidTheme(theme: string): theme is LiquidGlassTheme {
-    return ['mineral-light', 'mineral-dark', 'custom'].includes(theme);
+    return [
+      'mineral-light',
+      'mineral-dark',
+      'mineral-jade',
+      'mineral-ocean',
+      'mineral-amber',
+      'mineral-slate',
+      'custom',
+    ].includes(theme);
   }
 }

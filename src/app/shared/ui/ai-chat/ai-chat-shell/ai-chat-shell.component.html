@@ -1,7 +1,7 @@
 <div class="relative h-screen overflow-hidden bg-background text-[13px] leading-5">
   <header class="pointer-events-none fixed inset-x-0 top-0 z-50 px-4 pt-3">
     <div
-      class="pointer-events-auto mx-auto flex h-10 max-w-[1600px] items-center justify-between rounded-xl border border-border/60 bg-background/85 px-3 shadow-sm backdrop-blur"
+      class="pointer-events-auto flex h-10 w-full items-center justify-between rounded-xl bg-background/85 px-3 shadow-sm backdrop-blur"
     >
       <div class="flex items-center gap-4">
         <a routerLink="/" class="text-sm font-semibold text-foreground">Angular Spark</a>
@@ -27,7 +27,7 @@
           type="button"
           (click)="onToggleDock()"
           data-testid="dock-toggle"
-          class="inline-flex h-7 items-center rounded-md border border-border/70 bg-background px-2 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+          class="inline-flex h-7 items-center rounded-md bg-background px-2 text-xs font-medium text-foreground transition-colors hover:bg-accent"
         >
           {{ isDockPinned() ? '收起 LLM' : '展开 LLM' }}
         </button>
@@ -38,7 +38,7 @@
   <div class="absolute inset-0 px-4 pb-4 pt-16">
     <div class="flex h-full min-h-0">
       <main
-        class="h-full min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain rounded-xl border border-border/40 bg-background/70"
+        class="h-full min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain rounded-xl bg-background/70"
       >
         <div class="min-h-full p-4">
           <router-outlet />
@@ -47,7 +47,7 @@
 
       <aside
         data-testid="llm-dock"
-        class="relative ml-3 h-full min-h-0 shrink-0 overflow-hidden rounded-xl border border-border/50 bg-card/70 transition-[width,opacity,margin] duration-200 ease-out"
+        class="llm-dock-shell relative ml-3 h-full min-h-0 shrink-0 overflow-hidden rounded-xl bg-background/95 transition-[width,opacity,margin] duration-200 ease-out"
         [class.pointer-events-none]="!isDockPinned()"
         [style.width.px]="isDockPinned() ? effectiveDockWidth() : 0"
         [style.opacity]="isDockPinned() ? 1 : 0"
@@ -63,48 +63,47 @@
               (resizeCommit)="onResizeCommit($event)"
             />
 
-            <div class="shrink-0 border-b border-border/60 px-2 py-2">
-              <spark-session-tabs-bar
-                [sessions]="sessions"
-                [activeSessionId]="activeSessionId"
-                (sessionSelect)="onSessionSelect($event)"
-                (sessionToggle)="onSessionToggle()"
-                (newChat)="onNewChat()"
-                (sessionColorChange)="onSessionColorChange($event)"
-                (sessionRename)="onSessionRenameFromTabs($event)"
-                (sessionClose)="onDelete($event)"
-              />
-            </div>
-
-            <div class="ai-messages min-h-0 flex-1 overflow-y-auto overscroll-contain p-2">
-              <div class="space-y-2">
+            <div class="ai-messages min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2">
+              <div class="space-y-3">
                 @for (message of activeMessages(); track message.id) {
                   <ai-message-bubble [message]="message" />
                 }
 
                 @if (streamingResponse(); as stream) {
                   <div class="flex justify-start">
-                    <div class="w-full rounded-lg rounded-tl-sm border border-border/50 bg-muted/50 px-3 py-1.5">
+                    <div class="w-full rounded-md bg-transparent px-2.5 py-1.5">
                       <app-streaming-markdown [stream$]="stream" [maxHeight]="'none'" [virtualScroll]="false" />
                     </div>
                   </div>
                 }
 
                 @if (activeMessages().length === 0 && !streamingResponse()) {
-                  <div class="flex h-40 items-center justify-center text-muted-foreground">
+                  <div class="flex h-28 items-center justify-center text-muted-foreground" role="status" aria-live="polite">
                     <p class="text-xs">开始一个新的对话...</p>
                   </div>
                 }
               </div>
             </div>
 
-            <div class="shrink-0 border-t border-border/60 p-2">
-              <ai-chat-input
-                [value]="currentInputValue()"
-                (valueChange)="onInputChange($event)"
-                [placeholder]="'Ask AI anything...'"
-                (send)="onSend($event)"
-              />
+            <div class="shrink-0 bg-background/80 p-2">
+              <div class="space-y-2">
+                <spark-session-tabs-bar
+                  [sessions]="sessions"
+                  [activeSessionId]="activeSessionId"
+                  (sessionSelect)="onSessionSelect($event)"
+                  (newChat)="onNewChat()"
+                  (sessionColorChange)="onSessionColorChange($event)"
+                  (sessionRename)="onSessionRenameFromTabs($event)"
+                  (sessionClose)="onDelete($event)"
+                />
+
+                <ai-chat-input
+                  [value]="currentInputValue()"
+                  (valueChange)="onInputChange($event)"
+                  [placeholder]="'Ask AI anything...'"
+                  (send)="onSend($event)"
+                />
+              </div>
             </div>
           </div>
         }
@@ -117,7 +116,7 @@
       type="button"
       (click)="onOpenDock()"
       data-testid="dock-open-fab"
-      class="fixed right-4 top-1/2 z-40 inline-flex -translate-y-1/2 items-center rounded-l-md rounded-r-sm border border-border/70 bg-background/90 px-2 py-2 text-xs font-medium text-foreground shadow backdrop-blur hover:bg-accent"
+      class="fixed right-4 top-1/2 z-40 inline-flex -translate-y-1/2 items-center rounded-l-md rounded-r-sm bg-background/90 px-2 py-2 text-xs font-medium text-foreground shadow backdrop-blur hover:bg-accent"
     >
       LLM
     </button>

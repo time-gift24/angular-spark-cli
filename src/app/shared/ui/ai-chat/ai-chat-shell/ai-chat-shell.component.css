@@ -1,3 +1,21 @@
 :host {
   display: block;
 }
+
+.llm-dock-shell::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.625rem;
+  bottom: 0.625rem;
+  width: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in oklch, var(--border) 22%, transparent) 14%,
+    color-mix(in oklch, var(--border) 34%, transparent) 50%,
+    color-mix(in oklch, var(--border) 22%, transparent) 86%,
+    transparent 100%
+  );
+}

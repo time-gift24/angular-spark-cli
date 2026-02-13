@@ -1,0 +1,144 @@
+/**
+ * Streaming Markdown Component Styles
+ *
+ * Container styles for the streaming markdown component.
+ * Individual block styles are defined in their respective component CSS files.
+ */
+
+.streaming-markdown-container {
+  /* Container for all rendered blocks */
+  /* overflow-y and max-height are set dynamically via component inputs */
+}
+
+/* Block router wrapper - provides spacing between blocks */
+.markdown-block-router {
+  display: block;
+  margin-bottom: 1px;
+}
+
+/* ========================================
+ * Global Code Styles - Critical Overrides
+ * These rules ensure code elements have
+ * proper line-height for readability
+ * ======================================== */
+
+/* Inline code styling (for code within paragraphs and other blocks) */
+.inline-code {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 0.0625rem 0.25rem;
+  border-radius: var(--radius-sm);
+  line-height: 1.2;
+}
+
+/* Code line-height override */
+.markdown-code {
+  line-height: 1.2 !important;
+}
+
+/* ========================================
+ * Copy Button Styles
+ * Floating button for copying raw markdown
+ * ======================================== */
+
+/* Container positioning for copy button */
+.streaming-markdown-container {
+  position: relative;
+}
+
+/* Copy button - top-right corner */
+.copy-button {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+
+  /* Ultra compact sizing */
+  width: 28px;
+  height: 28px;
+
+  /* Mineral & Time color scheme - using CSS variables */
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  /* Icon styling */
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Icon size */
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Interactive states */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.9;
+  padding: 0;
+}
+
+/* Hover state - primary color (石绿 Malachite) */
+.copy-button:hover {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+/* Active state */
+.copy-button:active {
+  transform: translateY(0);
+}
+
+/* Copied state - primary color background */
+.copy-button[aria-label*="Copied"] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
+
+/* Focus state for accessibility */
+.copy-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+}
+
+.copy-button {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* ========================================
+ * Unified Streaming Cursor
+ * All block types show ▌ blinking cursor
+ * during streaming state
+ * ======================================== */
+
+.streaming-cursor::after {
+  content: '▌';
+  color: var(--primary);
+  animation: cursor-blink 1s step-end infinite;
+  font-weight: 400;
+  margin-left: 1px;
+}
+
+@keyframes cursor-blink {
+  50% { opacity: 0; }
+}

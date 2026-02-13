@@ -10,6 +10,26 @@
   display: block;
 }
 
+/* Input wrapper shadow states */
+.chat-input-wrapper {
+  box-shadow:
+    0 10px 22px -18px color-mix(in oklch, var(--foreground) 38%, transparent),
+    0 1px 2px color-mix(in oklch, var(--foreground) 20%, transparent);
+  transition: box-shadow var(--duration-fast) ease;
+}
+
+.chat-input-wrapper:hover {
+  box-shadow:
+    0 12px 26px -18px color-mix(in oklch, var(--foreground) 42%, transparent),
+    0 1px 2px color-mix(in oklch, var(--foreground) 24%, transparent);
+}
+
+.chat-input-wrapper.focus-within {
+  box-shadow:
+    0 14px 30px -18px color-mix(in oklch, var(--primary) 44%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--primary) 26%, transparent);
+}
+
 .chat-textarea {
   color: var(--chat-textarea-color);
 }
@@ -26,19 +46,23 @@
 
 /* Toolbar icon buttons - using standard button height */
 .chat-toolbar-btn {
-  height: 1.875rem !important;
-  width: 1.875rem !important;
+  height: 1.75rem !important;
+  width: 1.75rem !important;
+  border-radius: var(--radius-md) !important;
+  border: 0;
+  background-color: transparent;
   color: var(--muted-foreground);
-  transition: transform var(--duration-spring-fast) var(--ease-spring-snappy), background-color var(--duration-fast) ease, color var(--duration-fast) ease;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease;
 }
 
 .chat-toolbar-btn:hover {
-  background-color: color-mix(in oklch, var(--primary) 8%, transparent);
-  color: var(--primary);
+  background-color: color-mix(in oklch, var(--muted) 80%, transparent);
+  color: var(--foreground);
 }
 
 .chat-toolbar-btn:active {
-  transform: scale(0.90);
+  background-color: color-mix(in oklch, var(--muted) 92%, transparent);
 }
 
 .chat-toolbar-btn:focus-visible {
@@ -48,21 +72,22 @@
 
 /* Voice button special hover effect */
 .chat-voice-btn:hover {
-  background-color: color-mix(in oklch, var(--accent) 10%, transparent);
-  color: var(--accent);
+  background-color: color-mix(in oklch, var(--muted) 80%, transparent);
+  color: var(--foreground);
 }
 
-/* Send button - circular with custom states */
+/* Send button states */
 .chat-send-btn {
-  height: 1.875rem !important;
-  width: 1.875rem !important;
-  border-radius: 9999px !important; /* Circular */
-  background-color: var(--secondary);
-  border: 1px solid color-mix(in oklch, var(--primary) 15%, transparent);
+  height: 1.75rem !important;
+  width: 1.75rem !important;
+  border-radius: var(--radius-md) !important;
+  background-color: transparent;
+  border: 0;
   color: var(--muted-foreground);
   opacity: 0.5;
   cursor: not-allowed;
-  transition: transform var(--duration-spring-fast) var(--ease-spring-snappy), background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, opacity var(--duration-fast) ease;
+  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease,
+    opacity var(--duration-fast) ease;
 }
 
 .chat-send-btn:disabled {
@@ -73,20 +98,17 @@
 /* Active state (can send) */
 .chat-send-btn:not(:disabled) {
   background-color: var(--primary);
-  border-color: var(--primary);
   color: var(--primary-foreground);
   opacity: 1;
   cursor: pointer;
 }
 
 .chat-send-btn:not(:disabled):hover {
-  background-color: var(--primary);
-  filter: brightness(0.95);
-  transform: scale(1.05);
+  filter: brightness(0.96);
 }
 
 .chat-send-btn:not(:disabled):active {
-  transform: scale(0.92);
+  filter: brightness(0.9);
 }
 
 .chat-send-btn:focus-visible {

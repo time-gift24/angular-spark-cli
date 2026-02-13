@@ -3,8 +3,7 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { LLM_CONFIG } from './shared/services/llm';
-import { provideStreamingMarkdown } from './shared/components/streaming-markdown/core/provide-streaming-markdown';
-import { builtinPlugin } from './shared/components/streaming-markdown/plugins/builtin-plugin';
+import { builtinPlugin, provideStreamingMarkdown } from '@app/shared/ui/streaming-markdown';
 
 export const appConfig: ApplicationConfig = {
   providers: [

@@ -46,4 +46,19 @@ export const animationExamples: readonly LiquidGlassExample[] = [
   快速弹性动画
 </div>`,
   },
+  {
+    title: '悬浮无动画 (No Motion)',
+    description: '禁用位移和跟随动画，保留静态玻璃质感，适合希望减少动态干扰的场景。',
+    theme: 'mineral-dark',
+    mode: 'standard',
+    displacementScale: 0,
+    blurAmount: 0.15,
+    saturation: 105,
+    elasticity: 0.25,
+    aberrationIntensity: 1.5,
+    disableAnimation: true,
+    code: `<div liquidGlass [lgDisableAnimation]="true">
+  悬浮无动画效果
+</div>`,
+  },
 ] as const;

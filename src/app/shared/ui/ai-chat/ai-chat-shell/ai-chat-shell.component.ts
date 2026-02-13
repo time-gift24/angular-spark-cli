@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { SessionColor } from '@app/shared/models';
 import { SessionStateService } from '@app/shared/services';
-import { StreamingMarkdownComponent } from '@app/shared/components/streaming-markdown';
+import { StreamingMarkdownComponent } from '@app/shared/ui/streaming-markdown';
 import { AiChatStateService } from '../services';
 import { SessionTabsBarComponent } from '../session-tabs-bar/session-tabs-bar.component';
 import { ChatInputComponent } from '../chat-input/chat-input.component';
@@ -97,10 +97,6 @@ export class AiChatShellComponent {
     this.chatState.setDockMode('pinned');
   }
 
-  onSessionToggle(): void {
-    this.onToggleDock();
-  }
-
   onSend(message: string): void {
     const sessionId = this.activeSessionId();
     if (!sessionId) {
@@ -120,42 +116,8 @@ export class AiChatShellComponent {
   }
 
   private startStreamingResponse(sessionId: string, userMessage: string): void {
-    const mockResponses: Record<string, string> = {
-      default: this.getRichMarkdownResponse(),
-      hello: this.getGreetingResponse(),
-      code: this.getCodeExampleResponse(),
-      table: this.getTableExampleResponse(),
-    };
-
-    let response = mockResponses['default'];
-    const lowerMessage = userMessage.toLowerCase();
-
-    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('你好')) {
-      response = mockResponses['hello'];
-    } else if (lowerMessage.includes('code') || lowerMessage.includes('代码')) {
-      response = mockResponses['code'];
-    } else if (lowerMessage.includes('table') || lowerMessage.includes('表格')) {
-      response = mockResponses['table'];
-    }
-
-    const stream$ = new Observable<string>((subscriber) => {
-      const chunkSize = 20;
-      const chunks = this.splitIntoChunks(response, chunkSize);
-      let index = 0;
-      const delay = 50;
-
-      const interval = setInterval(() => {
-        if (index < chunks.length) {
-          subscriber.next(chunks[index]);
-          index++;
-        } else {
-          clearInterval(interval);
-          subscriber.complete();
-        }
-      }, delay);
-
-      return () => clearInterval(interval);
-    });
+    const response = this.getMockResponseForMessage(userMessage);
+    const stream$ = this.createStreamingMarkdown$(response);
 
     this.sessionState.setStreamingResponse(stream$);
 
@@ -175,6 +137,34 @@ export class AiChatShellComponent {
         });
         this.sessionState.setStreamingResponse(null);
       },
+    });
+  }
+
+  private createStreamingMarkdown$(response: string): Observable<string> {
+    return new Observable<string>((subscriber) => {
+      const chunks = this.splitIntoChunks(response, 22);
+      let index = 0;
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+      const emitNext = () => {
+        if (index >= chunks.length) {
+          subscriber.complete();
+          return;
+        }
+
+        subscriber.next(chunks[index]);
+        index++;
+        const delay = index <= 2 ? 35 : 50 + (index % 3) * 15;
+        timeoutId = setTimeout(emitNext, delay);
+      };
+
+      timeoutId = setTimeout(emitNext, 40);
+
+      return () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
     });
   }
 
@@ -242,85 +232,113 @@ export class AiChatShellComponent {
     return adjusted;
   }
 
+  private getMockResponseForMessage(userMessage: string): string {
+    const lower = userMessage.trim().toLowerCase();
+
+    if (this.includesAny(lower, ['help', '帮助', '功能', '能做什么'])) {
+      return this.getHelpMenuResponse();
+    }
+
+    if (this.includesAny(lower, ['hello', 'hi', '你好', '在吗'])) {
+      return this.getGreetingResponse();
+    }
+
+    if (this.includesAny(lower, ['code', '代码', 'typescript', 'ts', 'javascript', 'js'])) {
+      return this.getCodeExampleResponse();
+    }
+
+    if (this.includesAny(lower, ['table', '表格', '报表', 'dashboard', '看板'])) {
+      return this.getTableExampleResponse();
+    }
+
+    if (this.includesAny(lower, ['plan', '方案', '架构', '设计'])) {
+      return this.getPlanningResponse();
+    }
+
+    if (this.includesAny(lower, ['bug', '报错', 'error', '异常', 'debug'])) {
+      return this.getDebugChecklistResponse();
+    }
+
+    if (this.includesAny(lower, ['release', 'changelog', '更新日志', '版本'])) {
+      return this.getReleaseNotesResponse();
+    }
+
+    if (this.includesAny(lower, ['test', '测试', 'case', '用例'])) {
+      return this.getTestCaseResponse();
+    }
+
+    if (!lower) {
+      return this.getHelpMenuResponse();
+    }
+
+    return this.getContextualDefaultResponse(userMessage);
+  }
+
+  private includesAny(text: string, keywords: readonly string[]): boolean {
+    return keywords.some((keyword) => text.includes(keyword));
+  }
+
+  private getHelpMenuResponse(): string {
+    return `# Mock Streaming 已启用
+
+你发送消息后，我会返回 **Markdown 流式回复**。
+
+## 可用触发词
+
+| 触发词 | 返回内容 |
+| --- | --- |
+| \`code\` / \`代码\` | 代码片段示例 |
+| \`table\` / \`表格\` | 表格数据示例 |
+| \`plan\` / \`方案\` | 实施方案模板 |
+| \`bug\` / \`报错\` | 排查清单 |
+| \`test\` / \`测试\` | 测试用例模板 |
+| \`release\` / \`更新日志\` | 版本发布模板 |
+
+## 直接测试
+
+1. 输入：\`请给我一个 code 示例\`
+2. 输入：\`做个 table\`
+3. 输入：\`帮我写个 plan\``;
+  }
+
   private getRichMarkdownResponse(): string {
-    return `# 欢迎使用 AI Chat
+    return `# 通用 Markdown 回复
 
-这是一个展示 **丰富 Markdown** 功能的示例回复。
+这是默认 mock 回复，支持流式渲染。
 
-## 文本格式化
+## 重点
 
-支持 *斜体*、**粗体**、***粗斜体***、~~删除线~~ 和 \`行内代码\`。
+- 支持段落、列表、表格、代码块
+- 支持长文本分片流式输出
+- 支持关键词路由到不同模板
 
-## 代码高亮
+## 示例代码
 
 \`\`\`typescript
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+type ReplyMode = 'code' | 'table' | 'plan' | 'debug' | 'default';
 
-async function fetchUser(id: string): Promise<User> {
-  const response = await fetch(\`/api/users/\${id}\`);
-  return response.json();
+function pickMode(text: string): ReplyMode {
+  if (text.includes('code')) return 'code';
+  if (text.includes('table')) return 'table';
+  return 'default';
 }
 \`\`\`
 
-## 列表
-
-### 无序列表
-- 第一项
-- 第二项
-  - 嵌套项 A
-  - 嵌套项 B
-- 第三项
-
-### 有序列表
-1. 步骤一
-2. 步骤二
-3. 步骤三
-
-## 引用
-
-> 这是一段引用文本。
->
-> 可以包含多行，甚至包含其他 **markdown** 元素。
-
-## 链接
-
-访问 [Angular 文档](https://angular.dev) 了解更多信息。
-
-## 数学公式
-
-行内公式：$E = mc^2$
-
-块级公式：
-$$
-\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}
-$$
-
----
-
-希望这个示例能帮助你了解 Markdown 的各种功能！`;
+> 你可以试试输入：\`code\`、\`table\`、\`plan\`。`;
   }
 
   private getGreetingResponse(): string {
-    return `# 👋 你好！
+    return `# 你好
 
-很高兴见到你！我是你的 AI 助手。
+当前是 **Mock Streaming 模式**，适合联调消息流和 Markdown 渲染。
 
-## 我可以帮助你
+## 当前状态
 
-| 功能 | 描述 |
-|------|------|
-| 💬 问答 | 回答你的各种问题 |
-| 📝 写作 | 协助撰写文档、邮件等 |
-| 💻 编程 | 帮助编写和调试代码 |
-| 📊 分析 | 分析数据和提供见解 |
+- 输入任意内容都会返回 markdown
+- 回复会以 chunk 形式逐步输出
+- 完成后会落入会话消息列表
 
----
-
-试试问："**给我一个代码示例**" 或 "**展示表格功能**"`;
+继续发一条消息试试看。`;
   }
 
   private getCodeExampleResponse(): string {
@@ -435,6 +453,116 @@ class UserManager:
 ---
 
 Markdown 表格让数据展示更清晰！`;
+  }
+
+  private getPlanningResponse(): string {
+    return `# 实施方案（Mock）
+
+## 目标
+
+将“发送消息 -> 返回 markdown streaming”稳定落地到聊天区。
+
+## 任务拆分
+
+1. 输入消息后立即写入用户气泡
+2. 创建 mock markdown 响应模板
+3. 以 chunk 流式输出到 streaming 区域
+4. 完成后固化为 assistant 消息
+
+## 风险与处理
+
+| 风险 | 影响 | 处理 |
+| --- | --- | --- |
+| 分片切断代码块 | markdown 闪烁 | 断点避开 \`\`\`、\`**\`、链接括号 |
+| 高频更新卡顿 | 滚动不顺滑 | 控制 chunk 大小与延迟 |
+| 多次发送并发 | 状态错乱 | 新请求前清理旧流状态 |`;
+  }
+
+  private getDebugChecklistResponse(): string {
+    return `# 排查清单（Mock）
+
+## 快速检查
+
+- [ ] 是否调用了 \`setStreamingResponse(stream$)\`
+- [ ] \`stream$\` 是否有 \`next\` 与 \`complete\`
+- [ ] complete 时是否写回 assistant 消息
+- [ ] error 时是否清空 streaming 状态
+
+## 建议日志点
+
+\`\`\`text
+[chat] onSend
+[chat] stream next chunk
+[chat] stream complete
+[chat] persist assistant message
+\`\`\`
+
+## 常见原因
+
+1. chunk 太大导致“看起来不像 streaming”
+2. 分片间隔太短导致瞬间完成
+3. 组件销毁后订阅未清理`;
+  }
+
+  private getReleaseNotesResponse(): string {
+    return `# Release Notes（Mock）
+
+## v0.1.0
+
+### Added
+
+- 新增 markdown 模板回复（code/table/plan/debug/test）
+- 新增关键词路由逻辑
+- 新增流式分片节奏控制
+
+### Changed
+
+- 默认回复从固定文本改为上下文化模板
+- chunk 发送从固定间隔改为轻微节奏变化
+
+### Validation
+
+- development build 通过
+- 手动发送消息可观测 streaming 效果`;
+  }
+
+  private getTestCaseResponse(): string {
+    return `# 测试用例（Mock）
+
+## 功能用例
+
+| 编号 | 输入 | 预期 |
+| --- | --- | --- |
+| TC-01 | \`code\` | 返回包含代码块的 markdown streaming |
+| TC-02 | \`table\` | 返回包含表格的 markdown streaming |
+| TC-03 | \`plan\` | 返回结构化方案 markdown |
+| TC-04 | 空输入 | 不发送，不触发 streaming |
+
+## 体验用例
+
+1. 连续快速发送 3 条消息，确认 UI 不错乱
+2. 切换 session 后发送，确认回复写入当前会话
+3. 等待 streaming 完成，确认最终消息被固化`;
+  }
+
+  private getContextualDefaultResponse(userMessage: string): string {
+    return `# 已收到你的消息
+
+> ${userMessage}
+
+这是一个 **mock markdown streaming** 回复，用于联调界面与渲染逻辑。
+
+## 我理解的意图
+
+1. 你希望发送后立即看到流式输出
+2. 输出内容需要是 markdown（而非纯文本）
+3. 最终内容应落盘到当前会话
+
+## 下一步建议
+
+- 如果你要看代码渲染，发：\`code\`
+- 如果你要看表格渲染，发：\`table\`
+- 如果你要看结构化文档，发：\`plan\``;
   }
 
   onInputChange(value: string): void {

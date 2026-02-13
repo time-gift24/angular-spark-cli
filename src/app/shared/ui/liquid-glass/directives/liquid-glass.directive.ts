@@ -6,288 +6,126 @@ import {
   OnInit,
   OnDestroy,
   input,
+  output,
   booleanAttribute,
+  PLATFORM_ID,
+  NgZone,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import {
   LiquidGlassTheme,
   LiquidGlassRefractionMode,
+  LiquidGlassColorConfig,
 } from '@app/shared/ui/liquid-glass/types/liquid-glass.types';
 import { LiquidGlassThemeResolver } from '@app/shared/ui/liquid-glass/services/theme-resolver.service';
-import { SvgFilterBuilderService } from '@app/shared/ui/liquid-glass/services/svg-filter-builder.service';
-import { REFRACTION_MODE_TURBULENCE } from '@app/shared/ui/liquid-glass/types/theme.constants';
+import { ShaderDisplacementService } from '@app/shared/ui/liquid-glass/services/shader-displacement.service';
+import { displacementMap } from '@app/shared/ui/liquid-glass/constants/displacement-map';
+import { polarDisplacementMap } from '@app/shared/ui/liquid-glass/constants/polar-displacement-map';
+import { prominentDisplacementMap } from '@app/shared/ui/liquid-glass/constants/prominent-displacement-map';
 
 /**
- * Liquid Glass Directive - Phase 5: Core Implementation
- *
- * A headless directive that applies liquid glass distortion effects to any
- * element. Integrates theme resolution (P1), state machine (P2), SVG filter
- * builder (P3), and accessibility (P4).
- *
- * ## Features
- *
- * - **Dynamic Distortion**: Mouse-tracking liquid glass effect with SVG filters
- * - **Theme System**: Mineral-inspired themes with automatic color resolution
- * - **Performance**: GPU-accelerated animations with RAF-based smoothing
- * - **Accessibility**: ARIA labels and reduced motion support
- * - **Customizable**: Extensive input options for fine-tuned control
- *
- * ## Usage
- *
- * ```html
- * <!-- Basic usage with default theme -->
- * <div liquidGlass class="p-4">
- *   Content with liquid glass effect
- * </div>
- *
- * <!-- With theme and customization -->
- * <div
- *   liquidGlass
- *   lgTheme="mineral-light"
- *   lgMode="prominent"
- *   lgCornerRadius="var(--radius-2xl)"
- *   lgPadding="16"
- *   [lgDisableAnimation]="false">
- *   Customized liquid glass card
- * </div>
- * ```
- *
- * ## Design System Integration
- *
- * - **Colors**: Uses CSS variables (--accent, --background) from mineral theme
- * - **Spacing**: Integrates with --radius-* variables for consistency
- * - **Typography**: Preserves host element content without interference
- * - **Animation**: Subtle, natural motion with configurable elasticity
- *
- * @selector [liquidGlass]
- * @standalone true
- * @implements OnInit, OnDestroy
+ * Returns the displacement map for a given refraction mode.
+ */
+function getDisplacementMapUrl(
+  mode: LiquidGlassRefractionMode,
+  shaderMapUrl?: string,
+): string {
+  switch (mode) {
+    case 'standard':
+      return displacementMap;
+    case 'polar':
+      return polarDisplacementMap;
+    case 'prominent':
+      return prominentDisplacementMap;
+    case 'shader':
+      return shaderMapUrl || displacementMap;
+    default:
+      return displacementMap;
+  }
+}
+
+/**
+ * Liquid glass directive that applies vendor-equivalent edge-only refraction.
  */
 @Directive({
   selector: '[liquidGlass]',
   host: {
-    '(pointermove)': 'onPointerMove($event)',
-    '(pointerenter)': 'onPointerEnter()',
-    '(pointerleave)': 'onPointerLeave()',
+    '[class.liquid-glass]': 'isEnabled',
+    '[class.lg-host]': 'isEnabled',
+    '(mouseenter)': 'onPointerEnter()',
+    '(mouseleave)': 'onPointerLeave()',
+    '(mousedown)': 'onMouseDown()',
+    '(mouseup)': 'onMouseUp()',
     '(focus)': 'onFocus()',
     '(blur)': 'onBlur()',
+    '(click)': 'onClick()',
   },
 })
 export class LiquidGlassDirective implements OnInit, OnDestroy {
-  // ========== Dependency Injection ==========
+  private readonly el = inject(ElementRef<HTMLElement>);
+  private readonly renderer = inject(Renderer2);
+  private readonly ngZone = inject(NgZone);
+  private readonly platformId = inject(PLATFORM_ID);
 
-  /** Native element reference */
-  private el = inject(ElementRef<HTMLElement>);
+  private readonly themeResolver = inject(LiquidGlassThemeResolver);
+  private readonly shaderDisplacementService = inject(ShaderDisplacementService);
 
-  /** Renderer for DOM manipulation (Angular abstraction) */
-  private r = inject(Renderer2);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  /** Theme resolver for color and mode resolution (P1) */
-  private themeResolver = inject(LiquidGlassThemeResolver);
+  // Compatibility with `[liquidGlass]="false"`
+  readonly liquidGlassInput = input(true, {
+    alias: 'liquidGlass',
+    transform: booleanAttribute,
+  });
 
-  /** SVG filter builder for distortion effects (P3) */
-  private filterBuilder = inject(SvgFilterBuilderService);
-
-  // ========== Input Properties ==========
-
-  // ----- Theme & Mode -----
-
-  /**
-   * Theme variant for liquid glass effect
-   *
-   * Determines the color palette and intensity:
-   * - 'mineral-dark': Dark mineral theme with subtle highlights
-   * - 'mineral-light': Light mineral theme with soft gradients
-   * - 'custom': Use custom color overrides via lgBorder/lgHotspot/lgTint
-   *
-   * @default 'mineral-dark'
-   */
   readonly lgThemeInput = input<LiquidGlassTheme>('mineral-dark', { alias: 'lgTheme' });
-
-  /**
-   * Refraction mode for distortion intensity
-   *
-   * Controls the SVG turbulence frequency:
-   * - 'standard': Balanced distortion, turbulence [0.014, 0.035]
-   * - 'polar': Vertical distortion, turbulence [0.010, 0.060]
-   * - 'prominent': Strong distortion, turbulence [0.020, 0.020]
-   *
-   * @default 'standard'
-   */
   readonly lgModeInput = input<LiquidGlassRefractionMode>('standard', { alias: 'lgMode' });
 
-  // ----- Color Overrides -----
-
-  /**
-   * Border color override
-   *
-   * If not provided, uses theme-resolved --accent color
-   *
-   * @example lgBorder="oklch(0.70 0.12 75)"
-   */
   readonly lgBorderInput = input<string | undefined>(undefined, { alias: 'lgBorder' });
-
-  /**
-   * Hotspot color for radial gradient highlight
-   *
-   * Creates the glowing hotspot that follows mouse movement
-   *
-   * @example lgHotspot="color-mix(in oklch, var(--card) 30%, transparent)"
-   */
   readonly lgHotspotInput = input<string | undefined>(undefined, { alias: 'lgHotspot' });
-
-  /**
-   * Tint overlay color for base fill
-   *
-   * Provides the base color layer beneath gradients
-   *
-   * @example lgTint="color-mix(in oklch, var(--foreground) 40%, transparent)"
-   */
   readonly lgTintInput = input<string | undefined>(undefined, { alias: 'lgTint' });
 
-  /**
-   * ARIA label for screen readers
-   *
-   * @default 'Liquid glass card'
-   */
   readonly lgAriaLabelInput = input('Liquid glass card', { alias: 'lgAriaLabel' });
-
-  /**
-   * ARIA role for accessibility
-   *
-   * @default 'region'
-   */
   readonly lgRoleInput = input('region', { alias: 'lgRole' });
 
-  // ----- Spacing & Layout -----
-
-  /**
-   * Border radius using CSS variable or explicit value
-   *
-   * Integrates with design system radius tokens
-   *
-   * @default 'var(--radius-xl)'
-   * @example 'var(--radius-2xl)' or '16px'
-   */
-  readonly lgCornerRadiusInput = input('var(--radius-xl)', { alias: 'lgCornerRadius' });
-
-  /**
-   * Border width in pixels
-   *
-   * @default 1
-   */
+  readonly lgCornerRadiusInput = input('999px', { alias: 'lgCornerRadius' });
   readonly lgBorderWidthInput = input(1, { alias: 'lgBorderWidth' });
-
-  /**
-   * Border width in pixels when activated (hovered or focused)
-   *
-   * @default 2
-   */
   readonly lgBorderWidthActiveInput = input(2, { alias: 'lgBorderWidthActive' });
 
-  /**
-   * Internal padding in pixels
-   *
-   * Note: This is for the overlay only, not the host content
-   *
-   * @default 12
-   */
-  readonly lgPaddingInput = input(12, { alias: 'lgPadding' });
-
-  // ----- Filter Configuration -----
-
-  /**
-   * Disable SVG filters (backdrop blur only)
-   *
-   * Use this for better performance on lower-end devices
-   *
-   * @default false
-   */
   readonly lgDisableFiltersInput = input(false, {
     alias: 'lgDisableFilters',
     transform: booleanAttribute,
   });
+  readonly lgDisplacementScaleInput = input(70, { alias: 'lgDisplacementScale' });
+  readonly lgBlurAmountInput = input(0.0625, { alias: 'lgBlurAmount' });
+  readonly lgSaturationInput = input(140, { alias: 'lgSaturation' });
+  readonly lgAberrationIntensityInput = input(2, { alias: 'lgAberrationIntensity' });
 
-  /**
-   * Displacement scale for SVG turbulence
-   *
-   * Higher values create more pronounced distortion
-   *
-   * @default 0 (no distortion, clean edges)
-   * @example Set to 20-60 for liquid glass distortion effect
-   */
-  readonly lgDisplacementScaleInput = input(0, { alias: 'lgDisplacementScale' });
-
-  /**
-   * Backdrop blur amount multiplier
-   *
-   * Final blur = blurAmount * 18 pixels
-   *
-   * @default 0.15 (results in ~2.7px blur - subtle effect)
-   */
-  readonly lgBlurAmountInput = input(0.15, { alias: 'lgBlurAmount' });
-
-  /**
-   * Saturation adjustment percentage
-   *
-   * Values > 100 increase color vibrance
-   *
-   * @default 105 (subtle vibrance boost)
-   */
-  readonly lgSaturationInput = input(105, { alias: 'lgSaturation' });
-
-  /**
-   * Chromatic aberration intensity
-   *
-   * Creates RGB split effect at edges
-   *
-   * @default 1.5 (subtle effect)
-   */
-  readonly lgAberrationIntensityInput = input(1.5, { alias: 'lgAberrationIntensity' });
-
-  // ----- Animation Configuration -----
-
-  /**
-   * Disable all animation (static effect)
-   *
-   * Useful for accessibility or performance
-   *
-   * @default false
-   */
   readonly lgDisableAnimationInput = input(false, {
     alias: 'lgDisableAnimation',
     transform: booleanAttribute,
   });
-
-  /**
-   * Animation elasticity (0-1)
-   *
-   * Higher values = faster, snappier motion
-   * Lower values = smoother, more gradual motion
-   *
-   * @default 0.25 (smooth, natural feel)
-   */
-  readonly lgElasticityInput = input(0.25, { alias: 'lgElasticity' });
-
-  /**
-   * Parallax intensity in pixels
-   *
-   * Creates depth effect by moving overlay opposite to mouse
-   *
-   * @default 2
-   */
+  readonly lgElasticityInput = input(0.15, { alias: 'lgElasticity' });
   readonly lgParallaxIntensityInput = input(2, { alias: 'lgParallaxIntensity' });
-
-  /**
-   * Respect user's reduced motion preference
-   *
-   * When true, disables animation if user prefers reduced motion
-   *
-   * @default true
-   */
   readonly lgRespectReducedMotionInput = input(true, {
     alias: 'lgRespectReducedMotion',
     transform: booleanAttribute,
   });
+
+  // Vendor parity options
+  readonly lgOverLightInput = input(false, {
+    alias: 'lgOverLight',
+    transform: booleanAttribute,
+  });
+  readonly lgMouseContainerInput = input<HTMLElement | Window | null>(null, {
+    alias: 'lgMouseContainer',
+  });
+
+  readonly liquidGlassClick = output<void>();
+
+  private get isEnabled(): boolean {
+    return this.liquidGlassInput();
+  }
 
   private get lgTheme(): LiquidGlassTheme {
     return this.lgThemeInput();
@@ -329,10 +167,6 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     return this.lgBorderWidthActiveInput();
   }
 
-  private get lgPadding(): number {
-    return this.lgPaddingInput();
-  }
-
   private get lgDisableFilters(): boolean {
     return this.lgDisableFiltersInput();
   }
@@ -369,445 +203,696 @@ export class LiquidGlassDirective implements OnInit, OnDestroy {
     return this.lgRespectReducedMotionInput();
   }
 
-  // ========== Private Properties ==========
-
-  /** Host element being decorated */
-  private host!: HTMLElement;
-
-  /** Overlay div containing backdrop blur and background effects */
-  private overlay!: HTMLDivElement;
-
-  /** Border layer - separate from overlay to avoid blur effect */
-  private borderLayer!: HTMLDivElement;
-
-  /** SVG filter element (if filters enabled) */
-  private svgFilter?: SVGSVGElement;
-
-  /** RequestAnimationFrame ID for cleanup */
-  private animationFrameId = 0;
-
-  /** Unique ID for SVG filter reference */
-  private filterId = '';
-
-  /** Runtime override when prefers-reduced-motion is enabled */
-  private reduceMotionDisabledAnimation = false;
-
-  // ----- Animation State -----
-
-  /** Target X position (mouse position normalized 0-1) */
-  private targetX = 0.5;
-
-  /** Target Y position (mouse position normalized 0-1) */
-  private targetY = 0.5;
-
-  /** Current interpolated X position */
-  private curX = 0.5;
-
-  /** Current interpolated Y position */
-  private curY = 0.5;
-
-  // ----- Hover State -----
-
-  /** Whether the mouse is hovering over the element */
-  private isHovered = false;
-
-  /** Whether the element has keyboard focus */
-  private isFocused = false;
-
-  /**
-   * Check if element is in activated state
-   *
-   * Element is activated when EITHER hovered OR focused
-   *
-   * @returns true if element should show activation styling
-   */
-  private isActivated(): boolean {
-    return this.isHovered || this.isFocused;
+  private get lgOverLight(): boolean {
+    return this.lgOverLightInput();
   }
 
-  // ========== Lifecycle Hooks ==========
+  private host!: HTMLElement;
+  private warpLayer: HTMLSpanElement | null = null;
+  private borderLayer: HTMLDivElement | null = null;
+  private svgFilter: SVGSVGElement | null = null;
 
-  /**
-   * Initialize directive
-   *
-   * Sets up host styles, creates overlay and filters, starts animation loop
-   */
+  private filterId = '';
+  private animationFrameId = 0;
+  private readonly cleanupFns: Array<() => void> = [];
+
+  private isHovered = false;
+  private isFocused = false;
+  private isActive = false;
+
+  private internalGlobalMousePos = { x: 0, y: 0 };
+  private glassSize = { width: 270, height: 69 };
+
+  private reduceMotionDisabledAnimation = false;
+  private generatedShaderMapUrl: string | undefined;
+  private lastFrameWasIdle = false;
+
   ngOnInit(): void {
+    if (!this.isBrowser || !this.isEnabled) {
+      return;
+    }
+
     this.host = this.el.nativeElement;
 
-    // Check reduced motion preference
     if (this.lgRespectReducedMotion && this.prefersReducedMotion()) {
       this.reduceMotionDisabledAnimation = true;
     }
 
-    // Generate unique filter ID
-    this.filterId = this.filterBuilder.generateFilterId();
+    this.filterId = `lg-filter-${Math.random().toString(16).slice(2)}`;
 
-    // Initialize visual elements
     this.setupHostStyles();
-    this.createOverlay();
+    this.updateGlassSize();
+    this.createWarpLayer();
 
-    // Create SVG filter if not disabled
     if (!this.lgDisableFilters) {
       this.createSvgFilter();
     }
 
-    // Start animation loop if not disabled
+    this.createBorderLayer();
+    this.setupAccessibility();
+    this.setupMouseTracking();
+
+    const resizeHandler = () => {
+      this.updateGlassSize();
+      if (!this.lgDisableFilters && this.lgMode === 'shader') {
+        this.rebuildSvgFilter();
+      }
+    };
+
+    window.addEventListener('resize', resizeHandler);
+    this.cleanupFns.push(() => window.removeEventListener('resize', resizeHandler));
+
     if (!this.lgDisableAnimation) {
       this.startAnimationLoop();
     }
-
-    // Setup accessibility attributes
-    this.setupAccessibility();
   }
 
-  /**
-   * Clean up resources
-   *
-   * Cancels animation frame and removes DOM elements
-   */
   ngOnDestroy(): void {
-    cancelAnimationFrame(this.animationFrameId);
-    this.cleanup();
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+
+    for (const fn of this.cleanupFns) {
+      fn();
+    }
+
+    this.cleanupDom();
   }
 
-  // ========== Initialization Methods ==========
-
-  /**
-   * Check if user prefers reduced motion
-   *
-   * Reads the prefers-reduced-motion media query
-   *
-   * @returns true if reduced motion is preferred
-   */
-  private prefersReducedMotion(): boolean {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  onPointerEnter(): void {
+    if (!this.isEnabled) return;
+    this.isHovered = true;
+    this.updateBorderStyle();
   }
 
-  /**
-   * Clean up created DOM elements
-   *
-   * Removes SVG filter, overlay, and border layer from host
-   */
-  private cleanup(): void {
-    if (this.svgFilter?.parentNode) {
-      this.svgFilter.parentNode.removeChild(this.svgFilter);
-    }
-    if (this.overlay?.parentNode) {
-      this.overlay.parentNode.removeChild(this.overlay);
-    }
-    if (this.borderLayer?.parentNode) {
-      this.borderLayer.parentNode.removeChild(this.borderLayer);
-    }
+  onPointerLeave(): void {
+    if (!this.isEnabled) return;
+    this.isHovered = false;
+    this.updateBorderStyle();
   }
 
-  /**
-   * Apply base styles to host element
-   *
-   * Sets up positioning and containment for the overlay
-   */
+  onMouseDown(): void {
+    if (!this.isEnabled) return;
+    this.isActive = true;
+    this.updateBorderStyle();
+  }
+
+  onMouseUp(): void {
+    if (!this.isEnabled) return;
+    this.isActive = false;
+    this.updateBorderStyle();
+  }
+
+  onFocus(): void {
+    if (!this.isEnabled) return;
+    this.isFocused = true;
+    this.updateBorderStyle();
+  }
+
+  onBlur(): void {
+    if (!this.isEnabled) return;
+    this.isFocused = false;
+    this.updateBorderStyle();
+  }
+
+  onClick(): void {
+    if (!this.isEnabled) return;
+    this.liquidGlassClick.emit();
+  }
+
   private setupHostStyles(): void {
-    this.r.setStyle(this.host, 'position', 'relative');
-    this.r.setStyle(this.host, 'isolation', 'isolate');
-    this.r.setStyle(this.host, 'overflow', 'hidden');
-    this.r.setStyle(this.host, 'border-radius', this.lgCornerRadius);
+    this.renderer.setStyle(this.host, 'position', 'relative');
+    this.renderer.setStyle(this.host, 'isolation', 'isolate');
+    this.renderer.setStyle(this.host, 'overflow', 'hidden');
+    this.renderer.setStyle(this.host, 'border-radius', this.lgCornerRadius);
+    this.renderer.setStyle(this.host, 'box-shadow', 'var(--shadow-control-hover)');
   }
 
-  /**
-   * Create overlay div with all visual effects
-   *
-   * Creates two layers:
-   * 1. overlay: Backdrop blur, saturation, and background gradients
-   * 2. borderLayer: Sharp border on top (not affected by blur)
-   */
-  private createOverlay(): void {
-    // Create background overlay (backdrop blur + gradients)
-    this.overlay = this.r.createElement('div');
-    // Insert overlay as FIRST child so content stays on top
-    if (this.host.firstChild) {
-      this.r.insertBefore(this.host, this.overlay, this.host.firstChild);
-    } else {
-      this.r.appendChild(this.host, this.overlay);
-    }
+  private createWarpLayer(): void {
+    this.warpLayer = this.renderer.createElement('span');
+    this.renderer.addClass(this.warpLayer, 'lg-warp');
 
-    // ----- Overlay Base Styles -----
-    this.r.setStyle(this.overlay, 'pointer-events', 'none');
-    this.r.setStyle(this.overlay, 'position', 'absolute');
-    this.r.setStyle(this.overlay, 'inset', '0');
-    this.r.setStyle(this.overlay, 'border-radius', 'inherit');
-    this.r.setStyle(this.overlay, 'z-index', '-1');
-    this.r.setStyle(this.overlay, 'will-change', 'transform, filter, background');
-    this.r.setStyle(this.overlay, 'transform', 'translateZ(0)');
+    this.renderer.setStyle(this.warpLayer, 'position', 'absolute');
+    this.renderer.setStyle(this.warpLayer, 'inset', '-50%');
+    this.renderer.setStyle(this.warpLayer, 'width', '200%');
+    this.renderer.setStyle(this.warpLayer, 'height', '200%');
+    this.renderer.setStyle(this.warpLayer, 'pointer-events', 'none');
+    this.renderer.setStyle(this.warpLayer, 'z-index', '0');
+    this.renderer.setStyle(this.warpLayer, 'border-radius', 'inherit');
 
-    // ----- Backdrop Filter -----
-    const blurPx = Math.round(this.lgBlurAmount * 18);
-    this.r.setStyle(
-      this.overlay,
+    const baseBlur = this.lgOverLight ? 12 : 4;
+    const blurPx = baseBlur + this.lgBlurAmount * 32;
+    this.renderer.setStyle(
+      this.warpLayer,
       'backdrop-filter',
       `blur(${blurPx}px) saturate(${this.lgSaturation}%)`,
     );
-    this.r.setStyle(
-      this.overlay,
-      '-webkit-backdrop-filter',
-      `blur(${blurPx}px) saturate(${this.lgSaturation}%)`,
-    );
 
-    // ----- Initial Background -----
-    this.updateOverlayBackground(0.5, 0.5);
-
-    // Create border layer (separate to avoid blur)
-    this.createBorderLayer();
-  }
-
-  /**
-   * Create border layer on top of overlay
-   *
-   * This layer contains only the border and shadow, not affected by backdrop-filter
-   */
-  private createBorderLayer(): void {
-    this.borderLayer = this.r.createElement('div');
-    // Insert border layer after overlay
-    if (this.overlay.nextSibling) {
-      this.r.insertBefore(this.host, this.borderLayer, this.overlay.nextSibling);
-    } else {
-      this.r.appendChild(this.host, this.borderLayer);
+    if (!this.lgDisableFilters && !this.isFirefox()) {
+      this.renderer.setStyle(this.warpLayer, 'filter', `url(#${this.filterId})`);
     }
 
-    // ----- Border Layer Base Styles -----
-    this.r.setStyle(this.borderLayer, 'pointer-events', 'none');
-    this.r.setStyle(this.borderLayer, 'position', 'absolute');
-    this.r.setStyle(this.borderLayer, 'inset', '0');
-    this.r.setStyle(this.borderLayer, 'border-radius', 'inherit');
-    this.r.setStyle(this.borderLayer, 'z-index', '0'); // Above overlay (-1)
-    this.r.setStyle(this.borderLayer, 'transition', 'box-shadow 0.2s ease-out, border-color 0.2s ease-out, border-width 0.2s ease-out');
+    this.updateWarpBackground(0.5, 0.5);
 
-    // ----- Initial Border Styles -----
-    const borderColor = this.lgBorder || 'var(--primary)';
-    this.r.setStyle(this.borderLayer, 'border-width', `${this.lgBorderWidth}px`);
-    this.r.setStyle(this.borderLayer, 'border-style', 'solid');
-    this.r.setStyle(this.borderLayer, 'border-color', borderColor);
-    this.r.setStyle(
+    if (this.host.firstChild) {
+      this.renderer.insertBefore(this.host, this.warpLayer, this.host.firstChild);
+    } else {
+      this.renderer.appendChild(this.host, this.warpLayer);
+    }
+
+    this.promoteHostChildren();
+  }
+
+  private createBorderLayer(): void {
+    this.borderLayer = this.renderer.createElement('div');
+
+    this.renderer.setStyle(this.borderLayer, 'pointer-events', 'none');
+    this.renderer.setStyle(this.borderLayer, 'position', 'absolute');
+    this.renderer.setStyle(this.borderLayer, 'inset', '0');
+    this.renderer.setStyle(this.borderLayer, 'border-radius', 'inherit');
+    this.renderer.setStyle(this.borderLayer, 'z-index', '2');
+    this.renderer.setStyle(
       this.borderLayer,
-      'box-shadow',
-      'var(--shadow-control-active), inset 0 1px 0 color-mix(in oklch, var(--card) 15%, transparent)',
+      'transition',
+      'box-shadow 0.2s ease-out, border-color 0.2s ease-out, border-width 0.2s ease-out',
     );
+
+    this.renderer.appendChild(this.host, this.borderLayer);
+    this.updateBorderStyle();
   }
 
-  /**
-   * Update overlay background with radial gradient hotspot
-   *
-   * Creates a multi-layer background:
-   * 1. Radial gradient hotspot (follows mouse)
-   * 2. Top-down fade gradient (ambient light)
-   * 3. Base tint (provides opacity)
-   *
-   * @param x Normalized X position (0-1)
-   * @param y Normalized Y position (0-1)
-   */
-  private updateOverlayBackground(x: number, y: number): void {
-    const xPct = (x * 100).toFixed(2);
-    const yPct = (y * 100).toFixed(2);
-    const hotspot = this.lgHotspot || 'color-mix(in oklch, var(--card) 15%, transparent)';
-    const tint = this.lgTint || 'color-mix(in oklch, var(--foreground) 12%, transparent)';
-
-    const gradient = `
-      radial-gradient(140px 140px at ${xPct}% ${yPct}%, ${hotspot},
-        color-mix(in oklch, var(--card) 8%, transparent) 35%, transparent 70%),
-      linear-gradient(180deg, color-mix(in oklch, var(--card) 12%, transparent), transparent 65%),
-      ${tint}
-    `
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    this.r.setStyle(this.overlay, 'background', gradient);
-  }
-
-  /**
-   * Create SVG filter element for distortion effects
-   *
-   * Uses SvgFilterBuilderService (P3) to generate:
-   * - FeTurbulence for distortion pattern
-   * - FeDisplacementMap for image distortion
-   * - FeColorMatrix for saturation
-   *
-   * Applies chromatic aberration via CSS drop-shadow
-   */
   private createSvgFilter(): void {
-    const config = {
-      displacementScale: this.lgDisplacementScale,
-      blurAmount: this.lgBlurAmount,
-      saturation: this.lgSaturation,
-      aberrationIntensity: this.lgAberrationIntensity,
-      turbulenceBaseFrequency: REFRACTION_MODE_TURBULENCE[this.lgMode],
-    };
+    if (!this.warpLayer || this.isFirefox()) {
+      return;
+    }
 
-    this.svgFilter = this.filterBuilder.createFilterElement(
-      this.r,
-      config,
-      this.lgMode,
-      this.filterId,
+    const mode = this.lgMode;
+    if (mode === 'shader') {
+      this.generatedShaderMapUrl = this.shaderDisplacementService.generateShaderDisplacementMap(
+        this.glassSize.width,
+        this.glassSize.height,
+      );
+    } else {
+      this.generatedShaderMapUrl = undefined;
+    }
+
+    const displacementMapUrl = getDisplacementMapUrl(mode, this.generatedShaderMapUrl);
+
+    this.svgFilter = this.renderer.createElement('svg', 'svg') as SVGSVGElement;
+    this.renderer.setAttribute(this.svgFilter, 'width', '0');
+    this.renderer.setAttribute(this.svgFilter, 'height', '0');
+    this.renderer.setAttribute(
+      this.svgFilter,
+      'style',
+      'position:absolute; width:0; height:0; overflow:hidden;',
     );
 
-    this.r.appendChild(this.host, this.svgFilter);
+    const defs = this.renderer.createElement('defs', 'svg');
+    const filter = this.renderer.createElement('filter', 'svg');
 
-    // Apply filter to overlay with chromatic aberration
-    const aberration = Math.max(0, this.lgAberrationIntensity);
-    this.r.setStyle(
-      this.overlay,
-      'filter',
-      `url(#${this.filterId}) drop-shadow(${aberration}px 0 color-mix(in oklch, var(--accent) 18%, transparent)) ` +
-        `drop-shadow(${-aberration}px 0 color-mix(in oklch, var(--primary) 16%, transparent))`,
+    this.renderer.setAttribute(filter, 'id', this.filterId);
+    this.renderer.setAttribute(filter, 'x', '-35%');
+    this.renderer.setAttribute(filter, 'y', '-35%');
+    this.renderer.setAttribute(filter, 'width', '170%');
+    this.renderer.setAttribute(filter, 'height', '170%');
+    this.renderer.setAttribute(filter, 'color-interpolation-filters', 'sRGB');
+
+    const feImage = this.renderer.createElement('feImage', 'svg');
+    this.renderer.setAttribute(feImage, 'id', 'feimage');
+    this.renderer.setAttribute(feImage, 'x', '0');
+    this.renderer.setAttribute(feImage, 'y', '0');
+    this.renderer.setAttribute(feImage, 'width', '100%');
+    this.renderer.setAttribute(feImage, 'height', '100%');
+    this.renderer.setAttribute(feImage, 'result', 'DISPLACEMENT_MAP');
+    this.renderer.setAttribute(feImage, 'href', displacementMapUrl);
+    this.renderer.setAttribute(feImage, 'preserveAspectRatio', 'xMidYMid slice');
+
+    const feColorMatrix = this.renderer.createElement('feColorMatrix', 'svg');
+    this.renderer.setAttribute(feColorMatrix, 'in', 'DISPLACEMENT_MAP');
+    this.renderer.setAttribute(feColorMatrix, 'type', 'matrix');
+    this.renderer.setAttribute(
+      feColorMatrix,
+      'values',
+      '0.3 0.3 0.3 0 0 0.3 0.3 0.3 0 0 0.3 0.3 0.3 0 0 0 0 0 1 0',
     );
+    this.renderer.setAttribute(feColorMatrix, 'result', 'EDGE_INTENSITY');
+
+    const feComponentTransfer = this.renderer.createElement('feComponentTransfer', 'svg');
+    this.renderer.setAttribute(feComponentTransfer, 'in', 'EDGE_INTENSITY');
+    this.renderer.setAttribute(feComponentTransfer, 'result', 'EDGE_MASK');
+
+    const feFuncA = this.renderer.createElement('feFuncA', 'svg');
+    this.renderer.setAttribute(feFuncA, 'type', 'discrete');
+    this.renderer.setAttribute(
+      feFuncA,
+      'tableValues',
+      `0 ${this.lgAberrationIntensity * 0.05} 1`,
+    );
+    feComponentTransfer.appendChild(feFuncA);
+
+    const feOffset = this.renderer.createElement('feOffset', 'svg');
+    this.renderer.setAttribute(feOffset, 'in', 'SourceGraphic');
+    this.renderer.setAttribute(feOffset, 'dx', '0');
+    this.renderer.setAttribute(feOffset, 'dy', '0');
+    this.renderer.setAttribute(feOffset, 'result', 'CENTER_ORIGINAL');
+
+    const modeMultiplier = mode === 'shader' ? 1 : -1;
+    const baseScale = this.lgDisplacementScale;
+    const redScale = baseScale * modeMultiplier;
+    const greenScale = baseScale * (modeMultiplier - this.lgAberrationIntensity * 0.05);
+    const blueScale = baseScale * (modeMultiplier - this.lgAberrationIntensity * 0.1);
+
+    const redDisplacement = this.renderer.createElement('feDisplacementMap', 'svg');
+    this.renderer.setAttribute(redDisplacement, 'in', 'SourceGraphic');
+    this.renderer.setAttribute(redDisplacement, 'in2', 'DISPLACEMENT_MAP');
+    this.renderer.setAttribute(redDisplacement, 'scale', String(redScale));
+    this.renderer.setAttribute(redDisplacement, 'xChannelSelector', 'R');
+    this.renderer.setAttribute(redDisplacement, 'yChannelSelector', 'B');
+    this.renderer.setAttribute(redDisplacement, 'result', 'RED_DISPLACED');
+
+    const redMatrix = this.renderer.createElement('feColorMatrix', 'svg');
+    this.renderer.setAttribute(redMatrix, 'in', 'RED_DISPLACED');
+    this.renderer.setAttribute(redMatrix, 'type', 'matrix');
+    this.renderer.setAttribute(redMatrix, 'values', '1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0');
+    this.renderer.setAttribute(redMatrix, 'result', 'RED_CHANNEL');
+
+    const greenDisplacement = this.renderer.createElement('feDisplacementMap', 'svg');
+    this.renderer.setAttribute(greenDisplacement, 'in', 'SourceGraphic');
+    this.renderer.setAttribute(greenDisplacement, 'in2', 'DISPLACEMENT_MAP');
+    this.renderer.setAttribute(greenDisplacement, 'scale', String(greenScale));
+    this.renderer.setAttribute(greenDisplacement, 'xChannelSelector', 'R');
+    this.renderer.setAttribute(greenDisplacement, 'yChannelSelector', 'B');
+    this.renderer.setAttribute(greenDisplacement, 'result', 'GREEN_DISPLACED');
+
+    const greenMatrix = this.renderer.createElement('feColorMatrix', 'svg');
+    this.renderer.setAttribute(greenMatrix, 'in', 'GREEN_DISPLACED');
+    this.renderer.setAttribute(greenMatrix, 'type', 'matrix');
+    this.renderer.setAttribute(greenMatrix, 'values', '0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0');
+    this.renderer.setAttribute(greenMatrix, 'result', 'GREEN_CHANNEL');
+
+    const blueDisplacement = this.renderer.createElement('feDisplacementMap', 'svg');
+    this.renderer.setAttribute(blueDisplacement, 'in', 'SourceGraphic');
+    this.renderer.setAttribute(blueDisplacement, 'in2', 'DISPLACEMENT_MAP');
+    this.renderer.setAttribute(blueDisplacement, 'scale', String(blueScale));
+    this.renderer.setAttribute(blueDisplacement, 'xChannelSelector', 'R');
+    this.renderer.setAttribute(blueDisplacement, 'yChannelSelector', 'B');
+    this.renderer.setAttribute(blueDisplacement, 'result', 'BLUE_DISPLACED');
+
+    const blueMatrix = this.renderer.createElement('feColorMatrix', 'svg');
+    this.renderer.setAttribute(blueMatrix, 'in', 'BLUE_DISPLACED');
+    this.renderer.setAttribute(blueMatrix, 'type', 'matrix');
+    this.renderer.setAttribute(blueMatrix, 'values', '0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0');
+    this.renderer.setAttribute(blueMatrix, 'result', 'BLUE_CHANNEL');
+
+    const blend1 = this.renderer.createElement('feBlend', 'svg');
+    this.renderer.setAttribute(blend1, 'in', 'GREEN_CHANNEL');
+    this.renderer.setAttribute(blend1, 'in2', 'BLUE_CHANNEL');
+    this.renderer.setAttribute(blend1, 'mode', 'screen');
+    this.renderer.setAttribute(blend1, 'result', 'GB_COMBINED');
+
+    const blend2 = this.renderer.createElement('feBlend', 'svg');
+    this.renderer.setAttribute(blend2, 'in', 'RED_CHANNEL');
+    this.renderer.setAttribute(blend2, 'in2', 'GB_COMBINED');
+    this.renderer.setAttribute(blend2, 'mode', 'screen');
+    this.renderer.setAttribute(blend2, 'result', 'RGB_COMBINED');
+
+    const feGaussianBlur = this.renderer.createElement('feGaussianBlur', 'svg');
+    this.renderer.setAttribute(feGaussianBlur, 'in', 'RGB_COMBINED');
+    this.renderer.setAttribute(
+      feGaussianBlur,
+      'stdDeviation',
+      String(Math.max(0.1, 0.5 - this.lgAberrationIntensity * 0.1)),
+    );
+    this.renderer.setAttribute(feGaussianBlur, 'result', 'ABERRATED_BLURRED');
+
+    const composite1 = this.renderer.createElement('feComposite', 'svg');
+    this.renderer.setAttribute(composite1, 'in', 'ABERRATED_BLURRED');
+    this.renderer.setAttribute(composite1, 'in2', 'EDGE_MASK');
+    this.renderer.setAttribute(composite1, 'operator', 'in');
+    this.renderer.setAttribute(composite1, 'result', 'EDGE_ABERRATION');
+
+    const feComponentTransfer2 = this.renderer.createElement('feComponentTransfer', 'svg');
+    this.renderer.setAttribute(feComponentTransfer2, 'in', 'EDGE_MASK');
+    this.renderer.setAttribute(feComponentTransfer2, 'result', 'INVERTED_MASK');
+
+    const feFuncA2 = this.renderer.createElement('feFuncA', 'svg');
+    this.renderer.setAttribute(feFuncA2, 'type', 'table');
+    this.renderer.setAttribute(feFuncA2, 'tableValues', '1 0');
+    feComponentTransfer2.appendChild(feFuncA2);
+
+    const composite2 = this.renderer.createElement('feComposite', 'svg');
+    this.renderer.setAttribute(composite2, 'in', 'CENTER_ORIGINAL');
+    this.renderer.setAttribute(composite2, 'in2', 'INVERTED_MASK');
+    this.renderer.setAttribute(composite2, 'operator', 'in');
+    this.renderer.setAttribute(composite2, 'result', 'CENTER_CLEAN');
+
+    const composite3 = this.renderer.createElement('feComposite', 'svg');
+    this.renderer.setAttribute(composite3, 'in', 'EDGE_ABERRATION');
+    this.renderer.setAttribute(composite3, 'in2', 'CENTER_CLEAN');
+    this.renderer.setAttribute(composite3, 'operator', 'over');
+
+    filter.appendChild(feImage);
+    filter.appendChild(feColorMatrix);
+    filter.appendChild(feComponentTransfer);
+    filter.appendChild(feOffset);
+    filter.appendChild(redDisplacement);
+    filter.appendChild(redMatrix);
+    filter.appendChild(greenDisplacement);
+    filter.appendChild(greenMatrix);
+    filter.appendChild(blueDisplacement);
+    filter.appendChild(blueMatrix);
+    filter.appendChild(blend1);
+    filter.appendChild(blend2);
+    filter.appendChild(feGaussianBlur);
+    filter.appendChild(composite1);
+    filter.appendChild(feComponentTransfer2);
+    filter.appendChild(composite2);
+    filter.appendChild(composite3);
+
+    defs.appendChild(filter);
+    this.svgFilter.appendChild(defs);
+    this.renderer.appendChild(this.host, this.svgFilter);
+
+    if (this.warpLayer) {
+      this.renderer.setStyle(this.warpLayer, 'filter', `url(#${this.filterId})`);
+    }
   }
 
-  /**
-   * Setup accessibility attributes
-   *
-   * Adds role and aria-label for screen reader support
-   */
-  private setupAccessibility(): void {
-    this.r.setAttribute(this.host, 'role', this.lgRole);
-    this.r.setAttribute(this.host, 'aria-label', this.lgAriaLabel);
+  private rebuildSvgFilter(): void {
+    if (this.svgFilter) {
+      this.renderer.removeChild(this.host, this.svgFilter);
+      this.svgFilter = null;
+    }
+    this.createSvgFilter();
   }
 
-  // ========== Animation Methods ==========
+  private setupMouseTracking(): void {
+    const target = this.lgMouseContainerInput() || window;
 
-  /**
-   * Handle pointer movement over host element
-   *
-   * Updates target position for animation smoothing
-   *
-   * @param event Pointer event with client coordinates
-   */
-  onPointerMove(event: PointerEvent): void {
-    if (this.lgDisableAnimation) return;
+    this.ngZone.runOutsideAngular(() => {
+      const handler: EventListener = (event) => {
+        if (!(event instanceof MouseEvent)) {
+          return;
+        }
 
-    const rect = this.host.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width;
-    const y = (event.clientY - rect.top) / rect.height;
+        this.internalGlobalMousePos = { x: event.clientX, y: event.clientY };
+      };
 
-    this.targetX = this.clamp01(x);
-    this.targetY = this.clamp01(y);
+      target.addEventListener('mousemove', handler, { passive: true });
+      this.cleanupFns.push(() => target.removeEventListener('mousemove', handler));
+    });
   }
 
-  /**
-   * Handle pointer enter event (hover activation)
-   *
-   * Sets hovered state and updates border to be brighter/deeper
-   */
-  onPointerEnter(): void {
-    this.isHovered = true;
-    this.updateBorderColor();
-  }
-
-  /**
-   * Handle pointer leave event
-   *
-   * Resets hotspot to center position and restores normal border
-   */
-  onPointerLeave(): void {
-    this.isHovered = false;
-    this.targetX = 0.5;
-    this.targetY = 0.5;
-    this.updateBorderColor();
-  }
-
-  /**
-   * Handle focus event (keyboard navigation)
-   *
-   * Sets focused state and updates border to show activation
-   */
-  onFocus(): void {
-    this.isFocused = true;
-    this.updateBorderColor();
-  }
-
-  /**
-   * Handle blur event (loss of keyboard focus)
-   *
-   * Clears focused state and restores normal border if not hovered
-   */
-  onBlur(): void {
-    this.isFocused = false;
-    this.updateBorderColor();
-  }
-
-  /**
-   * Start animation loop with exponential smoothing
-   *
-   * Uses RequestAnimationFrame for smooth 60fps animation.
-   * Implements exponential moving average for natural motion.
-   */
   private startAnimationLoop(): void {
     const loop = () => {
-      // Exponential smoothing coefficient
-      // Higher k = faster tracking, lower k = smoother motion
-      const k = 1 - Math.pow(1 - this.lgElasticity, 2);
+      const isInteracting =
+        this.host.classList.contains('is-interacting') ||
+        this.host.classList.contains('cdk-drag-dragging');
 
-      // Interpolate current position toward target
-      this.curX += (this.targetX - this.curX) * k;
-      this.curY += (this.targetY - this.curY) * k;
+      if (isInteracting) {
+        this.renderer.removeStyle(this.host, 'transform');
+        this.animationFrameId = requestAnimationFrame(loop);
+        return;
+      }
 
-      // Update CSS custom properties for potential external use
-      this.host.style.setProperty('--lg-x', `${(this.curX * 100).toFixed(2)}%`);
-      this.host.style.setProperty('--lg-y', `${(this.curY * 100).toFixed(2)}%`);
+      const fadeIn = this.calculateFadeInFactor();
+      if (!this.isHovered && !this.isActive && !this.isFocused && fadeIn === 0) {
+        if (!this.lastFrameWasIdle) {
+          this.renderer.setStyle(this.host, 'transform', 'translate(0px, 0px) scale(1)');
+          this.updateWarpBackground(0.5, 0.5);
+          this.lastFrameWasIdle = true;
+        }
+        this.animationFrameId = requestAnimationFrame(loop);
+        return;
+      }
 
-      // Update background gradient hotspot
-      this.updateOverlayBackground(this.curX, this.curY);
-
-      // Parallax effect (move overlay opposite to mouse)
-      const dx = (this.curX - 0.5) * 2;
-      const dy = (this.curY - 0.5) * 2;
-      this.r.setStyle(
-        this.overlay,
-        'transform',
-        `translate3d(${(-dx * this.lgParallaxIntensity).toFixed(2)}px, ` +
-          `${(-dy * this.lgParallaxIntensity).toFixed(2)}px, 0)`,
-      );
-
-      // Schedule next frame
+      this.lastFrameWasIdle = false;
+      this.updateTransform(fadeIn);
       this.animationFrameId = requestAnimationFrame(loop);
     };
 
     this.animationFrameId = requestAnimationFrame(loop);
   }
 
-  /**
-   * Clamp value to [0, 1] range
-   *
-   * @param v Value to clamp
-   * @returns Clamped value
-   */
+  private updateTransform(fadeInFactor: number): void {
+    const translation = this.calculateElasticTranslation(fadeInFactor);
+    const scale = this.isActive ? 'scale(0.96)' : this.calculateDirectionalScale(fadeInFactor);
+
+    this.renderer.setStyle(
+      this.host,
+      'transform',
+      `translate(${translation.x}px, ${translation.y}px) ${scale}`,
+    );
+
+    const rect = this.host.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+      return;
+    }
+
+    const x = this.clamp01((this.internalGlobalMousePos.x - rect.left) / rect.width);
+    const y = this.clamp01((this.internalGlobalMousePos.y - rect.top) / rect.height);
+    this.updateWarpBackground(x, y);
+  }
+
+  private calculateDirectionalScale(fadeInFactor: number): string {
+    if (!this.internalGlobalMousePos.x || !this.internalGlobalMousePos.y) {
+      return 'scale(1)';
+    }
+
+    const rect = this.host.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const deltaX = this.internalGlobalMousePos.x - centerX;
+    const deltaY = this.internalGlobalMousePos.y - centerY;
+
+    const edgeDistanceX = Math.max(0, Math.abs(deltaX) - this.glassSize.width / 2);
+    const edgeDistanceY = Math.max(0, Math.abs(deltaY) - this.glassSize.height / 2);
+    const edgeDistance = Math.sqrt(edgeDistanceX * edgeDistanceX + edgeDistanceY * edgeDistanceY);
+
+    if (edgeDistance > 200) {
+      return 'scale(1)';
+    }
+
+    const centerDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    if (centerDistance === 0) {
+      return 'scale(1)';
+    }
+
+    const normalizedX = deltaX / centerDistance;
+    const normalizedY = deltaY / centerDistance;
+
+    const stretchIntensity =
+      Math.min(centerDistance / 300, 1) * this.clamp01(this.lgElasticity) * fadeInFactor;
+
+    const scaleX =
+      1 +
+      Math.abs(normalizedX) * stretchIntensity * 0.3 -
+      Math.abs(normalizedY) * stretchIntensity * 0.15;
+
+    const scaleY =
+      1 +
+      Math.abs(normalizedY) * stretchIntensity * 0.3 -
+      Math.abs(normalizedX) * stretchIntensity * 0.15;
+
+    return `scaleX(${Math.max(0.8, scaleX)}) scaleY(${Math.max(0.8, scaleY)})`;
+  }
+
+  private calculateFadeInFactor(): number {
+    if (!this.internalGlobalMousePos.x || !this.internalGlobalMousePos.y) {
+      return 0;
+    }
+
+    const rect = this.host.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const edgeDistanceX = Math.max(0, Math.abs(this.internalGlobalMousePos.x - centerX) - this.glassSize.width / 2);
+    const edgeDistanceY = Math.max(0, Math.abs(this.internalGlobalMousePos.y - centerY) - this.glassSize.height / 2);
+    const edgeDistance = Math.sqrt(edgeDistanceX * edgeDistanceX + edgeDistanceY * edgeDistanceY);
+
+    return edgeDistance > 200 ? 0 : 1 - edgeDistance / 200;
+  }
+
+  private calculateElasticTranslation(fadeInFactor: number): { x: number; y: number } {
+    if (!this.internalGlobalMousePos.x || !this.internalGlobalMousePos.y) {
+      return { x: 0, y: 0 };
+    }
+
+    const rect = this.host.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const baseX = (this.internalGlobalMousePos.x - centerX) * this.clamp01(this.lgElasticity) * 0.1;
+    const baseY = (this.internalGlobalMousePos.y - centerY) * this.clamp01(this.lgElasticity) * 0.1;
+
+    return {
+      x: baseX * fadeInFactor,
+      y: baseY * fadeInFactor,
+    };
+  }
+
+  private updateWarpBackground(x: number, y: number): void {
+    if (!this.warpLayer) {
+      return;
+    }
+
+    const colors = this.getResolvedColors();
+    const xPct = (x * 100).toFixed(2);
+    const yPct = (y * 100).toFixed(2);
+
+    const hotspotAlpha = this.lgOverLight ? 26 : 15;
+    const cardAlpha = this.lgOverLight ? 14 : 8;
+    const topAlpha = this.lgOverLight ? 20 : 12;
+
+    const gradient = `
+      radial-gradient(
+        140px 140px at ${xPct}% ${yPct}%,
+        ${colors.hotspot},
+        color-mix(in oklch, var(--card) ${cardAlpha}%, transparent) 35%,
+        transparent 70%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--card) ${topAlpha}%, transparent),
+        transparent 65%
+      ),
+      ${colors.tint}
+    `
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    this.renderer.setStyle(this.warpLayer, 'background', gradient);
+
+    const dx = (x - 0.5) * 2;
+    const dy = (y - 0.5) * 2;
+    this.renderer.setStyle(
+      this.warpLayer,
+      'transform',
+      `translate3d(${(-dx * this.lgParallaxIntensity).toFixed(2)}px, ${(-dy * this.lgParallaxIntensity).toFixed(2)}px, 0)`,
+    );
+
+    // Keep subtle chromatic tinting in sync with theme colors.
+    const aberration = Math.max(0, this.lgAberrationIntensity);
+    if (this.warpLayer && !this.lgDisableFilters && !this.isFirefox()) {
+      this.renderer.setStyle(
+        this.warpLayer,
+        'filter',
+        `url(#${this.filterId}) drop-shadow(${aberration}px 0 ${colors.aberration1}) drop-shadow(${-aberration}px 0 ${colors.aberration2})`,
+      );
+    }
+  }
+
+  private updateBorderStyle(): void {
+    if (!this.borderLayer) {
+      return;
+    }
+
+    const colors = this.getResolvedColors();
+    const active = this.isHovered || this.isFocused || this.isActive;
+
+    this.renderer.setStyle(this.borderLayer, 'border-style', 'solid');
+    this.renderer.setStyle(this.borderLayer, 'border-color', colors.border);
+    this.renderer.setStyle(
+      this.borderLayer,
+      'border-width',
+      `${active ? this.lgBorderWidthActive : this.lgBorderWidth}px`,
+    );
+
+    const baseShadow =
+      'var(--shadow-control-active), inset 0 1px 0 color-mix(in oklch, var(--card) 15%, transparent)';
+    const activeShadow = 'var(--shadow-control-hover), var(--shadow-focus-ring)';
+
+    this.renderer.setStyle(this.borderLayer, 'box-shadow', active ? activeShadow : baseShadow);
+  }
+
+  private setupAccessibility(): void {
+    if (!this.host.hasAttribute('role') && this.lgRole.trim()) {
+      this.renderer.setAttribute(this.host, 'role', this.lgRole);
+    }
+
+    if (!this.host.hasAttribute('aria-label') && this.lgAriaLabel.trim()) {
+      this.renderer.setAttribute(this.host, 'aria-label', this.lgAriaLabel);
+    }
+  }
+
+  private updateGlassSize(): void {
+    const rect = this.host.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      this.glassSize = {
+        width: rect.width,
+        height: rect.height,
+      };
+    }
+  }
+
+  private promoteHostChildren(): void {
+    const children = Array.from(this.host.children);
+    for (const child of children) {
+      if (child === this.warpLayer || child === this.borderLayer) {
+        continue;
+      }
+
+      this.renderer.setStyle(child, 'position', 'relative');
+      this.renderer.setStyle(child, 'z-index', '1');
+    }
+  }
+
+  private cleanupDom(): void {
+    if (this.svgFilter?.parentNode) {
+      this.svgFilter.parentNode.removeChild(this.svgFilter);
+    }
+
+    if (this.borderLayer?.parentNode) {
+      this.borderLayer.parentNode.removeChild(this.borderLayer);
+    }
+
+    if (this.warpLayer?.parentNode) {
+      this.warpLayer.parentNode.removeChild(this.warpLayer);
+    }
+
+    this.svgFilter = null;
+    this.borderLayer = null;
+    this.warpLayer = null;
+  }
+
+  private prefersReducedMotion(): boolean {
+    return (
+      this.isBrowser &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+  }
+
+  private isFirefox(): boolean {
+    return (
+      this.isBrowser &&
+      typeof navigator !== 'undefined' &&
+      navigator.userAgent.toLowerCase().includes('firefox')
+    );
+  }
+
   private clamp01(v: number): number {
     return Math.max(0, Math.min(1, v));
   }
 
-  /**
-   * Update border color based on hover/focus state
-   *
-   * When activated (hovered OR focused): uses primary color with external focus ring
-   * When not activated: uses normal border color from theme or custom input
-   */
-  private updateBorderColor(): void {
-    if (!this.borderLayer) return;
+  private getResolvedColors(): LiquidGlassColorConfig {
+    const preset = this.themeResolver.getColorConfig(this.lgTheme);
 
-    const baseColor = this.lgBorder || 'var(--primary)';
-
-    // Shadow constants
-    const baseShadow = 'var(--shadow-control-active)';
-    const focusRing = 'var(--shadow-focus-ring)';
-    const activatedShadow = `var(--shadow-control-hover), ${focusRing}`;
-
-    if (this.isActivated()) {
-      // Activated state: keep border color, add focus ring
-      this.r.setStyle(this.borderLayer, 'border-color', baseColor);
-      this.r.setStyle(this.borderLayer, 'border-width', `${this.lgBorderWidthActive}px`);
-      this.r.setStyle(this.borderLayer, 'box-shadow', activatedShadow);
-    } else {
-      // Normal state: use primary/base color
-      this.r.setStyle(this.borderLayer, 'border-color', baseColor);
-      this.r.setStyle(this.borderLayer, 'border-width', `${this.lgBorderWidth}px`);
-      this.r.setStyle(this.borderLayer, 'box-shadow', baseShadow);
-    }
+    return {
+      border: this.lgBorder || preset.border || 'var(--primary)',
+      hotspot:
+        this.lgHotspot ||
+        preset.hotspot ||
+        `color-mix(in oklch, var(--card) ${this.lgOverLight ? 22 : 15}%, transparent)`,
+      tint:
+        this.lgTint ||
+        preset.tint ||
+        `color-mix(in oklch, var(--foreground) ${this.lgOverLight ? 22 : 12}%, transparent)`,
+      aberration1:
+        preset.aberration1 || 'color-mix(in oklch, var(--accent) 18%, transparent)',
+      aberration2:
+        preset.aberration2 || 'color-mix(in oklch, var(--primary) 16%, transparent)',
+    };
   }
 }

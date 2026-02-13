@@ -15,10 +15,10 @@ import {
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MarkdownBlockRouterComponent } from '@app/shared/components/streaming-markdown/blocks/block-router/block-router.component';
-import { MarkdownBlock } from '@app/shared/components/streaming-markdown/core/models';
-import { MarkdownPreprocessor } from '@app/shared/components/streaming-markdown/core/markdown-preprocessor';
-import { BlockParser } from '@app/shared/components/streaming-markdown/core/block-parser';
+import { MarkdownBlockRouterComponent } from '@app/shared/ui/streaming-markdown/blocks/block-router/block-router.component';
+import { MarkdownBlock } from '@app/shared/ui/streaming-markdown/core/models';
+import { MarkdownPreprocessor } from '@app/shared/ui/streaming-markdown/core/markdown-preprocessor';
+import { BlockParser } from '@app/shared/ui/streaming-markdown/core/block-parser';
 
 @Component({
   selector: 'static-markdown',

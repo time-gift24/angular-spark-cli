@@ -11,7 +11,7 @@ import { SessionData } from '@app/shared/models';
 import { PanelHeaderComponent } from '../panel-header';
 import { MessageBubbleComponent } from '../message-bubble';
 import { ResizeHandleComponent } from '../resize-handle';
-import { StreamingMarkdownComponent } from '@app/shared/components/streaming-markdown';
+import { StreamingMarkdownComponent } from '@app/shared/ui/streaming-markdown';
 import { of, Observable } from 'rxjs';
 
 @Component({

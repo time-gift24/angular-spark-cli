@@ -5,3 +5,5 @@
  */
 
 export * from './theme-resolver.service';
+export * from './svg-filter-builder.service';
+export * from './shader-displacement.service';

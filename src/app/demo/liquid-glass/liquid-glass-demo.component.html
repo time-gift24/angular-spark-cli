@@ -73,11 +73,11 @@
     <div class="mb-6">
       <h2 class="text-lg font-medium mb-2 text-foreground">矿物主题</h2>
       <p class="text-sm text-muted-foreground">
-        矿物与时光主题的浅色和深色模式，采用低饱和度和 OKLCH 颜色空间
+        扩展到 6 组矿物主题配色，分别匹配暗色、浅色与中性色调场景
       </p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       @for (example of themeExamples; track example.title; let i = $index) {
         <div
           class="relative overflow-hidden rounded-xl border border-border p-6"
@@ -123,10 +123,10 @@
   <section class="mb-12">
     <div class="mb-6">
       <h2 class="text-lg font-medium mb-2 text-foreground">动画配置</h2>
-      <p class="text-sm text-muted-foreground">不同的弹性系数控制动画响应速度，从柔和到快速响应</p>
+      <p class="text-sm text-muted-foreground">支持不同弹性响应速度，也包含悬浮时无位移动画的静态展示</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       @for (example of animationExamples; track example.title; let i = $index) {
         <div
           class="relative overflow-hidden rounded-xl border border-border p-6"
@@ -149,15 +149,81 @@
               [lgSaturation]="example.saturation"
               [lgElasticity]="example.elasticity"
               [lgAberrationIntensity]="example.aberrationIntensity"
+              [lgDisableAnimation]="example.disableAnimation ?? false"
               class="p-5"
             >
               <h3 class="text-base font-semibold mb-2 text-foreground">{{ example.title }}</h3>
               <p class="text-xs text-muted-foreground mb-4 leading-relaxed">
                 {{ example.description }}
               </p>
-              <div class="flex justify-between text-xs font-mono text-muted-foreground">
-                <span>Elasticity:</span>
-                <span class="text-foreground">{{ example.elasticity }}</span>
+              <div class="space-y-1.5 text-xs font-mono text-muted-foreground">
+                <div class="flex justify-between gap-3">
+                  <span>Elasticity:</span>
+                  <span class="text-foreground">{{ example.elasticity }}</span>
+                </div>
+                <div class="flex justify-between gap-3">
+                  <span>Animation:</span>
+                  <span class="text-foreground">{{ example.disableAnimation ? 'Off' : 'On' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Shape Examples Section -->
+  <section class="mb-12">
+    <div class="mb-6">
+      <h2 class="text-lg font-medium mb-2 text-foreground">长方型样例</h2>
+      <p class="text-sm text-muted-foreground">
+        展示不同圆角的长方型液态玻璃卡片，适合列表项、信息块和操作面板
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (example of shapeExamples; track example.title; let i = $index) {
+        <div
+          class="relative overflow-hidden rounded-xl border border-border p-6"
+          [style.background]="getShapeCardBackground(i)"
+        >
+          <!-- Background Glow -->
+          <div
+            class="absolute inset-0 opacity-40 blur-3xl"
+            [style.background]="getShapeCardGlow(i)"
+          ></div>
+
+          <!-- Rectangular Liquid Glass Card -->
+          <div class="relative z-10">
+            <div
+              liquidGlass
+              [lgTheme]="example.theme"
+              [lgMode]="example.mode"
+              [lgDisplacementScale]="example.displacementScale"
+              [lgBlurAmount]="example.blurAmount"
+              [lgSaturation]="example.saturation"
+              [lgElasticity]="example.elasticity"
+              [lgAberrationIntensity]="example.aberrationIntensity"
+              [lgDisableAnimation]="example.disableAnimation ?? false"
+              [lgCornerRadius]="example.cornerRadius ?? '16px'"
+              class="h-36 p-5 flex flex-col justify-between"
+            >
+              <div>
+                <h3 class="text-base font-semibold mb-2 text-foreground">{{ example.title }}</h3>
+                <p class="text-xs text-muted-foreground leading-relaxed">
+                  {{ example.description }}
+                </p>
+              </div>
+              <div class="space-y-1.5 text-xs font-mono text-muted-foreground">
+                <div class="flex justify-between gap-3">
+                  <span>Radius:</span>
+                  <span class="text-foreground">{{ example.cornerRadius }}</span>
+                </div>
+                <div class="flex justify-between gap-3">
+                  <span>Animation:</span>
+                  <span class="text-foreground">{{ example.disableAnimation ? 'Off' : 'On' }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -200,8 +266,8 @@
       <div class="rounded-lg border border-border bg-muted/30 p-4">
         <h4 class="font-medium mb-2 text-foreground">主题与模式</h4>
         <ul class="space-y-1 text-xs text-muted-foreground">
-          <li><code class="text-primary">lgTheme</code> - 主题选择 (mineral-dark/mineral-light)</li>
-          <li><code class="text-primary">lgMode</code> - 折射模式 (standard/polar/prominent)</li>
+          <li><code class="text-primary">lgTheme</code> - 主题选择 (mineral-dark/light/jade/ocean/amber/slate)</li>
+          <li><code class="text-primary">lgMode</code> - 折射模式 (standard/polar/prominent/shader)</li>
         </ul>
       </div>
 

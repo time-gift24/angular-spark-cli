@@ -22,6 +22,8 @@ export interface LiquidGlassExample {
   readonly elasticity: number;
   /** 色散强度 */
   readonly aberrationIntensity: number;
+  /** 禁用悬浮位移动画 */
+  readonly disableAnimation?: boolean;
   /** 自定义圆角 */
   readonly cornerRadius?: string;
   /** 代码示例 */
