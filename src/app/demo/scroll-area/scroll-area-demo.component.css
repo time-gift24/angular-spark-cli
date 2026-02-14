@@ -1,0 +1,50 @@
+.demo-container {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.demo-header {
+  margin-bottom: 2rem;
+}
+
+.demo-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.demo-header p {
+  color: var(--color-muted-foreground);
+}
+
+.demo-section {
+  margin-bottom: 2rem;
+}
+
+.demo-section h2 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.demo-section > p {
+  color: var(--color-muted-foreground);
+  margin-bottom: 1rem;
+}
+
+.demo-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.example-wrapper h3 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.example-wrapper p {
+  margin-bottom: 0.75rem;
+}

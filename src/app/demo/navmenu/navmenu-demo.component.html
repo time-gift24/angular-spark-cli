@@ -1,0 +1,150 @@
+<div class="demo-container">
+  <h1 class="demo-title">Navigation Menu</h1>
+  <p class="demo-description">
+    A collection of menu components for navigation with keyboard support, proper ARIA attributes,
+    and smooth animations.
+  </p>
+
+  <!-- Example 1: Basic Horizontal Navigation Menu -->
+  <section class="demo-section">
+    <div class="demo-section-header">
+      <h2 class="demo-section-title">Horizontal Navigation Menu</h2>
+      <p class="demo-section-description">
+        A horizontal navigation menu with dropdown content panels.
+      </p>
+    </div>
+
+    <div class="demo-preview">
+      <div spark-navmenu-root [(open)]="horizontalOpen">
+        <div spark-navmenu-item value="products">
+          <button spark-navmenu-trigger>Products</button>
+          <div spark-navmenu-content>
+            <div spark-navmenu-item value="products-all">All Products</div>
+            <div spark-navmenu-item value="products-new">New Arrivals</div>
+            <div spark-navmenu-item value="products-best">Bestsellers</div>
+          </div>
+        </div>
+
+        <div spark-navmenu-item value="solutions">
+          <button spark-navmenu-trigger>Solutions</button>
+          <div spark-navmenu-content>
+            <div spark-navmenu-item value="solutions-enterprise">Enterprise</div>
+            <div spark-navmenu-item value="solutions-team">Team</div>
+            <div spark-navmenu-item value="solutions-startup">Startup</div>
+          </div>
+        </div>
+
+        <div spark-navmenu-item value="resources">
+          <button spark-navmenu-trigger>Resources</button>
+          <div spark-navmenu-content>
+            <div spark-navmenu-item value="resources-docs">Documentation</div>
+            <div spark-navmenu-item value="resources-blog">Blog</div>
+            <div spark-navmenu-item value="resources-community">Community</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-code">
+      <pre class="code-block"><code>&lt;div spark-navmenu-root [(open)]="currentValue"&gt;
+  &lt;div spark-navmenu-item value="products"&gt;
+    &lt;button spark-navmenu-trigger&gt;Products&lt;/button&gt;
+    &lt;div spark-navmenu-content&gt;
+      &lt;div spark-navmenu-item&gt;All Products&lt;/div&gt;
+      &lt;div spark-navmenu-item&gt;New Arrivals&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+  </section>
+
+  <!-- Example 2: Vertical Navigation Menu -->
+  <section class="demo-section">
+    <div class="demo-section-header">
+      <h2 class="demo-section-title">Vertical Navigation Menu</h2>
+      <p class="demo-section-description">
+        A vertical navigation menu with side-by-side content panels.
+      </p>
+    </div>
+
+    <div class="demo-preview">
+      <div spark-navmenu-root [(open)]="verticalOpen">
+        <div class="vertical-menu">
+          <div spark-navmenu-item value="dashboard">
+            <button spark-navmenu-trigger>Dashboard</button>
+            <div spark-navmenu-content>
+              <div spark-navmenu-item value="dashboard-overview">Overview</div>
+              <div spark-navmenu-item value="dashboard-analytics">Analytics</div>
+              <div spark-navmenu-item value="dashboard-reports">Reports</div>
+            </div>
+          </div>
+
+          <div spark-navmenu-item value="settings">
+            <button spark-navmenu-trigger>Settings</button>
+            <div spark-navmenu-content>
+              <div spark-navmenu-item value="settings-profile">Profile</div>
+              <div spark-navmenu-item value="settings-account">Account</div>
+              <div spark-navmenu-item value="settings-notifications">Notifications</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- State Display -->
+  <section class="demo-section">
+    <div class="demo-section-header">
+      <h2 class="demo-section-title">State Display</h2>
+      <p class="demo-section-description">
+        Current selected values from all menus.
+      </p>
+    </div>
+
+    <div class="demo-preview">
+      <div class="state-display">
+        <div class="state-item">
+          <span class="state-label">Horizontal:</span>
+          <span class="state-value">{{ horizontalOpen() ? 'open' : 'closed' }}</span>
+        </div>
+        <div class="state-item">
+          <span class="state-label">Vertical:</span>
+          <span class="state-value">{{ verticalOpen() ? 'open' : 'closed' }}</span>
+        </div>
+        <button class="reset-button" (click)="reset()">Reset All</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Keyboard Navigation Info -->
+  <section class="demo-section">
+    <div class="demo-section-header">
+      <h2 class="demo-section-title">Keyboard Navigation</h2>
+      <p class="demo-section-description">
+        The navigation menu supports full keyboard navigation for accessibility.
+      </p>
+    </div>
+
+    <div class="demo-preview">
+      <div class="keyboard-info">
+        <div class="keyboard-item">
+          <kbd class="kbd">Tab</kbd>
+          <span>Focus triggers</span>
+        </div>
+        <div class="keyboard-item">
+          <kbd class="kbd">Arrow Keys</kbd>
+          <span>Navigate between items</span>
+        </div>
+        <div class="keyboard-item">
+          <kbd class="kbd">Enter</kbd>
+          <kbd class="kbd">Space</kbd>
+          <span>Activate link</span>
+        </div>
+        <div class="keyboard-item">
+          <kbd class="kbd">Escape</kbd>
+          <span>Close menu</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

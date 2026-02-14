@@ -121,6 +121,14 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
               Switch
             </a>
             <a
+              routerLink="/demo/drawer"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Drawer
+            </a>
+            <a
               routerLink="/demo/sheet"
               routerLinkActive="bg-accent text-accent-foreground"
               [routerLinkActiveOptions]="{ exact: true }"
@@ -137,12 +145,36 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
               Checkbox
             </a>
             <a
+              routerLink="/demo/command"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Command
+            </a>
+            <a
+              routerLink="/demo/collapsible"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Collapsible
+            </a>
+            <a
               routerLink="/demo/context-menu"
               routerLinkActive="bg-accent text-accent-foreground"
               [routerLinkActiveOptions]="{ exact: true }"
               class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
             >
               Context Menu
+            </a>
+            <a
+              routerLink="/demo/navigation-menu"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Navigation Menu
             </a>
             <a
               routerLink="/demo/alert"
@@ -217,6 +249,22 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
               Empty
             </a>
             <a
+              routerLink="/demo/popover"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Popover
+            </a>
+            <a
+              routerLink="/demo/navmenu"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Nav Menu
+            </a>
+            <a
               routerLink="/demo/spinner"
               routerLinkActive="bg-accent text-accent-foreground"
               [routerLinkActiveOptions]="{ exact: true }"
@@ -249,6 +297,14 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
               Combobox
             </a>
             <a
+              routerLink="/demo/dialog"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Dialog
+            </a>
+            <a
               routerLink="/demo/dropdown-menu"
               routerLinkActive="bg-accent text-accent-foreground"
               [routerLinkActiveOptions]="{ exact: true }"
@@ -263,6 +319,22 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
               class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
             >
               Input Group
+            </a>
+            <a
+              routerLink="/demo/scroll-area"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Scroll Area
+            </a>
+            <a
+              routerLink="/demo/sonner"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Sonner
             </a>
           </div>
 

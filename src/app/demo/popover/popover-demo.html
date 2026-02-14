@@ -1,0 +1,213 @@
+<div class="demo-container">
+  <div class="demo-header">
+    <h1>Popover</h1>
+    <p class="text-muted-foreground">Display rich content in a portal-style popover.</p>
+  </div>
+
+  <div class="demo-section">
+    <h2>Basic Popover</h2>
+    <p class="text-sm text-muted-foreground">A popover with default positioning (bottom, center).</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-popover-root [(open)]="isOpen">
+          <button type="button" spark-popover-trigger spark-button variant="outline">
+            Open Popover
+          </button>
+          <div spark-popover-content>
+            <p class="text-sm">This is a popover with rich content.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Positioning</h2>
+    <p class="text-sm text-muted-foreground">Popovers can be positioned on any side.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <!-- Top Popover -->
+        <div spark-popover-root [(open)]="isTopOpen">
+          <button type="button" spark-popover-trigger spark-button variant="outline">
+            Top
+          </button>
+          <div spark-popover-content [side]="'top'" [align]="'center'">
+            <p class="text-sm">Popover positioned at the top</p>
+          </div>
+        </div>
+
+        <!-- Right Popover -->
+        <div spark-popover-root [(open)]="isRightOpen">
+          <button type="button" spark-popover-trigger spark-button variant="outline">
+            Right
+          </button>
+          <div spark-popover-content [side]="'right'" [align]="'center'">
+            <p class="text-sm">Popover positioned to the right</p>
+          </div>
+        </div>
+
+        <!-- Bottom Popover (default) -->
+        <div spark-popover-root [(open)]="isOpen">
+          <button type="button" spark-popover-trigger spark-button variant="outline">
+            Bottom
+          </button>
+          <div spark-popover-content [side]="'bottom'" [align]="'center'">
+            <p class="text-sm">Popover positioned at the bottom</p>
+          </div>
+        </div>
+
+        <!-- Left Popover -->
+        <div spark-popover-root [(open)]="isLeftOpen">
+          <button type="button" spark-popover-trigger spark-button variant="outline">
+            Left
+          </button>
+          <div spark-popover-content [side]="'left'" [align]="'center'">
+            <p class="text-sm">Popover positioned to the left</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Alignment</h2>
+    <p class="text-sm text-muted-foreground">Popovers can be aligned to start, center, or end of the trigger.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-popover-root [(open)]="isOpen">
+          <button type="button" spark-popover-trigger spark-button variant="outline" style="width: 120px;">
+            Align Start
+          </button>
+          <div spark-popover-content [side]="'bottom'" [align]="'start'">
+            <p class="text-sm">Aligned to start</p>
+          </div>
+        </div>
+
+        <div spark-popover-root [(open)]="isOpen">
+          <button type="button" spark-popover-trigger spark-button variant="outline" style="width: 120px;">
+            Align Center
+          </button>
+          <div spark-popover-content [side]="'bottom'" [align]="'center'">
+            <p class="text-sm">Aligned to center</p>
+          </div>
+        </div>
+
+        <div spark-popover-root [(open)]="isOpen">
+          <button type="button" spark-popover-trigger spark-button variant="outline" style="width: 120px;">
+            Align End
+          </button>
+          <div spark-popover-content [side]="'bottom'" [align]="'end'">
+            <p class="text-sm">Aligned to end</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>With Header and Footer</h2>
+    <p class="text-sm text-muted-foreground">Popovers can include structured header and footer sections.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-popover-root [(open)]="isWithHeaderOpen">
+          <button type="button" spark-popover-trigger spark-button variant="outline">
+            Show Details
+          </button>
+          <div spark-popover-content>
+            <div spark-popover-header>
+              <h3 spark-popover-title>Account Settings</h3>
+              <p class="text-sm text-muted-foreground">Manage your account preferences</p>
+            </div>
+            <div class="space-y-4 py-4">
+              <div class="flex flex-col space-y-2">
+                <label class="text-sm font-medium">Email</label>
+                <input
+                  type="email"
+                  class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="user@example.com"
+                  value="user@example.com"
+                />
+              </div>
+              <div class="flex flex-col space-y-2">
+                <label class="text-sm font-medium">Bio</label>
+                <textarea
+                  class="flex min-h-24 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  placeholder="Tell us a little about yourself"
+                ></textarea>
+              </div>
+            </div>
+            <div spark-popover-footer>
+              <button type="button" spark-button variant="outline" spark-popover-close>
+                Cancel
+              </button>
+              <button type="button" spark-button variant="default" spark-popover-close>
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Long Content</h2>
+    <p class="text-sm text-muted-foreground">Popovers with scrollable content.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-popover-root [(open)]="isLongContentOpen">
+          <button type="button" spark-popover-trigger spark-button variant="outline">
+            View Documentation
+          </button>
+          <div spark-popover-content style="max-width: 20rem;">
+            <div spark-popover-header>
+              <h3 spark-popover-title>Component API</h3>
+            </div>
+            <div class="space-y-2">
+              <h4 class="text-sm font-semibold">Props</h4>
+              <div class="space-y-1">
+                <p class="text-xs"><code>open</code> - Controlled open state</p>
+                <p class="text-xs"><code>onOpenChange</code> - Callback when open state changes</p>
+                <p class="text-xs"><code>side</code> - Positioning side (top, right, bottom, left)</p>
+                <p class="text-xs"><code>align</code> - Alignment (start, center, end)</p>
+                <p class="text-xs"><code>sideOffset</code> - Distance from trigger in pixels</p>
+              </div>
+              <h4 class="text-sm font-semibold mt-4">Usage</h4>
+              <p class="text-xs text-muted-foreground">
+                Popovers are lightweight alternatives to dialogs for displaying
+                rich content without blocking the entire interface.
+              </p>
+              <p class="text-xs text-muted-foreground mt-2">
+                They support keyboard navigation and can be dismissed by pressing
+                Escape or clicking outside the content area.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Without Animation</h2>
+    <p class="text-sm text-muted-foreground">Popovers can disable animation for instant display.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-popover-root [(open)]="isOpen">
+          <button type="button" spark-popover-trigger spark-button variant="outline">
+            No Animation
+          </button>
+          <div spark-popover-content [animate]="false">
+            <p class="text-sm">Instant popover without animation</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

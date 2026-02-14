@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+/* Expand animation - height grow with fade */
+@keyframes expand {
+  from {
+    opacity: 0;
+    transform: scaleY(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+/* Collapse animation - height shrink with fade */
+@keyframes collapse {
+  from {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  to {
+    opacity: 0;
+    transform: scaleY(0.95);
+  }
+}
+
+.animate-expand {
+  animation: expand var(--duration-normal, 200ms) var(--ease-in-out, ease-in-out);
+}
+
+.animate-collapse {
+  animation: collapse var(--duration-normal, 200ms) var(--ease-in-out, ease-in-out);
+}

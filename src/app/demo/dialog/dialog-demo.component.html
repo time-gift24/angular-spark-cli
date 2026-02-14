@@ -1,0 +1,171 @@
+<div class="demo-container">
+  <div class="demo-header">
+    <h1>Dialog</h1>
+    <p class="text-muted-foreground">Modal dialog for focused interactions and confirmations.</p>
+  </div>
+
+  <!-- Scene 1: Basic Dialog -->
+  <div class="demo-section">
+    <h2>Basic Dialog</h2>
+    <p class="text-sm text-muted-foreground">A simple dialog with title and action buttons.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <button
+          type="button"
+          spark-button
+          variant="outline"
+          (click)="isBasicOpen.set(true)"
+        >
+          Open Dialog
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 2: Dialog with Description -->
+  <div class="demo-section">
+    <h2>Dialog with Description</h2>
+    <p class="text-sm text-muted-foreground">Dialog with additional context and description text.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <button
+          type="button"
+          spark-button
+          variant="outline"
+          (click)="isDescriptionOpen.set(true)"
+        >
+          Open Dialog
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 3: Dialog without Close Button -->
+  <div class="demo-section">
+    <h2>Dialog without Close Button</h2>
+    <p class="text-sm text-muted-foreground">Dialog that requires explicit action to close.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <button
+          type="button"
+          spark-button
+          variant="outline"
+          (click)="isNoCloseOpen.set(true)"
+        >
+          Open Dialog
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 4: Long Content Dialog -->
+  <div class="demo-section">
+    <h2>Dialog with Long Content</h2>
+    <p class="text-sm text-muted-foreground">Dialog with scrollable content area.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <button
+          type="button"
+          spark-button
+          variant="outline"
+          (click)="isLongContentOpen.set(true)"
+        >
+          Open Dialog
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Basic Dialog -->
+<div spark-dialog [(open)]="isBasicOpen" (close)="onBasicCancel()">
+  <div spark-dialog-header>
+    <h3 spark-dialog-title>Confirm Action</h3>
+  </div>
+  <div spark-dialog-footer>
+    <button type="button" spark-button variant="outline" spark-dialog-close>
+      Cancel
+    </button>
+    <button type="button" spark-button (click)="onBasicConfirm()">
+      Confirm
+    </button>
+  </div>
+</div>
+
+<!-- Dialog with Description -->
+<div spark-dialog [(open)]="isDescriptionOpen" (close)="onDescriptionCancel()">
+  <div spark-dialog-header>
+    <h3 spark-dialog-title>Upload File</h3>
+    <p spark-dialog-description>
+      This action will upload the selected file to the server. The file will be processed in the background.
+      You can close this dialog and continue working.
+    </p>
+  </div>
+  <div spark-dialog-footer>
+    <button type="button" spark-button variant="outline" spark-dialog-close>
+      Cancel
+    </button>
+    <button type="button" spark-button (click)="onDescriptionConfirm()">
+      Upload
+    </button>
+  </div>
+</div>
+
+<!-- Dialog without Close Button -->
+<div spark-dialog [(open)]="isNoCloseOpen" [showCloseButton]="false">
+  <div spark-dialog-header>
+    <h3 spark-dialog-title>Important Notice</h3>
+    <p spark-dialog-description>
+      Please read this carefully before proceeding. You must explicitly confirm to continue.
+    </p>
+  </div>
+  <div spark-dialog-footer>
+    <button type="button" spark-button variant="outline" spark-dialog-close>
+      Decline
+    </button>
+    <button type="button" spark-button (click)="onNoCloseConfirm()">
+      Accept
+    </button>
+  </div>
+</div>
+
+<!-- Dialog with Long Content -->
+<div spark-dialog [(open)]="isLongContentOpen" (close)="onLongContentCancel()">
+  <div spark-dialog-header>
+    <h3 spark-dialog-title>Terms of Service</h3>
+    <p spark-dialog-description>
+      Please review the following terms before continuing.
+    </p>
+  </div>
+  <div class="max-h-64 overflow-y-auto space-y-2 text-sm">
+    <p>1. Introduction</p>
+    <p>Welcome to our service. By using our service, you agree to these terms.</p>
+    <p>2. Service Description</p>
+    <p>Our service provides a platform for managing your digital content. We offer various features
+    including file storage, sharing capabilities, and collaborative tools.</p>
+    <p>3. User Responsibilities</p>
+    <p>Users are responsible for maintaining the security of their accounts and for all activities
+    that occur under their account. You must notify us immediately of any unauthorized use.</p>
+    <p>4. Privacy Policy</p>
+    <p>Your privacy is important to us. Our Privacy Policy explains how we collect, use, and
+    protect your personal information.</p>
+    <p>5. Termination</p>
+    <p>We reserve the right to terminate or suspend access to our service immediately, without prior
+    notice or liability, for any reason whatsoever.</p>
+    <p>6. Limitation of Liability</p>
+    <p>To the fullest extent permitted by law, we shall not be liable for any indirect, incidental,
+    special, consequential or punitive damages.</p>
+  </div>
+  <div spark-dialog-footer>
+    <button type="button" spark-button variant="outline" spark-dialog-close>
+      Decline
+    </button>
+    <button type="button" spark-button (click)="onLongContentConfirm()">
+      Accept
+    </button>
+  </div>
+</div>

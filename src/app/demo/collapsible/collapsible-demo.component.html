@@ -1,0 +1,447 @@
+<div class="container max-w-2xl mx-auto py-8 px-4">
+  <div class="mb-8">
+    <h1 class="text-xl font-semibold mb-2">Collapsible</h1>
+    <p class="text-sm text-muted-foreground">
+      An interactive component that can be expanded or collapsed to show or hide content.
+      Supports controlled state, disabled state, and accordion-style behavior.
+    </p>
+  </div>
+
+  <div class="flex flex-col gap-8">
+    <!-- Basic Collapsible -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">Basic Collapsible</h2>
+      <p class="text-sm text-muted-foreground">
+        A simple collapsible with trigger and content.
+      </p>
+
+      <div spark-card class="w-full">
+        <div spark-collapsible [(open)]="basicOpen">
+          <div spark-card-header class="border-b">
+            <button
+              spark-collapsible-trigger
+              class="w-full flex items-center justify-between py-3 px-4 text-left"
+            >
+              <span class="font-medium">Can I use animations?</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="transition-transform duration-200"
+                [class]="basicOpen() ? 'rotate-180' : ''"
+              >
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
+          </div>
+
+          <div spark-collapsible-content class="px-4 pb-4">
+            <div class="py-4 text-sm text-muted-foreground">
+              <p class="mb-2">
+                Yes! You can use the CSS animation classes to animate the expand/collapse
+                behavior. The component uses <code class="bg-muted px-1 py-0.5 rounded text-xs">animate-expand</code>
+                and <code class="bg-muted px-1 py-0.5 rounded text-xs">animate-collapse</code> classes.
+              </p>
+              <p>
+                The transition duration is set to <code class="bg-muted px-1 py-0.5 rounded text-xs">300ms</code>
+                with an <code class="bg-muted px-1 py-0.5 rounded text-xs">ease-in-out</code> timing function
+                for smooth animations.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controlled Collapsible -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">Controlled Collapsible</h2>
+      <p class="text-sm text-muted-foreground">
+        Control the collapsible state programmatically with external buttons.
+      </p>
+
+      <div class="flex gap-2">
+        <button
+          spark-button
+          variant="outline"
+          size="sm"
+          (click)="expandControlled()"
+        >
+          Expand
+        </button>
+        <button
+          spark-button
+          variant="outline"
+          size="sm"
+          (click)="collapseControlled()"
+        >
+          Collapse
+        </button>
+        <button
+          spark-button
+          variant="outline"
+          size="sm"
+          (click)="toggleControlled()"
+        >
+          Toggle
+        </button>
+      </div>
+
+      <div spark-card class="w-full">
+        <div spark-collapsible [(open)]="controlledOpen">
+          <div spark-card-header class="border-b">
+            <button
+              spark-collapsible-trigger
+              class="w-full flex items-center justify-between py-3 px-4 text-left"
+            >
+              <span class="font-medium">Controlled Content</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="transition-transform duration-200"
+                [class]="controlledOpen() ? 'rotate-180' : ''"
+              >
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
+          </div>
+
+          <div spark-collapsible-content class="px-4 pb-4">
+            <div class="py-4 text-sm text-muted-foreground">
+              <p>
+                This collapsible's state is controlled by the buttons above. Click them to see
+                the expand and collapse behavior in action.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multiple Collapsibles -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">Multiple Collapsibles</h2>
+      <p class="text-sm text-muted-foreground">
+        Multiple collapsible sections can be used independently.
+      </p>
+
+      <div class="space-y-2">
+        <!-- Section 1 -->
+        <div spark-card class="w-full">
+          <div spark-collapsible [(open)]="section1Open">
+            <div spark-card-header>
+              <button
+                spark-collapsible-trigger
+                class="w-full flex items-center justify-between py-3 px-4 text-left"
+              >
+                <span class="font-medium">Installation</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="transition-transform duration-200"
+                  [class]="section1Open() ? 'rotate-180' : ''"
+                >
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
+            </div>
+
+            <div spark-collapsible-content class="px-4 pb-4">
+              <div class="py-4 text-sm text-muted-foreground">
+                <p>Install the component using npm:</p>
+                <pre class="mt-2 bg-muted p-3 rounded text-xs overflow-x-auto"><code>npm install @spark-ui/collapsible</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2 -->
+        <div spark-card class="w-full">
+          <div spark-collapsible [(open)]="section2Open">
+            <div spark-card-header>
+              <button
+                spark-collapsible-trigger
+                class="w-full flex items-center justify-between py-3 px-4 text-left"
+              >
+                <span class="font-medium">Usage</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="transition-transform duration-200"
+                  [class]="section2Open() ? 'rotate-180' : ''"
+                >
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
+            </div>
+
+            <div spark-collapsible-content class="px-4 pb-4">
+              <div class="py-4 text-sm text-muted-foreground">
+                <p>Import and use the component:</p>
+                <pre class="mt-2 bg-muted p-3 rounded text-xs overflow-x-auto"><code>import &#123; Collapsible &#125; from '@spark-ui/collapsible';</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3 -->
+        <div spark-card class="w-full">
+          <div spark-collapsible [(open)]="section3Open">
+            <div spark-card-header>
+              <button
+                spark-collapsible-trigger
+                class="w-full flex items-center justify-between py-3 px-4 text-left"
+              >
+                <span class="font-medium">API Reference</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="transition-transform duration-200"
+                  [class]="section3Open() ? 'rotate-180' : ''"
+                >
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
+            </div>
+
+            <div spark-collapsible-content class="px-4 pb-4">
+              <div class="py-4 text-sm text-muted-foreground">
+                <p>The collapsible accepts the following props:</p>
+                <ul class="mt-2 space-y-1 list-disc list-inside">
+                  <li><code class="bg-muted px-1 py-0.5 rounded text-xs">open</code> - Controlled open state</li>
+                  <li><code class="bg-muted px-1 py-0.5 rounded text-xs">disabled</code> - Disable interaction</li>
+                  <li><code class="bg-muted px-1 py-0.5 rounded text-xs">openChange</code> - Callback when state changes</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disabled Collapsible -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">Disabled Collapsible</h2>
+      <p class="text-sm text-muted-foreground">
+        A collapsible can be disabled to prevent user interaction.
+      </p>
+
+      <div class="flex items-center gap-2">
+        <label ui-checkbox for="collapsible-disabled-toggle">
+          Disabled
+        </label>
+        <input
+          ui-checkbox
+          id="collapsible-disabled-toggle"
+          type="checkbox"
+          [checked]="collapsibleDisabled()"
+          (change)="toggleDisabled()"
+        />
+      </div>
+
+      <div spark-card class="w-full">
+        <div spark-collapsible [(open)]="disabledOpen" [disabled]="collapsibleDisabled()">
+          <div spark-card-header class="border-b">
+            <button
+              spark-collapsible-trigger
+              class="w-full flex items-center justify-between py-3 px-4 text-left"
+            >
+              <span class="font-medium">
+                Disabled Collapsible
+                @if (collapsibleDisabled()) {
+                  <span class="ml-2 text-xs text-muted-foreground">(interaction disabled)</span>
+                }
+              </span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="transition-transform duration-200"
+                [class]="disabledOpen() ? 'rotate-180' : ''"
+              >
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
+          </div>
+
+          <div spark-collapsible-content class="px-4 pb-4">
+            <div class="py-4 text-sm text-muted-foreground">
+              <p>
+                This collapsible is currently
+                <span [class]="collapsibleDisabled() ? 'text-destructive' : 'text-muted-foreground'">
+                  <span [innerText]="collapsibleDisabled() ? 'disabled' : 'enabled'"></span>
+                </span>.
+                Toggle the checkbox above to change its state.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accordion-Style Collapsibles -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">Accordion-Style</h2>
+      <p class="text-sm text-muted-foreground">
+        Create accordion behavior by ensuring only one collapsible is open at a time.
+      </p>
+
+      <div class="space-y-2">
+        <!-- Accordion Item 1 -->
+        <div spark-card class="w-full">
+          <div spark-collapsible [(open)]="accordionOpen1" (openChange)="openAccordion1()">
+            <div spark-card-header>
+              <button
+                spark-collapsible-trigger
+                class="w-full flex items-center justify-between py-3 px-4 text-left"
+              >
+                <span class="font-medium">Is it accessible?</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="transition-transform duration-200"
+                  [class]="accordionOpen1() ? 'rotate-180' : ''"
+                >
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
+            </div>
+
+            <div spark-collapsible-content class="px-4 pb-4">
+              <div class="py-4 text-sm text-muted-foreground">
+                <p>
+                  Yes. The component follows WAI-ARIA patterns for collapsible content,
+                  including proper ARIA attributes and keyboard navigation support.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accordion Item 2 -->
+        <div spark-card class="w-full">
+          <div spark-collapsible [(open)]="accordionOpen2" (openChange)="openAccordion2()">
+            <div spark-card-header>
+              <button
+                spark-collapsible-trigger
+                class="w-full flex items-center justify-between py-3 px-4 text-left"
+              >
+                <span class="font-medium">Is it styled?</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="transition-transform duration-200"
+                  [class]="accordionOpen2() ? 'rotate-180' : ''"
+                >
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
+            </div>
+
+            <div spark-collapsible-content class="px-4 pb-4">
+              <div class="py-4 text-sm text-muted-foreground">
+                <p>
+                  Yes. The component comes with default styles using Tailwind CSS classes
+                  and CSS variables from your theme. You can customize the appearance
+                  using the <code class="bg-muted px-1 py-0.5 rounded text-xs">class</code> prop.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accordion Item 3 -->
+        <div spark-card class="w-full">
+          <div spark-collapsible [(open)]="accordionOpen3" (openChange)="openAccordion3()">
+            <div spark-card-header>
+              <button
+                spark-collapsible-trigger
+                class="w-full flex items-center justify-between py-3 px-4 text-left"
+              >
+                <span class="font-medium">Can I animate it?</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="transition-transform duration-200"
+                  [class]="accordionOpen3() ? 'rotate-180' : ''"
+                >
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
+            </div>
+
+            <div spark-collapsible-content class="px-4 pb-4">
+              <div class="py-4 text-sm text-muted-foreground">
+                <p>
+                  Yes. The component includes built-in expand/collapse animations.
+                  You can customize the animation duration using CSS variables.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

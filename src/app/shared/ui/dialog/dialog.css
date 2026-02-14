@@ -1,0 +1,173 @@
+/* Dialog Component Styles - 矿物与时光主题 */
+
+/* Dialog Root */
+:host([data-state='closed']) {
+  display: none;
+}
+
+:host([data-state='open']) {
+  display: flex;
+}
+
+/* Dialog Overlay */
+div[spark-dialog-overlay] {
+  position: fixed;
+  inset: 0;
+  background-color: oklch(0 0 0 / 50%);
+  z-index: var(--sheet-z-overlay);
+  transition: opacity var(--duration-spring-normal) var(--ease-spring-smooth);
+}
+
+/* Dialog Content */
+.dialog-content {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: var(--sheet-z-content);
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: var(--sheet-max-width);
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-popover);
+  padding: var(--sheet-padding);
+}
+
+/* Close Button */
+.dialog-close-button {
+  position: absolute;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--button-height-md);
+  height: var(--button-height-md);
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+  transition: all var(--duration-fast) var(--ease-spring-snappy);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  opacity: var(--opacity-disabled);
+}
+
+.dialog-close-button:hover {
+  opacity: 1;
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.dialog-close-button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.dialog-close-button svg {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+}
+
+.dialog-close-button .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Animations */
+@keyframes dialog-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes dialog-zoom-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes dialog-slide-in-from-top {
+  from {
+    transform: translateY(2%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes dialog-slide-out-to-top {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(2%);
+  }
+}
+
+@keyframes dialog-slide-in-from-left {
+  from {
+    transform: translateX(2%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes dialog-slide-out-to-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(2%);
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .dialog-content {
+    max-width: calc(100% - 2rem);
+    padding: var(--spacing-lg);
+  }
+
+  .dialog-close-button {
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+  }
+}

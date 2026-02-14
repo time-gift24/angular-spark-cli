@@ -1,0 +1,210 @@
+<div class="demo-container">
+  <div class="demo-header">
+    <h1>Drawer Component</h1>
+    <p class="text-muted-foreground">
+      A drawer is a panel that slides in from the edge of the screen. It is typically used for larger side panels,
+      while Sheet is better suited for smaller, focused popovers.
+    </p>
+  </div>
+
+  <!-- Basic Usage Section -->
+  <section class="demo-section">
+    <h2>Basic Drawer</h2>
+    <p class="text-muted-foreground mb-4">
+      Click the buttons below to open the drawer from different sides. The drawer features smooth spring animations,
+      focus management, and keyboard trap.
+    </p>
+
+    <div class="flex flex-wrap gap-2">
+      @for (option of sideOptions; track option.value) {
+        <button
+          spark-button
+          variant="outline"
+          (click)="openDrawer(option.value)"
+          spark-drawer-trigger
+        >
+          Open {{ option.label }} Drawer
+        </button>
+      }
+    </div>
+
+    <!-- Drawer Overlay -->
+    @if (drawerOpen()) {
+      <div
+        spark-drawer-overlay
+        [open]="drawerOpen()"
+        (close)="closeDrawer()"
+      ></div>
+
+      <!-- Drawer Content -->
+      <div
+        spark-drawer-content
+        [open]="drawerOpen()"
+        [side]="drawerSide()"
+        aria-label="Example drawer"
+        (close)="closeDrawer()"
+      >
+        <!-- Handle for visual indication (only on bottom drawer) -->
+        @if (drawerSide() === 'bottom') {
+          <div spark-drawer-handle></div>
+        }
+
+        <div spark-drawer-header>
+          <h3 spark-drawer-title>{{ drawerSide() | titlecase }} Drawer</h3>
+          <p spark-drawer-description>
+            This drawer slides in from the {{ drawerSide() }} side. Use it for larger panels and navigation menus.
+          </p>
+        </div>
+
+        <div class="p-[var(--drawer-padding)]">
+          <p class="mb-4">
+            Drawers are ideal for:
+          </p>
+          <ul class="list-disc list-inside space-y-2 text-sm">
+            <li>Navigation menus and site maps</li>
+            <li>Filter panels in e-commerce</li>
+            <li>Settings and configuration panels</li>
+            <li>Help and documentation sidebars</li>
+            <li>Complex forms requiring more space</li>
+          </ul>
+        </div>
+
+        <div spark-drawer-footer>
+          <button spark-button variant="outline" (click)="closeDrawer()" spark-drawer-close>Cancel</button>
+          <button spark-button variant="default" (click)="closeDrawer()" spark-drawer-close>Confirm</button>
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- Drawer vs Sheet Comparison Section -->
+  <section class="demo-section">
+    <h2>Drawer vs Sheet</h2>
+    <p class="text-muted-foreground mb-4">
+      While both components slide in from screen edges, they serve different purposes:
+    </p>
+
+    <div class="comparison-grid">
+      <div class="comparison-card">
+        <h3>Drawer</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+          Larger panels for navigation, settings, and complex content.
+        </p>
+        <button spark-button variant="outline" (click)="openDrawer('right')" spark-drawer-trigger>
+          Open Drawer
+        </button>
+        <ul class="mt-4 text-sm space-y-1">
+          <li class="flex items-center gap-2">
+            <span class="text-primary">+</span>
+            Wider default width (384px)
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="text-primary">+</span>
+            Designed for content panels
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="text-primary">+</span>
+            Better for navigation menus
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="text-primary">+</span>
+            Includes visual handle indicator
+          </li>
+        </ul>
+      </div>
+
+      <div class="comparison-card">
+        <h3>Sheet</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+          Smaller panels for quick actions and focused interactions.
+        </p>
+        <button spark-button variant="outline" (click)="openSheet('right')" spark-sheet-trigger>
+          Open Sheet
+        </button>
+        <ul class="mt-4 text-sm space-y-1">
+          <li class="flex items-center gap-2">
+            <span class="text-accent">+</span>
+            Narrower default width (448px max)
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="text-accent">+</span>
+            Designed for quick actions
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="text-accent">+</span>
+            Better for confirmations
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="text-accent">+</span>
+            Simpler visual presentation
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Sheet Panel -->
+    @if (sheetOpen()) {
+      <div
+        spark-sheet-overlay
+        [open]="sheetOpen()"
+        (close)="closeSheet()"
+      ></div>
+
+      <div
+        spark-sheet-content
+        [open]="sheetOpen()"
+        [side]="sheetSide()"
+        aria-label="Example sheet"
+        (close)="closeSheet()"
+      >
+        <div spark-sheet-header>
+          <h3 spark-sheet-title>Sheet</h3>
+          <p spark-sheet-description>
+            This is a Sheet - smaller and more focused than a Drawer.
+          </p>
+        </div>
+
+        <div class="p-[var(--sheet-padding)]">
+          <p class="text-sm">
+            Sheets are better suited for quick actions, confirmations, and lightweight forms.
+          </p>
+        </div>
+
+        <div spark-sheet-footer>
+          <button spark-button variant="outline" (click)="closeSheet()" spark-sheet-close>Cancel</button>
+          <button spark-button variant="default" (click)="closeSheet()" spark-sheet-close>Confirm</button>
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- Accessibility Section -->
+  <section class="demo-section">
+    <h2>Accessibility</h2>
+    <p class="text-muted-foreground mb-4">
+      The drawer component includes comprehensive accessibility features:
+    </p>
+
+    <div class="a11y-features">
+      <div class="a11y-item">
+        <h4>Keyboard Navigation</h4>
+        <ul class="text-sm space-y-1">
+          <li><kbd>Esc</kbd> - Close drawer</li>
+          <li><kbd>Tab</kbd> - Move focus forward</li>
+          <li><kbd>Shift + Tab</kbd> - Move focus backward</li>
+          <li>Focus is trapped within the drawer when open</li>
+        </ul>
+      </div>
+
+      <div class="a11y-item">
+        <h4>ARIA Attributes</h4>
+        <ul class="text-sm space-y-1">
+          <li><code>role="dialog"</code> - Identifies the drawer</li>
+          <li><code>aria-modal="true"</code> - Blocks interaction with background</li>
+          <li><code>aria-label</code> - Provides accessible name</li>
+          <li>Focus returns to trigger on close</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>

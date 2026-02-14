@@ -224,8 +224,69 @@ export const routes: Routes = [
       {
         path: 'combobox',
         loadComponent: () =>
-          import('./demo/combobox-demo/combobox-demo.component').then(
-            (m) => m.ComboboxDemoComponent,
+          import('./demo/combobox-demo/combobox-demo.component').then((m) => m.ComboboxDemoComponent),
+      },
+      {
+        path: 'collapsible',
+        loadComponent: () =>
+          import('./demo/collapsible/collapsible-demo.component').then(
+            (m) => m.CollapsibleDemoComponent,
+          ),
+      },
+      // New components
+      {
+        path: 'dialog',
+        loadComponent: () =>
+          import('./demo/dialog/dialog-demo.component').then(
+            (m) => m.DialogDemoComponent,
+          ),
+      },
+      {
+        path: 'popover',
+        loadComponent: () =>
+          import('./demo/popover/popover-demo.component').then(
+            (m) => m.PopoverDemoComponent,
+          ),
+      },
+      {
+        path: 'scroll-area',
+        loadComponent: () =>
+          import('./demo/scroll-area/scroll-area-demo.component').then(
+            (m) => m.ScrollAreaDemoComponent,
+          ),
+      },
+      {
+        path: 'drawer',
+        loadComponent: () =>
+          import('./demo/drawer/drawer-demo.component').then(
+            (m) => m.DrawerDemoComponent,
+          ),
+      },
+      {
+        path: 'sonner',
+        loadComponent: () =>
+          import('./demo/sonner/sonner-demo.component').then((m) => m.SonnerDemoComponent,
+          ),
+      },
+      {
+        path: 'command',
+        loadComponent: () =>
+          import('./demo/command/command-demo.component').then(
+            (m) => m.CommandDemoComponent,
+          ),
+      },
+      {
+        path: 'navmenu',
+        loadComponent: () =>
+          import('./demo/navmenu/navmenu-demo.component').then(
+            (m) => m.NavmenuDemoComponent,
+          ),
+      },
+      {
+        path: 'navigation-menu',
+        loadComponent: () =>
+          import('./demo/navmenu/navmenu-demo.component').then(
+            (m) => m.NavmenuDemoComponent,
           ),
       },
     ],

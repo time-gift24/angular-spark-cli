@@ -1,0 +1,192 @@
+<div class="demo-container">
+  <div class="demo-header">
+    <h1>Scroll Area</h1>
+    <p>
+      Styled scrollable container with custom scrollbar. Supports vertical,
+      horizontal, and bidirectional scrolling with touch support.
+    </p>
+  </div>
+
+  <div class="flex flex-col gap-8">
+    <!-- Basic Scroll Areas -->
+    <div class="demo-section">
+      <h2>Basic Scroll Areas</h2>
+      <p>Scroll areas with different orientation settings.</p>
+
+      <div class="demo-examples space-y-6">
+        @for (example of basicScrollAreas; track example.label) {
+          <div class="example-wrapper">
+            <h3>{{ example.label }}</h3>
+            <p class="text-sm text-muted-foreground mb-2">{{ example.description }}</p>
+            <div
+              spark-scroll-area
+              [orientation]="example.orientation ?? 'vertical'"
+              [style.height]="getScrollHeight(example)"
+              class="border rounded-md bg-card"
+            >
+              @if (example.orientation === 'horizontal' || example.orientation === 'both') {
+                <div class="flex gap-2 min-w-max p-4">
+                  @for (item of longHorizontalContent; track item) {
+                    <div class="flex-shrink-0 p-2 bg-muted rounded text-sm">
+                      {{ item }}
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="p-4 space-y-2">
+                  @for (item of longContent; track item) {
+                    <div class="p-2 bg-muted rounded text-sm">{{ item }}</div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Sized Scroll Areas -->
+    <div class="demo-section">
+      <h2>Sized Scroll Areas</h2>
+      <p>Scroll areas with different height configurations.</p>
+
+      <div class="demo-examples space-y-6">
+        @for (example of sizedScrollAreas; track example.label) {
+          <div class="example-wrapper">
+            <h3>{{ example.label }}</h3>
+            <p class="text-sm text-muted-foreground mb-2">{{ example.description }}</p>
+            <div
+              spark-scroll-area
+              [orientation]="example.orientation ?? 'vertical'"
+              [style.height]="getScrollHeight(example)"
+              class="border rounded-md bg-card"
+            >
+              <div class="p-4 space-y-2">
+                @for (item of longContent; track item) {
+                  <div class="p-2 bg-muted rounded text-sm">{{ item }}</div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Styled Content -->
+    <div class="demo-section">
+      <h2>Styled Content</h2>
+      <p>Scroll areas with different content styles.</p>
+
+      <div class="demo-examples">
+        @for (example of styledScrollAreas; track example.label) {
+          <div class="example-wrapper">
+            <h3>{{ example.label }}</h3>
+            <p class="text-sm text-muted-foreground mb-2">{{ example.description }}</p>
+
+            @if (example.label === 'Card Content') {
+              <div
+                spark-scroll-area
+                [orientation]="example.orientation ?? 'vertical'"
+                [style.height]="getScrollHeight(example)"
+                class="border rounded-md bg-card p-4 space-y-3"
+              >
+                @for (item of longContent.slice(0, 8); track item) {
+                  <div class="border rounded-md p-3 bg-background">
+                    <h4 class="font-medium text-sm">{{ item }}</h4>
+                    <p class="text-xs text-muted-foreground mt-1">
+                      Description text for {{ item.toLowerCase() }}.
+                    </p>
+                  </div>
+                }
+              </div>
+            } @else if (example.label === 'List Content') {
+              <div
+                spark-scroll-area
+                [orientation]="example.orientation ?? 'vertical'"
+                [style.height]="getScrollHeight(example)"
+                class="border rounded-md bg-card"
+              >
+                <div class="divide-y">
+                  @for (item of longContent; track item) {
+                    <div class="px-4 py-3 hover:bg-muted cursor-pointer text-sm">
+                      {{ item }}
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Orientation Examples -->
+    <div class="demo-section">
+      <h2>Orientation Variants</h2>
+      <p>Different scrollbar orientations for various use cases.</p>
+
+      <div class="demo-examples space-y-6">
+        <div class="example-wrapper">
+          <h3>Vertical Scrollbar</h3>
+          <p class="text-sm text-muted-foreground mb-2">Default vertical scrollbar for typical content.</p>
+          <div
+            spark-scroll-area
+            orientation="vertical"
+            style="height: 12rem;"
+            class="border rounded-md bg-card"
+          >
+            <div class="p-4 space-y-2">
+              @for (item of longContent.slice(0, 10); track item) {
+                <div class="p-2 bg-muted rounded text-sm">{{ item }}</div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="example-wrapper">
+          <h3>Horizontal Scrollbar</h3>
+          <p class="text-sm text-muted-foreground mb-2">Horizontal scrollbar for wide content.</p>
+          <div
+            spark-scroll-area
+            orientation="horizontal"
+            style="height: 12rem;"
+            class="border rounded-md bg-card"
+          >
+            <div class="flex gap-2 min-w-max p-4">
+              @for (item of longHorizontalContent.slice(0, 8); track item) {
+                <div class="flex-shrink-0 p-2 bg-muted rounded text-sm">
+                  {{ item }}
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="example-wrapper">
+          <h3>Both Directions</h3>
+          <p class="text-sm text-muted-foreground mb-2">Scrollbars in both directions.</p>
+          <div
+            spark-scroll-area
+            orientation="both"
+            style="height: 12rem;"
+            class="border rounded-md bg-card"
+          >
+            <div class="p-4">
+              <div class="flex gap-2 min-w-max">
+                @for (row of longContent.slice(0, 5); track row) {
+                  <div class="flex-shrink-0 flex gap-2">
+                    @for (item of longHorizontalContent.slice(0, 3); track item) {
+                      <div class="flex-shrink-0 p-2 bg-muted rounded text-xs">
+                        {{ item }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

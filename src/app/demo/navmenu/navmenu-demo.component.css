@@ -1,0 +1,151 @@
+.demo-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+}
+
+.demo-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: var(--foreground);
+}
+
+.demo-description {
+  font-size: var(--font-size-base);
+  color: var(--muted-foreground);
+  margin-bottom: var(--spacing-xl);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.demo-section {
+  margin-bottom: 3rem;
+}
+
+.demo-section-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.demo-section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  margin-bottom: var(--spacing-sm);
+  color: var(--foreground);
+}
+
+.demo-section-description {
+  font-size: var(--font-size-base);
+  color: var(--muted-foreground);
+}
+
+.demo-preview {
+  padding: var(--spacing-lg);
+  border: var(--separator-thickness) solid var(--separator-color);
+  border-radius: var(--radius-lg);
+  background-color: var(--card);
+  margin-bottom: var(--spacing-lg);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.demo-code {
+  background-color: var(--muted);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  overflow-x: auto;
+}
+
+.code-block {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--foreground);
+}
+
+.code-block code {
+  font-family: inherit;
+}
+
+.vertical-menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.state-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background-color: var(--muted);
+  border-radius: var(--radius-md);
+}
+
+.state-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.state-label {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.state-value {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--foreground);
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+.reset-button {
+  margin-left: auto;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.reset-button:hover {
+  opacity: 0.9;
+}
+
+.keyboard-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.keyboard-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: var(--muted);
+  border-radius: var(--radius-md);
+}
+
+.kbd {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--background);
+  border: var(--separator-thickness) solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  min-width: 2rem;
+  text-align: center;
+}

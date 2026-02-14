@@ -162,6 +162,19 @@
   --sheet-z-content: 50;
   --sheet-max-width: 28rem; /* 448px */
 
+  /* Drawer - larger version of sheet for side panels */
+  --drawer-transition-duration: 300ms;
+  --drawer-transition-easing: var(--ease-spring-smooth);
+  --drawer-overlay-bg: oklch(0 0 0 / 80%);
+  --drawer-padding: 1.5rem; /* 24px */
+  --drawer-z-overlay: 50;
+  --drawer-z-content: 50;
+  --drawer-max-width-side: 24rem; /* 384px - wider than sheet */
+  --drawer-max-width-mobile: 100%; /* Full width on mobile */
+  --drawer-max-height-top: 80vh;
+  --drawer-max-height-bottom: 80vh;
+  --drawer-handle-width: 6.25rem; /* 100px - visual drag indicator */
+
   /* Avatar */
   --avatar-size-sm: 2rem; /* 32px */
   --avatar-size-md: 2.5rem; /* 40px */
@@ -232,6 +245,29 @@
   --combobox-item-height: 1.75rem; /* 28px */
   --combobox-item-padding-x: 0.5rem; /* 8px - px-2 per aim */
   --combobox-item-padding-y: 0.375rem; /* 6px */
+
+  /* Command */
+  --command-padding-x: 0.75rem; /* 12px */
+  --command-padding-y: 0.625rem; /* 10px */
+  --command-input-height: 2.75rem; /* 44px */
+  --command-input-icon-size: 1rem; /* 16px */
+  --command-list-max-height: 18.75rem; /* 300px */
+  --command-item-padding-x: 0.5rem; /* 8px */
+  --command-item-padding-y: 0.375rem; /* 6px */
+  --command-item-height: 2rem; /* 32px */
+  --command-group-padding-x: 0.25rem; /* 4px */
+  --command-group-heading-padding-x: 0.5rem; /* 8px */
+  --command-group-heading-padding-y: 0.375rem; /* 6px */
+  --command-shortcut-font-size: 0.75rem; /* 12px */
+  --command-dialog-max-width: 40rem; /* 640px */
+
+  /* Scroll Area */
+  --scroll-area-scrollbar-width-vertical: 0.625rem; /* 10px */
+  --scroll-area-scrollbar-width-horizontal: 0.625rem; /* 10px */
+  --scroll-area-scrollbar-padding: 0.0625rem; /* 1px */
+  --scroll-area-thumb-radius: 9999px; /* fully rounded */
+  --scroll-area-corner-size: 0.625rem; /* 10px */
+  --command-dialog-max-height: 28rem; /* 448px */
 
   /* Utility color tokens */
   --mask-solid: #000;
@@ -404,6 +440,14 @@
   --shadow-focus-ring: 0 0 0 3px oklch(from var(--ring) calc(l + 0.15) c h / 0.25);
   --shadow-focus-ring-destructive: 0 0 0 3px
     oklch(from var(--destructive) calc(l + 0.15) c h / 0.25);
+
+  /* Sonner */
+  --sonner-toast-max-height: 15rem; /* 240px */
+  --sonner-padding-x: 1rem; /* 16px */
+  --sonner-padding-y: 1rem; /* 16px */
+  --sonner-gap: 1rem; /* 16px */
+  --sonner-icon-size: 1rem; /* 16px */
+  --sonner-close-button-size: 2rem; /* 32px */
 }
 
 @layer base {

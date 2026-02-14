@@ -140,6 +140,15 @@
   text-align: right;
 }
 
+/* Additional utilities for dialog demo */
+.max-h-64 {
+  max-height: 16rem;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .demo-section {

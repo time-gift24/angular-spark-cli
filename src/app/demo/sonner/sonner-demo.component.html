@@ -1,0 +1,169 @@
+<div class="container max-w-4xl mx-auto py-8 px-4">
+  <div class="mb-8">
+    <h1 class="text-xl font-semibold mb-2">Sonner (Toast Notifications)</h1>
+    <p class="text-sm text-muted-foreground">
+      Beautiful toast notifications with multiple variants, positions, and actions. Powered by signals.
+    </p>
+  </div>
+
+  <!-- Settings -->
+  <div class="mb-8 rounded-lg border bg-card p-4">
+    <h2 class="text-base font-medium mb-4">Settings</h2>
+    <div class="flex flex-wrap gap-4">
+      <div class="flex flex-col gap-2">
+        <label for="position" class="text-sm font-medium">Position</label>
+        <select
+          id="position"
+          class="h-7 rounded-md border border-input bg-background px-3 text-sm"
+          [value]="selectedPosition()"
+          (change)="onPositionChange($event)"
+        >
+          <option value="bottom-right">Bottom Right</option>
+          <option value="bottom-left">Bottom Left</option>
+          <option value="bottom-center">Bottom Center</option>
+          <option value="top-right">Top Right</option>
+          <option value="top-left">Top Left</option>
+          <option value="top-center">Top Center</option>
+        </select>
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="duration" class="text-sm font-medium">Duration (ms)</label>
+        <input
+          id="duration"
+          type="number"
+          class="h-7 w-32 rounded-md border border-input bg-background px-3 text-sm"
+          [value]="selectedDuration()"
+          (change)="onDurationChange($event)"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="grid gap-8 md:grid-cols-2">
+    <!-- Basic Variants -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">Variants</h2>
+      <div class="flex flex-wrap gap-3">
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          (click)="showDefault()"
+        >
+          Default
+        </button>
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-md border border-green-600 bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-green-700"
+          (click)="showSuccess()"
+        >
+          Success
+        </button>
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-md border border-destructive bg-destructive px-3 py-1.5 text-sm font-medium text-destructive-foreground transition-colors hover:bg-destructive/90"
+          (click)="showError()"
+        >
+          Error
+        </button>
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-md border border-yellow-600 bg-yellow-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-yellow-700"
+          (click)="showWarning()"
+        >
+          Warning
+        </button>
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-md border border-blue-600 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+          (click)="showInfo()"
+        >
+          Info
+        </button>
+      </div>
+    </div>
+
+    <!-- With Actions -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">With Actions</h2>
+      <div class="flex flex-wrap gap-3">
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+          (click)="showWithAction()"
+        >
+          With Undo Action
+        </button>
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-md border border-destructive bg-destructive px-3 py-1.5 text-sm font-medium text-destructive-foreground transition-colors hover:bg-destructive/90"
+          (click)="showDestructiveWithAction()"
+        >
+          Destructive Action
+        </button>
+      </div>
+    </div>
+
+    <!-- Promise Example -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">Promise State</h2>
+      <div class="flex flex-wrap gap-3">
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+          (click)="showWithPromise()"
+        >
+          Load Data (Promise)
+        </button>
+      </div>
+    </div>
+
+    <!-- Position Examples -->
+    <div class="space-y-4">
+      <h2 class="text-lg font-medium">Positions</h2>
+      <div class="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-md border border-input bg-background px-2 py-1.5 text-xs font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+          (click)="showAtTopLeft()"
+        >
+          Top Left
+        </button>
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-md border border-input bg-background px-2 py-1.5 text-xs font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+          (click)="showAtTopRight()"
+        >
+          Top Right
+        </button>
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-md border border-input bg-background px-2 py-1.5 text-xs font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+          (click)="showAtBottomLeft()"
+        >
+          Bottom Left
+        </button>
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-md border border-input bg-background px-2 py-1.5 text-xs font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+          (click)="showAtBottomCenter()"
+        >
+          Bottom Center
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dismiss All -->
+  <div class="mt-8">
+    <button
+      type="button"
+      class="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+      (click)="dismissAll()"
+    >
+      Dismiss All
+    </button>
+  </div>
+</div>
+
+<!-- Toaster -->
+<sonner-toaster [position]="selectedPosition()" />
