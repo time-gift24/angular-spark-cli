@@ -57,7 +57,7 @@ export type NavMenuContentSide = 'top' | 'right' | 'bottom' | 'left';
     :host {
       position: absolute;
       z-index: 50;
-      min-width: 8rem;
+      min-width: var(--navmenu-content-min-width, 8rem);
       max-width: var(--radix-navmenu-content-available-width, var(--radix-popper-anchor-width));
       max-height: var(--radix-navmenu-content-available-height, var(--radix-popper-anchor-height));
       overflow: auto;

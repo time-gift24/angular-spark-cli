@@ -19,12 +19,16 @@ export type CheckboxVariant = VariantProps<typeof checkboxVariants>;
 
 @Component({
   selector: 'ui-checkbox',
+  host: {
+    '[attr.data-state]': 'checked() ? "checked" : "unchecked"',
+  },
   template: `
     <input
       #input
       type="checkbox"
       [id]="id()"
       [checked]="checked()"
+      [attr.data-state]="checked() ? 'checked' : 'unchecked'"
       [disabled]="disabled()"
       [attr.aria-invalid]="ariaInvalid()"
       [attr.aria-label]="ariaLabel()"
