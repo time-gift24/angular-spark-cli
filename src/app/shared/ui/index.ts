@@ -41,3 +41,5 @@ export * from './combobox';
 export * from './popover';
 export * from './scroll-area';
 export * from './sonner';
+export * from './hover-card';
+export * from './button-group';

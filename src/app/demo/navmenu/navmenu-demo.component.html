@@ -2,7 +2,7 @@
   <h1 class="demo-title">Navigation Menu</h1>
   <p class="demo-description">
     A collection of menu components for navigation with keyboard support, proper ARIA attributes,
-    and smooth animations.
+    and smooth animations. Includes menu items, links, labels, separators, indicators, and viewports.
   </p>
 
   <!-- Example 1: Basic Horizontal Navigation Menu -->
@@ -15,7 +15,7 @@
     </div>
 
     <div class="demo-preview">
-      <div spark-navmenu-root [(open)]="horizontalOpen">
+      <div spark-navmenu-root [(open)]="horizontalOpen" class="flex gap-1">
         <div spark-navmenu-item value="products">
           <button spark-navmenu-trigger>Products</button>
           <div spark-navmenu-content>
@@ -46,12 +46,12 @@
     </div>
 
     <div class="demo-code">
-      <pre class="code-block"><code>&lt;div spark-navmenu-root [(open)]="currentValue"&gt;
+      <pre class="code-block"><code>&lt;div spark-navmenu-root [(open)]="isOpen" class="flex gap-1"&gt;
   &lt;div spark-navmenu-item value="products"&gt;
     &lt;button spark-navmenu-trigger&gt;Products&lt;/button&gt;
     &lt;div spark-navmenu-content&gt;
-      &lt;div spark-navmenu-item&gt;All Products&lt;/div&gt;
-      &lt;div spark-navmenu-item&gt;New Arrivals&lt;/div&gt;
+      &lt;div spark-navmenu-item value="all"&gt;All Products&lt;/div&gt;
+      &lt;div spark-navmenu-item value="new"&gt;New Arrivals&lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
 &lt;/div&gt;</code></pre>
@@ -92,6 +92,140 @@
     </div>
   </section>
 
+  <!-- Example 3: Navigation Menu with Labels and Separators -->
+  <section class="demo-section">
+    <div class="demo-section-header">
+      <h2 class="demo-section-title">With Labels and Separators</h2>
+      <p class="demo-section-description">
+        Navigation menu with grouped items using labels and separators.
+      </p>
+    </div>
+
+    <div class="demo-preview">
+      <div spark-navmenu-root class="flex gap-1">
+        <div spark-navmenu-item value="actions">
+          <button spark-navmenu-trigger>Actions</button>
+          <div spark-navmenu-content class="min-w-48">
+            <div spark-navmenu-label>File Operations</div>
+            <div spark-navmenu-item value="new-file">New File</div>
+            <div spark-navmenu-item value="open-file">Open File</div>
+            <div spark-navmenu-item value="save-file">Save File</div>
+            <div spark-navmenu-separator></div>
+            <div spark-navmenu-label>Edit Operations</div>
+            <div spark-navmenu-item value="cut">Cut</div>
+            <div spark-navmenu-item value="copy">Copy</div>
+            <div spark-navmenu-item value="paste">Paste</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-code">
+      <pre class="code-block"><code>&lt;div spark-navmenu-content class="min-w-48"&gt;
+  &lt;div spark-navmenu-label&gt;File Operations&lt;/div&gt;
+  &lt;div spark-navmenu-item value="new"&gt;New File&lt;/div&gt;
+  &lt;div spark-navmenu-item value="open"&gt;Open File&lt;/div&gt;
+  &lt;div spark-navmenu-separator&gt;&lt;/div&gt;
+  &lt;div spark-navmenu-label&gt;Edit Operations&lt;/div&gt;
+  &lt;div spark-navmenu-item value="copy"&gt;Copy&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+  </section>
+
+  <!-- Example 4: Navigation Menu with Links -->
+  <section class="demo-section">
+    <div class="demo-section-header">
+      <h2 class="demo-section-title">With Navigation Links</h2>
+      <p class="demo-section-description">
+        Navigation menu using link-style items for URL navigation.
+      </p>
+    </div>
+
+    <div class="demo-preview">
+      <div spark-navmenu-root [(open)]="linkMenuOpen" class="flex gap-1">
+        <div spark-navmenu-item value="getting-started">
+          <button spark-navmenu-trigger>Getting Started</button>
+          <div spark-navmenu-content class="w-64">
+            <a spark-navmenu-link href="/docs/introduction" class="flex-row items-center">
+              <svg class="size-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+              </svg>
+              <div>
+                <div class="font-medium">Introduction</div>
+                <div class="text-muted-foreground text-xs">Get started with the basics</div>
+              </div>
+            </a>
+            <a spark-navmenu-link href="/docs/installation" class="flex-row items-center">
+              <svg class="size-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              <div>
+                <div class="font-medium">Installation</div>
+                <div class="text-muted-foreground text-xs">Install the framework</div>
+              </div>
+            </a>
+            <div spark-navmenu-separator></div>
+            <a spark-navmenu-link href="/docs/components" class="flex-row items-center">
+              <svg class="size-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <line x1="3" y1="9" x2="21" y2="9"/>
+                <line x1="9" y1="21" x2="9" y2="9"/>
+              </svg>
+              <div>
+                <div class="font-medium">Components</div>
+                <div class="text-muted-foreground text-xs">Explore UI components</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-code">
+      <pre class="code-block"><code>&lt;a spark-navmenu-link href="/docs/introduction"&gt;
+  &lt;svg class="size-4 mr-2"&gt;...&lt;/svg&gt;
+  &lt;div&gt;
+    &lt;div class="font-medium"&gt;Introduction&lt;/div&gt;
+    &lt;div class="text-muted-foreground text-xs"&gt;Description&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/a&gt;</code></pre>
+    </div>
+  </section>
+
+  <!-- Example 5: Indicator and Viewport Components -->
+  <section class="demo-section">
+    <div class="demo-section-header">
+      <h2 class="demo-section-title">Indicator and Viewport</h2>
+      <p class="demo-section-description">
+        Visual indicator showing the active item and viewport container for content.
+      </p>
+    </div>
+
+    <div class="demo-preview">
+      <div class="indicator-preview">
+        <div class="indicator-label">Indicator (shows on active item):</div>
+        <div spark-navmenu-indicator class="relative"></div>
+
+        <div class="viewport-label mt-4">Viewport (container for content):</div>
+        <div spark-navmenu-viewport class="relative mt-2">
+          <div class="p-4 bg-popover border rounded-md">
+            Viewport content area
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-code">
+      <pre class="code-block"><code>&lt;!-- Indicator shows the active menu item --&gt;
+&lt;div spark-navmenu-indicator&gt;&lt;/div&gt;
+
+&lt;!-- Viewport is a container for menu content --&gt;
+&lt;div spark-navmenu-viewport&gt;
+  &lt;div class="p-4"&gt;Viewport content&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+  </section>
+
   <!-- State Display -->
   <section class="demo-section">
     <div class="demo-section-header">
@@ -110,6 +244,10 @@
         <div class="state-item">
           <span class="state-label">Vertical:</span>
           <span class="state-value">{{ verticalOpen() ? 'open' : 'closed' }}</span>
+        </div>
+        <div class="state-item">
+          <span class="state-label">Link Menu:</span>
+          <span class="state-value">{{ linkMenuOpen() ? 'open' : 'closed' }}</span>
         </div>
         <button class="reset-button" (click)="reset()">Reset All</button>
       </div>
@@ -143,6 +281,75 @@
         <div class="keyboard-item">
           <kbd class="kbd">Escape</kbd>
           <span>Close menu</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Component API Reference -->
+  <section class="demo-section">
+    <div class="demo-section-header">
+      <h2 class="demo-section-title">Component API Reference</h2>
+      <p class="demo-section-description">
+        Available components and their inputs.
+      </p>
+    </div>
+
+    <div class="demo-preview">
+      <div class="api-reference">
+        <div class="api-item">
+          <h3 class="api-title">NavMenuRootComponent</h3>
+          <code class="api-selector">div[spark-navmenu-root]</code>
+          <ul class="api-inputs">
+            <li><code>disabled</code>: boolean - Disable the menu</li>
+            <li><code>modal</code>: boolean - Modal behavior</li>
+            <li><code>open</code>: model&lt;boolean&gt; - Open state (two-way binding)</li>
+          </ul>
+        </div>
+
+        <div class="api-item">
+          <h3 class="api-title">NavMenuTriggerComponent</h3>
+          <code class="api-selector">button[spark-navmenu-trigger]</code>
+          <ul class="api-inputs">
+            <li><code>asChild</code>: boolean - Use as child wrapper</li>
+          </ul>
+        </div>
+
+        <div class="api-item">
+          <h3 class="api-title">NavMenuItemComponent</h3>
+          <code class="api-selector">div[spark-navmenu-item]</code>
+          <ul class="api-inputs">
+            <li><code>value</code>: string (required) - Unique identifier</li>
+            <li><code>disabled</code>: boolean - Disable the item</li>
+            <li><code>inset</code>: boolean - Add left inset padding</li>
+            <li><code>variant</code>: 'default' | 'destructive'</li>
+          </ul>
+        </div>
+
+        <div class="api-item">
+          <h3 class="api-title">NavMenuLinkComponent</h3>
+          <code class="api-selector">a[spark-navmenu-link]</code>
+          <ul class="api-inputs">
+            <li><code>active</code>: boolean - Active state styling</li>
+          </ul>
+        </div>
+
+        <div class="api-item">
+          <h3 class="api-title">NavMenuLabelComponent</h3>
+          <code class="api-selector">div[spark-navmenu-label]</code>
+          <ul class="api-inputs">
+            <li><code>inset</code>: boolean - Add left inset padding</li>
+          </ul>
+        </div>
+
+        <div class="api-item">
+          <h3 class="api-title">NavMenuContentComponent</h3>
+          <code class="api-selector">div[spark-navmenu-content]</code>
+          <ul class="api-inputs">
+            <li><code>align</code>: 'start' | 'center' | 'end'</li>
+            <li><code>side</code>: 'top' | 'right' | 'bottom' | 'left'</li>
+            <li><code>animate</code>: boolean - Enable animations</li>
+          </ul>
         </div>
       </div>
     </div>

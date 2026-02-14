@@ -8,6 +8,9 @@ export * from './navmenu-content.component';
 export * from './navmenu-item.component';
 export * from './navmenu-label.component';
 export * from './navmenu-separator.component';
+export * from './navmenu-indicator.component';
+export * from './navmenu-viewport.component';
+export * from './navmenu-link.component';
 
 // Re-export types
 export type {
@@ -23,3 +26,7 @@ export type {
 export type {
   NavMenuItemVariant,
 } from './navmenu-item.component';
+
+export type {
+  NavMenuLinkActive,
+} from './navmenu-link.component';

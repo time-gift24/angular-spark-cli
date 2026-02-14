@@ -1,0 +1,166 @@
+<div class="container max-w-2xl mx-auto py-8 px-4">
+  <div class="mb-8">
+    <h1 class="text-xl font-semibold mb-2">Button Group</h1>
+    <p class="text-sm text-muted-foreground">
+      Groups multiple buttons or button-like elements together with consistent styling and orientation support.
+    </p>
+  </div>
+
+  <div class="space-y-8">
+    <!-- Basic Horizontal -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Basic Horizontal</h2>
+      <div spark-button-group orientation="horizontal">
+        <button spark-button variant="default">Button 1</button>
+        <button spark-button variant="secondary">Button 2</button>
+        <button spark-button variant="outline">Button 3</button>
+      </div>
+    </div>
+
+    <!-- Vertical Orientation -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Vertical Orientation</h2>
+      <div spark-button-group orientation="vertical">
+        <button spark-button variant="default">Top</button>
+        <button spark-button variant="secondary">Middle</button>
+        <button spark-button variant="outline">Bottom</button>
+      </div>
+    </div>
+
+    <!-- With Text Label -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">With Text Label</h2>
+      <div class="flex items-center gap-4">
+        <div spark-button-group orientation="horizontal">
+          <button spark-button variant="default">Bold</button>
+          <button spark-button variant="ghost">Italic</button>
+          <button spark-button variant="ghost">Underline</button>
+        </div>
+        <div spark-button-group-text>Text Formatting</div>
+      </div>
+    </div>
+
+    <!-- With Separator -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">With Separator</h2>
+      <div spark-button-group orientation="horizontal">
+        <button spark-button variant="ghost" size="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6" />
+            <path d="m9 6 6 6" />
+          </svg>
+        </button>
+        <button spark-button variant="ghost" size="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 6v12a3 3 0 1 1-6 0V6a3 3 0 1 1 6 0" />
+            <path d="M9 12h6" />
+          </svg>
+        </button>
+        <div spark-button-group-separator orientation="vertical"></div>
+        <button spark-button variant="ghost" size="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7" />
+          </svg>
+        </button>
+        <button spark-button variant="ghost" size="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2" />
+            <path d="M9 3v18" />
+            <path d="m14 9 3 3" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- With Variants -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Button Variants</h2>
+      <div spark-button-group orientation="horizontal">
+        <button spark-button variant="default">Default</button>
+        <button spark-button variant="secondary">Secondary</button>
+        <button spark-button variant="outline">Outline</button>
+        <button spark-button variant="ghost">Ghost</button>
+      </div>
+    </div>
+
+    <!-- With Sizes -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Different Sizes</h2>
+      <div class="space-y-4">
+        <div spark-button-group orientation="horizontal">
+          <button spark-button size="sm">Small</button>
+          <button spark-button size="sm">Small</button>
+        </div>
+        <div spark-button-group orientation="horizontal">
+          <button spark-button size="default">Default</button>
+          <button spark-button size="default">Default</button>
+        </div>
+        <div spark-button-group orientation="horizontal">
+          <button spark-button size="lg">Large</button>
+          <button spark-button size="lg">Large</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Split Button -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Split Button</h2>
+      <div spark-button-group orientation="horizontal">
+        <button spark-button variant="default">Save</button>
+        <button spark-button variant="default" size="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6" />
+            <path d="m18 15-6-6" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Icon Only -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Icon Only</h2>
+      <div spark-button-group orientation="horizontal">
+        <button spark-button variant="outline" size="icon" aria-label="Bold">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 4h8a4 4 0 0 1 4 4 2 2 0 0 1-2 2v-4a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2 2 2 0 0 1-2-2" />
+          </svg>
+        </button>
+        <button spark-button variant="outline" size="icon" aria-label="Italic">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" x2="10" y1="4" y2="4" />
+            <line x1="19" x2="10" y1="20" y2="20" />
+            <line x1="14" x2="5" y1="10" y2="10" />
+            <line x1="14" x2="5" y1="14" y2="14" />
+          </svg>
+        </button>
+        <button spark-button variant="outline" size="icon" aria-label="Underline">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-7" />
+            <line x1="4" x2="20" y1="21" y2="21" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- With Destructive Action -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">With Destructive Action</h2>
+      <div spark-button-group orientation="horizontal">
+        <button spark-button variant="default">Save</button>
+        <button spark-button variant="destructive">Delete</button>
+      </div>
+    </div>
+
+    <!-- Vertical with Separator -->
+    <div class="space-y-3">
+      <h2 class="text-base font-medium">Vertical with Separator</h2>
+      <div spark-button-group orientation="vertical">
+        <button spark-button variant="ghost">Option 1</button>
+        <button spark-button variant="ghost">Option 2</button>
+        <div spark-button-group-separator orientation="horizontal"></div>
+        <button spark-button variant="destructive">Delete All</button>
+      </div>
+    </div>
+  </div>
+</div>

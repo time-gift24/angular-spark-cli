@@ -149,3 +149,71 @@
   min-width: 2rem;
   text-align: center;
 }
+
+/* Indicator and Viewport Preview */
+.indicator-preview {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.indicator-label,
+.viewport-label {
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground);
+  margin-bottom: var(--spacing-sm);
+}
+
+/* API Reference Styles */
+.api-reference {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+.api-item {
+  padding: var(--spacing-lg);
+  background-color: var(--muted);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.api-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: var(--spacing-xs);
+}
+
+.api-selector {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  margin-bottom: var(--spacing-md);
+}
+
+.api-inputs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.api-inputs li {
+  padding: var(--spacing-xs) 0;
+  color: var(--foreground);
+  border-bottom: 1px solid var(--border);
+}
+
+.api-inputs li:last-child {
+  border-bottom: none;
+}
+
+.api-inputs code {
+  background-color: var(--background);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+}

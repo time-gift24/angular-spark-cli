@@ -289,6 +289,20 @@ export const routes: Routes = [
             (m) => m.NavmenuDemoComponent,
           ),
       },
+      {
+        path: 'hover-card',
+        loadComponent: () =>
+          import('./demo/hover-card/hover-card-demo.component').then(
+            (m) => m.HoverCardDemoComponent,
+          ),
+      },
+      {
+        path: 'button-group',
+        loadComponent: () =>
+          import('./demo/button-group/button-group-demo.component').then(
+            (m) => m.ButtonGroupDemoComponent,
+          ),
+      },
     ],
   },
 ];

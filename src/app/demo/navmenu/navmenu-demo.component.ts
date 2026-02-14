@@ -4,6 +4,11 @@ import {
   NavMenuTriggerComponent,
   NavMenuContentComponent,
   NavMenuItemComponent,
+  NavMenuLabelComponent,
+  NavMenuSeparatorComponent,
+  NavMenuLinkComponent,
+  NavMenuIndicatorComponent,
+  NavMenuViewportComponent,
 } from '@app/shared/ui';
 
 @Component({
@@ -13,6 +18,11 @@ import {
     NavMenuTriggerComponent,
     NavMenuContentComponent,
     NavMenuItemComponent,
+    NavMenuLabelComponent,
+    NavMenuSeparatorComponent,
+    NavMenuLinkComponent,
+    NavMenuIndicatorComponent,
+    NavMenuViewportComponent,
   ],
   templateUrl: './navmenu-demo.component.html',
   styleUrls: ['./navmenu-demo.component.css'],
@@ -24,9 +34,11 @@ import {
 export class NavmenuDemoComponent {
   readonly horizontalOpen = signal(false);
   readonly verticalOpen = signal(false);
+  readonly linkMenuOpen = signal(false);
 
   reset(): void {
     this.horizontalOpen.set(false);
     this.verticalOpen.set(false);
+    this.linkMenuOpen.set(false);
   }
 }

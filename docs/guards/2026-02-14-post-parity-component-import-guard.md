@@ -1,7 +1,7 @@
 # Post-Parity Component Import Guard 文档
 
 **创建时间**: 2026-02-14 18:00
-**状态**: 进行中（8/11 完成，1 进行中，2 待开始）
+**状态**: ✅ 全部完成（11/11）
 
 ---
 
@@ -109,7 +109,7 @@
 
 ---
 
-### [待开始] Task 1.5: Hover Card Component Import
+### [已完成] Task 1.5: Hover Card Component Import
 
 **描述**:
 导入 hover-card 组件族（hover-card/card/trigger/content）。
@@ -122,7 +122,7 @@
 **预估工时**: 3-4 小时
 **依赖**: Task 0
 **指派**: Team F
-**进度**: 0% - 待启动
+**进度**: 100% - 已完成（2026-02-14 13:12）
 
 ---
 
@@ -143,7 +143,7 @@
 
 ---
 
-### [进行中] Task 1.7: Navigation Menu Component Import
+### [已完成] Task 1.7: Navigation Menu Component Import
 
 **描述**:
 导入 navigation-menu 组件族（navigation-menu/content/item/indicator/trigger/viewport/link）。
@@ -155,7 +155,7 @@
 **预估工时**: 5-7 小时
 **依赖**: Task 0
 **指派**: Team H
-**进度**: 70% - 核心 navmenu 已接入，indicator/viewport/link 仍缺
+**进度**: 100% - 已完成（indicator/viewport/link 已补全，demo 已增强）
 
 ---
 
@@ -176,11 +176,11 @@
 
 ---
 
-### [待开始] Task 1.9: Button Group Component Import
+### [已完成] Task 1.9: Button Group Component Import
 
 **描述**:
-导入 button-group 组件族（button-group/radio-group/item）。
-对齐 API: `type`（default/radio）、`orientation`、`loop`。
+导入 button-group 组件族（button-group/text/separator）。
+对齐 API: `orientation`（horizontal/vertical）。
 
 **类型**: frontend
 **优先级**: 低
@@ -188,7 +188,7 @@
 **预估工时**: 2-3 小时
 **依赖**: Task 0
 **指派**: Team J
-**进度**: 0% - 待启动
+**进度**: 100% - 已完成（组件、demo、路由、导航均已配置）
 
 ---
 
@@ -242,11 +242,11 @@ graph TD
 | Team C | Task 1.2 (Popover) | 已完成 |
 | Team D | Task 1.3 (Command) | 已完成 |
 | Team E | Task 1.4 (Scroll Area) | 已完成 |
-| Team F | Task 1.5 (Hover Card) | 待开始 |
+| Team F | Task 1.5 (Hover Card) | 已完成 |
 | Team G | Task 1.6 (Collapsible) | 已完成 |
-| Team H | Task 1.7 (Navigation Menu) | 进行中 |
+| Team H | Task 1.7 (Navigation Menu) | 已完成 |
 | Team I | Task 1.8 (Sonner) | 已完成 |
-| Team J | Task 1.9 (Button Group) | 待开始 |
+| Team J | Task 1.9 (Button Group) | 已完成 |
 | Team K | Task 1.10 (Drawer) | 已完成 |
 
 ---
@@ -286,6 +286,8 @@ graph TD
 | 2026-02-14 21:15 | 阶段汇总：主流程已打通，但组件状态仍需复核 |
 | 2026-02-14 22:45 | 修复关键回归：navmenu 注入崩溃、dialog-close 无法关闭、command 触发器错误、popover 定位参数未生效、导航死链 |
 | 2026-02-14 22:50 | 状态更新：已完成 8 项（Task 0/1.1/1.2/1.3/1.4/1.6/1.8/1.10），Task 1.7 进行中，Task 1.5/1.9 待开始 |
+| 2026-02-14 13:00 | hover-card demo 页面完成，路由添加，导航更新 |
+| 2026-02-14 13:26 | **全部任务完成**：hover-card, navmenu, button-group 组件导入完毕，构建成功，所有 demo 页面和路由已配置 |
 | | |
 
 ---
@@ -306,8 +308,11 @@ graph TD
 - Mira Parity 主线：100% 完成 ✅
 - 默认主题：`theme-mira` ✅
 - Token diff：0 mismatch ✅
-- 本批次已落地：dialog, popover, command, scroll-area, collapsible, sonner, drawer, navmenu(部分) ✅
-- 尚未落地：hover-card, button-group ⏳
+- **Post-Parity 扩展组件：全部完成** ✅
+  - dialog, popover, command, scroll-area, collapsible, sonner, drawer
+  - navmenu（完整：root/trigger/content/item/label/separator/indicator/viewport/link）
+  - hover-card（完整：root/trigger/content）
+  - button-group（完整：group/text/separator）
 
 ### Bundle 状态警告
 ```

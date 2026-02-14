@@ -41,6 +41,14 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
               Button
             </a>
             <a
+              routerLink="/demo/button-group"
+              routerLinkActive="bg-accent text-accent-foreground"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+            >
+              Button Group
+            </a>
+            <a
               routerLink="/demo/input"
               routerLinkActive="bg-accent text-accent-foreground"
               [routerLinkActiveOptions]="{ exact: true }"
@@ -257,12 +265,12 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
               Popover
             </a>
             <a
-              routerLink="/demo/navmenu"
+              routerLink="/demo/hover-card"
               routerLinkActive="bg-accent text-accent-foreground"
               [routerLinkActiveOptions]="{ exact: true }"
               class="block px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground text-muted-foreground"
             >
-              Nav Menu
+              Hover Card
             </a>
             <a
               routerLink="/demo/spinner"

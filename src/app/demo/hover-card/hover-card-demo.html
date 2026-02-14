@@ -1,0 +1,186 @@
+<div class="demo-container">
+  <div class="demo-header">
+    <h1>Hover Card</h1>
+    <p class="text-muted-foreground">Display rich content on hover with optional delays.</p>
+  </div>
+
+  <div class="demo-section">
+    <h2>Basic Hover Card</h2>
+    <p class="text-sm text-muted-foreground">A hover card with default positioning (bottom, center).</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-hover-card>
+          <button type="button" spark-hover-card-trigger spark-button variant="outline">
+            Hover me
+          </button>
+          <div spark-hover-card-content>
+            <p class="text-sm">This is a hover card with rich content.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Positioning</h2>
+    <p class="text-sm text-muted-foreground">Hover cards can be positioned on any side.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <!-- Top Hover Card -->
+        <div spark-hover-card>
+          <button type="button" spark-hover-card-trigger spark-button variant="outline">
+            Top
+          </button>
+          <div spark-hover-card-content [side]="'top'" [align]="'center'">
+            <p class="text-sm">Hover card positioned at top</p>
+          </div>
+        </div>
+
+        <!-- Right Hover Card -->
+        <div spark-hover-card>
+          <button type="button" spark-hover-card-trigger spark-button variant="outline">
+            Right
+          </button>
+          <div spark-hover-card-content [side]="'right'" [align]="'center'">
+            <p class="text-sm">Hover card positioned to right</p>
+          </div>
+        </div>
+
+        <!-- Bottom Hover Card (default) -->
+        <div spark-hover-card>
+          <button type="button" spark-hover-card-trigger spark-button variant="outline">
+            Bottom
+          </button>
+          <div spark-hover-card-content [side]="'bottom'" [align]="'center'">
+            <p class="text-sm">Hover card positioned at bottom</p>
+          </div>
+        </div>
+
+        <!-- Left Hover Card -->
+        <div spark-hover-card>
+          <button type="button" spark-hover-card-trigger spark-button variant="outline">
+            Left
+          </button>
+          <div spark-hover-card-content [side]="'left'" [align]="'center'">
+            <p class="text-sm">Hover card positioned to left</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Alignment</h2>
+    <p class="text-sm text-muted-foreground">Hover cards can be aligned to start, center, or end of trigger.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-hover-card>
+          <button type="button" spark-hover-card-trigger spark-button variant="outline" style="width: 120px;">
+            Align Start
+          </button>
+          <div spark-hover-card-content [side]="'bottom'" [align]="'start'">
+            <p class="text-sm">Aligned to start</p>
+          </div>
+        </div>
+
+        <div spark-hover-card>
+          <button type="button" spark-hover-card-trigger spark-button variant="outline" style="width: 120px;">
+            Align Center
+          </button>
+          <div spark-hover-card-content [side]="'bottom'" [align]="'center'">
+            <p class="text-sm">Aligned to center</p>
+          </div>
+        </div>
+
+        <div spark-hover-card>
+          <button type="button" spark-hover-card-trigger spark-button variant="outline" style="width: 120px;">
+            Align End
+          </button>
+          <div spark-hover-card-content [side]="'bottom'" [align]="'end'">
+            <p class="text-sm">Aligned to end</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>With Delays</h2>
+    <p class="text-sm text-muted-foreground">Hover cards support open and close delays for smoother interaction.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-hover-card [openDelay]="500" [closeDelay]="300">
+          <button type="button" spark-hover-card-trigger spark-button variant="outline">
+            Hover with delay
+          </button>
+          <div spark-hover-card-content>
+            <p class="text-sm">This card opens after 500ms and closes after 300ms.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Rich Content</h2>
+    <p class="text-sm text-muted-foreground">Hover cards can contain rich content like avatars, links, and descriptions.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-hover-card [openDelay]="200">
+          <button type="button" spark-hover-card-trigger spark-button variant="ghost" class="flex items-center gap-2">
+            <ui-avatar size="sm" class="bg-primary text-primary-foreground">
+              <ui-avatar-fallback>JD</ui-avatar-fallback>
+            </ui-avatar>
+            <span>@johndoe</span>
+          </button>
+          <div spark-hover-card-content class="w-64">
+            <div class="flex flex-col space-y-3">
+              <div class="flex flex-row items-center gap-3">
+                <ui-avatar class="bg-primary text-primary-foreground">
+                  <ui-avatar-fallback>JD</ui-avatar-fallback>
+                </ui-avatar>
+                <div class="flex flex-col">
+                  <span class="text-sm font-medium">John Doe</span>
+                  <span class="text-xs text-muted-foreground">@johndoe</span>
+                </div>
+              </div>
+              <p class="text-sm text-muted-foreground">
+                Frontend developer and open source contributor. Building UI components with Angular.
+              </p>
+              <div class="flex flex-col space-y-1">
+                <span class="text-xs font-medium">Followers</span>
+                <span class="text-sm font-medium">1,234</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <h2>Focus and Keyboard Support</h2>
+    <p class="text-sm text-muted-foreground">Hover cards also open on focus for keyboard accessibility.</p>
+
+    <div class="demo-example">
+      <div class="flex flex-row items-center gap-4">
+        <div spark-hover-card [openDelay]="100">
+          <button type="button" spark-hover-card-trigger spark-button variant="outline">
+            Focus or Hover
+          </button>
+          <div spark-hover-card-content>
+            <p class="text-sm">This card opens on both hover and focus events.</p>
+            <p class="text-xs text-muted-foreground mt-2">
+              Try tabbing to this button to see the focus interaction.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
